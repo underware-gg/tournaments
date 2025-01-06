@@ -1,0 +1,47 @@
+[world]
+name = "Tournament"
+description = "Tournament component used to create and compete in tournaments across Dojo games."
+cover_uri = "file://assets/cover.png"
+icon_uri = "file://assets/icon.png"
+website = "https://github.com/dojoengine/dojo-starter"
+seed = "tournaments"
+
+[world.socials]
+x = "https://x.com/ohayo_dojo"
+discord = "https://discord.gg/FB2wR6uF"
+github = "https://github.com/dojoengine/dojo-starter"
+telegram = "https://t.me/dojoengine"
+
+[namespace]
+default = "tournaments"
+
+[env]
+chain_id = "KATANA_LOCAL"
+rpc_url = "http://localhost:5050/"
+account_address = "0x127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec"
+private_key = "0xc5b2fcab997346f3ea1c00b002ecf6f382c5f9c9659a3894eb783c5320f912"
+# world_address = "0x043b149fadbe95e3946fa124a9a6bd64ec5374b8765f2bb753289d520bd8546d"  # Uncomment and update this line with your world address.
+
+[writers]
+# Tournament
+"tournaments-Tournament" = ["tournaments-tournament_mock"]
+"tournaments-TournamentGame" = ["tournaments-tournament_mock"]
+"tournaments-TournamentEntryAddresses" = ["tournaments-tournament_mock"]
+"tournaments-TournamentEntriesAddress" = ["tournaments-tournament_mock"]
+"tournaments-TournamentStartsAddress" = ["tournaments-tournament_mock"]
+"tournaments-TournamentEntries" = ["tournaments-tournament_mock"]
+"tournaments-TournamentScores" = ["tournaments-tournament_mock"]
+"tournaments-TournamentTotals" = ["tournaments-tournament_mock"]
+"tournaments-TournamentPrize" = ["tournaments-tournament_mock"]
+"tournaments-Token" = ["tournaments-tournament_mock"]
+"tournaments-TournamentConfig" = ["tournaments-tournament_mock"]
+# Game
+"tournaments-Game" = ["tournaments-game_mock"]
+"tournaments-GameCount" = ["tournaments-game_mock"]
+"tournaments-Settings" = ["tournaments-game_mock"]
+"tournaments-GameSettings" = ["tournaments-game_mock"]
+"tournaments-SettingsCount" = ["tournaments-game_mock"]
+
+[migration]
+order_inits = []
+skip_contracts = ["tournaments-Tournament"]
