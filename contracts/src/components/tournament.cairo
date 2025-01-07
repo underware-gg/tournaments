@@ -225,6 +225,13 @@ pub mod tournament_component {
                 self.get_contract().world_dispatcher(), DEFAULT_NS()
             );
             let mut store: Store = StoreTrait::new(world);
+            // TODO: add assert
+            // TODO: add src5 check - game, game metadata, erc721
+            // TODO: get name from src5
+            // assert(store.get_game(game).is_none(), Errors::GAME_ALREADY_REGISTERED);
+            // check SRC5 token is registered
+            // let token_dispatcher = ISRC5Dispatcher { contract_address: game };
+            // assert(token_dispatcher.total_supply() > 0, Errors::GAME_ALREADY_REGISTERED);
             store.set_game(@Game { game, name });
         }
 
@@ -297,6 +304,9 @@ pub mod tournament_component {
                 ._assert_premium_token_registered_and_distribution_valid(
                     store, entry_premium.clone(), winners_count
                 );
+            // TODO: assert game exists
+            // TODO: assert settings exists
+            // TODO: return a token 
 
             // create a new tournament
             self
@@ -330,6 +340,7 @@ pub mod tournament_component {
             tournament_id: u64,
             gated_submission_type: Option<GatedSubmissionType>,
         ) {
+            // TODO: provide NFT
             let mut world = WorldTrait::storage(
                 self.get_contract().world_dispatcher(), DEFAULT_NS()
             );
@@ -1278,6 +1289,7 @@ pub mod tournament_component {
                                 game_ids.len() == tournament_ids.len(),
                                 Errors::INVALID_SUBMITTED_GAMES_LENGTH
                             );
+                            // TODO: change to an or check
                             let mut loop_index = 0;
                             loop {
                                 if loop_index == tournament_ids.len() {
@@ -1643,6 +1655,7 @@ pub mod tournament_component {
             match token_data_type {
                 TokenDataType::erc20(token_data) => {
                     let token_dispatcher = IERC20Dispatcher { contract_address: token };
+                    // TODO: assert amount is bigger than 0
                     token_dispatcher
                         .transfer_from(
                             get_caller_address(),

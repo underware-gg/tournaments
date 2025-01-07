@@ -191,7 +191,10 @@ pub mod game_component {
         fn initializer(ref self: ComponentState<TContractState>) {
             let mut src5_component = get_dep_component_mut!(ref self, SRC5);
             src5_component.register_interface(TOURNAMENT_ID);
+            // TODO: add SRC5 GameMetadata
+            // TODO: add name, description etc (game metadata - same style as ERC721 meta)
         }
+
         fn get_game_count(self: @ComponentState<TContractState>) -> felt252 {
             let mut world = WorldTrait::storage(
                 self.get_contract().world_dispatcher(), DEFAULT_NS()

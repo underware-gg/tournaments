@@ -39,6 +39,7 @@ pub struct Premium {
 #[derive(Copy, Drop, Serde, PartialEq, Introspect)]
 pub enum GatedType {
     token: GatedToken,
+    // TODO: add enum between winners and participants
     tournament: Span<u64>,
     address: Span<ContractAddress>,
 }
@@ -46,6 +47,7 @@ pub enum GatedType {
 #[derive(Copy, Drop, Serde, Introspect)]
 pub enum GatedSubmissionType {
     token_id: u256,
+    // this should be tournament ids
     game_id: Span<felt252>,
 }
 
@@ -79,6 +81,19 @@ pub struct Game {
     pub game: ContractAddress,
     pub name: felt252,
 }
+
+// id: u64,
+// name: felt252,
+// desc: ByteArray,
+// image: ByteArray,
+// rating: u8,
+// releasedate: u64,
+// developer: felt252,
+// publisher: felt252,
+// genre: felt252,
+// players: u8,
+// lastplayed: u64,
+// owner: felt252,
 
 #[dojo::model]
 #[derive(Drop, Serde)]
