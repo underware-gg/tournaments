@@ -1,5 +1,5 @@
 use tournaments::components::models::tournament::{
-    Game, Tournament, Premium, TokenDataType, GatedType, GatedSubmissionType
+    Tournament as TournamentModel, Premium, TokenDataType, GatedType, TokenMetadata,
 };
 use tournaments::components::models::game::SettingsDetails;
 
@@ -14,7 +14,9 @@ pub struct Token {
     pub token_data_type: TokenDataType,
 }
 
-pub const TOURNAMENT_ID: felt252 = 0x746f75726e616d656e74;
+pub const IGAME_ID: felt252 = 0x027fd8d2e685b5a61e4516152831e8730c27b25c9f831ec27c1e48a46e55086a;
+pub const IGAME_METADATA_ID: felt252 =
+    0xdbe4736acc1847cb2bca994503d50e7fc21daf5cc7b76688ad4d6788c0a9f1;
 
 #[starknet::interface]
 pub trait IERC20Mock<TState> {
@@ -27,7 +29,7 @@ pub trait IERC20Mock<TState> {
     fn allowance(self: @TState, owner: ContractAddress, spender: ContractAddress) -> u256;
     fn transfer(ref self: TState, recipient: ContractAddress, amount: u256) -> bool;
     fn transfer_from(
-        ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256
+        ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256,
     ) -> bool;
     fn approve(ref self: TState, spender: ContractAddress, amount: u256) -> bool;
     // IERC20Metadata
@@ -38,7 +40,7 @@ pub trait IERC20Mock<TState> {
     fn totalSupply(self: @TState) -> u256;
     fn balanceOf(self: @TState, account: ContractAddress) -> u256;
     fn transferFrom(
-        ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256
+        ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256,
     ) -> bool;
 
     // IERCPublic
@@ -60,14 +62,14 @@ pub trait IERC721Mock<TState> {
         from: ContractAddress,
         to: ContractAddress,
         token_id: u256,
-        data: Span<felt252>
+        data: Span<felt252>,
     );
     fn transfer_from(ref self: TState, from: ContractAddress, to: ContractAddress, token_id: u256);
     fn approve(ref self: TState, to: ContractAddress, token_id: u256);
     fn set_approval_for_all(ref self: TState, operator: ContractAddress, approved: bool);
     fn get_approved(self: @TState, token_id: u256) -> ContractAddress;
     fn is_approved_for_all(
-        self: @TState, owner: ContractAddress, operator: ContractAddress
+        self: @TState, owner: ContractAddress, operator: ContractAddress,
     ) -> bool;
     // IERC721CamelOnly
     fn balanceOf(self: @TState, account: ContractAddress) -> u256;
@@ -77,7 +79,7 @@ pub trait IERC721Mock<TState> {
         from: ContractAddress,
         to: ContractAddress,
         tokenId: u256,
-        data: Span<felt252>
+        data: Span<felt252>,
     );
     fn transferFrom(ref self: TState, from: ContractAddress, to: ContractAddress, tokenId: u256);
     fn setApprovalForAll(ref self: TState, operator: ContractAddress, approved: bool);
@@ -99,13 +101,52 @@ pub trait ITournamentMock<TState> {
     // IWorldProvider
     fn world_dispatcher(self: @TState) -> IWorldDispatcher;
 
-    fn game(self: @TState, game: ContractAddress) -> Game;
+    // IERC721
+    fn balance_of(self: @TState, account: ContractAddress) -> u256;
+    fn owner_of(self: @TState, token_id: u256) -> ContractAddress;
+    fn safe_transfer_from(
+        ref self: TState,
+        from: ContractAddress,
+        to: ContractAddress,
+        token_id: u256,
+        data: Span<felt252>,
+    );
+    fn transfer_from(ref self: TState, from: ContractAddress, to: ContractAddress, token_id: u256);
+    fn approve(ref self: TState, to: ContractAddress, token_id: u256);
+    fn set_approval_for_all(ref self: TState, operator: ContractAddress, approved: bool);
+    fn get_approved(self: @TState, token_id: u256) -> ContractAddress;
+    fn is_approved_for_all(
+        self: @TState, owner: ContractAddress, operator: ContractAddress,
+    ) -> bool;
+    // IERC721CamelOnly
+    fn balanceOf(self: @TState, account: ContractAddress) -> u256;
+    fn ownerOf(self: @TState, tokenId: u256) -> ContractAddress;
+    fn safeTransferFrom(
+        ref self: TState,
+        from: ContractAddress,
+        to: ContractAddress,
+        tokenId: u256,
+        data: Span<felt252>,
+    );
+    fn transferFrom(ref self: TState, from: ContractAddress, to: ContractAddress, tokenId: u256);
+    fn setApprovalForAll(ref self: TState, operator: ContractAddress, approved: bool);
+    fn getApproved(self: @TState, tokenId: u256) -> ContractAddress;
+    fn isApprovedForAll(self: @TState, owner: ContractAddress, operator: ContractAddress) -> bool;
+    // IERC721Metadata
+    fn name(self: @TState) -> ByteArray;
+    fn symbol(self: @TState) -> ByteArray;
+    fn token_uri(self: @TState, token_id: u256) -> ByteArray;
+    // IERC721MetadataCamelOnly
+    fn tokenURI(self: @TState, tokenId: u256) -> ByteArray;
+
+    // ITournament
     fn total_tournaments(self: @TState) -> u64;
-    fn tournament(self: @TState, tournament_id: u64) -> Tournament;
+    fn tournament(self: @TState, tournament_id: u64) -> TournamentModel;
+    fn tournament_token(self: @TState, token_id: u64) -> TokenMetadata;
     fn tournament_entries(self: @TState, tournament_id: u64) -> u64;
-    fn top_scores(self: @TState, tournament_id: u64) -> Array<u64>;
     fn is_token_registered(self: @TState, token: ContractAddress) -> bool;
-    fn register_game(ref self: TState, game: ContractAddress, name: felt252);
+    // TODO: add for V2 (only ERC721 tokens)
+    // fn register_tokens(ref self: TState, tokens: Array<Token>);
     fn create_tournament(
         ref self: TState,
         name: felt252,
@@ -118,28 +159,29 @@ pub trait ITournamentMock<TState> {
         winners_count: u8,
         gated_type: Option<GatedType>,
         entry_premium: Option<Premium>,
-        game: ContractAddress,
-        settings_id: u64,
-    ) -> u64;
-    fn register_tokens(ref self: TState, tokens: Array<Token>);
+        game_address: ContractAddress,
+        settings_id: u32,
+    ) -> (u64, u64);
     fn enter_tournament(
-        ref self: TState, tournament_id: u64, gated_submission_type: Option<GatedSubmissionType>
-    );
-    fn start_tournament(
-        ref self: TState, tournament_id: u64, start_all: bool, start_count: Option<u64>,
-    );
-    fn submit_scores(ref self: TState, tournament_id: u64, game_ids: Array<felt252>);
+        ref self: TState, tournament_id: u64, qualifying_token_id: Option<u256>,
+    ) -> (u64, TokenMetadata);
+    fn start_game(ref self: TState, tournament_token_id: u64);
+    fn submit_scores(ref self: TState, tournament_id: u64, token_ids: Array<u64>);
+    fn finalize_tournament(ref self: TState, tournament_id: u64);
+    fn distribute_prize(ref self: TState, prize_id: u64);
+    fn distribute_unclaimable_prize(ref self: TState, prize_id: u64);
     fn add_prize(
         ref self: TState,
         tournament_id: u64,
         token: ContractAddress,
         token_data_type: TokenDataType,
-        position: u8
-    );
-    fn distribute_prizes(ref self: TState, tournament_id: u64, prize_keys: Array<u64>);
-
+        position: u8,
+    ) -> u64;
     fn initializer(
         ref self: TState,
+        name: ByteArray,
+        symbol: ByteArray,
+        base_uri: ByteArray,
         safe_mode: bool,
         test_mode: bool,
         test_erc20: ContractAddress,
@@ -162,14 +204,14 @@ pub trait IGameMock<TState> {
         from: ContractAddress,
         to: ContractAddress,
         token_id: u256,
-        data: Span<felt252>
+        data: Span<felt252>,
     );
     fn transfer_from(ref self: TState, from: ContractAddress, to: ContractAddress, token_id: u256);
     fn approve(ref self: TState, to: ContractAddress, token_id: u256);
     fn set_approval_for_all(ref self: TState, operator: ContractAddress, approved: bool);
     fn get_approved(self: @TState, token_id: u256) -> ContractAddress;
     fn is_approved_for_all(
-        self: @TState, owner: ContractAddress, operator: ContractAddress
+        self: @TState, owner: ContractAddress, operator: ContractAddress,
     ) -> bool;
     // IERC721CamelOnly
     fn balanceOf(self: @TState, account: ContractAddress) -> u256;
@@ -179,7 +221,7 @@ pub trait IGameMock<TState> {
         from: ContractAddress,
         to: ContractAddress,
         tokenId: u256,
-        data: Span<felt252>
+        data: Span<felt252>,
     );
     fn transferFrom(ref self: TState, from: ContractAddress, to: ContractAddress, tokenId: u256);
     fn setApprovalForAll(ref self: TState, operator: ContractAddress, approved: bool);
@@ -192,24 +234,19 @@ pub trait IGameMock<TState> {
     // IERC721MetadataCamelOnly
     fn tokenURI(self: @TState, tokenId: u256) -> ByteArray;
 
-    // Game
-    fn get_score(self: @TState, game_id: felt252) -> u64;
-    fn get_setting(self: @TState, settings_id: u32, key: felt252) -> u64;
-    fn get_settings_id(self: @TState, game_id: felt252) -> u32;
+    // IGame
+    fn get_settings_id(self: @TState, game_id: u64) -> u32;
     fn get_settings_details(self: @TState, settings_id: u32) -> SettingsDetails;
     fn settings_exists(self: @TState, settings_id: u32) -> bool;
-
-    fn new_game(ref self: TState, settings_id: u32, to: ContractAddress) -> felt252;
-    fn end_game(ref self: TState, game_id: felt252, score: u64);
-    fn add_settings(
-        ref self: TState,
-        name: felt252,
-        description: ByteArray,
-        setting_keys: Span<felt252>,
-        setting_values: Span<u64>
+    fn new_game(ref self: TState, settings_id: u32, to: ContractAddress) -> u64;
+    // GameMock
+    fn start_game(ref self: TState, game_id: u64);
+    fn end_game(ref self: TState, game_id: u64, score: u64);
+    fn set_settings(
+        ref self: TState, settings_id: u32, name: felt252, description: ByteArray, exists: bool,
     );
 
-    fn initializer(ref self: TState,);
+    fn initializer(ref self: TState);
 }
 
 #[generate_trait]

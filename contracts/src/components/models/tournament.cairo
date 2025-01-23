@@ -1,21 +1,9 @@
 use starknet::ContractAddress;
 
 #[derive(Copy, Drop, Serde, PartialEq, Introspect)]
-pub enum GatedEntryType {
-    criteria: Span<EntryCriteria>,
-    uniform: u64,
-}
-
-#[derive(Copy, Drop, Serde, PartialEq, Introspect)]
-pub struct EntryCriteria {
-    pub token_id: u128,
-    pub entry_count: u64,
-}
-
-#[derive(Copy, Drop, Serde, PartialEq, Introspect)]
-pub struct GatedToken {
-    pub token: ContractAddress,
-    pub entry_type: GatedEntryType,
+pub enum TournamentType {
+    winners: Span<u64>,
+    participants: Span<u64>,
 }
 
 #[derive(Copy, Drop, Serde, Introspect)]
@@ -30,7 +18,7 @@ pub struct ERC721Data {
 
 #[derive(Copy, Drop, Serde, PartialEq, Introspect)]
 pub struct Premium {
-    pub token: ContractAddress,
+    pub token_address: ContractAddress,
     pub token_amount: u128,
     pub token_distribution: Span<u8>,
     pub creator_fee: u8,
@@ -38,17 +26,10 @@ pub struct Premium {
 
 #[derive(Copy, Drop, Serde, PartialEq, Introspect)]
 pub enum GatedType {
-    token: GatedToken,
+    token: ContractAddress,
     // TODO: add enum between winners and participants
-    tournament: Span<u64>,
+    tournament: TournamentType,
     address: Span<ContractAddress>,
-}
-
-#[derive(Copy, Drop, Serde, Introspect)]
-pub enum GatedSubmissionType {
-    token_id: u256,
-    // this should be tournament ids
-    game_id: Span<felt252>,
 }
 
 #[derive(Copy, Drop, Serde, Introspect)]
@@ -58,42 +39,24 @@ pub enum TokenDataType {
 }
 
 #[derive(Copy, Drop, Serde, PartialEq, Introspect)]
-pub enum EntryStatus {
-    Entered,
-    Started,
-    Submitted,
+pub enum TournamentState {
+    PreRegistration,
+    Registration,
+    Active,
+    Finalized,
+    ScoreSubmitted,
 }
 
-#[derive(Copy, Drop, PartialEq, Introspect, Serde)]
-pub enum FreeGameTokenType {
-    GoldenToken,
-    LaunchTournamentChampion,
+#[derive(Copy, Drop, Serde, PartialEq, Introspect)]
+pub enum GameState {
+    Registered,
+    Started,
+    ScoreSubmitted,
 }
 
 ///
 /// Model
 ///
-
-#[dojo::model]
-#[derive(Drop, Serde)]
-pub struct Game {
-    #[key]
-    pub game: ContractAddress,
-    pub name: felt252,
-}
-
-// id: u64,
-// name: felt252,
-// desc: ByteArray,
-// image: ByteArray,
-// rating: u8,
-// releasedate: u64,
-// developer: felt252,
-// publisher: felt252,
-// genre: felt252,
-// players: u8,
-// lastplayed: u64,
-// owner: felt252,
 
 #[dojo::model]
 #[derive(Drop, Serde)]
@@ -106,100 +69,86 @@ pub struct Tournament {
     pub registration_start_time: u64,
     pub registration_end_time: u64,
     pub start_time: u64,
+    pub settings_id: u32,
     pub end_time: u64,
     pub submission_period: u64,
     pub winners_count: u8,
+    pub state: TournamentState,
     pub gated_type: Option<GatedType>,
     pub entry_premium: Option<Premium>,
-    pub game: ContractAddress,
-    pub settings_id: u32,
-}
-
-#[dojo::model]
-#[derive(Drop, Serde)]
-pub struct TournamentEntryAddresses {
-    #[key]
-    pub tournament_id: u64,
-    pub addresses: Array<ContractAddress>,
-}
-
-#[dojo::model]
-#[derive(Drop, Serde)]
-pub struct TournamentEntriesAddress {
-    #[key]
-    pub tournament_id: u64,
-    #[key]
-    pub address: ContractAddress,
-    pub entry_count: u64,
-}
-
-#[dojo::model]
-#[derive(Drop, Serde)]
-pub struct TournamentStartsAddress {
-    #[key]
-    pub tournament_id: u64,
-    #[key]
-    pub address: ContractAddress,
-    pub start_count: u64,
+    pub game_address: ContractAddress,
 }
 
 #[dojo::model]
 #[derive(Copy, Drop, Serde)]
-pub struct TournamentGame {
+pub struct TokenMetadata {
     #[key]
+    pub token_id: u64,
     pub tournament_id: u64,
-    #[key]
-    pub game_id: u64,
-    pub score: u64,
-    pub exists: bool,
-    pub submitted: bool,
+    pub game_token_id: u64,
+    pub entry_number: u32,
+    pub state: Option<GameState>,
 }
 
 #[dojo::model]
 #[derive(Copy, Drop, Serde)]
-pub struct TournamentEntries {
-    #[key]
-    pub tournament_id: u64,
-    pub entry_count: u64,
-    pub premiums_formatted: bool,
-    pub distribute_called: bool,
-}
-
-#[dojo::model]
-#[derive(Drop, Serde)]
 pub struct TournamentScores {
     #[key]
     pub tournament_id: u64,
-    pub top_score_ids: Array<u64>,
+    pub top_score_token_ids: Span<u64>,
 }
 
 #[dojo::model]
-#[derive(Copy, Drop, Serde)]
-pub struct TournamentTotals {
+#[derive(Copy, Drop, Serde, IntrospectPacked)]
+pub struct PlatformMetrics {
     #[key]
-    pub contract: ContractAddress,
+    pub key: felt252,
     pub total_tournaments: u64,
+}
+
+#[dojo::model]
+#[derive(Copy, Drop, Serde, IntrospectPacked)]
+pub struct TournamentTokenMetrics {
+    #[key]
+    pub key: felt252,
+    pub total_supply: u64,
+}
+
+#[dojo::model]
+#[derive(Copy, Drop, Serde, IntrospectPacked)]
+pub struct PrizeMetrics {
+    #[key]
+    pub key: felt252,
     pub total_prizes: u64,
 }
 
 #[dojo::model]
-#[derive(Copy, Drop, Serde)]
-pub struct TournamentPrize {
+#[derive(Copy, Drop, Serde, IntrospectPacked)]
+pub struct EntryCount {
     #[key]
     pub tournament_id: u64,
-    #[key]
-    pub prize_key: u64,
-    pub token: ContractAddress,
-    pub token_data_type: TokenDataType,
-    pub payout_position: u8,
-    pub claimed: bool
+    pub count: u32,
 }
 
+#[dojo::model]
+#[derive(Copy, Drop, Serde)]
+pub struct Prize {
+    #[key]
+    pub prize_id: u64,
+    pub tournament_id: u64,
+    pub payout_position: u8,
+    pub claimed: bool,
+    pub token: ContractAddress,
+    pub token_data_type: TokenDataType,
+}
+
+
+//TODO: Remove name and symbol from the model
 #[dojo::model]
 #[derive(Drop, Serde)]
 pub struct Token {
     #[key]
-    pub token: ContractAddress,
+    pub address: ContractAddress,
     pub name: ByteArray,
     pub symbol: ByteArray,
     pub token_data_type: TokenDataType,
@@ -210,7 +159,7 @@ pub struct Token {
 #[derive(Copy, Drop, Serde)]
 pub struct TournamentConfig {
     #[key]
-    pub contract: ContractAddress,
+    pub key: felt252,
     pub safe_mode: bool,
     pub test_mode: bool,
 }

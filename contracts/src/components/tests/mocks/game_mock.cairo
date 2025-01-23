@@ -1,7 +1,15 @@
 #[starknet::interface]
 trait IGameMock<TContractState> {
-    fn start_game(ref self: TContractState, game_id: felt252);
-    fn end_game(ref self: TContractState, game_id: felt252, score: u64);
+    fn get_score(self: @TContractState, game_id: u64) -> u64;
+    fn start_game(ref self: TContractState, game_id: u64);
+    fn end_game(ref self: TContractState, game_id: u64, score: u64);
+    fn set_settings(
+        ref self: TContractState,
+        settings_id: u32,
+        name: felt252,
+        description: ByteArray,
+        exists: bool,
+    );
 }
 
 #[starknet::interface]
@@ -16,8 +24,8 @@ mod game_mock {
     use openzeppelin_token::erc721::{ERC721Component, ERC721HooksEmptyImpl};
 
     use tournaments::components::interfaces::{WorldImpl};
-    use tournaments::components::libs::store::{Store, StoreTrait};
-    use tournaments::components::models::game::Score;
+    use tournaments::components::libs::game_store::{Store, StoreTrait};
+    use tournaments::components::models::game::{SettingsDetails, Score};
 
     use tournaments::components::constants::{DEFAULT_NS};
 
@@ -64,29 +72,76 @@ mod game_mock {
     fn BASE_URI() -> ByteArray {
         ("https://game.io")
     }
+
+    fn GAME_NAME() -> felt252 {
+        ('Game')
+    }
+    fn GAME_DESCRIPTION() -> ByteArray {
+        ("Game description")
+    }
+    fn GAME_DEVELOPER() -> felt252 {
+        ('Game developer')
+    }
+    fn GAME_PUBLISHER() -> felt252 {
+        ('Game publisher')
+    }
+    fn GAME_GENRE() -> felt252 {
+        ('Game genre')
+    }
+    fn GAME_IMAGE() -> ByteArray {
+        ("https://game.io/image.png")
+    }
     //*******************************
 
     #[abi(embed_v0)]
     impl GameMockImpl of super::IGameMock<ContractState> {
-        fn start_game(ref self: ContractState, game_id: felt252) {
+        fn start_game(ref self: ContractState, game_id: u64) {
             let mut world = self.world(DEFAULT_NS());
             let mut store: Store = StoreTrait::new(world);
 
-            store.set_game_score(@Score { game_id: game_id.into(), score: 0, });
+            store.set_score(@Score { game_id, score: 0 });
         }
 
-        fn end_game(ref self: ContractState, game_id: felt252, score: u64) {
+        fn end_game(ref self: ContractState, game_id: u64, score: u64) {
             let mut world = self.world(DEFAULT_NS());
             let mut store: Store = StoreTrait::new(world);
-            store.set_game_score(@Score { game_id: game_id.into(), score: score, });
+            store.set_score(@Score { game_id, score });
+        }
+
+        fn set_settings(
+            ref self: ContractState,
+            settings_id: u32,
+            name: felt252,
+            description: ByteArray,
+            exists: bool,
+        ) {
+            let mut world = self.world(DEFAULT_NS());
+            let mut store: Store = StoreTrait::new(world);
+            store
+                .set_settings_details(
+                    @SettingsDetails { id: settings_id, name, description, exists },
+                );
+        }
+
+        fn get_score(self: @ContractState, game_id: u64) -> u64 {
+            game_id
         }
     }
 
     #[abi(embed_v0)]
     impl GameInitializerImpl of super::IGameMockInit<ContractState> {
-        fn initializer(ref self: ContractState,) {
-            self.erc721.initializer(TOKEN_NAME(), TOKEN_SYMBOL(), BASE_URI(),);
-            self.game.initializer();
+        fn initializer(ref self: ContractState) {
+            self.erc721.initializer(TOKEN_NAME(), TOKEN_SYMBOL(), BASE_URI());
+            self
+                .game
+                .initializer(
+                    GAME_NAME(),
+                    GAME_DESCRIPTION(),
+                    GAME_DEVELOPER(),
+                    GAME_PUBLISHER(),
+                    GAME_GENRE(),
+                    GAME_IMAGE(),
+                );
         }
     }
 }
