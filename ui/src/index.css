@@ -2,14 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'AstroNaut';
+  src        : url('/fonts/AstroNaut-Black.otf') format('opentype');
+  font-weight: 900;
+  font-style : normal;
+}
+
+@font-face {
+  font-family: 'AstroNaut';
+  src        : url('/fonts/AstroNaut-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style : normal;
+}
+
+@font-face {
+  font-family: 'AstroNaut';
+  src        : url('/fonts/AstroNaut-RegularItalic.otf') format('opentype');
+  font-weight: 400;
+  font-style : italic;
+}
+
+@font-face {
+  font-family: 'AstroNaut';
+  src        : url('/fonts/AstroNaut-Thin.otf') format('opentype');
+  font-weight: 100;
+  font-style : normal;
+}
+
+@font-face {
+  font-family: 'AstroNaut';
+  src        : url('/fonts/AstroNaut-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style : normal;
+}
+
+@font-face {
+  font-family: 'AstroNaut';
+  src        : url('/fonts/AstroNaut-ThinItalic.otf') format('opentype');
+  font-weight: 100;
+  font-style : italic;
+}
+
+@font-face {
+  font-family: 'AstroNaut';
+  src        : url('/fonts/AstroNaut-BoldItalic.otf') format('opentype');
+  font-weight: 700;
+  font-style : italic;
+}
+
+@font-face {
+  font-family: 'AstroNaut';
+  src        : url('/fonts/AstroNaut-BlackItalic.otf') format('opentype');
+  font-weight: 900;
+  font-style : italic;
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme    : light dark;
-  color           : rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: rgba(0, 218, 163, 1);
+  background-image: radial-gradient(circle, rgba(0, 218, 163, 0.1), rgba(0, 218, 163, 0)),
+    url(./background.png);
+  background-size      : cover;
+  background-position  : center;
+  background-repeat    : no-repeat;
+  background-attachment: fixed;
 
   font-synthesis         : none;
   text-rendering         : optimizeLegibility;
@@ -30,21 +90,6 @@ a:hover {
 h1 {
   font-size  : 3.2em;
   line-height: 1.1;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color           : #213547;
-    background-color: #ffffff;
-  }
-
-  a:hover {
-    color: #747bff;
-  }
-
-  button {
-    background-color: #f9f9f9;
-  }
 }
 
 @layer base {
