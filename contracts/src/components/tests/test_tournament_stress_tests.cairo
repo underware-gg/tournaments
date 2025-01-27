@@ -1,18 +1,16 @@
 use starknet::testing;
 use tournaments::components::constants::{MIN_SUBMISSION_PERIOD};
-use tournaments::components::models::tournament::{
-    TournamentGame, TokenDataType, ERC20Data, TournamentPrize
-};
+use tournaments::components::models::tournament::{TournamentGame, TokenDataType, ERC20Data, Prize};
 
 use tournaments::components::tests::interfaces::{
-    IGameMockDispatcherTrait, ITournamentMockDispatcherTrait, IERC20MockDispatcherTrait
+    IGameMockDispatcherTrait, ITournamentMockDispatcherTrait, IERC20MockDispatcherTrait,
 };
 use tournaments::components::tests::test_tournament::{setup, TestContracts};
 use tournaments::tests::{
     utils,
     constants::{
         OWNER, TOURNAMENT_NAME, TOURNAMENT_DESCRIPTION, TEST_START_TIME, TEST_END_TIME,
-        TEST_REGISTRATION_START_TIME, TEST_REGISTRATION_END_TIME
+        TEST_REGISTRATION_START_TIME, TEST_REGISTRATION_END_TIME,
     },
 };
 
@@ -38,7 +36,7 @@ fn test_submit_multiple_scores_stress_test() {
             Option::None, // zero gated type
             Option::None, // zero entry premium
             contracts.game.contract_address,
-            1
+            1,
         );
 
     utils::impersonate(OWNER());
@@ -64,8 +62,12 @@ fn test_submit_multiple_scores_stress_test() {
             .world
             .write_model_test(
                 @TournamentGame {
-                    tournament_id: tournament_id, game_id: i + 1, score: 0, exists: true, submitted: false
-                }
+                    tournament_id: tournament_id,
+                    game_id: i + 1,
+                    score: 0,
+                    exists: true,
+                    ScoreSubmitted: false,
+                },
             );
         i += 1;
     };
@@ -101,7 +103,7 @@ fn test_distribute_many_prizes() {
             Option::None, // zero gated type
             Option::None, // zero entry premium
             contracts.game.contract_address,
-            1
+            1,
         );
 
     utils::impersonate(OWNER());
@@ -118,14 +120,13 @@ fn test_distribute_many_prizes() {
         contracts
             .world
             .write_model_test(
-                @TournamentPrize {
+                @Prize {
+                    id: i + 1,
                     tournament_id,
-                    prize_key: i + 1,
-                    token: contracts.erc20.contract_address,
+                    token_address: contracts.erc20.contract_address,
                     token_data_type: TokenDataType::erc20(ERC20Data { token_amount: 1 }),
                     payout_position: (i + 1).try_into().unwrap(),
-                    claimed: true
-                }
+                },
             );
         i += 1;
     };
@@ -133,14 +134,14 @@ fn test_distribute_many_prizes() {
     testing::set_block_timestamp((TEST_END_TIME() + MIN_SUBMISSION_PERIOD).into());
 
     let mut i: u64 = 0;
-    let mut prize_keys: Array<u64> = array![];
+    let mut prize_ids: Array<u64> = array![];
     loop {
         if i == 250 {
             break;
         }
-        prize_keys.append(i + 1);
+        prize_ids.append(i + 1);
         i += 1;
     };
 
-    contracts.tournament.distribute_prizes(tournament_id, prize_keys);
+    contracts.tournament.distribute_prizes(tournament_id, prize_ids);
 }
