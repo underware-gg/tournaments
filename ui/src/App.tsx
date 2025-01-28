@@ -1,14 +1,18 @@
 import Header from "@/components/Header";
-import GameFilters from "@/containers/GameFilters";
+import Overview from "@/containers/Overview";
+import Tournament from "@/containers/Tournament";
+import { Routes, Route } from "react-router-dom";
 
 function App() {
   return (
     <div className="min-h-screen flex-col w-full">
       <Header />
-      <div className="flex flex-row p-20 gap-5">
-        <GameFilters />
-        <div className="flex flex-col w-4/5">Hello</div>
-      </div>
+      <Routes>
+        <Route path="/" element={<Overview />} />
+        <Route path="/tournament">
+          <Route path=":id" element={<Tournament />} />
+        </Route>
+      </Routes>
     </div>
   );
 }

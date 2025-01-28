@@ -11,7 +11,7 @@ import { DojoManifest } from "@/hooks/useDojoSystem";
 import tournament_manifest_dev from "../../../contracts/manifest_dev.json";
 import tournament_manifest_slot from "../../../contracts/manifest_slot.json";
 import tournament_manifest_mainnet from "../../../contracts/manifest_mainnet.json";
-import { makeControllerConnector } from "@/hooks/useController";
+import { initializeController } from "@/dojo/setup/controllerSetup";
 import { supportedConnectorIds } from "@/lib/connectors";
 import { stringToFelt, cleanObject } from "@/lib/utils";
 
@@ -284,7 +284,7 @@ export const dojoContextConfig: Record<ChainId, DojoChainConfig> = {
 
 const CONTROLLER =
   defaultChainId !== ChainId.KATANA_LOCAL
-    ? makeControllerConnector(
+    ? initializeController(
         manifests[defaultChainId],
         dojoContextConfig[defaultChainId]?.rpcUrl!,
         defaultChainId,

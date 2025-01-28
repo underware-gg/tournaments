@@ -15,10 +15,10 @@ export default {
   		colors: {
         'retro-green': 'rgba(0, 218, 163, 1)',
         'retro-green-dark': 'rgba(0, 140, 105, 1)',
+        'retro-grey': 'rgba(34, 34, 34, 1)',
       },
       fontFamily: {
-        // Add your new font family
-        'astronaut': ['AstroNaut', 'sans-serif']  // Replace YourFontName with your font's name
+        'astronaut': ['AstroNaut', 'sans-serif']
       }
   	}
   },

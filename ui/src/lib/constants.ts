@@ -118,3 +118,49 @@ export const ITEMS: { [key: number]: string } = {
   100: "Chain Gloves",
   101: "Heavy Gloves",
 };
+
+export const tournaments = [
+  {
+    fee: 5,
+    pot: 100,
+    players: 5,
+    startsIn: 12,
+    registration: "Open",
+    games: ["lootSurvivor"],
+    name: "FOCGing Around",
+    description: "Lorem ipsum dolar sit amet",
+  },
+  {
+    fee: 5,
+    pot: 100,
+    players: 5,
+    startsIn: 12,
+    registration: "Open",
+    games: ["lootSurvivor", "zkube"],
+    name: "FOCGing Around",
+    description: "Lorem ipsum dolar sit amet",
+  },
+];
+
+export const participants = [
+  {
+    name: "Clicksave",
+    score: 1000,
+  },
+  {
+    name: "Clicksave",
+    score: 1000,
+  },
+  {
+    name: "Clicksave",
+    score: 1000,
+  },
+  {
+    name: "Clicksave",
+    score: 1000,
+  },
+  {
+    name: "Clicksave",
+    score: 1000,
+  },
+];
