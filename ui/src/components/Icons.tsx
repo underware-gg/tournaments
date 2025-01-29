@@ -159,3 +159,16 @@ export const CLOCK: React.FC = () => (
     />
   </svg>
 );
+
+export const FLAG: React.FC = () => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M5.65088 5.33325H7.23818V18.6666H5.65088V5.33325Z"
+      fill="currentColor"
+    />
+    <path
+      d="M17.5557 8.66659H18.3493V5.33325H17.5557V6.16659H16.762V6.99992H14.3811V7.83325H12.7938V6.16659H8.82553V6.99992H8.03188V13.6666H8.82553V12.8333H10.4128V11.9999H12.0001V13.6666H15.1747V12.8333H15.9684V11.1666H16.762V10.3333H17.5557V8.66659Z"
+      fill="currentColor"
+    />
+  </svg>
+);

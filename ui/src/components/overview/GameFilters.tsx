@@ -12,6 +12,7 @@ const GameFilters = () => {
           key={key}
           size={"xl"}
           variant="outline"
+          borderColor="rgba(0, 218, 163, 1)"
           className={`text-2xl font-astronaut ${
             gameFilters.includes(key) ? "bg-retro-green/25" : ""
           }`}

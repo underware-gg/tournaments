@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useDojo } from "@/DojoContext";
+import { useDojo } from "@/context/dojo";
 import { getContractByName } from "@dojoengine/core";
 import { Manifest } from "@dojoengine/core";
 

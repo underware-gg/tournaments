@@ -4,13 +4,13 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn, adjustColorOpacity } from "@/lib/utils";
 
 const cardVariants = cva(
-  "inline-flex flex-col gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-colors [border-style:solid] [border-image-slice:4] [border-image-width:4px] relative hover:cursor-pointer",
+  "inline-flex flex-col gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-colors [border-style:solid] [border-image-slice:4] [border-image-width:4px] relative",
   {
     variants: {
       variant: {
-        default: "bg-retro-green text-black hover:bg-retro-green/90 border-2",
-        destructive: "bg-red-500 text-neutral-50 hover:bg-red-500/90",
-        outline: `bg-black text-retro-green hover:bg-retro-green/10 border-2 border-retro-green`,
+        default: "bg-retro-green text-black border-2",
+        destructive: "bg-red-500 text-neutral-50",
+        outline: `bg-black text-retro-green border-2 border-retro-green`,
       },
       size: {
         default: "h-48 p-4",
@@ -26,11 +26,17 @@ const cardVariants = cva(
   }
 );
 
+const interactiveVariants = {
+  default: "hover:bg-retro-green/90 hover:cursor-pointer",
+  destructive: "hover:bg-red-500/90 hover:cursor-pointer",
+  outline: "hover:bg-retro-green/10 hover:cursor-pointer",
+} as const;
+
 export interface CardProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof cardVariants> {
   borderColor?: string;
-  isClickable?: boolean; // Add this to make the press effect optional
+  interactive?: boolean;
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
@@ -40,6 +46,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       variant,
       size,
       borderColor = "rgba(0, 140, 105, 1)",
+      interactive = false,
       children,
       ...props
     },
@@ -49,21 +56,25 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
 
     // Generate the border image dynamically
     const borderImage = `url("data:image/svg+xml,${PressableBorderImage({
-      color: isHovered ? adjustColorOpacity(borderColor, 0.9) : borderColor,
+      color:
+        interactive && isHovered
+          ? adjustColorOpacity(borderColor, 0.9)
+          : borderColor,
       isPressed: false,
     })}")`;
 
     return (
       <div
-        className={cn(cardVariants({ variant, size, className }))}
+        className={cn(
+          cardVariants({ variant, size, className }),
+          interactive && variant ? interactiveVariants[variant] : ""
+        )}
         ref={ref}
         style={{
           borderImageSource: `${borderImage}`,
         }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => {
-          setIsHovered(false);
-        }}
+        onMouseEnter={() => interactive && setIsHovered(true)}
+        onMouseLeave={() => interactive && setIsHovered(false)}
         {...props}
       >
         {children}

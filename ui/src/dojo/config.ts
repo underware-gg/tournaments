@@ -42,8 +42,31 @@ const supportedChainIds: ChainId[] = [
   ChainId.SN_MAIN,
 ];
 
-export const defaultChainId = (import.meta.env.VITE_CHAIN_ID ||
-  undefined) as ChainId;
+const validateChainConfig = (
+  config: DojoChainConfig,
+  chainId: ChainId
+): void => {
+  const required = ["rpcUrl", "chainId", "name"];
+  const missing = required.filter(
+    (key) => !config[key as keyof DojoChainConfig]
+  );
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required chain config for ${chainId}: ${missing.join(", ")}`
+    );
+  }
+};
+
+const getDefaultChainId = (): ChainId => {
+  const envChainId = import.meta.env.VITE_CHAIN_ID as ChainId;
+
+  if (envChainId && !isChainIdSupported(envChainId)) {
+    throw new Error(`Unsupported chain ID in environment: ${envChainId}`);
+  }
+
+  return envChainId || ChainId.KATANA_LOCAL;
+};
 
 export const isChainIdSupported = (chainId: ChainId): boolean => {
   return Object.keys(dojoContextConfig).includes(chainId);
@@ -74,7 +97,7 @@ export const getDojoChainConfig = (
   }
   //
   // override env (default chain only)
-  if (chainId == defaultChainId) {
+  if (chainId == getDefaultChainId()) {
     result = {
       ...result,
       ...cleanObject(envChainConfig),
@@ -282,31 +305,48 @@ export const dojoContextConfig: Record<ChainId, DojoChainConfig> = {
   [ChainId.SN_MAIN]: snMainnetConfig,
 };
 
-const CONTROLLER =
-  defaultChainId !== ChainId.KATANA_LOCAL
-    ? initializeController(
-        manifests[defaultChainId],
-        dojoContextConfig[defaultChainId]?.rpcUrl!,
-        defaultChainId,
-        dojoContextConfig[defaultChainId]
-        // NAMESPACE
-      )
-    : undefined;
 //------------------------
 
 export const makeDojoAppConfig = (): DojoAppConfig => {
+  const initialChainId = getDefaultChainId();
+
+  // Validate chain configuration before creating app config
+  const chainConfig = dojoContextConfig[initialChainId];
+  validateChainConfig(chainConfig, initialChainId);
+
+  // Initialize controller with error handling
+  const controller =
+    initialChainId !== ChainId.KATANA_LOCAL
+      ? (() => {
+          try {
+            return initializeController(
+              manifests[initialChainId],
+              chainConfig.rpcUrl!,
+              initialChainId,
+              chainConfig
+            );
+          } catch (error) {
+            console.error(
+              `Failed to initialize controller for chain ${initialChainId}:`,
+              error
+            );
+            return undefined;
+          }
+        })()
+      : undefined;
+
   return {
     manifests,
     supportedChainIds,
-    initialChainId: defaultChainId,
+    initialChainId,
     nameSpace: NAMESPACE,
-    contractInterfaces: CONTRACT_INTERFACES[defaultChainId],
+    contractInterfaces: CONTRACT_INTERFACES[initialChainId],
     starknetDomain: {
       name: "Tournament",
       version: "0.1.0",
-      chainId: defaultChainId,
+      chainId: initialChainId,
       revision: "1",
     },
-    controllerConnector: CONTROLLER,
+    controllerConnector: controller,
   };
 };

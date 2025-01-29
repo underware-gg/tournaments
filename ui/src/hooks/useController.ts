@@ -50,9 +50,7 @@ export const useConnectedController = () => {
 
 export const useControllerUsername = () => {
   const [username, setUsername] = useState<string | undefined>(undefined);
-  console.log("hello");
   const controllerConnector = useConnectedController();
-  console.log(controllerConnector);
 
   const getUsername = useCallback(async () => {
     if (!controllerConnector?.controller) return;
@@ -99,21 +97,3 @@ export const isControllerAccount = () => {
   const { connector } = useConnect();
   return connector?.id == supportedConnectorIds.CONTROLLER;
 };
-
-// export const useControllerAccount = (contractAddress: BigNumberish) => {
-//   const { classHash, isDeployed } = useContractClassHash(contractAddress);
-//   const isControllerAccount = useMemo(
-//     () => classHash && bigintEquals(classHash, CONTROLLER_CLASS_HASH),
-//     [classHash]
-//   );
-//   const isKatanaAccount = useMemo(
-//     () => classHash && bigintEquals(classHash, KATANA_CLASS_HASH),
-//     [classHash]
-//   );
-//   return {
-//     classHash,
-//     isDeployed,
-//     isControllerAccount,
-//     isKatanaAccount,
-//   };
-// };

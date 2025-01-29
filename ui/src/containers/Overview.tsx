@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { GLOBE, TROPHY, X, USER, CHEVRON_DOWN } from "@/components/Icons";
+import {
+  GLOBE,
+  TROPHY,
+  X,
+  USER,
+  CHEVRON_DOWN,
+  TOKEN,
+} from "@/components/Icons";
 import useUIStore from "@/hooks/useUIStore";
 import Games from "@/assets/games";
 import {
@@ -32,7 +39,7 @@ const Overview = () => {
     <div className="flex flex-row p-20 gap-5">
       <GameFilters />
       <div className="flex flex-col w-full p-2">
-        <div className="flex flex-row justify-between w-full border-b-2 border-retro-green">
+        <div className="flex flex-row justify-between w-full border-b-4 border-retro-green">
           <div className="flex flex-row gap-2">
             <Button
               onClick={() => setSelectedTab("all")}
@@ -101,7 +108,7 @@ const Overview = () => {
           <div
             className={`
             overflow-hidden transition-[height] duration-300 ease-in-out
-            ${gameFilters.length > 0 ? "h-16 py-2" : "h-0"}
+            ${gameFilters.length > 0 ? "h-[72px] py-2" : "h-0"}
           `}
           >
             {gameFilters.length > 0 && (
@@ -128,6 +135,8 @@ const Overview = () => {
               <Card
                 key={index}
                 variant="outline"
+                interactive={true}
+                borderColor="rgba(0, 218, 163, 1)"
                 onClick={() => {
                   navigate(`/tournament/${index}`);
                 }}
@@ -159,9 +168,28 @@ const Overview = () => {
                       </div>
                     </div>
                     <div className="flex flex-row -space-x-2 w-1/2 justify-end px-2">
-                      {tournament.games.map((game, index) => (
-                        <TokenGameIcon key={index} game={game} size={"md"} />
-                      ))}
+                      {tournament.games.slice(0, 3).map((game, index) => {
+                        // If this is the 3rd item and there are more games
+                        if (index === 2 && tournament.games.length > 3) {
+                          return (
+                            <span
+                              key={index}
+                              className="relative inline-flex items-center justify-center"
+                            >
+                              <span className={"text-retro-green-dark size-10"}>
+                                <TOKEN />
+                              </span>
+                              <div className="absolute inset-0 flex items-center justify-center rounded-full text-retro-green font-astronaut">
+                                +{tournament.games.length - 2}
+                              </div>
+                            </span>
+                          );
+                        }
+                        // Regular token icon for first 2 items
+                        return (
+                          <TokenGameIcon key={index} game={game} size={"md"} />
+                        );
+                      })}
                     </div>
                   </div>
                   <div className="flex flex-row items-center justify-between w-3/4 mx-auto">
