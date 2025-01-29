@@ -10,7 +10,7 @@ interface TokenGameIconProps {
 const TokenGameIcon = ({
   game,
   size = "sm",
-  tokenColor = "text-retro-green-dark",
+  tokenColor = "text-retro-green/25",
 }: TokenGameIconProps) => {
   const Icon = Games[game].Icon;
   const sizeClasses = {

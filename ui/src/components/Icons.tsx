@@ -102,8 +102,8 @@ export const USER: React.FC = () => (
 export const CHEVRON_DOWN: React.FC = () => (
   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
-      fill-rule="evenodd"
-      clip-rule="evenodd"
+      fillRule="evenodd"
+      clipRule="evenodd"
       d="M15.9999 10.1822L8 10.1822L8 11.394L9.33345 11.394L9.33345 12.6058L10.6669 12.6058L10.6669 13.8176L13.3337 13.8176L13.3337 12.6058L14.6666 12.6058L14.6666 11.394L16 11.394L15.9999 10.1822Z"
       fill="currentColor"
     />

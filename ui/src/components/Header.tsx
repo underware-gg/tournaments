@@ -15,7 +15,7 @@ const Header = () => {
   const { openProfile } = useControllerProfile();
   const { username } = useControllerUsername();
   return (
-    <div className="flex flex-row items-center justify-between py-5 px-10">
+    <div className="flex flex-row items-center justify-between py-5 px-10 h-[80px]">
       <div className="flex text-4xl font-astronaut">Stark_Cup</div>
       <div className="flex flex-row items-center gap-2">
         <Button>

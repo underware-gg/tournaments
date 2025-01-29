@@ -11,6 +11,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { tournaments, participants } from "@/lib/constants";
 import { Card } from "@/components/ui/card";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
+import { motion } from "framer-motion";
 
 const Tournament = () => {
   const { id } = useParams<{ id: string }>();
@@ -87,59 +88,110 @@ const Tournament = () => {
         >
           <div className="flex flex-row justify-between font-astronaut text-2xl h-8">
             <span>Structure</span>
-            {/* <div className="flex flex-row items-center">
-              <span className="w-6">
-                <TROPHY />
-              </span>
-              : {tournament.pot}
-            </div> */}
           </div>
           <div className="w-full h-0.5 bg-retro-green/25" />
           <div className="flex-1 flex items-center justify-center">
             <div className="flex flex-row gap-10 items-center overflow-scroll">
               {tournament.games.map((game, index) => (
-                <>
-                  <div key={index} className="flex  relative">
-                    <div className="absolute top-8 left-[calc(100%_-_8px)] w-[calc(100%_+_12px)] h-0.5 border-t-4 border-dotted border-retro-green-dark" />
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.5,
+                    delay: index * 0.2,
+                  }}
+                >
+                  <div className="flex relative">
+                    <motion.div
+                      className="absolute top-0 left-[calc(100%)] flex flex-row items-center justify-between font-astronaut w-full"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{
+                        duration: 0.3,
+                        delay: index * 0.2 + 0.2,
+                      }}
+                    >
+                      <div className="flex flex-row items-center">
+                        <span className="w-6">
+                          <TROPHY />
+                        </span>
+                        <span>20</span>
+                      </div>
+                    </motion.div>
+                    <motion.div
+                      className="absolute top-8 left-[calc(100%_-_8px)] w-[calc(100%_+_12px)] h-0.5 border-t-4 border-dotted border-retro-green-dark"
+                      initial={{ width: 0 }}
+                      animate={{ width: "calc(100% + 12px)" }}
+                      transition={{
+                        duration: 0.5,
+                        delay: index * 0.2 + 0.3,
+                        ease: "easeOut",
+                      }}
+                    />
 
-                    <div className="flex flex-col gap-2 w-24">
-                      <TokenGameIcon game={game} size={"lg"} />
-                      <div className="flex flex-row items-center justify-between font-astronaut">
+                    <div className="flex flex-col gap-2 w-24 items-center">
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 260,
+                          damping: 20,
+                          delay: index * 0.2,
+                        }}
+                      >
+                        <TokenGameIcon game={game} size={"lg"} />
+                      </motion.div>
+                      <motion.div
+                        className="flex flex-row items-center justify-between font-astronaut"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{
+                          duration: 0.3,
+                          delay: index * 0.2 + 0.2,
+                        }}
+                      >
                         <div className="flex flex-row items-center">
                           <span className="w-6">
                             <CLOCK />
                           </span>
                           <span>2H</span>
                         </div>
-                        <div className="flex flex-row items-center">
-                          <span className="w-6">
-                            <TROPHY />
-                          </span>
-                          <span>20</span>
-                        </div>
-                      </div>
+                      </motion.div>
                     </div>
                   </div>
-                  {index == tournament.games.length - 1 && (
-                    <div className="w-24 z-10 flex flex-col gap-2 items-center">
-                      <Card
-                        variant="outline"
-                        className="p-2 text-retro-green-dark border-2 border-retro-green-dark h-14 w-14 flex items-center justify-center"
-                      >
-                        <span className="w-10">
-                          <FLAG />
-                        </span>
-                      </Card>
-                      <div className="flex flex-row items-center justify-center gap-2 font-astronaut">
-                        <div className="flex flex-col items-center">
-                          <span className="text-xs">21/04</span>
-                          <span className="text-xs">00:00AM</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </>
+                </motion.div>
               ))}
+              {tournament.games.length > 0 && (
+                <motion.div
+                  className="w-24 flex flex-col gap-2 items-center"
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    duration: 0.5,
+                    delay: (tournament.games.length - 1) * 0.2 + 0.3,
+                    type: "spring",
+                    stiffness: 260,
+                    damping: 20,
+                  }}
+                >
+                  <Card
+                    variant="outline"
+                    className="p-2 text-retro-green-dark border-2 border-retro-green-dark h-14 w-14 flex items-center justify-center"
+                  >
+                    <span className="w-10">
+                      <FLAG />
+                    </span>
+                  </Card>
+                  <div className="flex flex-row items-center justify-center gap-2 font-astronaut">
+                    <div className="flex flex-col items-center">
+                      <span className="text-xs">21/04</span>
+                      <span className="text-xs">00:00AM</span>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
             </div>
           </div>
         </Card>

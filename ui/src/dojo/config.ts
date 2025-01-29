@@ -185,6 +185,7 @@ export type DojoChainConfig = {
   relayUrl?: string;
   blastRpc?: string;
   blockExplorerUrl?: string;
+  ekuboPriceAPI?: string;
   masterAddress?: string;
   masterPrivateKey?: string;
   accountClassHash?: string;
@@ -208,6 +209,7 @@ const localKatanaConfig: DojoChainConfig = {
   relayUrl: LOCAL_RELAY,
   blastRpc: undefined,
   blockExplorerUrl: undefined,
+  ekuboPriceAPI: undefined,
   // masterAddress: KATANA_PREFUNDED_ADDRESS,
   // masterPrivateKey: KATANA_PREFUNDED_PRIVATE_KEY,
   masterAddress:
@@ -235,6 +237,7 @@ const slotKatanaConfig: DojoChainConfig = {
   relayUrl: undefined,
   blastRpc: undefined,
   blockExplorerUrl: undefined,
+  ekuboPriceAPI: undefined,
   // masterAddress: KATANA_PREFUNDED_ADDRESS,
   // masterPrivateKey: KATANA_PREFUNDED_PRIVATE_KEY,
   masterAddress:
@@ -263,6 +266,7 @@ const snMainnetConfig: DojoChainConfig = {
   blastRpc:
     "https://starknet-mainnet.blastapi.io/5ef61753-e7c1-4593-bc62-97fdf96f8de5",
   blockExplorerUrl: "https://voyager.online/",
+  ekuboPriceAPI: "https://mainnet-api.ekubo.org/price",
   masterAddress: undefined,
   masterPrivateKey: undefined,
   accountClassHash: undefined,

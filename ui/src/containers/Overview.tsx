@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -31,14 +31,28 @@ const Overview = () => {
   const navigate = useNavigate();
   const [sortBy, setSortBy] = useState<string>("start");
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Use useEffect to watch for filter changes
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+  }, [gameFilters]); // Reset scroll when filters change
+
   const removeGameFilter = (filter: keyof typeof Games) => {
     setGameFilters(gameFilters.filter((f) => f !== filter));
   };
 
+  const filteredTournaments = tournaments.filter((tournament) => {
+    if (gameFilters.length === 0) return true;
+    return gameFilters.every((filter) => tournament.games.includes(filter));
+  });
+
   return (
-    <div className="flex flex-row p-20 gap-5">
+    <div className="flex flex-row p-20 gap-5 h-[calc(100vh-80px)]">
       <GameFilters />
-      <div className="flex flex-col w-full p-2">
+      <div className="flex flex-col w-4/5 p-2">
         <div className="flex flex-row justify-between w-full border-b-4 border-retro-green">
           <div className="flex flex-row gap-2">
             <Button
@@ -104,17 +118,17 @@ const Overview = () => {
             </DropdownMenu>
           </div>
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col overflow-hidden">
           <div
             className={`
-            overflow-hidden transition-[height] duration-300 ease-in-out
+            transition-[height] duration-300 ease-in-out
             ${gameFilters.length > 0 ? "h-[72px] py-2" : "h-0"}
           `}
           >
             {gameFilters.length > 0 && (
-              <div className="flex flex-row items-center gap-4 p-4 h-16">
+              <div className="flex flex-row items-center gap-4 p-4 h-[72px] overflow-x-auto w-full">
                 {gameFilters.map((filter) => (
-                  <div className="flex flex-row items-center gap-4 bg-black border-2 border-retro-grey py-2 px-4">
+                  <div className="flex flex-row items-center gap-4 bg-black border-2 border-retro-grey py-2 px-4 shrink-0">
                     <GameIcon game={filter} />
                     <span className="text-2xl font-astronaut">
                       {Games[filter].name}
@@ -130,8 +144,11 @@ const Overview = () => {
               </div>
             )}
           </div>
-          <div className="grid grid-cols-3 gap-4 transition-all duration-300 ease-in-out py-4">
-            {tournaments.map((tournament, index) => (
+          <div
+            ref={scrollContainerRef}
+            className="grid grid-cols-3 gap-4 transition-all duration-300 ease-in-out py-4 overflow-y-auto"
+          >
+            {filteredTournaments.map((tournament, index) => (
               <Card
                 key={index}
                 variant="outline"
@@ -140,6 +157,7 @@ const Overview = () => {
                 onClick={() => {
                   navigate(`/tournament/${index}`);
                 }}
+                className="animate-in fade-in zoom-in duration-300 ease-out"
               >
                 <div className="flex flex-col justify-between h-full">
                   <div className="flex flex-row justify-between font-astronaut text-xl">
@@ -176,7 +194,7 @@ const Overview = () => {
                               key={index}
                               className="relative inline-flex items-center justify-center"
                             >
-                              <span className={"text-retro-green-dark size-10"}>
+                              <span className={"text-retro-green/25 size-10"}>
                                 <TOKEN />
                               </span>
                               <div className="absolute inset-0 flex items-center justify-center rounded-full text-retro-green font-astronaut">
