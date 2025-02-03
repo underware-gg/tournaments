@@ -8,6 +8,7 @@ import {
   USER,
   CHEVRON_DOWN,
   TOKEN,
+  PLUS,
 } from "@/components/Icons";
 import useUIStore from "@/hooks/useUIStore";
 import Games from "@/assets/games";
@@ -50,7 +51,7 @@ const Overview = () => {
   });
 
   return (
-    <div className="flex flex-row p-20 gap-5 h-[calc(100vh-80px)]">
+    <div className="flex flex-row px-20 pt-20 gap-5 h-[calc(100vh-80px)]">
       <GameFilters />
       <div className="flex flex-col w-4/5 p-2">
         <div className="flex flex-row justify-between w-full border-b-4 border-retro-green">
@@ -134,7 +135,7 @@ const Overview = () => {
                       {Games[filter].name}
                     </span>
                     <span
-                      className="w-6 text-retro-green-dark cursor-pointer"
+                      className="w-6 h-6 text-retro-green-dark cursor-pointer"
                       onClick={() => removeGameFilter(filter)}
                     >
                       <X />
@@ -148,81 +149,113 @@ const Overview = () => {
             ref={scrollContainerRef}
             className="grid grid-cols-3 gap-4 transition-all duration-300 ease-in-out py-4 overflow-y-auto"
           >
-            {filteredTournaments.map((tournament, index) => (
-              <Card
-                key={index}
-                variant="outline"
-                interactive={true}
-                borderColor="rgba(0, 218, 163, 1)"
-                onClick={() => {
-                  navigate(`/tournament/${index}`);
-                }}
-                className="animate-in fade-in zoom-in duration-300 ease-out"
-              >
-                <div className="flex flex-col justify-between h-full">
-                  <div className="flex flex-row justify-between font-astronaut text-xl">
-                    <p>{tournament.name}</p>
-                    <div className="flex flex-row items-center">
-                      <span className="w-6">
-                        <USER />
-                      </span>
-                      : {tournament.players}
-                    </div>
-                  </div>
-                  <div className="w-full h-0.5 bg-retro-green/25" />
-                  <div className="flex flex-row">
-                    <div className="flex flex-col w-1/2">
-                      <div className="flex flex-row gap-2">
-                        <span className="text-retro-green-dark">
-                          Registration:
+            {filteredTournaments.length > 0 ? (
+              filteredTournaments.map((tournament, index) => (
+                <Card
+                  key={index}
+                  variant="outline"
+                  interactive={true}
+                  borderColor="rgba(0, 218, 163, 1)"
+                  onClick={() => {
+                    navigate(`/tournament/${index}`);
+                  }}
+                  className="animate-in fade-in zoom-in duration-300 ease-out"
+                >
+                  <div className="flex flex-col justify-between h-full">
+                    <div className="flex flex-row justify-between font-astronaut text-xl">
+                      <p>{tournament.name}</p>
+                      <div className="flex flex-row items-center">
+                        <span className="w-6">
+                          <USER />
                         </span>
-                        <span>{tournament.registration}</span>
-                      </div>
-                      <div className="flex flex-row gap-2">
-                        <span className="text-retro-green-dark">
-                          Starts In:
-                        </span>
-                        <span>{tournament.startsIn} Hours</span>
+                        : {tournament.players}
                       </div>
                     </div>
-                    <div className="flex flex-row -space-x-2 w-1/2 justify-end px-2">
-                      {tournament.games.slice(0, 3).map((game, index) => {
-                        // If this is the 3rd item and there are more games
-                        if (index === 2 && tournament.games.length > 3) {
-                          return (
-                            <span
-                              key={index}
-                              className="relative inline-flex items-center justify-center"
-                            >
-                              <span className={"text-retro-green/25 size-10"}>
-                                <TOKEN />
+                    <div className="w-full h-0.5 bg-retro-green/25" />
+                    <div className="flex flex-row">
+                      <div className="flex flex-col w-1/2">
+                        <div className="flex flex-row gap-2">
+                          <span className="text-retro-green-dark">
+                            Registration:
+                          </span>
+                          <span>{tournament.registration}</span>
+                        </div>
+                        <div className="flex flex-row gap-2">
+                          <span className="text-retro-green-dark">
+                            Starts In:
+                          </span>
+                          <span>{tournament.startsIn} Hours</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-row -space-x-2 w-1/2 justify-end px-2">
+                        {tournament.games.slice(0, 3).map((game, index) => {
+                          // If this is the 3rd item and there are more games
+                          if (index === 2 && tournament.games.length > 3) {
+                            return (
+                              <span
+                                key={index}
+                                className="relative inline-flex items-center justify-center"
+                              >
+                                <span className={"text-retro-green/25 size-10"}>
+                                  <TOKEN />
+                                </span>
+                                <div className="absolute inset-0 flex items-center justify-center rounded-full text-retro-green font-astronaut">
+                                  +{tournament.games.length - 2}
+                                </div>
                               </span>
-                              <div className="absolute inset-0 flex items-center justify-center rounded-full text-retro-green font-astronaut">
-                                +{tournament.games.length - 2}
-                              </div>
-                            </span>
+                            );
+                          }
+                          // Regular token icon for first 2 items
+                          return (
+                            <TokenGameIcon
+                              key={index}
+                              game={game}
+                              size={"md"}
+                            />
                           );
-                        }
-                        // Regular token icon for first 2 items
-                        return (
-                          <TokenGameIcon key={index} game={game} size={"md"} />
-                        );
-                      })}
+                        })}
+                      </div>
+                    </div>
+                    <div className="flex flex-row items-center justify-between w-3/4 mx-auto">
+                      <div className="flex flex-row items-center gap-2">
+                        <span className="text-retro-green-dark">Fee:</span>
+                        <span>${tournament.fee}</span>
+                      </div>
+                      <div className="flex flex-row items-center gap-2">
+                        <span className="text-retro-green-dark">Pot:</span>
+                        <span>${tournament.pot}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex flex-row items-center justify-between w-3/4 mx-auto">
-                    <div className="flex flex-row items-center gap-2">
-                      <span className="text-retro-green-dark">Fee:</span>
-                      <span>${tournament.fee}</span>
-                    </div>
-                    <div className="flex flex-row items-center gap-2">
-                      <span className="text-retro-green-dark">Pot:</span>
-                      <span>${tournament.pot}</span>
-                    </div>
-                  </div>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-3 flex flex-col items-center justify-center gap-6 py-20">
+                <div className="flex flex-col items-center gap-4">
+                  <span className="text-retro-green-dark opacity-50 w-20 h-20">
+                    <TROPHY />
+                  </span>
+                  <h3 className="text-2xl font-astronaut text-center">
+                    No Tournaments Found
+                  </h3>
+                  <p className="text-retro-green-dark text-center max-w-md">
+                    {gameFilters.length > 0
+                      ? `No tournaments currently available for ${gameFilters
+                          .map((f) => Games[f].name)
+                          .join(", ")}.`
+                      : "No tournaments currently available."}
+                  </p>
                 </div>
-              </Card>
-            ))}
+
+                <Button
+                  onClick={() => navigate("/create-tournament")}
+                  className="flex items-center gap-2"
+                >
+                  <PLUS />
+                  Create Tournament
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>

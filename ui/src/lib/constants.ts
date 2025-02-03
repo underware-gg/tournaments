@@ -128,7 +128,9 @@ export const tournaments = [
     registration: "Open",
     games: ["lootSurvivor"],
     name: "FOCGing Around",
-    description: "Lorem ipsum dolar sit amet",
+    description:
+      "asudbfabsdkfbakusdbfbaskyudfbukyasbduyfbuyasbdfuba asdkufbkasdf akusydbf auksdb fagsd ausdyhbf asudkyafb asidufb asdkufhbasd aksdbfasdfausd  asdlfbasdb asdkfbas bhdbf asjdf asdjhfb asdbf ahjsdf sdjhfb ajhsd f ajhbdf asdfbas aisdbf asaisbd aisdbf aujd faisudf ausd fasdfiasd aisd fasdib asidf asdf iasd fujb sdf",
+    type: "Tournament",
   },
   {
     fee: 5,
@@ -139,6 +141,7 @@ export const tournaments = [
     games: ["lootSurvivor", "zkube"],
     name: "FOCGing Around",
     description: "Lorem ipsum dolar sit amet",
+    type: "Season",
   },
   {
     fee: 5,
@@ -149,6 +152,7 @@ export const tournaments = [
     games: ["lootSurvivor", "zkube", "darkShuffle"],
     name: "FOCGing Around",
     description: "Lorem ipsum dolar sit amet",
+    type: "Season",
   },
   {
     fee: 5,
@@ -159,6 +163,7 @@ export const tournaments = [
     games: ["lootSurvivor", "zkube", "darkShuffle"],
     name: "FOCGing Around",
     description: "Lorem ipsum dolar sit amet",
+    type: "Season",
   },
   {
     fee: 5,
@@ -169,6 +174,7 @@ export const tournaments = [
     games: ["lootSurvivor", "zkube", "darkShuffle", "dopeWars"],
     name: "FOCGing Around",
     description: "Lorem ipsum dolar sit amet",
+    type: "Season",
   },
   {
     fee: 5,
@@ -179,6 +185,7 @@ export const tournaments = [
     games: ["lootSurvivor"],
     name: "FOCGing Around",
     description: "Lorem ipsum dolar sit amet",
+    type: "Season",
   },
   {
     fee: 5,
@@ -189,6 +196,7 @@ export const tournaments = [
     games: ["lootSurvivor", "zkube"],
     name: "FOCGing Around",
     description: "Lorem ipsum dolar sit amet",
+    type: "Season",
   },
   {
     fee: 5,
@@ -199,6 +207,7 @@ export const tournaments = [
     games: ["lootSurvivor", "zkube", "darkShuffle"],
     name: "FOCGing Around",
     description: "Lorem ipsum dolar sit amet",
+    type: "Season",
   },
   {
     fee: 5,
@@ -209,6 +218,7 @@ export const tournaments = [
     games: ["lootSurvivor", "zkube", "darkShuffle"],
     name: "FOCGing Around",
     description: "Lorem ipsum dolar sit amet",
+    type: "Season",
   },
   {
     fee: 5,
@@ -219,6 +229,7 @@ export const tournaments = [
     games: ["lootSurvivor", "zkube", "darkShuffle", "dopeWars"],
     name: "FOCGing Around",
     description: "Lorem ipsum dolar sit amet",
+    type: "Season",
   },
 ];
 

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Connector, argent, braavos } from "@starknet-react/core";
+import { Connector } from "@starknet-react/core";
 import { DojoAppConfig, DojoChainConfig } from "@/dojo/config";
 
 export const supportedConnectorIds = {
@@ -25,8 +25,8 @@ export const useChainConnectors = (
 ) => {
   const connectorIds = useMemo<Connector[]>(() => {
     const result = (chainConfig?.connectorIds ?? []).reduce((acc, id) => {
-      if (id == supportedConnectorIds.ARGENT) acc.push(argent());
-      if (id == supportedConnectorIds.BRAAVOS) acc.push(braavos());
+      // if (id == supportedConnectorIds.ARGENT) acc.push(argent());
+      // if (id == supportedConnectorIds.BRAAVOS) acc.push(braavos());
       if (id == supportedConnectorIds.CONTROLLER)
         acc.push(dojoAppConfig.controllerConnector!);
       return acc;

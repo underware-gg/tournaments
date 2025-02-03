@@ -1,5 +1,5 @@
 import * as React from "react";
-import PressableBorderImage from "@/components/icons/PressableBorderImage";
+import BorderImage from "@/components/icons/BorderImage";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn, adjustColorOpacity } from "@/lib/utils";
 
@@ -55,12 +55,11 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     const [isHovered, setIsHovered] = React.useState(false);
 
     // Generate the border image dynamically
-    const borderImage = `url("data:image/svg+xml,${PressableBorderImage({
+    const borderImage = `url("data:image/svg+xml,${BorderImage({
       color:
         interactive && isHovered
           ? adjustColorOpacity(borderColor, 0.9)
           : borderColor,
-      isPressed: false,
     })}")`;
 
     return (

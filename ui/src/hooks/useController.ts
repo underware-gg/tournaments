@@ -48,6 +48,26 @@ export const useConnectedController = () => {
   return controllerConnector;
 };
 
+export const useConnectController = () => {
+  const { connect, connectors } = useConnect();
+
+  const controllerConnector = useMemo(
+    () =>
+      connectors.find(
+        (c) => c.id === supportedConnectorIds.CONTROLLER
+      ) as unknown as ControllerConnector | undefined,
+    [connectors]
+  );
+
+  const connectController = () => {
+    connect({ connector: controllerConnector });
+  };
+
+  return {
+    connectController,
+  };
+};
+
 export const useControllerUsername = () => {
   const [username, setUsername] = useState<string | undefined>(undefined);
   const controllerConnector = useConnectedController();

@@ -3,6 +3,7 @@ import lootSurvivor from "./loot-survivor.png";
 import darkShuffle from "./dark-shuffle.png";
 import zkube from "./zkube.png";
 import dopeWars from "./dope-wars.png";
+import jokersOfNeon from "./jokers-of-neon.png";
 
 export interface Game {
   name: string;
@@ -34,6 +35,14 @@ export const games: Record<string, Game> = {
     name: "Dope Wars",
     Icon: function DopeWarsIcon(props: ImgHTMLAttributes<HTMLImageElement>) {
       return <img src={dopeWars} {...props} />;
+    },
+  },
+  jokersOfNeon: {
+    name: "Jokers of Neon",
+    Icon: function JokersOfNeonIcon(
+      props: ImgHTMLAttributes<HTMLImageElement>
+    ) {
+      return <img src={jokersOfNeon} {...props} />;
     },
   },
 };
