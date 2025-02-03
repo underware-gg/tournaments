@@ -1,11 +1,10 @@
 use starknet::ContractAddress;
 use dojo::world::{WorldStorage};
 use dojo::model::{ModelStorage};
-
 use tournaments::components::models::tournament::{
     Tournament, EntryCount, Prize, Leaderboard, Token, Registration, TournamentConfig,
     TournamentTokenMetrics, PlatformMetrics, PrizeMetrics, PrizeClaim, PrizeType, Metadata,
-    Schedule, GameConfig, EntryConfig,
+    Schedule, GameConfig, EntryFee, EntryRequirement,
 };
 
 use tournaments::components::constants::{VERSION};
@@ -29,9 +28,16 @@ pub impl StoreImpl of StoreTrait {
     // Tournament
 
     #[inline(always)]
-    fn get_platform_metrics(self: Store, key: felt252) -> PlatformMetrics {
-        (self.world.read_model(key))
+    fn get_platform_metrics(self: Store) -> PlatformMetrics {
+        (self.world.read_model(VERSION))
     }
+
+    #[inline(always)]
+    fn get_tournament_count(self: Store) -> u64 {
+        let metrics: PlatformMetrics = (self.world.read_model(VERSION));
+        metrics.total_tournaments
+    }
+
 
     #[inline(always)]
     fn get_token_metadata_metrics(self: Store, key: felt252) -> TournamentTokenMetrics {
@@ -59,7 +65,7 @@ pub impl StoreImpl of StoreTrait {
     }
 
     #[inline(always)]
-    fn get_leaderboard(self: Store, tournament_id: u64) -> Span<u64> {
+    fn get_leaderboard(self: Store, tournament_id: u64) -> Array<u64> {
         let leaderboard: Leaderboard = (self.world.read_model(tournament_id));
         leaderboard.token_ids
     }
@@ -96,11 +102,14 @@ pub impl StoreImpl of StoreTrait {
         metadata: Metadata,
         schedule: Schedule,
         game_config: GameConfig,
-        entry_config: Option<EntryConfig>,
+        entry_fee: Option<EntryFee>,
+        entry_requirement: Option<EntryRequirement>,
     ) -> Tournament {
         let id = self.increment_and_get_tournament_count();
         let creator = starknet::get_caller_address();
-        let tournament = Tournament { id, creator, metadata, schedule, game_config, entry_config };
+        let tournament = Tournament {
+            id, creator, metadata, schedule, game_config, entry_fee, entry_requirement,
+        };
         self.world.write_model(@tournament);
         tournament
     }
@@ -177,7 +186,7 @@ pub impl StoreImpl of StoreTrait {
 
     #[inline(always)]
     fn increment_and_get_tournament_count(ref self: Store) -> u64 {
-        let mut platform_metrics = self.get_platform_metrics(VERSION);
+        let mut platform_metrics = self.get_platform_metrics();
         platform_metrics.total_tournaments += 1;
         self.set_platform_metrics(@platform_metrics);
         platform_metrics.total_tournaments
