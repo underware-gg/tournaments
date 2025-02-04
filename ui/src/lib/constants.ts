@@ -121,6 +121,7 @@ export const ITEMS: { [key: number]: string } = {
 
 export const tournaments = [
   {
+    id: "1",
     fee: 5,
     pot: 100,
     players: 5,
@@ -133,6 +134,7 @@ export const tournaments = [
     type: "Tournament",
   },
   {
+    id: "2",
     fee: 5,
     pot: 100,
     players: 5,
@@ -144,6 +146,7 @@ export const tournaments = [
     type: "Season",
   },
   {
+    id: "3",
     fee: 5,
     pot: 100,
     players: 5,
@@ -155,6 +158,7 @@ export const tournaments = [
     type: "Season",
   },
   {
+    id: "4",
     fee: 5,
     pot: 100,
     players: 5,
@@ -166,6 +170,7 @@ export const tournaments = [
     type: "Season",
   },
   {
+    id: "5",
     fee: 5,
     pot: 100,
     players: 5,
@@ -177,6 +182,7 @@ export const tournaments = [
     type: "Season",
   },
   {
+    id: "6",
     fee: 5,
     pot: 100,
     players: 5,
@@ -188,6 +194,7 @@ export const tournaments = [
     type: "Season",
   },
   {
+    id: "7",
     fee: 5,
     pot: 100,
     players: 5,
@@ -199,6 +206,7 @@ export const tournaments = [
     type: "Season",
   },
   {
+    id: "8",
     fee: 5,
     pot: 100,
     players: 5,
@@ -210,6 +218,7 @@ export const tournaments = [
     type: "Season",
   },
   {
+    id: "9",
     fee: 5,
     pot: 100,
     players: 5,
@@ -221,6 +230,7 @@ export const tournaments = [
     type: "Season",
   },
   {
+    id: "10",
     fee: 5,
     pot: 100,
     players: 5,

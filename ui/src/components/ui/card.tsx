@@ -1,7 +1,7 @@
 import * as React from "react";
 import BorderImage from "@/components/icons/BorderImage";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn, adjustColorOpacity } from "@/lib/utils";
+import { cn, adjustColorOpacity } from "@/lib/utils/utils";
 
 const cardVariants = cva(
   "inline-flex flex-col gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-colors [border-style:solid] [border-image-slice:4] [border-image-width:4px] relative",

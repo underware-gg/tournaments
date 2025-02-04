@@ -13,7 +13,7 @@ import tournament_manifest_slot from "../../../contracts/manifest_slot.json";
 import tournament_manifest_mainnet from "../../../contracts/manifest_mainnet.json";
 import { initializeController } from "@/dojo/setup/controllerSetup";
 import { supportedConnectorIds } from "@/lib/connectors";
-import { stringToFelt, cleanObject } from "@/lib/utils";
+import { stringToFelt, cleanObject } from "@/lib/utils/utils";
 
 export interface ContractInterfaces {
   [contractName: string]: string[];

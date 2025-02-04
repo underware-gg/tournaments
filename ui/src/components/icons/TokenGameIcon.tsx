@@ -3,7 +3,7 @@ import { TOKEN } from "@/components/Icons";
 
 interface TokenGameIconProps {
   game: keyof typeof Games;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   tokenColor?: string;
 }
 
@@ -14,6 +14,7 @@ const TokenGameIcon = ({
 }: TokenGameIconProps) => {
   const Icon = Games[game].Icon;
   const sizeClasses = {
+    xs: "size-5",
     sm: "size-8",
     md: "size-10",
     lg: "size-16",

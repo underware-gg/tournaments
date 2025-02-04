@@ -28,12 +28,15 @@ import {
   GameType,
 } from "@/components/createTournament/settings/types";
 import { Slider } from "@/components/ui/slider";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
+import { INFO } from "@/components/Icons";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 const Details = ({ form }: StepProps) => {
-  const [showLeaderboardSizeDetails, setShowLeaderboardSizeDetails] =
-    React.useState(false);
-
   const PREDEFINED_SIZES = [1, 3, 10, 20] as const;
 
   React.useEffect(() => {
@@ -215,26 +218,37 @@ const Details = ({ form }: StepProps) => {
             name="leaderboardSize"
             render={({ field }) => (
               <FormItem>
-                <div className="flex flex-row items-center gap-5">
+                <div className="flex flex-row items-center gap-5 relative overflow-visible">
                   <FormLabel className="font-astronaut text-2xl">
                     Leaderboard Size
                   </FormLabel>
-                  <div className="flex flex-row gap-2">
-                    <FormDescription className="text-wrap">
-                      Size of the leaderboard.
-                    </FormDescription>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowLeaderboardSizeDetails(
-                          !showLeaderboardSizeDetails
-                        )
-                      }
-                      className="text-neutral-500 font-bold"
-                    >
-                      {showLeaderboardSizeDetails ? "See Less" : "See More"}
-                    </button>
-                  </div>
+                  <FormDescription>Size of the leaderboard</FormDescription>
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <span className="absolute -top-4 right-0 w-6 h-6 cursor-pointer">
+                        <INFO />
+                      </span>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80 p-4 text-sm z-50">
+                      <div className="space-y-2">
+                        <h4 className="font-medium">Leaderboard Size</h4>
+                        <p className="text-muted-foreground">
+                          Determines how many top players will be displayed on
+                          the tournament leaderboard.
+                        </p>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          <li>Top 1: Only the winner is shown</li>
+                          <li>
+                            Top 3: Shows gold, silver, and bronze positions
+                          </li>
+                          <li>
+                            Top 10/20: Extended rankings for larger tournaments
+                          </li>
+                          <li>Custom: Set any size between 1-100 players</li>
+                        </ul>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
                 </div>
                 <FormControl>
                   <div className="space-y-4">
@@ -260,14 +274,6 @@ const Details = ({ form }: StepProps) => {
                     </div>
 
                     <div className="space-y-2">
-                      {/* <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">
-                          Custom size
-                        </span>
-                        <span className="text-sm font-medium">
-                          {field.value}
-                        </span>
-                      </div> */}
                       <Slider
                         min={1}
                         max={100}

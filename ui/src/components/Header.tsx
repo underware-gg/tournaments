@@ -1,7 +1,7 @@
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import { Button } from "@/components/ui/button";
 import { CONTROLLER, PLUS, LOGOUT } from "@/components/Icons";
-import { displayAddress } from "@/lib/utils";
+import { displayAddress } from "@/lib/utils/utils";
 import {
   useControllerUsername,
   useControllerProfile,
