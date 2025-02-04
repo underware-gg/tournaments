@@ -10,7 +10,7 @@ import { DojoProvider } from "@dojoengine/core";
 import { setupWorld } from "@/generated/contracts.gen";
 import { SDK, init } from "@dojoengine/sdk";
 import { SchemaType, schema } from "@/generated/models.gen";
-import { DojoManifest } from "@/hooks/useDojoSystem";
+import { DojoManifest } from "@/dojo/hooks/useDojoSystem";
 import {
   DojoAppConfig,
   DojoChainConfig,

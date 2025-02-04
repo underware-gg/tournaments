@@ -1,8 +1,8 @@
 import { Connector } from "@starknet-react/core";
 import { ControllerConnector } from "@cartridge/connector";
-import { DojoManifest } from "@/hooks/useDojoSystem";
+import { DojoManifest } from "@/dojo/hooks/useDojoSystem";
 import { DojoChainConfig, ChainId } from "@/dojo/config";
-import { stringToFelt } from "@/lib/utils/utils";
+import { stringToFelt } from "@/lib/utils";
 import { SessionPolicies } from "@cartridge/controller";
 
 const exclusions = ["dojo_init", "upgrade"];

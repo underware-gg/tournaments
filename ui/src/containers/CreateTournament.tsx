@@ -15,6 +15,8 @@ import EntryRequirements from "@/components/createTournament/EntryRequirements";
 import EntryFees from "@/components/createTournament/EntryFees";
 import BonusPrizes from "@/components/createTournament/BonusPrizes";
 import TournamentConfirmation from "@/components/dialogs/TournamentConfirmation";
+import { processPrizes, processTournamentData } from "@/lib/utils/formatting";
+import { useAccount } from "@starknet-react/core";
 
 export type TournamentFormData = z.infer<typeof formSchema>;
 
@@ -93,6 +95,7 @@ const formSchema = z.object({
 
 const CreateTournament = () => {
   const navigate = useNavigate();
+  const { address } = useAccount();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     shouldUnregister: false,
@@ -132,6 +135,11 @@ const CreateTournament = () => {
       bonusPrizes: [],
     },
   });
+
+  // const tournamentCount = tournamentTotals?.total_tournaments ?? 0n;
+  // const prizeCount = tournamentTotals?.total_prizes ?? 0n;
+  const tournamentCount = 0n;
+  const prizeCount = 0n;
 
   // Add state for current step
   const [currentStep, setCurrentStep] = React.useState<
@@ -183,7 +191,6 @@ const CreateTournament = () => {
         setCurrentStep("prizes");
         break;
       case "prizes":
-        console.log("Triggering form submission");
         setShowConfirmation(true);
         break;
     }
@@ -286,7 +293,6 @@ const CreateTournament = () => {
           !!(getValue("startTime") && getValue("duration")) && getValue("type"),
         enabled: true,
       },
-
       gating: {
         complete:
           getValue("enableGating") === true
@@ -315,7 +321,6 @@ const CreateTournament = () => {
             : true,
         enabled: getValue("enableGating") === true,
       },
-
       fees: {
         complete:
           getValue("enableEntryFees") === true
@@ -327,7 +332,6 @@ const CreateTournament = () => {
             : true,
         enabled: getValue("enableEntryFees") === true,
       },
-
       prizes: {
         complete:
           getValue("enableBonusPrizes") === true
@@ -375,16 +379,63 @@ const CreateTournament = () => {
     }
   };
 
-  const handleConfirm = () => {
-    form.handleSubmit(
-      (values) => {
-        console.log("Form submitted with values:", values);
-        // Add your submission logic here
-      },
-      (errors) => {
-        console.error("Form validation failed:", errors);
-      }
-    )();
+  const handleCreateTournament = async () => {
+    // try {
+    //   const formData = form.getValues();
+    //   // Process the tournament data
+    //   const processedTournament = processTournamentData(
+    //     formData,
+    //     address!,
+    //     tournamentCount
+    //   );
+    //   // Process the prizes if they exist
+    //   const processedPrizes = processPrizes(
+    //     formData,
+    //     tournamentCount,
+    //     prizeCount
+    //   );
+    //   if (processedPrizes.length > 0) {
+    //     // Handle token approvals
+    //     const erc20Tokens = processedPrizes
+    //       .filter((prize) => prize.token_type.activeVariant() === "erc20")
+    //       .map((prize) => prize.token);
+    //     const erc721Tokens = processedPrizes
+    //       .filter((prize) => prize.token_type.activeVariant() === "erc721")
+    //       .map((prize) => prize.token);
+    //     if (erc20Tokens.length > 0) {
+    //       await approveERC20Multiple(erc20Tokens);
+    //     }
+    //     if (erc721Tokens.length > 0) {
+    //       await approveERC721Multiple(erc721Tokens);
+    //     }
+    //     // Create tournament with prizes
+    //     await createTournamentAndAddPrizes(
+    //       BigInt(tournamentCount) + 1n,
+    //       processedTournament,
+    //       processedPrizes
+    //     );
+    //   } else {
+    //     // Create tournament without prizes
+    //     await createTournament(
+    //       BigInt(tournamentCount) + 1n,
+    //       processedTournament
+    //     );
+    //   }
+    //   // Handle success
+    //   toast({
+    //     title: "Tournament Created",
+    //     description: "Your tournament has been created successfully!",
+    //   });
+    //   // Reset form or navigate away
+    //   navigate("/tournaments");
+    // } catch (error) {
+    //   console.error("Error creating tournament:", error);
+    //   toast({
+    //     title: "Error",
+    //     description: "Failed to create tournament. Please try again.",
+    //     variant: "destructive",
+    //   });
+    // }
   };
 
   return (
@@ -415,7 +466,7 @@ const CreateTournament = () => {
             </Button>
             <TournamentConfirmation
               formData={form.getValues()}
-              onConfirm={handleConfirm}
+              onConfirm={handleCreateTournament}
               open={showConfirmation}
               onOpenChange={setShowConfirmation}
             />
