@@ -2,8 +2,7 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import PressableBorderImage from "@/components/icons/PressableBorderImage";
-
-import { cn, adjustColorOpacity } from "@/lib/utils/utils";
+import { cn, adjustColorOpacity } from "@/lib/utils";
 
 const buttonVariants = cva(
   "inline-flex items-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0 [border-style:solid] [border-image-slice:4] [border-image-width:4px] relative active:top-[2px] active:left-[2px]",

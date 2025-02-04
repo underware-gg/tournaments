@@ -213,33 +213,21 @@ export const useOptimisticUpdates = () => {
 
   const applyTournamentPrizeUpdate = (
     tournamentId: BigNumberish,
-    prizeKey: BigNumberish,
-    token: string,
-    token_data_type: TokenTypeEnum,
-    payout_position: BigNumberish
+    prize: Prize
   ) => {
     const entityId = getEntityIdFromKeys([
       BigInt(tournamentId),
-      BigInt(prizeKey),
+      BigInt(prize.id),
     ]);
     const transactionId = uuidv4();
 
     state.applyOptimisticUpdate(transactionId, (draft) => {
-      applyModelUpdate(draft, entityId, nameSpace, "TournamentPrize", {
-        tournament_id: tournamentId,
-        prize_key: prizeKey,
-        token,
-        token_data_type,
-        payout_position,
-        claimed: false,
-      });
+      applyModelUpdate(draft, entityId, nameSpace, "Prize", prize);
     });
 
     const waitForPrizeEntityChange = async () => {
       return await state.waitForEntityChange(entityId, (entity) => {
-        return (
-          entity?.models?.[nameSpace]?.TournamentPrize?.prize_key == prizeKey
-        );
+        return (entity?.models?.[nameSpace]?.Prize as Prize) == prize;
       });
     };
 

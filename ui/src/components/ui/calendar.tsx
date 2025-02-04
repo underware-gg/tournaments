@@ -1,8 +1,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker, DayPickerSingleProps } from "react-day-picker";
 import { format } from "date-fns";
-
-import { cn } from "@/lib/utils/utils";
+import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Select,

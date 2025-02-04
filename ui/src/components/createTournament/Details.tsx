@@ -28,7 +28,7 @@ import {
   GameType,
 } from "@/components/createTournament/settings/types";
 import { Slider } from "@/components/ui/slider";
-import { cn } from "@/lib/utils/utils";
+import { cn } from "@/lib/utils";
 import { INFO } from "@/components/Icons";
 import {
   HoverCard,

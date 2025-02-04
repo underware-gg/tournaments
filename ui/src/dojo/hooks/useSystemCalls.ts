@@ -136,7 +136,6 @@ export const useSystemCalls = () => {
     tournamentId: BigNumberish,
     tournamentName: string,
     prize: Prize,
-    prizeKey: BigNumberish,
     showToast: boolean
   ) => {
     toast({
@@ -146,10 +145,7 @@ export const useSystemCalls = () => {
 
     const { wait, revert, confirm } = applyTournamentPrizeUpdate(
       tournamentId,
-      prizeKey,
-      prize.token_address,
-      prize.token_type,
-      prize.payout_position
+      prize
     );
 
     try {
