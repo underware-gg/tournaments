@@ -1,8 +1,10 @@
 [package]
 cairo-version = "=2.8.4"
 name = "tournaments"
-version = "0.0.0"
+version = "0.0.1"
 edition = "2024_07"
+
+[lib]
 
 [[target.starknet-contract]]
 sierra = true
@@ -10,13 +12,14 @@ sierra = true
 build-external-contracts = ["dojo::world::world_contract::world"]
 
 [dependencies]
-openzeppelin_token = "0.18.0"
-dojo = { git = "https://github.com/dojoengine/dojo.git", tag = "v1.0.12" }
+openzeppelin_introspection = { git = "https://github.com/openzeppelin/cairo-contracts", tag = "v0.18.0"}
+openzeppelin_token = { git = "https://github.com/openzeppelin/cairo-contracts", tag = "v0.18.0"}
+dojo = { git = "https://github.com/dojoengine/dojo.git", tag = "v1.0.9" }
 starknet = "2.8.4"
 
 [dev-dependencies]
 # This package is required to run tests and add dojo utilities to your project in test only.
-dojo_cairo_test = { git = "https://github.com/dojoengine/dojo.git", tag = "v1.0.12" }
+dojo_cairo_test = { git = "https://github.com/dojoengine/dojo.git", tag = "v1.0.9" }
 
 [features]
 default = []
