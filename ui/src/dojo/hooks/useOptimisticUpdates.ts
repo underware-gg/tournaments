@@ -4,6 +4,7 @@ import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { v4 as uuidv4 } from "uuid";
 import { useDojo } from "@/context/dojo";
 import { Tournament, Prize, TokenTypeEnum } from "@/generated/models.gen";
+import Tournament from "@/containers/Tournament";
 
 const applyModelUpdate = <T extends { [key: string]: any }>(
   draft: any,
@@ -38,7 +39,7 @@ const applyModelUpdate = <T extends { [key: string]: any }>(
 };
 
 export const useOptimisticUpdates = () => {
-  const state = useDojoStore((state) => state);
+  const state = useDojoStore.getState();
   const { nameSpace } = useDojo();
 
   const applyTournamentEntryUpdate = (
@@ -262,8 +263,8 @@ export const useOptimisticUpdates = () => {
         entityId,
         (entity) => {
           return (
-            (entity?.models?.[nameSpace]?.Tournament as Tournament) ==
-            tournament
+            (entity?.models?.[nameSpace]?.Tournament as Tournament)?.id ===
+            tournament.id
           );
         }
       );
@@ -274,7 +275,7 @@ export const useOptimisticUpdates = () => {
           BigInt(prize.id),
         ]);
         return state.waitForEntityChange(prizesEntityId, (entity) => {
-          return (entity?.models?.[nameSpace]?.Prize as Prize) == prize;
+          return (entity?.models?.[nameSpace]?.Prize as Prize)?.id == prize.id;
         });
       });
 

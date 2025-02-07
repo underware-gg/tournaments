@@ -9,19 +9,47 @@ import {
   EntryFee,
   QualificationProof,
 } from "@/generated/models.gen";
-import { Account, BigNumberish, CairoOption, CallData } from "starknet";
+import {
+  Account,
+  BigNumberish,
+  CairoOption,
+  CallData,
+  ByteArray,
+  byteArray,
+  Uint256,
+} from "starknet";
 import { useToast } from "@/hooks/useToast";
 import { useOptimisticUpdates } from "@/dojo/hooks/useOptimisticUpdates";
 import { feltToString } from "@/lib/utils";
 import { useTournamentContracts } from "@/dojo/hooks/useTournamentContracts";
 import { ChainId } from "@/dojo/config";
 
+// Type for the transformed tournament
+type ExecutableTournament = Omit<Tournament, "metadata"> & {
+  metadata: Omit<Tournament["metadata"], "description"> & {
+    description: ByteArray;
+  };
+};
+
+// Helper function to transform Tournament to ExecutableTournament
+const prepareForExecution = (tournament: Tournament): ExecutableTournament => {
+  return {
+    ...tournament,
+    metadata: {
+      ...tournament.metadata,
+      description: byteArray.byteArrayFromString(
+        tournament.metadata.description
+      ),
+    },
+  };
+};
+
 export function selectTournament(client: any, isMainnet: boolean): any {
   return isMainnet ? client["LSTournament"] : client["tournament_mock"];
 }
 
 export const useSystemCalls = () => {
-  const state = useDojoStore((state) => state);
+  const state = useDojoStore.getState();
 
   const { client, selectedChainConfig } = useDojo();
   const { account, address } = useAccount();
@@ -200,18 +228,20 @@ export const useSystemCalls = () => {
       prizes
     );
 
+    const executableTournament = prepareForExecution(tournament);
+
     try {
       let calls = [];
       const createCall = {
         contractAddress: tournamentAddress,
         entrypoint: "create_tournament",
-        calldata: [
-          tournament.metadata,
-          tournament.schedule,
-          tournament.game_config,
-          tournament.entry_fee,
-          tournament.entry_requirement,
-        ],
+        calldata: CallData.compile([
+          executableTournament.metadata,
+          executableTournament.schedule,
+          executableTournament.game_config,
+          executableTournament.entry_fee,
+          executableTournament.entry_requirement,
+        ]),
       };
       calls.push(createCall);
       for (const prize of prizes) {
@@ -221,7 +251,7 @@ export const useSystemCalls = () => {
           calldata: CallData.compile([
             tournamentAddress,
             prize.token_type.activeVariant() === "erc20"
-              ? prize.token_type.variant.erc20?.token_amount!
+              ? prize.token_type.variant.erc20?.amount!
               : prize.token_type.variant.erc721?.token_id!,
             "0",
           ]),
@@ -230,17 +260,17 @@ export const useSystemCalls = () => {
         const addPrizesCall = {
           contractAddress: tournamentAddress,
           entrypoint: "add_prize",
-          calldata: [
+          calldata: CallData.compile([
             prize.tournament_id,
             prize.token_address,
             prize.token_type,
             prize.payout_position,
-          ],
+          ]),
         };
         calls.push(addPrizesCall);
       }
 
-      const tx = await (account as Account)?.execute(calls);
+      const tx = account?.execute(calls);
 
       await wait();
 
@@ -376,6 +406,26 @@ export const useSystemCalls = () => {
     await (account as Account)?.execute(calls);
   };
 
+  const mintErc20 = async (recipient: string, amount: Uint256) => {
+    const resolvedClient = await client;
+    await resolvedClient.erc20_mock.mint(account!, recipient, amount);
+  };
+
+  const mintErc721 = async (recipient: string, tokenId: Uint256) => {
+    const resolvedClient = await client;
+    await resolvedClient.erc721_mock.mint(account!, recipient, tokenId);
+  };
+
+  const getErc20Balance = async (address: string) => {
+    const resolvedClient = await client;
+    return await resolvedClient.erc20_mock.balanceOf(address);
+  };
+
+  const getErc721Balance = async (address: string) => {
+    const resolvedClient = await client;
+    return await resolvedClient.erc721_mock.balanceOf(address);
+  };
+
   return {
     approveAndEnterTournament,
     submitScores,
@@ -386,5 +436,9 @@ export const useSystemCalls = () => {
     getBalanceGeneral,
     approveERC20Multiple,
     approveERC721Multiple,
+    mintErc721,
+    mintErc20,
+    getErc20Balance,
+    getErc721Balance,
   };
 };

@@ -1,5 +1,7 @@
 import { ETH, LORDS } from "@/components/Icons";
 
+export const TOURNAMENT_VERSION_KEY: bigint = BigInt(0x302e302e31);
+
 export const TOKEN_ICONS: Record<string, React.ComponentType> = {
   ETH: ETH,
   USDC: ETH,
@@ -132,6 +134,8 @@ export const tournaments = [
     description:
       "asudbfabsdkfbakusdbfbaskyudfbukyasbduyfbuyasbdfuba asdkufbkasdf akusydbf auksdb fagsd ausdyhbf asudkyafb asidufb asdkufhbasd aksdbfasdfausd  asdlfbasdb asdkfbas bhdbf asjdf asdjhfb asdbf ahjsdf sdjhfb ajhsd f ajhbdf asdfbas aisdbf asaisbd aisdbf aujd faisudf ausd fasdfiasd aisd fasdib asidf asdf iasd fujb sdf",
     type: "Tournament",
+    starts: 1738750674,
+    submissionPeriod: 3600,
   },
   {
     id: "2",

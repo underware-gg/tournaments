@@ -7,7 +7,9 @@ import {
   useControllerProfile,
   useConnectController,
 } from "@/hooks/useController";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useDojo } from "@/context/dojo";
+import { ChainId } from "@/dojo/config";
 
 const Header = () => {
   const { account } = useAccount();
@@ -16,20 +18,39 @@ const Header = () => {
   const { openProfile } = useControllerProfile();
   const { username } = useControllerUsername();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { selectedChainConfig } = useDojo();
+
+  const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
+
   return (
     <div className="flex flex-row items-center justify-between py-5 px-10 h-[80px]">
       <div className="flex text-4xl font-astronaut">Stark_Cup</div>
       <div className="flex flex-row items-center gap-2">
-        <Button
-          onClick={() => {
-            navigate("/create-tournament");
-          }}
-        >
-          <span className="flex flex-row items-center gap-2">
-            <PLUS />
-            Create Tournament
-          </span>
-        </Button>
+        {!isMainnet && location.pathname !== "/register-token" && (
+          <Button
+            onClick={() => {
+              navigate("/register-token");
+            }}
+          >
+            <span className="flex flex-row items-center gap-2">
+              <PLUS />
+              Register Token
+            </span>
+          </Button>
+        )}
+        {location.pathname !== "/create-tournament" && (
+          <Button
+            onClick={() => {
+              navigate("/create-tournament");
+            }}
+          >
+            <span className="flex flex-row items-center gap-2">
+              <PLUS />
+              Create Tournament
+            </span>
+          </Button>
+        )}
         <Button
           onClick={() => {
             if (!account) {

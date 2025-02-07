@@ -43,21 +43,11 @@ export const initializeController = (
 
   return new ControllerConnector({
     chains: [{ rpcUrl: rpcUrl }],
-    defaultChainId:
-      defaultChainId == ChainId.SN_MAIN
-        ? stringToFelt(defaultChainId).toString()
-        : defaultChainId == ChainId.WP_LS_TOURNAMENTS_KATANA
-        ? "WP_LS-TOURNAMENTS-KATANA"
-        : defaultChainId,
+    defaultChainId: stringToFelt(defaultChainId).toString(),
     theme: "loot-survivor",
     colorMode: "dark",
     policies,
     slot:
-      defaultChainId == ChainId.SN_MAIN
-        ? "ls-tournament-tokens"
-        : "ls-tournaments-katana",
-    tokens: {
-      erc20: [dojoChainConfig.lordsAddress!],
-    },
+      defaultChainId == ChainId.SN_MAIN ? "tournament-tokens" : "tournaments",
   }) as never as Connector;
 };

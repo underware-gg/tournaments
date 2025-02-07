@@ -1,0 +1,253 @@
+import { useState, ChangeEvent, useEffect } from "react";
+import { useAccount } from "@starknet-react/core";
+import { Button } from "@/components/ui/button";
+import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
+import { CairoCustomEnum } from "starknet";
+import { useDojoStore } from "@/dojo/hooks/useDojoStore";
+import { copyToClipboard, padAddress, formatBalance } from "@/lib/utils";
+import { useDojoSystem } from "@/dojo/hooks/useDojoSystem";
+import { useDojo } from "@/context/dojo";
+import { useSubscribeTokensQuery } from "@/dojo/hooks/useSdkQueries";
+import TokenBox from "@/components/registerToken/TokenBox";
+import { Token } from "@/generated/models.gen";
+import { displayAddress } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
+import { ARROW_LEFT } from "@/components/Icons";
+
+const RegisterToken = () => {
+  const { address } = useAccount();
+  const { nameSpace } = useDojo();
+  const navigate = useNavigate();
+  const erc20_mock = useDojoSystem("erc20_mock").contractAddress ?? "0x0";
+  const erc721_mock = useDojoSystem("erc721_mock").contractAddress ?? "0x0";
+  const [tokenType, setTokenType] = useState<string | null>(null);
+  const [tokenAddress, setTokenAddress] = useState("");
+  const [tokenId, setTokenId] = useState("");
+  const [tokenBalance, setTokenBalance] = useState<Record<string, bigint>>({});
+  const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
+
+  const state = useDojoStore.getState();
+  const tokens = state.getEntitiesByModel(nameSpace, "Token");
+
+  useSubscribeTokensQuery();
+
+  const { mintErc20, mintErc721, getErc20Balance, getErc721Balance } =
+    useSystemCalls();
+
+  const handleChangeAddress = (e: ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setTokenAddress(value);
+  };
+
+  const handleChangeTokenId = (e: ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setTokenId(value);
+  };
+
+  const getTestERC20Balance = async () => {
+    const balance = await getErc20Balance(address!);
+    if (balance !== undefined) {
+      setTokenBalance((prev) => ({
+        ...prev,
+        erc20: balance as bigint,
+      }));
+    }
+  };
+
+  const getTestERC721Balance = async () => {
+    const balance = await getErc721Balance(address!);
+    if (balance !== undefined) {
+      setTokenBalance((prev) => ({
+        ...prev,
+        erc721: balance as bigint,
+      }));
+    }
+  };
+
+  useEffect(() => {
+    if (address) {
+      getTestERC20Balance();
+      getTestERC721Balance();
+    }
+  }, [address]);
+
+  const handleCopyAddress = (address: string, standard: string) => {
+    copyToClipboard(padAddress(address));
+    setCopiedStates((prev) => ({ ...prev, [standard]: true }));
+    setTimeout(() => {
+      setCopiedStates((prev) => ({ ...prev, [standard]: false }));
+    }, 2000);
+  };
+
+  // const handleRegisterToken = async () => {
+  //   if (tokenType !== null) {
+  //     if (tokenType === TokenDataEnum.erc20) {
+  //       const tokenDataType = new CairoCustomEnum({
+  //         erc20: {
+  //           token_amount: 1,
+  //         },
+  //         erc721: undefined,
+  //       }) as TokenDataTypeEnum;
+  //       await approveERC20General({ token: tokenAddress, tokenDataType });
+  //       await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for 5 second
+  //       await registerTokens([
+  //         {
+  //           token: tokenAddress,
+  //           tokenDataType: new CairoCustomEnum({
+  //             erc20: {
+  //               token_amount: 1,
+  //             },
+  //             erc721: undefined,
+  //           }) as TokenDataTypeEnum,
+  //         },
+  //       ]);
+  //     } else {
+  //       const tokenDataType = new CairoCustomEnum({
+  //         erc20: undefined,
+  //         erc721: {
+  //           token_id: tokenId,
+  //         },
+  //       }) as TokenDataTypeEnum;
+  //       await approveERC721General({ token: tokenAddress, tokenDataType });
+  //       await registerTokens([
+  //         {
+  //           token: tokenAddress,
+  //           tokenDataType: new CairoCustomEnum({
+  //             erc721: {
+  //               token_id: tokenId,
+  //             },
+  //           }) as TokenDataTypeEnum,
+  //         },
+  //       ]);
+  //     }
+  //   }
+  // };
+
+  return (
+    <div className="flex flex-col gap-5 h-[calc(100vh-80px)] w-3/4 mx-auto px-20 pt-20">
+      <div className="space-y-5">
+        <div className="flex flex-row justify-between items-center">
+          <Button variant="outline" onClick={() => navigate("/")}>
+            <ARROW_LEFT />
+            Home
+          </Button>
+        </div>
+        <div className="flex flex-row gap-2 justify-center">
+          <TokenBox
+            title="Test ERC20"
+            contractAddress={erc20_mock}
+            standard="erc20"
+            balance={formatBalance(tokenBalance["erc20"])}
+            onMint={async () => {
+              await mintErc20(address!, {
+                low: 100000000000000000000n,
+                high: 0n,
+              });
+            }}
+            onCopy={handleCopyAddress}
+            isCopied={copiedStates["erc20"]}
+          />
+
+          <TokenBox
+            title="Test ERC721"
+            contractAddress={erc721_mock}
+            standard="erc721"
+            balance={Number(tokenBalance["erc721"])}
+            onMint={async () => {
+              await mintErc721(address!, {
+                low: BigInt(Number(tokenBalance["erc721"]) + 1),
+                high: 0n,
+              });
+            }}
+            onCopy={handleCopyAddress}
+            isCopied={copiedStates["erc721"]}
+            variant="erc721"
+          />
+        </div>
+        <h1 className="text-4xl text-center uppercase">Registered Tokens</h1>
+        {!!tokens && tokens.length > 0 ? (
+          <div className="flex flex-row gap-2 justify-center">
+            {tokens.map((token) => {
+              const tokenModel = token.models[nameSpace].Token as Token;
+              return (
+                <Button
+                  key={token.entityId}
+                  variant="outline"
+                  className="relative"
+                >
+                  {tokenModel?.name}
+                  <span className="absolute top-0 text-xs uppercase text-terminal-green/75">
+                    {tokenModel?.token_type?.activeVariant()}
+                  </span>
+                  <span className="absolute bottom-0 text-xs uppercase text-terminal-green/75">
+                    {displayAddress(tokenModel?.address!)}
+                  </span>
+                </Button>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-2xl text-center uppercase text-terminal-green/75">
+            No tokens registered
+          </p>
+        )}
+        <h1 className="text-4xl text-center uppercase">Register Tokens</h1>
+        <p className="text-lg text-center">
+          To register a token you must hold an amount of it. In the case of
+          registering an NFT, you must also provide the token ID.
+        </p>
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-2">
+              <h3 className="text-xl uppercase">Select Token Type</h3>
+              <div className="flex flex-row gap-10">
+                <Button
+                  variant={tokenType === "erc20" ? "default" : "outline"}
+                  onClick={() => setTokenType("erc20")}
+                >
+                  ERC20
+                </Button>
+                <Button
+                  variant={tokenType === "erc721" ? "default" : "outline"}
+                  onClick={() => setTokenType("erc721")}
+                ></Button>
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <h3 className="text-xl uppercase">Paste Contract Address</h3>
+              <input
+                type="text"
+                name="tokenAddress"
+                onChange={handleChangeAddress}
+                className="p-1 m-2 h-12 w-[700px] 2xl:text-2xl bg-terminal-black border border-terminal-green animate-pulse transform"
+              />
+            </div>
+            {tokenType === "erc721" && (
+              <div className="flex flex-col items-center gap-2">
+                <h3 className="text-xl">Enter Token ID</h3>
+                <input
+                  type="number"
+                  name="tokenId"
+                  onChange={handleChangeTokenId}
+                  className="p-1 m-2 h-12 w-20 2xl:text-2xl bg-terminal-black border border-terminal-green transform"
+                />
+              </div>
+            )}
+            {/* <Button
+            onClick={handleRegisterToken}
+            disabled={
+              tokenAddress == "" ||
+              tokenType === null ||
+              (tokenType === TokenDataEnum.erc721 ? tokenId === "" : false)
+            }
+          >
+            Register Token
+          </Button> */}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RegisterToken;

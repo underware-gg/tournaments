@@ -149,10 +149,8 @@ const Schedule = ({ form }: StepProps) => {
 
                             // Convert duration to hours for submission period check
                             const durationInHours = duration * 24;
-                            const currentSubmissionHours = parseInt(
-                              form.watch("submissionPeriod") || "1"
-                            );
-
+                            const currentSubmissionHours =
+                              form.watch("submissionPeriod");
                             // Update submission period if it exceeds new duration or if it's a predefined duration
                             if (
                               currentSubmissionHours > durationInHours ||
@@ -162,7 +160,7 @@ const Schedule = ({ form }: StepProps) => {
                             ) {
                               form.setValue(
                                 "submissionPeriod",
-                                defaultSubmissionHours.toString()
+                                defaultSubmissionHours
                               );
                             }
                           }}
@@ -179,23 +177,20 @@ const Schedule = ({ form }: StepProps) => {
                             Submission Period
                           </Label>
                           <span className="text-sm text-muted-foreground">
-                            {parseInt(form.watch("submissionPeriod") || "1")}{" "}
-                            {parseInt(form.watch("submissionPeriod") || "1") ===
-                            1
+                            {form.watch("submissionPeriod") || 1}{" "}
+                            {form.watch("submissionPeriod") || 1 === 1
                               ? "hour"
                               : "hours"}
                           </span>
                         </div>
                         <Slider
-                          value={[
-                            parseInt(form.watch("submissionPeriod") || "1"),
-                          ]}
+                          value={[form.watch("submissionPeriod") || 1]}
                           onValueChange={([submissionHours]) => {
                             // Ensure submission period doesn't exceed duration in hours
                             const maxHours = field.value * 24;
                             form.setValue(
                               "submissionPeriod",
-                              Math.min(maxHours, submissionHours).toString()
+                              Math.min(maxHours, submissionHours)
                             );
                           }}
                           max={field.value * 24} // Max hours based on selected days
@@ -275,9 +270,9 @@ const Schedule = ({ form }: StepProps) => {
           <div className="w-full h-0.5 bg-retro-green/25" />
           <TournamentTimeline
             type={form.watch("type")}
-            startTime={form.watch("startTime")}
-            duration={form.watch("duration")}
-            submissionPeriod={form.watch("submissionPeriod")}
+            startTime={Math.floor(form.watch("startTime").getTime() / 1000)} // Convert to Unix timestamp
+            duration={form.watch("duration") * 24 * 60 * 60} // Convert days to seconds
+            submissionPeriod={form.watch("submissionPeriod") * 60 * 60} // Convert hours to seconds
           />
         </div>
       </div>

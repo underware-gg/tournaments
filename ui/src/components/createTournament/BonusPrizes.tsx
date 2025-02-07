@@ -14,14 +14,14 @@ import AmountInput from "@/components/createTournament/inputs/Amount";
 import { Switch } from "@/components/ui/switch";
 import TokenDialog from "@/components/dialogs/Token";
 import { getTokenLogoUrl } from "@/lib/tokensMeta";
-import { Token } from "@/lib/types";
+import { Token } from "@/generated/models.gen";
 import { X } from "@/components/Icons";
 
 interface NewPrize {
   tokenAddress: string;
   tokenType: "ERC20" | "ERC721" | "";
   amount?: number;
-  tokenId?: string;
+  tokenId?: number;
   position?: number;
 }
 
@@ -45,23 +45,6 @@ const BonusPrizes = ({ form }: StepProps) => {
 
     return false;
   };
-
-  const tokens: Token[] = [
-    {
-      address: "0x123",
-      name: "Token 1",
-      symbol: "TKN1",
-      token_type: "ERC20",
-      is_registered: true,
-    },
-    {
-      address: "0x456",
-      name: "Token 2",
-      symbol: "TKN2",
-      token_type: "ERC20",
-      is_registered: true,
-    },
-  ];
 
   return (
     <FormField
@@ -104,7 +87,9 @@ const BonusPrizes = ({ form }: StepProps) => {
                           ...prev,
                           tokenAddress: token.address,
                           tokenType:
-                            token.token_type === "ERC20" ? "ERC20" : "ERC721",
+                            token.token_type.activeVariant() === "erc20"
+                              ? "ERC20"
+                              : "ERC721",
                           // Reset other values when token changes
                           amount: undefined,
                           tokenId: undefined,
@@ -128,13 +113,13 @@ const BonusPrizes = ({ form }: StepProps) => {
                             />
                           ) : (
                             <Input
-                              type="text"
+                              type="number"
                               placeholder="Token ID"
                               value={newPrize.tokenId || ""}
                               onChange={(e) =>
                                 setNewPrize((prev) => ({
                                   ...prev,
-                                  tokenId: e.target.value,
+                                  tokenId: Number(e.target.value),
                                 }))
                               }
                               className="w-[150px]"
@@ -223,18 +208,10 @@ const BonusPrizes = ({ form }: StepProps) => {
                                   alt="Token logo"
                                 />
                                 <span className="font-bold">
-                                  {
-                                    tokens.find(
-                                      (t) => t.address === prize.tokenAddress
-                                    )?.name
-                                  }
+                                  {selectedToken?.name}
                                 </span>
                                 <span className="text-sm text-neutral-500 uppercase">
-                                  {
-                                    tokens.find(
-                                      (t) => t.address === prize.tokenAddress
-                                    )?.symbol
-                                  }
+                                  {selectedToken?.symbol}
                                 </span>
                               </div>
                               {prize.type === "ERC20" ? (

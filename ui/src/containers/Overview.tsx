@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -25,16 +25,34 @@ import { useNavigate } from "react-router-dom";
 import { tournaments } from "@/lib/constants";
 import GameIcon from "@/components/icons/GameIcon";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
+import { useGetUpcomingTournamentsQuery } from "@/dojo/hooks/useSdkQueries";
+import { bigintToHex } from "@/lib/utils";
+import { useDojo } from "@/context/dojo";
+import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 
 const Overview = () => {
   const [selectedTab, setSelectedTab] = useState<"all" | "my">("all");
   const { gameFilters, setGameFilters } = useUIStore();
   const navigate = useNavigate();
   const [sortBy, setSortBy] = useState<string>("start");
+  const { nameSpace } = useDojo();
+  const state = useDojoStore.getState();
+
+  console.log(state);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Use useEffect to watch for filter changes
+  const hexTimestamp = useMemo(
+    () => bigintToHex(BigInt(new Date().getTime()) / 1000n),
+    []
+  );
+
+  // const { entities } = useGetUpcomingTournamentsQuery(hexTimestamp, 15, 5);
+
+  // const tournamentsData = state.getEntitiesByModel(nameSpace, "Tournament");
+
+  // console.log(entities);
+
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;

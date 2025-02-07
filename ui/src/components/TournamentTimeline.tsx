@@ -5,9 +5,9 @@ import { format, addDays, addHours } from "date-fns";
 
 interface TournamentTimelineProps {
   type: string;
-  startTime: Date;
+  startTime: number;
   duration: number;
-  submissionPeriod: string;
+  submissionPeriod: number;
 }
 
 const TournamentTimeline = ({
@@ -16,6 +16,12 @@ const TournamentTimeline = ({
   duration,
   submissionPeriod,
 }: TournamentTimelineProps) => {
+  const startDate = new Date(startTime * 1000);
+  const endDate = new Date((startTime + duration) * 1000);
+  const submissionEndDate = new Date(
+    (startTime + duration + submissionPeriod) * 1000
+  );
+
   return (
     <div className="flex flex-row items-center justify-center gap-14 mt-4">
       {type === "fixed" && (
@@ -53,8 +59,8 @@ const TournamentTimeline = ({
           </span>
         </Card>
         <div className="flex flex-col items-center font-astronaut">
-          <span className="text-xs">{format(startTime, "dd/MM")}</span>
-          <span className="text-xs">{format(startTime, "HH:mm")}</span>
+          <span className="text-xs">{format(startDate, "dd/MM")}</span>
+          <span className="text-xs">{format(startDate, "HH:mm")}</span>
         </div>
         <span className="absolute -top-6 left-[calc(100%_-_8px)] w-[calc(100%_+_12px)] text-[14px] text-center font-astronaut whitespace-nowrap">
           Duration
@@ -80,12 +86,8 @@ const TournamentTimeline = ({
           </span>
         </Card>
         <div className="flex flex-col items-center font-astronaut">
-          <span className="text-xs">
-            {format(addDays(startTime, duration), "dd/MM")}
-          </span>
-          <span className="text-xs">
-            {format(addDays(startTime, duration), "HH:mm")}
-          </span>
+          <span className="text-xs">{format(endDate, "dd/MM")}</span>
+          <span className="text-xs">{format(endDate, "HH:mm")}</span>
         </div>
         <span className="absolute -top-6 left-[calc(100%_-_8px)] w-[calc(100%_+_12px)] text-[14px] text-center font-astronaut whitespace-nowrap">
           Submission
@@ -111,24 +113,8 @@ const TournamentTimeline = ({
           </span>
         </Card>
         <div className="flex flex-col items-center font-astronaut">
-          <span className="text-xs">
-            {format(
-              addHours(
-                addDays(startTime, duration),
-                parseInt(submissionPeriod || "1")
-              ),
-              "dd/MM"
-            )}
-          </span>
-          <span className="text-xs">
-            {format(
-              addHours(
-                addDays(startTime, duration),
-                parseInt(submissionPeriod || "1")
-              ),
-              "HH:mm"
-            )}
-          </span>
+          <span className="text-xs">{format(submissionEndDate, "dd/MM")}</span>
+          <span className="text-xs">{format(submissionEndDate, "HH:mm")}</span>
         </div>
       </div>
     </div>

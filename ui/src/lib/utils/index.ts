@@ -2,7 +2,7 @@ import React from "react";
 import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { BigNumberish, shortString } from "starknet";
-import { TournamentPrize } from "@/generated/models.gen";
+import { Prize } from "@/generated/models.gen";
 import { TOKEN_ADDRESSES, TOKEN_ICONS, ITEMS } from "@/lib/constants";
 
 export function cn(...inputs: ClassValue[]) {
@@ -81,13 +81,13 @@ export const formatTime = (seconds: number): string => {
   const days = Math.floor(hours / 24);
 
   if (days > 0) {
-    return `${days} day${days > 1 ? "s" : ""}`;
+    return `${days} Day${days > 1 ? "s" : ""}`;
   } else if (hours > 0) {
-    return `${hours} hour${hours > 1 ? "s" : ""}`;
+    return `${hours} Hour${hours > 1 ? "s" : ""}`;
   } else if (minutes > 0) {
-    return `${minutes} minute${minutes > 1 ? "s" : ""}`;
+    return `${minutes} Minute${minutes > 1 ? "s" : ""}`;
   } else {
-    return `${seconds} second${seconds > 1 ? "s" : ""}`;
+    return `${seconds} Second${seconds > 1 ? "s" : ""}`;
   }
 };
 
@@ -187,10 +187,10 @@ export function getItemValueFromKey(key: number): string | null {
   return ITEMS[key];
 }
 
-export const getPrizesByToken = (prizes: TournamentPrize[]) => {
+export const getPrizesByToken = (prizes: Prize[]) => {
   return Object.entries(
     prizes.reduce((acc, prize) => {
-      const key = prize.token;
+      const key = prize.token_address;
       if (!acc[key]) acc[key] = [];
       acc[key].push(prize);
       return acc;

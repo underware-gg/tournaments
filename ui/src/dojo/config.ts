@@ -31,14 +31,14 @@ export interface DojoAppConfig {
 
 export enum ChainId {
   KATANA_LOCAL = "KATANA_LOCAL",
-  WP_LS_TOURNAMENTS_KATANA = "WP_LS_TOURNAMENTS_KATANA",
+  WP_TOURNAMENTS = "WP_TOURNAMENTS",
   SN_MAIN = "SN_MAIN",
 }
 
 // TODO: fix for running between katana and mainnet
 const supportedChainIds: ChainId[] = [
   ChainId.KATANA_LOCAL,
-  ChainId.WP_LS_TOURNAMENTS_KATANA,
+  ChainId.WP_TOURNAMENTS,
   ChainId.SN_MAIN,
 ];
 
@@ -127,29 +127,25 @@ export const getStarknetProviderChains = (
 
 const manifests: Record<ChainId, DojoManifest> = {
   [ChainId.KATANA_LOCAL]: tournament_manifest_dev as DojoManifest,
-  [ChainId.WP_LS_TOURNAMENTS_KATANA]: tournament_manifest_slot as DojoManifest,
+  [ChainId.WP_TOURNAMENTS]: tournament_manifest_slot as DojoManifest,
   [ChainId.SN_MAIN]: tournament_manifest_mainnet as DojoManifest,
 };
 
-const NAMESPACE = "ls_tournaments_v0";
+const NAMESPACE = "tournaments";
 
 let katanaContractInterfaces: ContractInterfaces = {
   tournament_mock: ["ITournamentMock"],
   erc20_mock: ["IERC20Mock"],
   erc721_mock: ["IERC721Mock"],
-  eth_mock: ["IETHMock"],
-  lords_mock: ["ILordsMock"],
-  loot_survivor_mock: ["ILootSurvivorMock"],
-  pragma_mock: ["IPragmaMock"],
 };
 
 let mainnetContractInterfaces: ContractInterfaces = {
-  ls_tournament: ["ILSTournament"],
+  tournament: ["ITournament"],
 };
 
 const CONTRACT_INTERFACES: Record<ChainId, ContractInterfaces> = {
   [ChainId.KATANA_LOCAL]: katanaContractInterfaces,
-  [ChainId.WP_LS_TOURNAMENTS_KATANA]: katanaContractInterfaces,
+  [ChainId.WP_TOURNAMENTS]: katanaContractInterfaces,
   [ChainId.SN_MAIN]: mainnetContractInterfaces,
 };
 
@@ -190,8 +186,6 @@ export type DojoChainConfig = {
   masterPrivateKey?: string;
   accountClassHash?: string;
   ethAddress?: string;
-  lordsAddress?: string;
-  clientRewardAddress?: string[];
   connectorIds?: string[];
   // starknet Chain
   network?: string;
@@ -218,10 +212,6 @@ const localKatanaConfig: DojoChainConfig = {
     "0xc5b2fcab997346f3ea1c00b002ecf6f382c5f9c9659a3894eb783c5320f912",
   accountClassHash: KATANA_CLASS_HASH,
   ethAddress: KATANA_ETH_CONTRACT_ADDRESS,
-  lordsAddress: "0x0",
-  clientRewardAddress: [
-    "0x036cE487952f25878a0158bA4A0C2Eb5eb66f0282567163a4B893A0EA5847D2d",
-  ],
   connectorIds: [supportedConnectorIds.PREDEPLOYED],
   // starknet Chain
   nativeCurrency: ETH_KATANA,
@@ -230,26 +220,22 @@ const localKatanaConfig: DojoChainConfig = {
 
 const slotKatanaConfig: DojoChainConfig = {
   chain: undefined, // derive from this
-  chainId: ChainId.WP_LS_TOURNAMENTS_KATANA,
+  chainId: ChainId.WP_TOURNAMENTS,
   name: "Katana Slot",
-  rpcUrl: "https://api.cartridge.gg/x/ls-tournaments-katana/katana",
-  toriiUrl: "https://api.cartridge.gg/x/ls-tournaments-katana/torii",
+  rpcUrl: "https://api.cartridge.gg/x/tournaments/katana",
+  toriiUrl: "https://api.cartridge.gg/x/tournaments/torii",
   relayUrl: undefined,
   blastRpc: undefined,
   blockExplorerUrl: undefined,
-  ekuboPriceAPI: undefined,
+  ekuboPriceAPI: "https://mainnet-api.ekubo.org/price",
   // masterAddress: KATANA_PREFUNDED_ADDRESS,
   // masterPrivateKey: KATANA_PREFUNDED_PRIVATE_KEY,
   masterAddress:
-    "0x6677fe62ee39c7b07401f754138502bab7fac99d2d3c5d37df7d1c6fab10819",
+    "0x5b6b8189bb580f0df1e6d6bec509ff0d6c9be7365d10627e0cf222ec1b47a71",
   masterPrivateKey:
-    "0x3e3979c1ed728490308054fe357a9f49cf67f80f9721f44cc57235129e090f4",
+    "0x33003003001800009900180300d206308b0070db00121318d17b5e6262150b",
   accountClassHash: KATANA_CLASS_HASH,
   ethAddress: KATANA_ETH_CONTRACT_ADDRESS,
-  lordsAddress: "0x0",
-  clientRewardAddress: [
-    "0x036cE487952f25878a0158bA4A0C2Eb5eb66f0282567163a4B893A0EA5847D2d",
-  ],
   connectorIds: [supportedConnectorIds.CONTROLLER],
   // starknet Chain
   nativeCurrency: ETH_KATANA,
@@ -261,7 +247,7 @@ const snMainnetConfig: DojoChainConfig = {
   chainId: ChainId.SN_MAIN,
   name: "Mainnet",
   rpcUrl: "https://api.cartridge.gg/x/starknet/mainnet",
-  toriiUrl: "https://api.cartridge.gg/x/ls-tournaments/torii",
+  toriiUrl: "https://api.cartridge.gg/x/tournaments/torii",
   relayUrl: undefined,
   blastRpc:
     "https://starknet-mainnet.blastapi.io/5ef61753-e7c1-4593-bc62-97fdf96f8de5",
@@ -271,20 +257,7 @@ const snMainnetConfig: DojoChainConfig = {
   masterPrivateKey: undefined,
   accountClassHash: undefined,
   ethAddress: mainnet.nativeCurrency.address,
-  lordsAddress:
-    "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
-  clientRewardAddress: [
-    "0x036cE487952f25878a0158bA4A0C2Eb5eb66f0282567163a4B893A0EA5847D2d",
-    "0x0616E6a5F9b1f86a0Ece6E965B2f3b27E3D784be79Cb2F6304D92Db100C7D29E",
-    "0x049FB4281D13E1f5f488540Cd051e1507149E99CC2E22635101041Ec5E4e4557",
-    "0x02CD97240DB3f679De98A729aE91EB996cAb9Fd92a9A578Df11a72F49bE1c356",
-    "0x03F7F4E5a23A712787F0C100f02934c4A88606B7F0C880c2FD43e817E6275d83",
-  ],
-  connectorIds: [
-    supportedConnectorIds.CONTROLLER,
-    supportedConnectorIds.ARGENT,
-    supportedConnectorIds.BRAAVOS,
-  ],
+  connectorIds: [supportedConnectorIds.CONTROLLER],
 } as const;
 
 // environment overrides, will be applied over default chain only
@@ -299,13 +272,12 @@ export const envChainConfig: DojoChainConfig = {
   masterPrivateKey: import.meta.env.VITE_MASTER_PRIVATE_KEY || undefined,
   accountClassHash: undefined,
   ethAddress: undefined,
-  lordsAddress: undefined,
   connectorIds: undefined,
 };
 
 export const dojoContextConfig: Record<ChainId, DojoChainConfig> = {
   [ChainId.KATANA_LOCAL]: localKatanaConfig,
-  [ChainId.WP_LS_TOURNAMENTS_KATANA]: slotKatanaConfig,
+  [ChainId.WP_TOURNAMENTS]: slotKatanaConfig,
   [ChainId.SN_MAIN]: snMainnetConfig,
 };
 

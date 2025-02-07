@@ -57,7 +57,7 @@ pub trait ITournament<TState> {
 }
 
 #[dojo::contract]
-pub mod Tournament {
+pub mod TournamentContract {
     use starknet::{contract_address_const};
     use tournaments::components::tournament::tournament_component;
     use openzeppelin_introspection::src5::SRC5Component;

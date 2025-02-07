@@ -44,4 +44,4 @@ private_key = "0x33003003001800009900180300d206308b0070db00121318d17b5e6262150b"
 
 [migration]
 order_inits = []
-skip_contracts = ["tournaments-Tournament"]
+skip_contracts = ["tournaments-TournamentContract"]

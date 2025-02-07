@@ -2468,8 +2468,8 @@
       ]
     },
     {
-      "address": "0x33bd390c20efee8436f054b67e17befde07638ed22e01136f184481eec0cfd7",
-      "class_hash": "0x5b7774c8e2fd9e3233998c5e5e4deccf488501b6cf707197268b41557b6e40a",
+      "address": "0x75bd3616602ebec162c920492e4d042155fd0d199f1ed44edcb2eec120feb3d",
+      "class_hash": "0x50e18dad9e0af468c426241e0255a5fee0a092c535ac782222baa7bf9585b0f",
       "abi": [
         {
           "type": "impl",
@@ -4909,6 +4909,12 @@
       "class_hash": "0xe034023e909b3cc66fef48a24ac15e4db96716f3f37bc6b6a2c9369bf92021",
       "tag": "tournaments-TokenMetadata",
       "selector": "0x44c9ae93085bc1b86a4e6b088a10dc38be01b717c3c63551ebb49126e6a0cb5"
+    },
+    {
+      "members": [],
+      "class_hash": "0x18be7c2db6073025916064aa9051b3112d2c1b74ac3ecad4f2f82a46edf4ee6",
+      "tag": "tournaments-Tournament",
+      "selector": "0x3ef7a9a57a595d2717b8cac5c4b95f10fa41c28c85a27e980cc1833f0de0885"
     },
     {
       "members": [],

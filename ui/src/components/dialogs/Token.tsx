@@ -11,7 +11,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { getTokenLogoUrl } from "@/lib/tokensMeta";
-import { Token } from "@/lib/types";
+import { useDojo } from "@/context/dojo";
+import { useDojoStore } from "@/dojo/hooks/useDojoStore";
+import { Token } from "@/generated/models.gen";
 
 interface TokenDialogProps {
   selectedToken: Token | null;
@@ -20,23 +22,11 @@ interface TokenDialogProps {
 
 const TokenDialog = ({ selectedToken, onSelect }: TokenDialogProps) => {
   const [tokenSearchQuery, setTokenSearchQuery] = useState("");
-
-  const tokens: Token[] = [
-    {
-      address: "0x123",
-      name: "Token 1",
-      symbol: "TKN1",
-      token_type: "ERC20",
-      is_registered: true,
-    },
-    {
-      address: "0x456",
-      name: "Token 2",
-      symbol: "TKN2",
-      token_type: "ERC20",
-      is_registered: true,
-    },
-  ];
+  const { nameSpace } = useDojo();
+  const tokens = useDojoStore
+    .getState()
+    .getEntitiesByModel(nameSpace, "Token")
+    .map((token) => token.models[nameSpace].Token as Token);
 
   const filteredTokens = tokens.filter((token) =>
     token.name.toLowerCase().includes(tokenSearchQuery.toLowerCase())
@@ -82,20 +72,28 @@ const TokenDialog = ({ selectedToken, onSelect }: TokenDialogProps) => {
           {filteredTokens.map((token, index) => (
             <DialogClose asChild key={index}>
               <div
-                className={`w-full flex flex-row gap-5 items-center hover:bg-retro-green/20 hover:cursor-pointer px-5 py-2 ${
+                className={`w-full flex flex-row items-center justify-between hover:bg-retro-green/20 hover:cursor-pointer px-5 py-2 ${
                   selectedToken?.address === token.address
                     ? "bg-terminal-green/75 text-terminal-black"
                     : ""
                 }`}
                 onClick={() => onSelect(token)}
               >
-                <img src={getTokenLogoUrl(token.address)} className="w-8 h-8" />
-                <div className="flex flex-col">
-                  <span className="font-bold">{token.name}</span>
-                  <span className="uppercase text-neutral-500">
-                    {token.symbol}
-                  </span>
+                <div className="flex flex-row gap-5 items-center">
+                  <img
+                    src={getTokenLogoUrl(token.address)}
+                    className="w-8 h-8"
+                  />
+                  <div className="flex flex-col">
+                    <span className="font-bold">{token.name}</span>
+                    <span className="uppercase text-neutral-500">
+                      {token.symbol}
+                    </span>
+                  </div>
                 </div>
+                <span className="uppercase text-neutral-500">
+                  {token.token_type.activeVariant()}
+                </span>
               </div>
             </DialogClose>
           ))}

@@ -144,6 +144,7 @@ mod game_mock {
                     GAME_GENRE(),
                     GAME_IMAGE(),
                 );
+            self.game.set_settings(0, 'Test', "This is a test");
         }
     }
 }

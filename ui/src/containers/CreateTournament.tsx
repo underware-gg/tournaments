@@ -17,6 +17,15 @@ import BonusPrizes from "@/components/createTournament/BonusPrizes";
 import TournamentConfirmation from "@/components/dialogs/TournamentConfirmation";
 import { processPrizes, processTournamentData } from "@/lib/utils/formatting";
 import { useAccount } from "@starknet-react/core";
+import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
+import { useDojo } from "@/context/dojo";
+import { useDojoStore } from "@/dojo/hooks/useDojoStore";
+import {
+  useGetTournamentCountsQuery,
+  useGetPrizeCountsQuery,
+  useSubscribeTournamentsQuery,
+} from "@/dojo/hooks/useSdkQueries";
+import { TOURNAMENT_VERSION_KEY } from "@/lib/constants";
 
 export type TournamentFormData = z.infer<typeof formSchema>;
 
@@ -31,10 +40,10 @@ const formSchema = z.object({
   startTime: z.date(),
   duration: z.number().min(1).max(90),
   type: z.enum(["fixed", "open"]),
-  submissionPeriod: z.string(),
+  submissionPeriod: z.number().min(1).max(90),
 
   // Details step
-  game: z.string().min(2).max(50),
+  game: z.string().min(2).max(66),
   settings: z.string(), // Changed to string for ID
   name: z.string().min(2).max(50),
   description: z.string().min(0).max(500),
@@ -85,7 +94,7 @@ const formSchema = z.object({
         z.object({
           type: z.literal("ERC721"),
           tokenAddress: z.string(),
-          tokenId: z.string(),
+          tokenId: z.number().min(1),
           position: z.number().min(1),
         }),
       ])
@@ -96,6 +105,17 @@ const formSchema = z.object({
 const CreateTournament = () => {
   const navigate = useNavigate();
   const { address } = useAccount();
+  const { createTournamentAndApproveAndAddPrizes } = useSystemCalls();
+
+  useSubscribeTournamentsQuery();
+  const { entity: tournamentCountsEntity } = useGetTournamentCountsQuery(
+    TOURNAMENT_VERSION_KEY
+  );
+  const { entity: prizeCountsEntity } = useGetPrizeCountsQuery(
+    TOURNAMENT_VERSION_KEY
+  );
+  const state = useDojoStore.getState();
+  console.log(state);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     shouldUnregister: false,
@@ -115,7 +135,7 @@ const CreateTournament = () => {
       })(),
       duration: 7,
       type: "fixed",
-      submissionPeriod: "1",
+      submissionPeriod: 1,
 
       // Other steps
       enableGating: false,
@@ -136,10 +156,11 @@ const CreateTournament = () => {
     },
   });
 
-  // const tournamentCount = tournamentTotals?.total_tournaments ?? 0n;
-  // const prizeCount = tournamentTotals?.total_prizes ?? 0n;
-  const tournamentCount = 0n;
-  const prizeCount = 0n;
+  const tournamentCount =
+    tournamentCountsEntity?.PlatformMetrics?.total_tournaments ?? 0;
+  const prizeCount = tournamentCountsEntity?.PrizeMetrics?.total_prizes ?? 0;
+  // const tournamentCount = 0n;
+  // const prizeCount = 0;
 
   // Add state for current step
   const [currentStep, setCurrentStep] = React.useState<
@@ -380,62 +401,27 @@ const CreateTournament = () => {
   };
 
   const handleCreateTournament = async () => {
-    // try {
-    //   const formData = form.getValues();
-    //   // Process the tournament data
-    //   const processedTournament = processTournamentData(
-    //     formData,
-    //     address!,
-    //     tournamentCount
-    //   );
-    //   // Process the prizes if they exist
-    //   const processedPrizes = processPrizes(
-    //     formData,
-    //     tournamentCount,
-    //     prizeCount
-    //   );
-    //   if (processedPrizes.length > 0) {
-    //     // Handle token approvals
-    //     const erc20Tokens = processedPrizes
-    //       .filter((prize) => prize.token_type.activeVariant() === "erc20")
-    //       .map((prize) => prize.token);
-    //     const erc721Tokens = processedPrizes
-    //       .filter((prize) => prize.token_type.activeVariant() === "erc721")
-    //       .map((prize) => prize.token);
-    //     if (erc20Tokens.length > 0) {
-    //       await approveERC20Multiple(erc20Tokens);
-    //     }
-    //     if (erc721Tokens.length > 0) {
-    //       await approveERC721Multiple(erc721Tokens);
-    //     }
-    //     // Create tournament with prizes
-    //     await createTournamentAndAddPrizes(
-    //       BigInt(tournamentCount) + 1n,
-    //       processedTournament,
-    //       processedPrizes
-    //     );
-    //   } else {
-    //     // Create tournament without prizes
-    //     await createTournament(
-    //       BigInt(tournamentCount) + 1n,
-    //       processedTournament
-    //     );
-    //   }
-    //   // Handle success
-    //   toast({
-    //     title: "Tournament Created",
-    //     description: "Your tournament has been created successfully!",
-    //   });
-    //   // Reset form or navigate away
-    //   navigate("/tournaments");
-    // } catch (error) {
-    //   console.error("Error creating tournament:", error);
-    //   toast({
-    //     title: "Error",
-    //     description: "Failed to create tournament. Please try again.",
-    //     variant: "destructive",
-    //   });
-    // }
+    try {
+      const formData = form.getValues();
+      // Process the tournament data
+      const processedTournament = processTournamentData(
+        formData,
+        address!,
+        tournamentCount
+      );
+      // Process the prizes if they exist
+      const processedPrizes = processPrizes(
+        formData,
+        tournamentCount,
+        prizeCount
+      );
+      await createTournamentAndApproveAndAddPrizes(
+        processedTournament,
+        processedPrizes
+      );
+    } catch (error) {
+      console.error("Error creating tournament:", error);
+    }
   };
 
   return (
