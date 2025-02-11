@@ -9,7 +9,7 @@ import {
 import { DojoProvider } from "@dojoengine/core";
 import { setupWorld } from "@/generated/contracts.gen";
 import { SDK, init } from "@dojoengine/sdk";
-import { SchemaType, schema } from "@/generated/models.gen";
+import { SchemaType } from "@/generated/models.gen";
 import { DojoManifest } from "@/dojo/hooks/useDojoSystem";
 import {
   DojoAppConfig,
@@ -53,23 +53,20 @@ export const DojoContextProvider = ({
   );
 
   useEffect(() => {
-    init<SchemaType>(
-      {
-        client: {
-          rpcUrl: selectedChainConfig.rpcUrl!,
-          toriiUrl: selectedChainConfig.toriiUrl!,
-          relayUrl: selectedChainConfig.relayUrl ?? "",
-          worldAddress: appConfig.manifests[chainId!].world.address ?? "",
-        },
-        domain: {
-          name: "WORLD_NAME",
-          version: "1.0",
-          chainId: "KATANA",
-          revision: "1",
-        },
+    init<SchemaType>({
+      client: {
+        rpcUrl: selectedChainConfig.rpcUrl!,
+        toriiUrl: selectedChainConfig.toriiUrl!,
+        relayUrl: selectedChainConfig.relayUrl ?? "",
+        worldAddress: appConfig.manifests[chainId!].world.address ?? "",
       },
-      schema
-    ).then(setSdk);
+      domain: {
+        name: "WORLD_NAME",
+        version: "1.0",
+        chainId: "KATANA",
+        revision: "1",
+      },
+    }).then(setSdk);
   }, []);
 
   const isLoading = sdk === undefined;

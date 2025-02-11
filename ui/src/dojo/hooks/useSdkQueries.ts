@@ -9,20 +9,17 @@ import {
   TournamentSubQuery,
 } from "@/lib/dojo/hooks/useSdkSub";
 import { bigintToHex } from "@/lib/utils";
-import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
+import { ParsedEntity, ToriiQueryBuilder, KeysClause } from "@dojoengine/sdk";
 import { SchemaType } from "@/generated/models.gen";
 import { addAddressPadding, BigNumberish } from "starknet";
 
 export const useGetTokensQuery = () => {
   const { nameSpace } = useDojo();
-  const query = useMemo<TournamentGetQuery>(
-    () => ({
-      [nameSpace]: {
-        Token: [],
-      },
-    }),
-    []
-  );
+  const query = new ToriiQueryBuilder()
+    .withClause(KeysClause(["tournaments-Token"], [undefined]).build())
+    .withEntityModels(["tournaments-Token"])
+    .withLimit(100)
+    .includeHashedKeys();
 
   const { entities, isLoading, refetch } = useSdkGetEntities({
     query,
@@ -32,17 +29,7 @@ export const useGetTokensQuery = () => {
 
 export const useGetTournamentCountsQuery = (key: bigint) => {
   const { nameSpace } = useDojo();
-  const query = useMemo(
-    () =>
-      new QueryBuilder<SchemaType>()
-        .namespace(nameSpace, (n) =>
-          n.entity("PlatformMetrics", (e) =>
-            e.eq("key", addAddressPadding(bigintToHex(key)))
-          )
-        )
-        .build(),
-    [key]
-  );
+  const query = {};
   const { entities, isLoading, refetch } = useSdkGetEntities({
     query,
   });
@@ -55,17 +42,7 @@ export const useGetTournamentCountsQuery = (key: bigint) => {
 
 export const useGetPrizeCountsQuery = (key: bigint) => {
   const { nameSpace } = useDojo();
-  const query = useMemo(
-    () =>
-      new QueryBuilder<SchemaType>()
-        .namespace(nameSpace, (n) =>
-          n.entity("PrizeMetrics", (e) =>
-            e.eq("key", addAddressPadding(bigintToHex(key)))
-          )
-        )
-        .build(),
-    [key]
-  );
+  const query = {};
   const { entities, isLoading, refetch } = useSdkGetEntities({
     query,
   });

@@ -9,7 +9,7 @@ export type TournamentSubQuery = SubscriptionQueryType<SchemaType>;
 
 export type EntityResult = {
   entityId: BigNumberish;
-} & Partial<SchemaType["tournament"]>;
+} & Partial<SchemaType["tournaments"]>;
 
 export type UseSdkSubEntitiesResult = {
   entities: EntityResult[] | null;
@@ -17,7 +17,7 @@ export type UseSdkSubEntitiesResult = {
 };
 
 export type UseSdkSubEntitiesProps = {
-  query: TournamentSubQuery;
+  query: any;
   logging?: boolean;
   enabled?: boolean;
 };
@@ -35,7 +35,7 @@ export const useSdkSubscribeEntities = ({
     let _unsubscribe: (() => void) | undefined;
 
     const _subscribe = async () => {
-      const subscription = await sdk.subscribeEntityQuery({
+      const [initialEntities, subscription] = await sdk.subscribeEntityQuery({
         query,
         callback: (response) => {
           if (response.error) {

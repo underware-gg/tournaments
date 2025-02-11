@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import { BigNumberish } from "starknet";
-import { QueryType, ParsedEntity } from "@dojoengine/sdk";
+import { QueryType } from "@dojoengine/sdk";
 import { useDojo } from "@/context/dojo";
 import { SchemaType } from "@/generated/models.gen";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
@@ -10,7 +10,7 @@ export type TournamentGetQuery = QueryType<SchemaType>;
 
 export type EntityResult = {
   entityId: BigNumberish;
-} & Partial<SchemaType["tournament"]>;
+} & Partial<SchemaType["tournaments"]>;
 
 export type UseSdkGetEntitiesResult = {
   entities: EntityResult[] | null;
@@ -48,31 +48,12 @@ export const useSdkGetEntities = ({
 
   const fetchEntities = useCallback(async () => {
     try {
+      console.log(query);
       setIsLoading(true);
-      await sdk.getEntities({
+      const response = await sdk.getEntities({
         query,
-        callback: (resp) => {
-          if (resp.error) {
-            console.error("useSdkGetEntities() error:", resp.error.message);
-            return;
-          }
-          if (resp.data) {
-            setStoreEntities(resp.data as ParsedEntity<SchemaType>[]);
-            setEntities(
-              resp.data.map(
-                (e: any) =>
-                  ({
-                    entityId: e.entityId,
-                    ...e.models[nameSpace],
-                  } as EntityResult)
-              )
-            );
-          }
-        },
-        orderBy,
-        limit,
-        offset,
       });
+      console.log(response);
     } catch (error) {
       console.error("useSdkGetEntities() exception:", error);
     } finally {
