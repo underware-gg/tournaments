@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { TournamentFormData } from "@/containers/CreateTournament";
 import { format } from "date-fns";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
+import { ALERT } from "@/components/Icons";
 
 interface TournamentConfirmationProps {
   formData: TournamentFormData;
@@ -32,7 +33,14 @@ const TournamentConfirmation = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle>Confirm Tournament Details</DialogTitle>
+          <DialogTitle>
+            <div className="flex flex-row gap-2 items-center">
+              <span className="w-8 h-8">
+                <ALERT />
+              </span>
+              Confirm Tournament Details
+            </div>
+          </DialogTitle>
         </DialogHeader>
 
         <div className="overflow-y-auto p-6 pt-2 max-h-[60vh]">
