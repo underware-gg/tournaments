@@ -1,7 +1,4 @@
-import { Card } from "@/components/ui/card";
 import { FLAG, LEADERBOARD, REGISTER } from "@/components/Icons";
-import { motion } from "framer-motion";
-import { format } from "date-fns";
 import TimelineCard from "@/components/TimelineCard";
 
 interface TournamentTimelineProps {

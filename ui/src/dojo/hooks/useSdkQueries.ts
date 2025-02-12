@@ -9,7 +9,7 @@ import {
   TournamentSubQuery,
 } from "@/lib/dojo/hooks/useSdkSub";
 import { bigintToHex } from "@/lib/utils";
-import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
+import { QueryBuilder } from "@dojoengine/sdk";
 import { SchemaType } from "@/generated/models.gen";
 import { addAddressPadding, BigNumberish } from "starknet";
 
@@ -112,8 +112,54 @@ export const useGetUpcomingTournamentsQuery = (
   return { entities, isLoading, refetch };
 };
 
+export const useGetLiveTournamentsQuery = (
+  currentTime: string,
+  limit: number,
+  offset: number
+) => {
+  const { nameSpace } = useDojo();
+  const query = useMemo<TournamentGetQuery>(
+    () => ({
+      [nameSpace]: {
+        Tournament: {
+          $: {
+            where: {
+              And: [
+                {
+                  "schedule.game.start": {
+                    $lte: addAddressPadding(currentTime),
+                  },
+                },
+                {
+                  "schedule.game.end": { $gt: addAddressPadding(currentTime) },
+                },
+              ],
+            },
+          },
+        },
+      },
+    }),
+    [currentTime]
+  );
+
+  const { entities, isLoading, refetch } = useSdkGetEntities({
+    query,
+    orderBy: [
+      {
+        model: `${nameSpace}-Tournament`,
+        member: "schedule.game.start",
+        direction: "Asc",
+      },
+    ],
+    limit: limit,
+    offset: offset,
+  });
+  return { entities, isLoading, refetch };
+};
+
 export const useGetTournamentDetailsQuery = (tournamentId: BigNumberish) => {
   const { nameSpace } = useDojo();
+  console.log(addAddressPadding(tournamentId));
   const query = useMemo<TournamentGetQuery>(
     () => ({
       [nameSpace]: {
@@ -146,6 +192,10 @@ export const useGetTournamentDetailsInListQuery = (
   tournamentIds: BigNumberish[]
 ) => {
   const { nameSpace } = useDojo();
+  const tournamentIdsKey = useMemo(
+    () => JSON.stringify(tournamentIds),
+    [tournamentIds]
+  );
   const query = useMemo<TournamentGetQuery>(
     () => ({
       [nameSpace]: {
@@ -156,16 +206,9 @@ export const useGetTournamentDetailsInListQuery = (
             },
           },
         },
-        TournamentEntries: {
-          $: {
-            where: {
-              tournament_id: { $in: tournamentIds },
-            },
-          },
-        },
       },
     }),
-    [tournamentIds]
+    [nameSpace, tournamentIdsKey]
   );
 
   const { entities, isLoading, refetch } = useSdkGetEntities({

@@ -1,8 +1,8 @@
-import Games from "@/assets/games";
+import { getGames } from "@/assets/games";
 import { TOKEN } from "@/components/Icons";
 
 interface TokenGameIconProps {
-  game: keyof typeof Games;
+  game: keyof ReturnType<typeof getGames>;
   size?: "xs" | "sm" | "md" | "lg";
   tokenColor?: string;
 }
@@ -12,7 +12,8 @@ const TokenGameIcon = ({
   size = "sm",
   tokenColor = "text-retro-green/25",
 }: TokenGameIconProps) => {
-  const Icon = Games[game].Icon;
+  const games = getGames();
+  const Icon = games[game].Icon;
   const sizeClasses = {
     xs: "size-5",
     sm: "size-8",

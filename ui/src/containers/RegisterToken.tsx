@@ -2,7 +2,6 @@ import { useState, ChangeEvent, useEffect } from "react";
 import { useAccount } from "@starknet-react/core";
 import { Button } from "@/components/ui/button";
 import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
-import { CairoCustomEnum } from "starknet";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { copyToClipboard, padAddress, formatBalance } from "@/lib/utils";
 import { useDojoSystem } from "@/dojo/hooks/useDojoSystem";
@@ -21,8 +20,8 @@ const RegisterToken = () => {
   const erc20_mock = useDojoSystem("erc20_mock").contractAddress ?? "0x0";
   const erc721_mock = useDojoSystem("erc721_mock").contractAddress ?? "0x0";
   const [tokenType, setTokenType] = useState<string | null>(null);
-  const [tokenAddress, setTokenAddress] = useState("");
-  const [tokenId, setTokenId] = useState("");
+  const [_tokenAddress, setTokenAddress] = useState("");
+  const [_tokenId, setTokenId] = useState("");
   const [tokenBalance, setTokenBalance] = useState<Record<string, bigint>>({});
   const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
 

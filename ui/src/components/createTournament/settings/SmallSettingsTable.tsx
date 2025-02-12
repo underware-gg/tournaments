@@ -1,5 +1,5 @@
 import {
-  GameSettingsConfig,
+  getGameSettingsConfig,
   GameType,
 } from "@/components/createTournament/settings/types";
 
@@ -10,7 +10,9 @@ const SmallSettingsTable = <T extends GameType>({
   game: T;
   settingId: string;
 }) => {
-  const setting = GameSettingsConfig[game]?.find((s) => s.id === settingId);
+  const setting = getGameSettingsConfig()[game]?.find(
+    (s) => s.id === settingId
+  );
 
   if (!setting?.settings?.length) {
     return (

@@ -20,11 +20,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { StepProps } from "@/containers/CreateTournament";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
-import Games from "@/assets/games";
+import { getGames } from "@/assets/games";
 import SettingsCarousel from "@/components/createTournament/settings/SettingsCarousel";
 import SmallSettingsTable from "@/components/createTournament/settings/SmallSettingsTable";
 import {
-  GameSettings,
+  getGameSettings,
   GameType,
 } from "@/components/createTournament/settings/types";
 import { Slider } from "@/components/ui/slider";
@@ -43,7 +43,7 @@ const Details = ({ form }: StepProps) => {
     const subscription = form.watch((value, { name }) => {
       if (name === "game") {
         const game = value.game as GameType;
-        const firstSetting = GameSettings[game]?.[0]?.id;
+        const firstSetting = gameSettings[game]?.[0]?.id;
         if (firstSetting) {
           form.setValue("settings", firstSetting);
         }
@@ -52,6 +52,9 @@ const Details = ({ form }: StepProps) => {
 
     return () => subscription.unsubscribe();
   }, [form]);
+
+  const games = getGames();
+  const gameSettings = getGameSettings();
 
   return (
     <div className="flex flex-col p-4 gap-5">
@@ -76,7 +79,7 @@ const Details = ({ form }: StepProps) => {
                 </div>
                 <FormControl>
                   <div className="flex flex-row gap-5 overflow-x-auto">
-                    {Object.entries(Games).map(([key, game]) => (
+                    {Object.entries(games).map(([key, game]) => (
                       <Card
                         key={key}
                         variant={field.value === key ? "default" : "outline"}
@@ -121,16 +124,16 @@ const Details = ({ form }: StepProps) => {
                         <div className="flex flex-col">
                           <h3 className="font-astronaut text-lg">
                             {
-                              GameSettings[
+                              gameSettings[
                                 form.watch("game") as GameType
                               ]?.find((s) => s.id === field.value)?.name
                             }
                           </h3>
                           <p className="text-sm text-retro-green-dark">
                             {
-                              GameSettings[
+                              gameSettings[
                                 form.watch("game") as GameType
-                              ]?.find((s) => s.id === field.value)?.description
+                              ]?.find((s) => s.id === field.value)?.name
                             }
                           </p>
                         </div>
@@ -151,7 +154,7 @@ const Details = ({ form }: StepProps) => {
                               <SettingsCarousel
                                 game={form.watch("game") as GameType}
                                 settings={
-                                  GameSettings[form.watch("game") as GameType]
+                                  gameSettings[form.watch("game") as GameType]
                                 }
                                 value={field.value}
                                 onChange={field.onChange}

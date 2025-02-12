@@ -232,23 +232,6 @@ export function generatePixelBorderPath(radius = 4, pixelSize = 4) {
   return generatePath(flipped);
 }
 
-function generateInnerPath(
-  radius: number,
-  pixelSize: number,
-  offset: number,
-  reverse = false
-) {
-  const points = generatePoints(radius, pixelSize);
-  const inset =
-    offset < radius
-      ? insetCoords(points, pixelSize, offset)
-      : generatePoints(2, pixelSize, offset);
-  const flipped = flipCoords(inset);
-  const corners = addCorners(flipped);
-
-  return generatePath(corners, reverse);
-}
-
 function generatePath(coords: Point[], reverse = false) {
   const mirroredCoords = mirrorCoords(coords);
 
@@ -299,23 +282,6 @@ function flipCoords(coords: Point[]) {
   ].filter(({ x, y }, i, arr) => {
     return !i || arr[i - 1].x !== x || arr[i - 1].y !== y;
   });
-}
-
-function insetCoords(coords: Point[], pixelSize: number, offset: number) {
-  return coords
-    .map(({ x, y }) => ({
-      x: x + pixelSize * offset,
-      y: y + pixelSize * Math.floor(offset / 2),
-    }))
-    .reduce((ret: Point[], item) => {
-      if (ret.length > 0 && ret[ret.length - 1].x === ret[ret.length - 1].y) {
-        return ret;
-      }
-
-      ret.push(item);
-
-      return ret;
-    }, []);
 }
 
 function mergeCoords(coords: Point[]) {

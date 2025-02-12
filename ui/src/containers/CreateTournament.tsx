@@ -8,7 +8,7 @@ import { useForm, UseFormReturn } from "react-hook-form";
 import * as z from "zod";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { CHECK, X } from "@/components/Icons";
+import { CHECK } from "@/components/Icons";
 import Details from "@/components/createTournament/Details";
 import Schedule from "@/components/createTournament/Schedule";
 import EntryRequirements from "@/components/createTournament/EntryRequirements";
@@ -18,7 +18,6 @@ import TournamentConfirmation from "@/components/dialogs/TournamentConfirmation"
 import { processPrizes, processTournamentData } from "@/lib/utils/formatting";
 import { useAccount } from "@starknet-react/core";
 import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
-import { useDojo } from "@/context/dojo";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import {
   useGetTournamentCountsQuery,
@@ -111,9 +110,7 @@ const CreateTournament = () => {
   const { entity: tournamentCountsEntity } = useGetTournamentCountsQuery(
     TOURNAMENT_VERSION_KEY
   );
-  const { entity: prizeCountsEntity } = useGetPrizeCountsQuery(
-    TOURNAMENT_VERSION_KEY
-  );
+  useGetPrizeCountsQuery(TOURNAMENT_VERSION_KEY);
   const state = useDojoStore.getState();
   console.log(state);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -284,12 +281,6 @@ const CreateTournament = () => {
       </Card>
     </>
   );
-
-  // Add a type for section status
-  type SectionStatus = {
-    complete: boolean;
-    enabled: boolean;
-  };
 
   const getSectionStatus = (form: any) => {
     // Helper function to safely check nested values
@@ -465,22 +456,24 @@ const CreateTournament = () => {
           </span>
 
           <div className="flex items-center gap-6">
-            {Object.entries(getSectionStatus(form)).map(([section, status]) => (
-              <div
-                key={section}
-                className={cn(
-                  "flex items-center gap-2",
-                  visitedSections.has(section) || section === currentStep
-                    ? "cursor-pointer"
-                    : "cursor-not-allowed opacity-50",
-                  currentStep === section && "border-b-2 border-retro-green"
-                )}
-                onClick={() => handleSectionClick(section)}
-              >
-                <StatusIndicator section={section} />
-                <span className="text-sm capitalize">{section}</span>
-              </div>
-            ))}
+            {Object.entries(getSectionStatus(form)).map(
+              ([section, _status]) => (
+                <div
+                  key={section}
+                  className={cn(
+                    "flex items-center gap-2",
+                    visitedSections.has(section) || section === currentStep
+                      ? "cursor-pointer"
+                      : "cursor-not-allowed opacity-50",
+                    currentStep === section && "border-b-2 border-retro-green"
+                  )}
+                  onClick={() => handleSectionClick(section)}
+                >
+                  <StatusIndicator section={section} />
+                  <span className="text-sm capitalize">{section}</span>
+                </div>
+              )
+            )}
           </div>
         </div>
       </div>

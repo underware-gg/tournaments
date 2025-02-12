@@ -22,18 +22,10 @@ import { StepProps } from "@/containers/CreateTournament";
 import { TROPHY, USER, X } from "@/components/Icons";
 import { displayAddress } from "@/lib/utils";
 import { tournaments } from "@/lib/constants";
-import TokenGameIcon from "../icons/TokenGameIcon";
+import TokenGameIcon from "@/components/icons/TokenGameIcon";
 import { Search } from "lucide-react";
 import TokenDialog from "@/components/dialogs/Token";
-
-type Token = {
-  address: string;
-  name: string;
-  symbol: string;
-  token_type: string;
-  is_registered: boolean;
-};
-
+import { Token } from "@/generated/models.gen";
 const EntryRequirements = ({ form }: StepProps) => {
   const [newAddress, setNewAddress] = React.useState("");
   const [tournamentSearchQuery, setTournamentSearchQuery] = useState("");

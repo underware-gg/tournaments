@@ -3,16 +3,9 @@ import { Button } from "@/components/ui/button";
 import { ARROW_LEFT, TROPHY } from "@/components/Icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import TokenGameIcon from "@/components/icons/TokenGameIcon";
-import { motion } from "framer-motion";
 import EntrantsTable from "@/components/tournament/EntrantsTable";
 import TournamentTimeline from "@/components/TournamentTimeline";
-import {
-  bigintToHex,
-  feltToString,
-  formatTime,
-  getOrdinalSuffix,
-} from "@/lib/utils";
+import { bigintToHex, feltToString, formatTime } from "@/lib/utils";
 import { addAddressPadding } from "starknet";
 import { useGetTournamentDetailsQuery } from "@/dojo/hooks/useSdkQueries";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
@@ -20,11 +13,14 @@ import {
   Tournament as TournamentModel,
   Prize,
   Token,
+  EntryCount,
+  ModelsMapping,
 } from "@/generated/models.gen";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { useDojo } from "@/context/dojo";
 import PrizeDisplay from "@/components/tournament/Prize";
-import { groupPrizes } from "@/lib/utils/formatting";
+import { groupPrizesByPositions } from "@/lib/utils/formatting";
+import useModel from "@/dojo/hooks/useModel";
 
 const Tournament = () => {
   const { id } = useParams<{ id: string }>();
@@ -53,6 +49,12 @@ const Tournament = () => {
   const tokens = tokenModels.map(
     (model) => model.models[nameSpace].Token
   ) as Token[];
+
+  // entry count model
+  const entryCountModel = useModel(
+    tournamentEntityId,
+    ModelsMapping.EntryCount
+  ) as unknown as EntryCount;
 
   const [isOverflowing, setIsOverflowing] = useState(false);
   const textRef = useRef<HTMLParagraphElement>(null);
@@ -89,7 +91,7 @@ const Tournament = () => {
     ? "Fixed"
     : "Open";
 
-  const groupedPrizes = groupPrizes(prizes, tokens);
+  const groupedPrizes = groupPrizesByPositions(prizes, tokens);
 
   const hasEntryFee = tournamentModel?.entry_fee.isSome();
 
@@ -99,6 +101,7 @@ const Tournament = () => {
 
   console.log(entryFee);
   console.log(groupedPrizes);
+
   return (
     <div className="w-3/4 px-20 pt-20 mx-auto flex flex-col gap-5">
       <div className="flex flex-row justify-between">
@@ -128,12 +131,6 @@ const Tournament = () => {
                 Pot: <span className="text-retro-green">${100}</span>
               </span>
               {/* <span>
-              Starts:{" "}
-              <span className="text-retro-green">
-                {tournament.startsIn} Hours
-              </span>
-            </span> */}
-              {/* <span>
               Leaderboard: <span className="text-retro-green">Top 5</span>
             </span> */}
               <span>
@@ -147,6 +144,14 @@ const Tournament = () => {
                 <span className="text-retro-green">{registrationType}</span>
               </span>
             </div>
+          </div>
+          <div className="flex flex-row">
+            {/* <span>
+              Starts:{" "}
+              <span className="text-retro-green">
+                {tournament.startsIn} Hours
+              </span>
+            </span> */}
           </div>
         </div>
         <div className={`flex ${isExpanded ? "flex-col" : "flex-row"}`}>
@@ -177,62 +182,76 @@ const Tournament = () => {
           )}
         </div>
       </div>
-      <div className="flex flex-row items-center h-[150px] gap-5">
-        <div className="w-1/2">
-          <TournamentTimeline
-            type={registrationType}
-            startTime={Number(tournamentModel?.schedule.game.start)}
-            duration={durationSeconds}
-            submissionPeriod={Number(
-              tournamentModel?.schedule.submission_period
-            )}
-          />
-        </div>
-        <Card variant="outline" className="w-1/2 h-full">
-          <div className="flex flex-col">
-            <div className="flex flex-row justify-between font-astronaut text-2xl h-8">
-              <span>Prizes</span>
-              <div className="flex flex-row items-center">
-                <span className="w-8">
-                  <TROPHY />
-                </span>
-                : {Number(tournamentModel.game_config.prize_spots)}
+      <div className="flex flex-col gap-10">
+        <div className="flex flex-row items-center h-[150px] gap-5">
+          <div className="w-1/2">
+            <TournamentTimeline
+              type={registrationType}
+              startTime={Number(tournamentModel?.schedule.game.start)}
+              duration={durationSeconds}
+              submissionPeriod={Number(
+                tournamentModel?.schedule.submission_period
+              )}
+            />
+          </div>
+          <Card variant="outline" className="w-1/2 h-full">
+            <div className="flex flex-col">
+              <div className="flex flex-row justify-between font-astronaut text-2xl h-8">
+                <span>Prizes</span>
+                <div className="flex flex-row items-center">
+                  <span className="w-8">
+                    <TROPHY />
+                  </span>
+                  : {Number(tournamentModel.game_config.prize_spots)}
+                </div>
+              </div>
+              <div className="w-full h-0.5 bg-retro-green/25" />
+              <div className="p-4">
+                {prizes.length > 0 ? (
+                  <div className="flex flex-col gap-3">
+                    {Object.entries(groupedPrizes)
+                      .sort(
+                        (a, b) =>
+                          Number(a[1].payout_position) -
+                          Number(b[1].payout_position)
+                      )
+                      .map(([position, prizes], index) => (
+                        <PrizeDisplay
+                          key={index}
+                          position={Number(position)}
+                          prizes={prizes}
+                        />
+                      ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-32 text-retro-green/50 font-astronaut">
+                    No prizes announced yet
+                  </div>
+                )}
               </div>
             </div>
-            <div className="w-full h-0.5 bg-retro-green/25" />
-            <div className="p-4">
-              {prizes.length > 0 ? (
-                <div className="flex flex-col gap-3">
-                  {prizes.map((prize, index) => (
-                    <PrizeDisplay key={index} index={index} prize={prize} />
-                  ))}
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-32 text-retro-green/50 font-astronaut">
-                  No prizes announced yet
-                </div>
-              )}
+          </Card>
+        </div>
+        <div className="flex flex-row gap-5">
+          <EntrantsTable
+            entryCount={entryCountModel ? Number(entryCountModel.count) : 0}
+          />
+          <Card
+            variant="outline"
+            borderColor="rgba(0, 218, 163, 1)"
+            className="w-1/2 flex flex-col justify-between"
+          >
+            <div className="flex flex-row justify-between font-astronaut text-2xl h-8">
+              <span>My Entries</span>
+              <div className="flex flex-row items-center">
+                <span className="w-6">
+                  <TROPHY />
+                </span>
+                : {5}
+              </div>
             </div>
-          </div>
-        </Card>
-      </div>
-      <div className="flex flex-row gap-5">
-        <EntrantsTable />
-        {/* <Card
-          variant="outline"
-          borderColor="rgba(0, 218, 163, 1)"
-          className="w-1/2 flex flex-col justify-between"
-        >
-          <div className="flex flex-row justify-between font-astronaut text-2xl h-8">
-            <span>Prizes</span>
-            <div className="flex flex-row items-center">
-              <span className="w-6">
-                <TROPHY />
-              </span>
-              : {5}
-            </div>
-          </div>
-        </Card> */}
+          </Card>
+        </div>
       </div>
     </div>
   );

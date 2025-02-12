@@ -1,5 +1,5 @@
 import {
-  GameSettingsConfig,
+  getGameSettingsConfig,
   GameType,
 } from "@/components/createTournament/settings/types";
 
@@ -10,7 +10,9 @@ const SettingsTable = <T extends GameType>({
   game: T;
   settingId: string;
 }) => {
-  const setting = GameSettingsConfig[game]?.find((s) => s.id === settingId);
+  const setting = getGameSettingsConfig()[game]?.find(
+    (s) => s.id === settingId
+  );
 
   // If game doesn't exist in config or has no settings
   if (!setting?.settings?.length) {

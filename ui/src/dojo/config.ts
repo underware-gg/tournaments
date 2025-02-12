@@ -1,6 +1,11 @@
 import { StarknetDomain } from "starknet";
 import { Connector } from "@starknet-react/core";
-import { Chain, mainnet, NativeCurrency } from "@starknet-react/chains";
+import {
+  Chain,
+  mainnet,
+  sepolia,
+  NativeCurrency,
+} from "@starknet-react/chains";
 import {
   LOCAL_KATANA,
   LOCAL_RELAY,
@@ -11,6 +16,7 @@ import { DojoManifest } from "@/dojo/hooks/useDojoSystem";
 import tournament_manifest_dev from "../../../contracts/manifest_dev.json";
 import tournament_manifest_slot from "../../../contracts/manifest_slot.json";
 import tournament_manifest_mainnet from "../../../contracts/manifest_mainnet.json";
+import tournament_manifest_sepolia from "../../../contracts/manifest_sepolia.json";
 import { initializeController } from "@/dojo/setup/controllerSetup";
 import { supportedConnectorIds } from "@/lib/connectors";
 import { stringToFelt, cleanObject } from "@/lib/utils";
@@ -33,6 +39,7 @@ export enum ChainId {
   KATANA_LOCAL = "KATANA_LOCAL",
   WP_TOURNAMENTS = "WP_TOURNAMENTS",
   SN_MAIN = "SN_MAIN",
+  SN_SEPOLIA = "SN_SEPOLIA",
 }
 
 // TODO: fix for running between katana and mainnet
@@ -40,6 +47,7 @@ const supportedChainIds: ChainId[] = [
   ChainId.KATANA_LOCAL,
   ChainId.WP_TOURNAMENTS,
   ChainId.SN_MAIN,
+  ChainId.SN_SEPOLIA,
 ];
 
 const validateChainConfig = (
@@ -129,6 +137,7 @@ const manifests: Record<ChainId, DojoManifest> = {
   [ChainId.KATANA_LOCAL]: tournament_manifest_dev as DojoManifest,
   [ChainId.WP_TOURNAMENTS]: tournament_manifest_slot as DojoManifest,
   [ChainId.SN_MAIN]: tournament_manifest_mainnet as DojoManifest,
+  [ChainId.SN_SEPOLIA]: tournament_manifest_sepolia as DojoManifest,
 };
 
 const NAMESPACE = "tournaments";
@@ -147,6 +156,7 @@ const CONTRACT_INTERFACES: Record<ChainId, ContractInterfaces> = {
   [ChainId.KATANA_LOCAL]: katanaContractInterfaces,
   [ChainId.WP_TOURNAMENTS]: katanaContractInterfaces,
   [ChainId.SN_MAIN]: mainnetContractInterfaces,
+  [ChainId.SN_SEPOLIA]: katanaContractInterfaces,
 };
 
 //
@@ -242,6 +252,25 @@ const slotKatanaConfig: DojoChainConfig = {
   explorers: WORLD_EXPLORER,
 };
 
+const snSepoliaConfig: DojoChainConfig = {
+  chain: undefined, // derive from this
+  chainId: ChainId.SN_SEPOLIA,
+  name: "Starknet Sepolia",
+  rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia",
+  toriiUrl: "https://api.cartridge.gg/x/darkshuffle-sepolia/torii",
+  relayUrl: undefined,
+  blastRpc: undefined,
+  blockExplorerUrl: undefined,
+  ekuboPriceAPI: "https://sepolia-api.ekubo.org/price",
+  // masterAddress: KATANA_PREFUNDED_ADDRESS,
+  // masterPrivateKey: KATANA_PREFUNDED_PRIVATE_KEY,
+  masterAddress: undefined,
+  masterPrivateKey: undefined,
+  accountClassHash: undefined,
+  ethAddress: sepolia.nativeCurrency.address,
+  connectorIds: [supportedConnectorIds.CONTROLLER],
+};
+
 const snMainnetConfig: DojoChainConfig = {
   chain: { ...mainnet },
   chainId: ChainId.SN_MAIN,
@@ -279,6 +308,7 @@ export const dojoContextConfig: Record<ChainId, DojoChainConfig> = {
   [ChainId.KATANA_LOCAL]: localKatanaConfig,
   [ChainId.WP_TOURNAMENTS]: slotKatanaConfig,
   [ChainId.SN_MAIN]: snMainnetConfig,
+  [ChainId.SN_SEPOLIA]: snSepoliaConfig,
 };
 
 //------------------------
@@ -298,8 +328,7 @@ export const makeDojoAppConfig = (): DojoAppConfig => {
             return initializeController(
               manifests[initialChainId],
               chainConfig.rpcUrl!,
-              initialChainId,
-              chainConfig
+              initialChainId
             );
           } catch (error) {
             console.error(

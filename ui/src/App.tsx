@@ -5,9 +5,18 @@ import CreateTournament from "@/containers/CreateTournament";
 import RegisterToken from "@/containers/RegisterToken";
 import { Routes, Route } from "react-router-dom";
 import { useGetTokensQuery } from "@/dojo/hooks/useSdkQueries";
+import { useGetUpcomingTournamentsCount } from "@/dojo/hooks/useSqlQueries";
+import { addAddressPadding } from "starknet";
+import { bigintToHex } from "@/lib/utils";
 
 function App() {
   useGetTokensQuery();
+
+  const currentTime = Math.floor(Date.now() / 1000);
+  const formattedTime = addAddressPadding(bigintToHex(currentTime));
+
+  useGetUpcomingTournamentsCount(formattedTime);
+
   return (
     <div className="min-h-screen flex-col w-full">
       <Header />

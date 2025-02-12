@@ -2,14 +2,23 @@ import { Card } from "@/components/ui/card";
 import Pagination from "@/components/table/Pagination";
 import { USER } from "@/components/Icons";
 import { participants } from "@/lib/constants";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 
-const EntrantsTable = () => {
+interface EntrantsTableProps {
+  entryCount: number;
+}
+
+const EntrantsTable = ({ entryCount }: EntrantsTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showParticipants, setShowParticipants] = useState(false);
   const entrants = participants.map((participant) => participant.name);
   const entrantsCount = entrants.length;
+
+  useEffect(() => {
+    setShowParticipants(entryCount > 0);
+  }, [entryCount]);
+
   return (
     <Card
       variant="outline"
@@ -21,7 +30,7 @@ const EntrantsTable = () => {
       <div className="flex flex-col justify-between">
         <div className="flex flex-row justify-between h-8">
           <span className="font-astronaut text-2xl">Entrants</span>
-          {showParticipants && (
+          {showParticipants && entrantsCount > 5 && (
             <Pagination
               totalPages={10}
               currentPage={currentPage}
@@ -29,18 +38,22 @@ const EntrantsTable = () => {
             />
           )}
           <div className="flex flex-row items-center gap-2">
-            <span className="text-neutral-500">
-              {showParticipants ? "Hide" : "Show Participants"}
-            </span>
-            <Switch
-              checked={showParticipants}
-              onCheckedChange={setShowParticipants}
-            />
+            {entryCount > 0 && (
+              <>
+                <span className="text-neutral-500">
+                  {showParticipants ? "Hide" : "Show Participants"}
+                </span>
+                <Switch
+                  checked={showParticipants}
+                  onCheckedChange={setShowParticipants}
+                />
+              </>
+            )}
             <div className="flex flex-row items-center font-astronaut text-2xl">
               <span className="w-10">
                 <USER />
               </span>
-              : {entrantsCount}
+              : {entryCount}
             </div>
           </div>
         </div>

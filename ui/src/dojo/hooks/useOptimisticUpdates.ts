@@ -1,10 +1,9 @@
-import { BigNumberish, CairoOption } from "starknet";
+import { BigNumberish } from "starknet";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { v4 as uuidv4 } from "uuid";
 import { useDojo } from "@/context/dojo";
-import { Tournament, Prize, TokenTypeEnum } from "@/generated/models.gen";
-import Tournament from "@/containers/Tournament";
+import { Tournament, Prize } from "@/generated/models.gen";
 
 const applyModelUpdate = <T extends { [key: string]: any }>(
   draft: any,
