@@ -71,9 +71,9 @@ pub mod tournament_component {
     };
     use tournaments::components::interfaces::{WorldTrait, WorldImpl};
     use tournaments::components::libs::store::{Store, StoreTrait};
+    use tournaments::components::game::{ISettingsDispatcher, ISettingsDispatcherTrait};
 
     use dojo::contract::components::world_provider::{IWorldProvider};
-
 
     use starknet::{ContractAddress, get_block_timestamp, get_contract_address, get_caller_address};
 
@@ -110,26 +110,26 @@ pub mod tournament_component {
         +Drop<TContractState>,
     > of ITournament<ComponentState<TContractState>> {
         fn total_tournaments(self: @ComponentState<TContractState>) -> u64 {
-            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), DEFAULT_NS());
+            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), @DEFAULT_NS());
             let store: Store = StoreTrait::new(world);
             store.get_platform_metrics().total_tournaments
         }
         fn tournament(
             self: @ComponentState<TContractState>, tournament_id: u64,
         ) -> TournamentModel {
-            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), DEFAULT_NS());
+            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), @DEFAULT_NS());
             let store: Store = StoreTrait::new(world);
             store.get_tournament(tournament_id)
         }
         fn get_registration(
             self: @ComponentState<TContractState>, tournament_id: u64, token_id: u64,
         ) -> Registration {
-            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), DEFAULT_NS());
+            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), @DEFAULT_NS());
             let store: Store = StoreTrait::new(world);
             store.get_registration(tournament_id, token_id)
         }
         fn tournament_entries(self: @ComponentState<TContractState>, tournament_id: u64) -> u32 {
-            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), DEFAULT_NS());
+            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), @DEFAULT_NS());
             let store: Store = StoreTrait::new(world);
             store.get_tournament_entry_count(tournament_id).count
         }
@@ -137,7 +137,7 @@ pub mod tournament_component {
         fn is_token_registered(
             self: @ComponentState<TContractState>, address: ContractAddress,
         ) -> bool {
-            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), DEFAULT_NS());
+            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), @DEFAULT_NS());
             let store: Store = StoreTrait::new(world);
             let token = store.get_token(address);
             self._is_token_registered(@token)
@@ -165,13 +165,13 @@ pub mod tournament_component {
         fn get_leaderboard(
             self: @ComponentState<TContractState>, tournament_id: u64,
         ) -> Array<u64> {
-            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), DEFAULT_NS());
+            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), @DEFAULT_NS());
             let store: Store = StoreTrait::new(world);
             store.get_leaderboard(tournament_id)
         }
 
         fn get_state(self: @ComponentState<TContractState>, tournament_id: u64) -> TournamentState {
-            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), DEFAULT_NS());
+            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), @DEFAULT_NS());
             let store: Store = StoreTrait::new(world);
             let tournament = store.get_tournament(tournament_id);
             self._get_state(@tournament.schedule)
@@ -195,7 +195,7 @@ pub mod tournament_component {
             entry_requirement: Option<EntryRequirement>,
         ) -> (TournamentModel, u64) {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), DEFAULT_NS(),
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
 
@@ -252,7 +252,7 @@ pub mod tournament_component {
             qualification: Option<QualificationProof>,
         ) -> (u64, u32) {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), DEFAULT_NS(),
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
             let tournament = store.get_tournament(tournament_id);
@@ -310,7 +310,7 @@ pub mod tournament_component {
             position: u8,
         ) {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), DEFAULT_NS(),
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
 
@@ -359,7 +359,7 @@ pub mod tournament_component {
             ref self: ComponentState<TContractState>, tournament_id: u64, prize_type: PrizeType,
         ) {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), DEFAULT_NS(),
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
             let tournament = store.get_tournament(tournament_id);
@@ -395,7 +395,7 @@ pub mod tournament_component {
             position: u8,
         ) -> u64 {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), DEFAULT_NS(),
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
             let mut tournament = store.get_tournament(tournament_id);
@@ -446,7 +446,7 @@ pub mod tournament_component {
         /// @param test_mode A bool representing whether to use test mode.
         fn initialize(ref self: ComponentState<TContractState>, safe_mode: bool, test_mode: bool) {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), DEFAULT_NS(),
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
             // Store the config
@@ -470,7 +470,7 @@ pub mod tournament_component {
             symbol: ByteArray,
         ) {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), DEFAULT_NS(),
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
 
@@ -495,7 +495,7 @@ pub mod tournament_component {
             symbol: ByteArray,
         ) {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), DEFAULT_NS(),
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
             let token_model = store.get_token(address);
@@ -515,9 +515,9 @@ pub mod tournament_component {
         #[inline(always)]
         fn get_score_for_token_id(
             self: @ComponentState<TContractState>, contract_address: ContractAddress, token_id: u64,
-        ) -> u64 {
+        ) -> u32 {
             let game_dispatcher = IGameDispatcher { contract_address };
-            game_dispatcher.get_score(token_id)
+            game_dispatcher.score(token_id)
         }
 
         #[inline(always)]
@@ -541,7 +541,7 @@ pub mod tournament_component {
             self: @ComponentState<TContractState>,
             game_address: ContractAddress,
             leaderboard: Span<u64>,
-            score: u64,
+            score: u32,
         ) -> bool {
             let num_scores = leaderboard.len();
 
@@ -854,8 +854,8 @@ pub mod tournament_component {
         fn _assert_settings_exists(
             self: @ComponentState<TContractState>, game: ContractAddress, settings_id: u32,
         ) {
-            let game_dispatcher = IGameDispatcher { contract_address: game };
-            let settings_exist = game_dispatcher.get_settings_details(settings_id).exists;
+            let settings_dispatcher = ISettingsDispatcher { contract_address: game };
+            let settings_exist = settings_dispatcher.setting_exists(settings_id);
             let game_address: felt252 = game.into();
             assert!(
                 settings_exist,
@@ -1445,7 +1445,7 @@ pub mod tournament_component {
         ) -> u64 {
             let game_dispatcher = IGameDispatcher { contract_address: game_address };
             let game_token_id = game_dispatcher
-                .new_game(player_name, settings_id, start_time, end_time, player_address);
+                .mint(player_name, settings_id, start_time, end_time, player_address);
             game_token_id
         }
 
@@ -1638,7 +1638,7 @@ pub mod tournament_component {
             tournament: @TournamentModel,
             registration: @Registration,
             current_leaderboard: Span<u64>,
-            submitted_score: u64,
+            submitted_score: u32,
             submitted_position: u8,
         ) {
             assert!(
@@ -1677,7 +1677,7 @@ pub mod tournament_component {
             if position_index < current_leaderboard.len() {
                 // validate it's higher
                 let current_score_at_position = game_dispatcher
-                    .get_score(*current_leaderboard.at(position_index));
+                    .score(*current_leaderboard.at(position_index));
 
                 assert!(
                     submitted_score > current_score_at_position,
@@ -1692,7 +1692,7 @@ pub mod tournament_component {
             if submitted_position > 1 {
                 // validate it is less than the score above it.
                 let current_score_above_position = game_dispatcher
-                    .get_score(*current_leaderboard.at(position_index - 1));
+                    .score(*current_leaderboard.at(position_index - 1));
 
                 assert!(
                     submitted_score < current_score_above_position,
