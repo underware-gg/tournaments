@@ -32,7 +32,7 @@ const TokenDialog = ({ selectedToken, onSelect }: TokenDialogProps) => {
   const sepoliaTokens = [
     {
       address:
-        "0x0610ac81c42fc73266f39a95ea156d570ffd47680e8283557486a3a065784173",
+        "0x064fd80fcb41d00214430574a0aa19d21cc5d6452aeb4996f31b6e9ba4f466a0",
       is_registered: true,
       name: "Lords",
       symbol: "LORDS",
