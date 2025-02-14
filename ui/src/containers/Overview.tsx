@@ -1,13 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  GLOBE,
-  TROPHY,
-  X,
-  CHEVRON_DOWN,
-  FLAG,
-  MINUS,
-} from "@/components/Icons";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { X, CHEVRON_DOWN } from "@/components/Icons";
 import useUIStore from "@/hooks/useUIStore";
 import { getGames } from "@/assets/games";
 import {
@@ -23,6 +15,14 @@ import GameIcon from "@/components/icons/GameIcon";
 import UpcomingTournaments from "@/components/overview/tournaments/UpcomingTournaments";
 import MyTournaments from "@/components/overview/tournaments/MyTournaments";
 import LiveTournaments from "@/components/overview/tournaments/LiveTournaments";
+import TournamentTabs from "@/components/overview/TournamentTabs";
+import {
+  useGetUpcomingTournamentsCount,
+  useGetLiveTournamentsCount,
+  useGetEndedTournamentsCount,
+} from "@/dojo/hooks/useSqlQueries";
+import { bigintToHex } from "@/lib/utils";
+import { addAddressPadding } from "starknet";
 
 const Overview = () => {
   const [selectedTab, setSelectedTab] = useState<
@@ -32,6 +32,19 @@ const Overview = () => {
   const [sortBy, setSortBy] = useState<string>("start");
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const currentTime = useMemo(() => {
+    return addAddressPadding(bigintToHex(BigInt(Date.now()) / 1000n));
+  }, []);
+
+  const { data: upcomingTournamentsCount } =
+    useGetUpcomingTournamentsCount(currentTime);
+
+  const { data: liveTournamentsCount } =
+    useGetLiveTournamentsCount(currentTime);
+
+  const { data: endedTournamentsCount } =
+    useGetEndedTournamentsCount(currentTime);
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -43,8 +56,6 @@ const Overview = () => {
     setGameFilters(gameFilters.filter((f) => f !== filter));
   };
 
-  console.log(gameFilters);
-
   const games = getGames();
 
   return (
@@ -52,44 +63,13 @@ const Overview = () => {
       <GameFilters />
       <div className="flex flex-col w-4/5 p-2">
         <div className="flex flex-row justify-between w-full border-b-4 border-retro-green">
-          <div className="flex flex-row gap-2">
-            <Button
-              onClick={() => setSelectedTab("all")}
-              variant={selectedTab === "all" ? "default" : "outline"}
-              borderColor="rgba(0, 218, 163, 1)"
-              className="[border-image-width:4px_4px_0_4px] rounded-b-none"
-            >
-              <GLOBE />
-              All Tournaments
-            </Button>
-            <Button
-              onClick={() => setSelectedTab("live")}
-              variant={selectedTab === "live" ? "default" : "outline"}
-              borderColor="rgba(0, 218, 163, 1)"
-              className="[border-image-width:4px_4px_0_4px] rounded-b-none"
-            >
-              <FLAG />
-              Live Tournaments
-            </Button>
-            <Button
-              onClick={() => setSelectedTab("ended")}
-              variant={selectedTab === "ended" ? "default" : "outline"}
-              borderColor="rgba(0, 218, 163, 1)"
-              className="[border-image-width:4px_4px_0_4px] rounded-b-none"
-            >
-              <MINUS />
-              Ended Tournaments
-            </Button>
-            <Button
-              onClick={() => setSelectedTab("my")}
-              variant={selectedTab === "my" ? "default" : "outline"}
-              borderColor="rgba(0, 218, 163, 1)"
-              className="[border-image-width:4px_4px_0_4px] rounded-b-none"
-            >
-              <TROPHY />
-              My Tournaments
-            </Button>
-          </div>
+          <TournamentTabs
+            selectedTab={selectedTab}
+            setSelectedTab={setSelectedTab}
+            upcomingTournamentsCount={upcomingTournamentsCount}
+            liveTournamentsCount={liveTournamentsCount}
+            endedTournamentsCount={endedTournamentsCount}
+          />
           <div className="flex flex-row gap-4 items-center">
             Sort By:
             <DropdownMenu>
@@ -172,7 +152,7 @@ const Overview = () => {
             ) : selectedTab === "live" ? (
               <LiveTournaments gameFilters={gameFilters} />
             ) : (
-              <MyTournaments />
+              <MyTournaments gameFilters={gameFilters} />
             )}
           </div>
         </div>

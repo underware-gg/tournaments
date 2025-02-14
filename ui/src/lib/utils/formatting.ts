@@ -186,7 +186,6 @@ export const groupPrizesByPositions = (prizes: Prize[], tokens: Token[]) =>
         } else if (prize.token_type.activeVariant() === "erc20") {
           const currentAmount = acc[position][tokenSymbol].value as bigint;
           const newAmount = BigInt(prize.token_type.variant.erc20.amount);
-          console.log(tokenSymbol, currentAmount, newAmount);
           acc[position][tokenSymbol].value =
             (currentAmount + newAmount) / 10n ** 18n;
         }

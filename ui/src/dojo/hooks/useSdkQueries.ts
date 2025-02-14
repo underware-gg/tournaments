@@ -159,7 +159,6 @@ export const useGetLiveTournamentsQuery = (
 
 export const useGetTournamentDetailsQuery = (tournamentId: BigNumberish) => {
   const { nameSpace } = useDojo();
-  console.log(addAddressPadding(tournamentId));
   const query = useMemo<TournamentGetQuery>(
     () => ({
       [nameSpace]: {
@@ -217,6 +216,188 @@ export const useGetTournamentDetailsInListQuery = (
   return { entities, isLoading, refetch };
 };
 
+export const useGetTournamentRegistrationsQuery = ({
+  tournamentId,
+  limit,
+  offset,
+}: {
+  tournamentId: BigNumberish;
+  limit: number;
+  offset: number;
+}) => {
+  const { nameSpace } = useDojo();
+  const query = useMemo<TournamentGetQuery>(
+    () => ({
+      [nameSpace]: {
+        Registration: {
+          $: {
+            where: {
+              And: [
+                {
+                  tournament_id: { $eq: addAddressPadding(tournamentId) },
+                },
+                {
+                  entry_number: { $gt: 0 },
+                },
+              ],
+            },
+          },
+        },
+      },
+    }),
+    [nameSpace, tournamentId]
+  );
+  const { entities, isLoading, refetch } = useSdkGetEntities({
+    query,
+    limit,
+    offset,
+  });
+  return { entities, isLoading, refetch };
+};
+
+export const useGetAllRegistrationsQuery = ({
+  limit,
+  offset,
+}: {
+  limit: number;
+  offset: number;
+}) => {
+  const { nameSpace } = useDojo();
+  const query = useMemo<TournamentGetQuery>(
+    () => ({
+      [nameSpace]: {
+        Registration: {
+          $: {
+            where: {
+              entry_number: { $gt: 0 },
+            },
+          },
+        },
+      },
+    }),
+    [nameSpace]
+  );
+  const { entities, isLoading, refetch } = useSdkGetEntities({
+    query,
+    limit,
+    offset,
+  });
+  return { entities, isLoading, refetch };
+};
+
+export const useGetRegistrationsInTokenListQuery = ({
+  tokenIds,
+  limit,
+  offset,
+}: {
+  tokenIds: BigNumberish[];
+  limit: number;
+  offset: number;
+}) => {
+  const { nameSpace } = useDojo();
+  const tokenIdsKey = useMemo(() => JSON.stringify(tokenIds), [tokenIds]);
+  const query = useMemo<TournamentGetQuery>(
+    () => ({
+      [nameSpace]: {
+        Registration: {
+          $: {
+            where: {
+              token_id: { $in: tokenIds },
+            },
+          },
+        },
+      },
+    }),
+    [nameSpace, tokenIdsKey]
+  );
+
+  const { entities, isLoading, refetch } = useSdkGetEntities({
+    query,
+    limit,
+    offset,
+  });
+  return { entities, isLoading, refetch };
+};
+
+export const useGetGameScoresInListQuery = ({
+  namespace,
+  gameIds,
+  isSepolia,
+}: {
+  namespace: string;
+  gameIds: BigNumberish[];
+  isSepolia: boolean;
+}) => {
+  const gameIdsKey = useMemo(() => JSON.stringify(gameIds), [gameIds]);
+  const query = useMemo<TournamentGetQuery>(
+    () => ({
+      [namespace]: {
+        Score: {
+          $: {
+            where: {
+              game_id: { $in: gameIds },
+            },
+          },
+        },
+        TokenMetadata: {
+          $: {
+            where: {
+              token_id: { $in: gameIds },
+            },
+          },
+        },
+      },
+    }),
+    [namespace, gameIdsKey]
+  );
+  const sepoliaQuery = useMemo<TournamentGetQuery>(
+    () => ({
+      ds: {
+        Game: {
+          $: {
+            where: {
+              game_id: { $in: gameIds },
+            },
+          },
+        },
+      },
+    }),
+    [gameIds]
+  );
+  const { entities, isLoading, refetch } = useSdkGetEntities({
+    query: isSepolia ? sepoliaQuery : query,
+  });
+  return { entities, isLoading, refetch };
+};
+
+export const useGetGameMetadataInListQuery = ({
+  nameSpace,
+  gameIds,
+}: {
+  nameSpace: string;
+  gameIds: BigNumberish[];
+}) => {
+  const gameIdsKey = useMemo(() => JSON.stringify(gameIds), [gameIds]);
+  const query = useMemo<TournamentGetQuery>(
+    () => ({
+      [nameSpace]: {
+        Game: {
+          $: {
+            where: {
+              game_id: { $in: gameIds },
+            },
+          },
+        },
+      },
+    }),
+    [nameSpace, gameIdsKey]
+  );
+  const { entities, isLoading, refetch } = useSdkGetEntities({
+    query,
+  });
+  return { entities, isLoading, refetch };
+};
+
 export const useSubscribeTournamentsQuery = () => {
   const { nameSpace } = useDojo();
   const query = useMemo<TournamentSubQuery>(
@@ -245,6 +426,37 @@ export const useSubscribeTokensQuery = () => {
   );
   const { entities, isSubscribed } = useSdkSubscribeEntities({
     query,
+  });
+  return { entities, isSubscribed };
+};
+
+export const useSubscribeGamesQuery = ({
+  nameSpace,
+  isSepolia,
+}: {
+  nameSpace: string;
+  isSepolia: boolean;
+}) => {
+  const query = useMemo<TournamentSubQuery>(
+    () => ({
+      [nameSpace]: {
+        Score: [],
+        TokenMetadata: [],
+      },
+    }),
+    [nameSpace]
+  );
+  const sepoliaQuery = useMemo(
+    () => ({
+      ds: {
+        Game: [],
+        TokenMetadata: [],
+      },
+    }),
+    [nameSpace]
+  );
+  const { entities, isSubscribed } = useSdkSubscribeEntities({
+    query: isSepolia ? sepoliaQuery : query,
   });
   return { entities, isSubscribed };
 };

@@ -3,16 +3,16 @@ import {
   GameType,
 } from "@/components/createTournament/settings/types";
 
-const SmallSettingsTable = <T extends GameType>({
+const SmallSettingsTable = ({
   game,
   settingId,
 }: {
-  game: T;
+  game: GameType;
   settingId: string;
 }) => {
-  const setting = getGameSettingsConfig()[game]?.find(
-    (s) => s.id === settingId
-  );
+  const setting = getGameSettingsConfig()[
+    game as keyof ReturnType<typeof getGameSettingsConfig>
+  ]?.find((s) => s.id === settingId);
 
   if (!setting?.settings?.length) {
     return (

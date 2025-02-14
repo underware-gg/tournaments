@@ -3,11 +3,14 @@ import { Button } from "@/components/ui/button";
 import { ARROW_LEFT, TROPHY } from "@/components/Icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import EntrantsTable from "@/components/tournament/EntrantsTable";
+import EntrantsTable from "@/components/tournament/table/EntrantsTable";
 import TournamentTimeline from "@/components/TournamentTimeline";
 import { bigintToHex, feltToString, formatTime } from "@/lib/utils";
 import { addAddressPadding } from "starknet";
-import { useGetTournamentDetailsQuery } from "@/dojo/hooks/useSdkQueries";
+import {
+  useGetTournamentDetailsQuery,
+  useSubscribeGamesQuery,
+} from "@/dojo/hooks/useSdkQueries";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import {
   Tournament as TournamentModel,
@@ -21,13 +24,19 @@ import { useDojo } from "@/context/dojo";
 import PrizeDisplay from "@/components/tournament/Prize";
 import { groupPrizesByPositions } from "@/lib/utils/formatting";
 import useModel from "@/dojo/hooks/useModel";
+import { useGameNamespace } from "@/dojo/hooks/useGameNamespace";
+import { EnterTournamentDialog } from "@/components/dialogs/EnterTournament";
+import ScoreTable from "@/components/tournament/table/ScoreTable";
+import { ChainId } from "@/dojo/config";
 
 const Tournament = () => {
   const { id } = useParams<{ id: string }>();
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
-  const { nameSpace } = useDojo();
+  const { nameSpace, selectedChainConfig } = useDojo();
   const state = useDojoStore.getState();
+  const [enterDialogOpen, setEnterDialogOpen] = useState(false);
+  const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
   // const tournament = tournaments[Number(id)];
 
   const { entities: tournamentDetails } = useGetTournamentDetailsQuery(
@@ -55,6 +64,15 @@ const Tournament = () => {
     tournamentEntityId,
     ModelsMapping.EntryCount
   ) as unknown as EntryCount;
+
+  const { gameNamespace } = useGameNamespace(
+    tournamentModel?.game_config?.address
+  );
+
+  useSubscribeGamesQuery({
+    nameSpace: gameNamespace ?? "",
+    isSepolia: isSepolia,
+  });
 
   const [isOverflowing, setIsOverflowing] = useState(false);
   const textRef = useRef<HTMLParagraphElement>(null);
@@ -88,8 +106,8 @@ const Tournament = () => {
   );
 
   const registrationType = tournamentModel?.schedule.registration.isNone()
-    ? "Fixed"
-    : "Open";
+    ? "Open"
+    : "Fixed";
 
   const groupedPrizes = groupPrizesByPositions(prizes, tokens);
 
@@ -99,8 +117,20 @@ const Tournament = () => {
     ? Number(BigInt(tournamentModel?.entry_fee.Some?.amount!) / 10n ** 18n)
     : "Free";
 
-  console.log(entryFee);
-  console.log(groupedPrizes);
+  const isStarted =
+    Number(tournamentModel?.schedule.game.start) <
+    Number(BigInt(Date.now()) / 1000n);
+
+  const isEnded =
+    Number(tournamentModel?.schedule.game.end) <
+    Number(BigInt(Date.now()) / 1000n);
+
+  const startsIn =
+    Number(tournamentModel?.schedule.game.start) -
+    Number(BigInt(Date.now()) / 1000n);
+  const endsIn =
+    Number(tournamentModel?.schedule.game.end) -
+    Number(BigInt(Date.now()) / 1000n);
 
   return (
     <div className="w-3/4 px-20 pt-20 mx-auto flex flex-col gap-5">
@@ -113,11 +143,27 @@ const Tournament = () => {
           {/* <Button variant="outline">
             <PLUS /> Add Prizes
           </Button> */}
-          <Button className="uppercase">
-            <TROPHY />
-            {` Enter | `}
-            <span className="font-bold">{hasEntryFee ? "$5" : "Free"}</span>
-          </Button>
+          {(registrationType === "Fixed" && !isStarted) ||
+            (registrationType === "Open" && !isEnded && (
+              <Button
+                className="uppercase"
+                onClick={() => setEnterDialogOpen(true)}
+              >
+                <TROPHY />
+                {` Enter | `}
+                <span className="font-bold">
+                  {hasEntryFee ? `$${entryFee}` : "Free"}
+                </span>
+              </Button>
+            ))}
+          <EnterTournamentDialog
+            open={enterDialogOpen}
+            onOpenChange={setEnterDialogOpen}
+            hasEntryFee={hasEntryFee}
+            entryFee={entryFee}
+            tournamentModel={tournamentModel}
+            entryCountModel={entryCountModel}
+          />
         </div>
       </div>
       <div className="flex flex-col gap-2">
@@ -146,12 +192,17 @@ const Tournament = () => {
             </div>
           </div>
           <div className="flex flex-row">
-            {/* <span>
-              Starts:{" "}
-              <span className="text-retro-green">
-                {tournament.startsIn} Hours
-              </span>
-            </span> */}
+            {isStarted ? (
+              <div>
+                <span className="text-retro-green-dark">Ends In: </span>
+                <span className="text-retro-green">{formatTime(endsIn)}</span>
+              </div>
+            ) : (
+              <div>
+                <span className="text-retro-green-dark">Starts In: </span>
+                <span className="text-retro-green">{formatTime(startsIn)}</span>
+              </div>
+            )}
           </div>
         </div>
         <div className={`flex ${isExpanded ? "flex-col" : "flex-row"}`}>
@@ -192,6 +243,7 @@ const Tournament = () => {
               submissionPeriod={Number(
                 tournamentModel?.schedule.submission_period
               )}
+              pulse={true}
             />
           </div>
           <Card variant="outline" className="w-1/2 h-full">
@@ -233,22 +285,39 @@ const Tournament = () => {
           </Card>
         </div>
         <div className="flex flex-row gap-5">
-          <EntrantsTable
-            entryCount={entryCountModel ? Number(entryCountModel.count) : 0}
-          />
+          {registrationType === "Fixed" && !isStarted ? (
+            <EntrantsTable
+              tournamentId={tournamentModel?.id}
+              entryCount={entryCountModel ? Number(entryCountModel.count) : 0}
+              gameAddress={tournamentModel?.game_config?.address}
+              gameNamespace={gameNamespace ?? ""}
+            />
+          ) : isStarted && !isEnded ? (
+            <ScoreTable
+              tournamentId={tournamentModel?.id}
+              entryCount={entryCountModel ? Number(entryCountModel.count) : 0}
+              gameAddress={tournamentModel?.game_config?.address}
+              gameNamespace={gameNamespace ?? ""}
+            />
+          ) : (
+            <></>
+          )}
           <Card
             variant="outline"
             borderColor="rgba(0, 218, 163, 1)"
             className="w-1/2 flex flex-col justify-between"
           >
-            <div className="flex flex-row justify-between font-astronaut text-2xl h-8">
-              <span>My Entries</span>
-              <div className="flex flex-row items-center">
-                <span className="w-6">
-                  <TROPHY />
-                </span>
-                : {5}
+            <div className="flex flex-col">
+              <div className="flex flex-row justify-between font-astronaut text-2xl h-8">
+                <span>My Entries</span>
+                <div className="flex flex-row items-center">
+                  <span className="w-6">
+                    <TROPHY />
+                  </span>
+                  : {5}
+                </div>
               </div>
+              <div className="w-full h-0.5 bg-retro-green/25" />
             </div>
           </Card>
         </div>

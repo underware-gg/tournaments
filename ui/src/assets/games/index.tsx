@@ -28,7 +28,7 @@ export const getGames = (): Record<string, Game> => {
     };
   } else {
     return {
-      "0x075bd3616602ebec162c920492e4d042155fd0d199f1ed44edcb2eec120feb3d": {
+      "0x02f3f1675be75c1c9424d777cc79f60f29c9e24cf08775a4bb90f3d44812781c": {
         name: "Loot Survivor",
         Icon: function LootSurvivorIcon(
           props: ImgHTMLAttributes<HTMLImageElement>

@@ -46,6 +46,7 @@ export const useSdkGetEntities = ({
   const fetchEntities = useCallback(async () => {
     setIsLoading(true);
     console.log("orderBy", orderBy);
+    console.log("query", query);
     try {
       await sdk.getEntities({
         query,

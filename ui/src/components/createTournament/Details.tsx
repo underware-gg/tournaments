@@ -43,7 +43,9 @@ const Details = ({ form }: StepProps) => {
     const subscription = form.watch((value, { name }) => {
       if (name === "game") {
         const game = value.game as GameType;
-        const firstSetting = gameSettings[game]?.[0]?.id;
+        const firstSetting =
+          gameSettings[game as keyof ReturnType<typeof getGameSettings>]?.[0]
+            ?.id;
         if (firstSetting) {
           form.setValue("settings", firstSetting);
         }
@@ -125,14 +127,18 @@ const Details = ({ form }: StepProps) => {
                           <h3 className="font-astronaut text-lg">
                             {
                               gameSettings[
-                                form.watch("game") as GameType
+                                form.watch("game") as keyof ReturnType<
+                                  typeof getGameSettings
+                                >
                               ]?.find((s) => s.id === field.value)?.name
                             }
                           </h3>
                           <p className="text-sm text-retro-green-dark">
                             {
                               gameSettings[
-                                form.watch("game") as GameType
+                                form.watch("game") as keyof ReturnType<
+                                  typeof getGameSettings
+                                >
                               ]?.find((s) => s.id === field.value)?.name
                             }
                           </p>
@@ -154,7 +160,11 @@ const Details = ({ form }: StepProps) => {
                               <SettingsCarousel
                                 game={form.watch("game") as GameType}
                                 settings={
-                                  gameSettings[form.watch("game") as GameType]
+                                  gameSettings[
+                                    form.watch("game") as keyof ReturnType<
+                                      typeof getGameSettings
+                                    >
+                                  ]
                                 }
                                 value={field.value}
                                 onChange={field.onChange}

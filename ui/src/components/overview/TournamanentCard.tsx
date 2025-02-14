@@ -67,8 +67,8 @@ export const TournamentCard = ({
   const totalPrizeNFTs = countTotalNFTs(groupedPrizes);
 
   const registrationType = tournament?.schedule.registration.isNone()
-    ? "Fixed"
-    : "Open";
+    ? "Open"
+    : "Fixed";
 
   const startDate = new Date(Number(tournament.schedule.game.start) * 1000);
   const endDate = new Date(Number(tournament.schedule.game.end) * 1000);

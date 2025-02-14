@@ -11,6 +11,7 @@ interface TimelineCardProps {
   label?: string;
   showConnector?: boolean;
   color?: string;
+  active?: boolean;
 }
 
 const TimelineCard = ({
@@ -20,9 +21,15 @@ const TimelineCard = ({
   label,
   showConnector = false,
   color = "text-retro-green-dark",
+  active = false,
 }: TimelineCardProps) => {
+  console.log(active);
   return (
-    <div className="relative flex flex-col gap-2">
+    <div
+      className={`relative flex flex-col gap-2 ${
+        active ? "animate-pulse" : ""
+      }`}
+    >
       <Card
         variant="outline"
         className={`p-2 ${color} border-2 border-retro-green-dark h-14 w-14 flex items-center justify-center z-20`}

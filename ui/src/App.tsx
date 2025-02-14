@@ -3,11 +3,13 @@ import Overview from "@/containers/Overview";
 import Tournament from "@/containers/Tournament";
 import CreateTournament from "@/containers/CreateTournament";
 import RegisterToken from "@/containers/RegisterToken";
+import Play from "@/containers/Play";
 import { Routes, Route } from "react-router-dom";
 import { useGetTokensQuery } from "@/dojo/hooks/useSdkQueries";
 import { useGetUpcomingTournamentsCount } from "@/dojo/hooks/useSqlQueries";
 import { addAddressPadding } from "starknet";
 import { bigintToHex } from "@/lib/utils";
+import { Toaster } from "@/components/ui/toaster";
 
 function App() {
   useGetTokensQuery();
@@ -27,7 +29,9 @@ function App() {
         </Route>
         <Route path="/create-tournament" element={<CreateTournament />} />
         <Route path="/register-token" element={<RegisterToken />} />
+        <Route path="/play" element={<Play />} />
       </Routes>
+      <Toaster />
     </div>
   );
 }

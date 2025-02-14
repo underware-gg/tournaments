@@ -10,9 +10,9 @@ const SettingsTable = <T extends GameType>({
   game: T;
   settingId: string;
 }) => {
-  const setting = getGameSettingsConfig()[game]?.find(
-    (s) => s.id === settingId
-  );
+  const setting = getGameSettingsConfig()[
+    game as keyof ReturnType<typeof getGameSettingsConfig>
+  ]?.find((s) => s.id === settingId);
 
   // If game doesn't exist in config or has no settings
   if (!setting?.settings?.length) {

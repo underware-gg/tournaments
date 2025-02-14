@@ -1,5 +1,4 @@
 use starknet::ContractAddress;
-use dojo::world::IWorldDispatcher;
 use tournaments::components::models::tournament::{
     Tournament as TournamentModel, TokenType, Registration, PrizeType, TournamentState, Metadata,
     Schedule, GameConfig, QualificationProof, EntryFee, EntryRequirement,
@@ -7,9 +6,6 @@ use tournaments::components::models::tournament::{
 
 #[starknet::interface]
 pub trait ITournamentMock<TState> {
-    // IWorldProvider
-    fn world_dispatcher(self: @TState) -> IWorldDispatcher;
-
     // IERC721
     fn balance_of(self: @TState, account: ContractAddress) -> u64;
     fn owner_of(self: @TState, token_id: u64) -> ContractAddress;
@@ -89,6 +85,7 @@ pub mod tournament_mock {
     use tournaments::components::tournament::tournament_component;
     use openzeppelin_introspection::src5::SRC5Component;
     use openzeppelin_token::erc721::{ERC721Component, ERC721HooksEmptyImpl};
+    use dojo::world::{IWorldDispatcher, IWorldDispatcherTrait};
 
     component!(path: tournament_component, storage: tournament, event: TournamentEvent);
     component!(path: ERC721Component, storage: erc721, event: ERC721Event);

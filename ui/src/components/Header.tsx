@@ -1,6 +1,6 @@
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import { Button } from "@/components/ui/button";
-import { CONTROLLER, PLUS, LOGOUT } from "@/components/Icons";
+import { CONTROLLER, PLUS, LOGOUT, PLAY } from "@/components/Icons";
 import { displayAddress } from "@/lib/utils";
 import {
   useControllerUsername,
@@ -27,6 +27,18 @@ const Header = () => {
     <div className="flex flex-row items-center justify-between py-5 px-10 h-[80px]">
       <div className="flex text-4xl font-astronaut">Stark_Cup</div>
       <div className="flex flex-row items-center gap-2">
+        {!isMainnet && location.pathname !== "/play" && (
+          <Button
+            onClick={() => {
+              navigate("/play");
+            }}
+          >
+            <span className="flex flex-row items-center gap-2">
+              <PLAY />
+              Play
+            </span>
+          </Button>
+        )}
         {!isMainnet && location.pathname !== "/register-token" && (
           <Button
             onClick={() => {

@@ -31,6 +31,8 @@ mod game_mock {
 
     use starknet::{ContractAddress, contract_address_const};
 
+    use dojo::world::{IWorldDispatcher, IWorldDispatcherTrait};
+
     component!(path: game_component, storage: game, event: GameEvent);
     component!(path: SRC5Component, storage: src5, event: SRC5Event);
     component!(path: ERC721Component, storage: erc721, event: ERC721Event);

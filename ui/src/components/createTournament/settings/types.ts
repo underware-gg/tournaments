@@ -1,5 +1,6 @@
 import { useDojo } from "@/context/dojo";
 import { ChainId } from "@/dojo/config";
+import { getGames } from "@/assets/games";
 
 export const getGameSettings = () => {
   const { selectedChainConfig } = useDojo();
@@ -16,7 +17,7 @@ export const getGameSettings = () => {
     };
   } else {
     return {
-      "0x075bd3616602ebec162c920492e4d042155fd0d199f1ed44edcb2eec120feb3d": [
+      "0x02f3f1675be75c1c9424d777cc79f60f29c9e24cf08775a4bb90f3d44812781c": [
         {
           id: "lootSurvivor_standard",
           name: "Standard",
@@ -150,4 +151,4 @@ export const getGameSettingsConfig = () => {
 };
 
 // Create type helpers
-export type GameType = keyof ReturnType<typeof getGameSettingsConfig>;
+export type GameType = keyof ReturnType<typeof getGames>;
