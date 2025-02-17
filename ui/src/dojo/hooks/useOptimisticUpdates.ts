@@ -1,10 +1,9 @@
-import { BigNumberish, CairoOption } from "starknet";
+import { BigNumberish } from "starknet";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { v4 as uuidv4 } from "uuid";
 import { useDojo } from "@/context/dojo";
-import { Tournament, Prize, TokenTypeEnum } from "@/generated/models.gen";
-import Tournament from "@/containers/Tournament";
+import { Tournament, Prize } from "@/generated/models.gen";
 
 const applyModelUpdate = <T extends { [key: string]: any }>(
   draft: any,
@@ -57,19 +56,20 @@ export const useOptimisticUpdates = () => {
     const transactionId = uuidv4();
 
     state.applyOptimisticUpdate(transactionId, (draft) => {
-      applyModelUpdate(draft, entriesEntityId, nameSpace, "TournamentEntries", {
+      applyModelUpdate(draft, entriesEntityId, nameSpace, "EntryCount", {
         tournament_id: tournamentId,
-        entry_count: newEntryCount,
+        count: newEntryCount,
       });
       applyModelUpdate(
         draft,
         entriesAddressEntityId,
         nameSpace,
-        "TournamentEntriesAddress",
+        "Registration",
         {
           tournament_id: tournamentId,
-          address: accountAddress,
-          entry_count: newEntryCount,
+          game_token_id: 0,
+          entry_number: newEntryCount,
+          has_submitted: false,
         }
       );
     });
@@ -79,8 +79,7 @@ export const useOptimisticUpdates = () => {
         entriesEntityId,
         (entity) => {
           return (
-            entity?.models?.[nameSpace]?.TournamentEntries?.entry_count ==
-            newEntryCount
+            entity?.models?.[nameSpace]?.EntryCount?.count == newEntryCount
           );
         }
       );
@@ -89,8 +88,8 @@ export const useOptimisticUpdates = () => {
         entriesAddressEntityId,
         (entity) => {
           return (
-            entity?.models?.[nameSpace]?.TournamentEntriesAddress
-              ?.entry_count == newEntryAddressCount
+            entity?.models?.[nameSpace]?.Registration?.entry_number ==
+            newEntryAddressCount
           );
         }
       );

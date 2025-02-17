@@ -1,7 +1,4 @@
-import { Card } from "@/components/ui/card";
 import { FLAG, LEADERBOARD, REGISTER } from "@/components/Icons";
-import { motion } from "framer-motion";
-import { format } from "date-fns";
 import TimelineCard from "@/components/TimelineCard";
 
 interface TournamentTimelineProps {
@@ -9,6 +6,7 @@ interface TournamentTimelineProps {
   startTime: number;
   duration: number;
   submissionPeriod: number;
+  pulse?: boolean;
 }
 
 const TournamentTimeline = ({
@@ -16,6 +14,7 @@ const TournamentTimeline = ({
   startTime,
   duration,
   submissionPeriod,
+  pulse = false,
 }: TournamentTimelineProps) => {
   const startDate = new Date(startTime * 1000);
   const endDate = new Date((startTime + duration) * 1000);
@@ -24,6 +23,15 @@ const TournamentTimeline = ({
   );
   const registrationPeriod =
     startTime - Number(BigInt(new Date().getTime()) / BigInt(1000));
+
+  const isStarted =
+    startTime < Number(BigInt(new Date().getTime()) / BigInt(1000));
+  console.log(isStarted);
+  const isEnded =
+    startTime + duration < Number(BigInt(new Date().getTime()) / BigInt(1000));
+  const isSubmissionEnded =
+    startTime + duration + submissionPeriod <
+    Number(BigInt(new Date().getTime()) / BigInt(1000));
 
   return (
     <div className="flex flex-row items-center justify-center gap-20 mt-4">
@@ -34,6 +42,7 @@ const TournamentTimeline = ({
           duraton={registrationPeriod}
           label="Registration"
           showConnector
+          active={pulse ? !isStarted : false}
         />
       )}
       <TimelineCard
@@ -43,6 +52,7 @@ const TournamentTimeline = ({
         label="Duration"
         showConnector
         color="text-green-700"
+        active={pulse ? isStarted : false}
       />
       <TimelineCard
         icon={<FLAG />}
@@ -51,8 +61,13 @@ const TournamentTimeline = ({
         label="Submission"
         showConnector
         color="text-red-700"
+        active={pulse ? isSubmissionEnded : false}
       />
-      <TimelineCard icon={<LEADERBOARD />} date={submissionEndDate} />
+      <TimelineCard
+        icon={<LEADERBOARD />}
+        date={submissionEndDate}
+        active={pulse ? isEnded : false}
+      />
     </div>
   );
 };

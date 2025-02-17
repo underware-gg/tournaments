@@ -7,7 +7,6 @@ import {
   CairoCustomEnum,
 } from "starknet";
 import { Prize, Tournament, Token } from "@/generated/models.gen";
-import Games from "@/assets/games";
 
 const SECONDS_IN_DAY = 86400;
 const SECONDS_IN_HOUR = 3600;
@@ -27,8 +26,6 @@ export const processTournamentData = (
   // End time is start time + duration in days
   const endTimestamp = startTimestamp + formData.duration * SECONDS_IN_DAY;
 
-  const gameAddress = Games[formData.game].address;
-
   // Process entry requirement based on type and requirement
   let entryRequirement;
   if (formData.enableGating && formData.gatingOptions?.type) {
@@ -36,10 +33,13 @@ export const processTournamentData = (
       case "token":
         entryRequirement = new CairoCustomEnum({
           token: formData.gatingOptions.token,
+          tournament: undefined,
+          allowlist: undefined,
         });
         break;
       case "tournament":
         entryRequirement = new CairoCustomEnum({
+          token: undefined,
           tournament: {
             winners:
               formData.gatingOptions.tournament?.requirement === "won"
@@ -50,10 +50,13 @@ export const processTournamentData = (
                 ? formData.gatingOptions.tournament.ids
                 : [],
           },
+          allowlist: undefined,
         });
         break;
       case "addresses":
         entryRequirement = new CairoCustomEnum({
+          token: undefined,
+          tournament: undefined,
           allowlist: formData.gatingOptions.addresses,
         });
         break;
@@ -79,10 +82,10 @@ export const processTournamentData = (
         start: startTimestamp,
         end: endTimestamp,
       },
-      submission_period: Number(formData.submissionPeriod) * SECONDS_IN_HOUR,
+      submission_duration: Number(formData.submissionPeriod) * SECONDS_IN_HOUR,
     },
     game_config: {
-      address: addAddressPadding(gameAddress),
+      address: addAddressPadding(formData.game),
       settings_id: 0,
       prize_spots: formData.leaderboardSize,
     },
@@ -120,7 +123,7 @@ export const processPrizes = (
     return [];
   }
 
-  return formData.bonusPrizes.map((prize, index) => ({
+  return formData.bonusPrizes.map((prize, _) => ({
     id: prizeCount + 1,
     tournament_id: tournamentCount + 1,
     token_address: prize.tokenAddress,
@@ -130,12 +133,12 @@ export const processPrizes = (
             erc20: {
               amount: addAddressPadding(bigintToHex(prize.amount! * 10 ** 18)),
             },
+            erc721: undefined,
           })
         : new CairoCustomEnum({
+            erc20: undefined,
             erc721: {
-              token_id: addAddressPadding(
-                bigintToHex(prize.tokenId! * 10 ** 18)
-              ),
+              token_id: addAddressPadding(bigintToHex(prize.tokenId!)),
             },
           }),
     payout_position: prize.position,
@@ -143,46 +146,91 @@ export const processPrizes = (
   }));
 };
 
-export const groupPrizes = (prizes: Prize[], tokens: Token[]) =>
+export const groupPrizesByPositions = (prizes: Prize[], tokens: Token[]) =>
+  [...prizes]
+    .sort((a, b) => Number(a.payout_position) - Number(b.payout_position))
+    .reduce(
+      (acc, prize) => {
+        const position = prize.payout_position.toString();
+        const tokenModel = tokens.find(
+          (t) => t.address === prize.token_address
+        );
+
+        // Skip if we can't find the token model
+        if (!tokenModel?.symbol) {
+          console.warn(
+            `No token model found for address ${prize.token_address}`
+          );
+          return acc;
+        }
+
+        const tokenSymbol = tokenModel.symbol;
+
+        if (!acc[position]) {
+          acc[position] = {};
+        }
+
+        if (!acc[position][tokenSymbol]) {
+          acc[position][tokenSymbol] = {
+            type: prize.token_type.variant.erc721 ? "erc721" : "erc20",
+            payout_position: position,
+            address: prize.token_address,
+            value: prize.token_type.variant.erc721 ? [] : 0n,
+          };
+        }
+
+        if (prize.token_type.activeVariant() === "erc721") {
+          (acc[position][tokenSymbol].value as bigint[]).push(
+            BigInt(prize.token_type.variant.erc721.id)
+          );
+        } else if (prize.token_type.activeVariant() === "erc20") {
+          const currentAmount = acc[position][tokenSymbol].value as bigint;
+          const newAmount = BigInt(prize.token_type.variant.erc20.amount);
+          acc[position][tokenSymbol].value =
+            (currentAmount + newAmount) / 10n ** 18n;
+        }
+
+        return acc;
+      },
+      {} as Record<
+        string,
+        Record<
+          string,
+          {
+            type: "erc20" | "erc721";
+            payout_position: string;
+            address: string;
+            value: bigint[] | bigint;
+          }
+        >
+      >
+    );
+
+export const groupPrizesByTokens = (prizes: Prize[], tokens: Token[]) =>
   prizes.reduce(
     (acc, prize) => {
-      const position = prize.payout_position.toString();
-      if (!acc[position]) {
-        acc[position] = {
-          payout_position: position,
-          tokens: {} as Record<
-            string,
-            {
-              type: "erc20" | "erc721";
-              values: string[];
-              address: string;
-            }
-          >,
-        };
-      }
-
       const tokenModel = tokens.find((t) => t.address === prize.token_address);
-
       const tokenSymbol = tokenModel?.symbol!;
-      if (!acc[position].tokens[tokenSymbol]) {
-        acc[position].tokens[tokenSymbol] = {
+
+      if (!acc[tokenSymbol]) {
+        acc[tokenSymbol] = {
           type: prize.token_type.variant.erc721 ? "erc721" : "erc20",
-          values: [],
+          payout_position: prize.payout_position.toString(),
           address: prize.token_address,
+          value: prize.token_type.variant.erc721 ? [] : 0n,
         };
       }
 
       if (prize.token_type.activeVariant() === "erc721") {
-        acc[position].tokens[tokenSymbol].values.push(
-          `#${Number(prize.token_type.variant.erc721.token_id!).toString()}`
+        // For ERC721, push the token ID to the array
+        (acc[tokenSymbol].value as bigint[]).push(
+          BigInt(prize.token_type.variant.erc721.id!)
         );
       } else if (prize.token_type.activeVariant() === "erc20") {
-        acc[position].tokens[tokenSymbol].values.push(
-          (
-            BigInt(prize.token_type.variant.erc20.amount) /
-            10n ** 18n
-          ).toString()
-        );
+        // For ERC20, sum up the values
+        const currentAmount = acc[tokenSymbol].value as bigint;
+        const newAmount = BigInt(prize.token_type.variant.erc20.amount);
+        acc[tokenSymbol].value = (currentAmount + newAmount) / 10n ** 18n;
       }
 
       return acc;
@@ -190,17 +238,57 @@ export const groupPrizes = (prizes: Prize[], tokens: Token[]) =>
     {} as Record<
       string,
       {
+        type: "erc20" | "erc721";
         payout_position: string;
-        tokens: Record<
-          string,
-          {
-            type: "erc20" | "erc721";
-            values: string[];
-            address: string;
-          }
-        >;
+        address: string;
+        value: bigint[] | bigint;
       }
     >
   );
 
-// Add other helper functions for processing specific parts...
+export const getErc20TokenSymbols = (
+  groupedPrizes: Record<
+    string,
+    {
+      type: "erc20" | "erc721";
+      payout_position: string;
+      address: string;
+      value: bigint[] | bigint;
+    }
+  >
+) => {
+  return Object.entries(groupedPrizes)
+    .filter(([_, prize]) => prize.type === "erc20")
+    .map(([symbol, _]) => symbol);
+};
+
+export const calculateTotalValue = (
+  groupedPrizes: Record<
+    string,
+    {
+      type: "erc20" | "erc721";
+      payout_position: string;
+      address: string;
+      value: bigint[] | bigint;
+    }
+  >,
+  prices: Record<string, bigint | undefined>
+) => {
+  return Object.entries(groupedPrizes)
+    .filter(([_, prize]) => prize.type === "erc20")
+    .reduce((total, [symbol, prize]) => {
+      const price = prices[symbol] || 1n;
+      const amount = prize.value as bigint;
+      return total + Number(price * amount);
+    }, 0);
+};
+
+export const countTotalNFTs = (
+  groupedPrizes: ReturnType<typeof groupPrizesByTokens>
+) => {
+  return Object.entries(groupedPrizes)
+    .filter(([_, prize]) => prize.type === "erc721")
+    .reduce((total, [_, prize]) => {
+      return total + (prize.value as bigint[]).length;
+    }, 0);
+};

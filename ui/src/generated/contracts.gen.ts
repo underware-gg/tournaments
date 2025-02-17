@@ -15,7 +15,7 @@ export function setupWorld(provider: DojoProvider) {
     try {
       return await provider.call("tournaments", {
         contractName: "game_mock",
-        entrypoint: "get_score",
+        entrypoint: "score",
         calldata: [gameId],
       });
     } catch (error) {
@@ -115,7 +115,7 @@ export function setupWorld(provider: DojoProvider) {
         snAccount,
         {
           contractName: "game_mock",
-          entrypoint: "new_game",
+          entrypoint: "mint",
           calldata: [playerName, settingsId, availableAt, expiresAt, to],
         },
         "tournaments"
@@ -739,42 +739,6 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
-  const tournament_mock_createTournament_and_approve_and_addPrizes = async (
-    snAccount: Account | AccountInterface,
-    metadata: models.Metadata,
-    schedule: models.Schedule,
-    gameConfig: models.GameConfig,
-    entryFee: CairoOption<models.Period>,
-    entryRequirement: CairoOption<models.Period>,
-    prizes: models.Prize[]
-  ) => {
-    let calls = [];
-    const createCall = {
-      contractName: "tournament_mock",
-      entrypoint: "create_tournament",
-      calldata: [metadata, schedule, gameConfig, entryFee, entryRequirement],
-    };
-    calls.push(createCall);
-    for (const prize of prizes) {
-      const addPrizesCall = {
-        contractName: "tournament_mock",
-        entrypoint: "add_prize",
-        calldata: [
-          prize.tournament_id,
-          prize.token_address,
-          prize.token_type,
-          prize.payout_position,
-        ],
-      };
-      calls.push(addPrizesCall);
-    }
-    try {
-      return await provider.execute(snAccount, calls, "ls_tournaments_v0");
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const tournament_mock_enterTournament = async (
     snAccount: Account | AccountInterface,
     tournamentId: BigNumberish,
@@ -961,7 +925,7 @@ export function setupWorld(provider: DojoProvider) {
     try {
       return await provider.call("tournaments", {
         contractName: "tournament_mock",
-        entrypoint: "get_state",
+        entrypoint: "current_phase",
         calldata: [tournamentId],
       });
     } catch (error) {

@@ -2,9 +2,10 @@
 
 use starknet::ContractAddress;
 use tournaments::components::models::tournament::{
-    Tournament as TournamentModel, TokenType, Registration, PrizeType, TournamentState, Metadata,
-    Schedule, GameConfig, EntryFee, EntryRequirement, QualificationProof,
+    Tournament as TournamentModel, TokenType, Registration, PrizeType, Metadata, GameConfig,
+    EntryFee, EntryRequirement, QualificationProof,
 };
+use tournaments::components::models::schedule::{Schedule, Phase};
 
 ///
 /// Interface
@@ -43,7 +44,7 @@ trait ITournament<TState> {
     fn is_token_registered(self: @TState, address: ContractAddress) -> bool;
     fn register_token(ref self: TState, address: ContractAddress, token_type: TokenType);
     fn get_leaderboard(self: @TState, tournament_id: u64) -> Array<u64>;
-    fn get_state(self: @TState, tournament_id: u64) -> TournamentState;
+    fn current_phase(self: @TState, tournament_id: u64) -> Phase;
 }
 
 ///
@@ -56,24 +57,24 @@ pub mod tournament_component {
 
     use core::num::traits::Zero;
 
-    use tournaments::components::constants::{
-        TWO_POW_128, MIN_REGISTRATION_PERIOD, MAX_REGISTRATION_PERIOD, MIN_TOURNAMENT_LENGTH,
-        MAX_TOURNAMENT_LENGTH, MIN_SUBMISSION_PERIOD, MAX_SUBMISSION_PERIOD, DEFAULT_NS, VERSION,
-    };
+    use tournaments::components::constants::{TWO_POW_128, DEFAULT_NS, VERSION, SEPOLIA_CHAIN_ID};
     use tournaments::components::interfaces::{
         IGameDispatcher, IGameDispatcherTrait, IGAME_ID, IGAME_METADATA_ID,
     };
     use tournaments::components::models::tournament::{
         Tournament as TournamentModel, Registration, Leaderboard, Prize, Token, TournamentConfig,
-        TokenType, TournamentType, ERC20Data, ERC721Data, PrizeType, Role, PrizeClaim,
-        TournamentState, Metadata, Schedule, GameConfig, EntryFee, EntryRequirement, Period,
-        QualificationProof, TournamentQualification,
+        TokenType, TournamentType, ERC20Data, ERC721Data, PrizeType, Role, PrizeClaim, Metadata,
+        GameConfig, EntryFee, EntryRequirement, QualificationProof, TournamentQualification,
     };
+    use tournaments::components::models::schedule::{Schedule, Phase};
     use tournaments::components::interfaces::{WorldTrait, WorldImpl};
     use tournaments::components::libs::store::{Store, StoreTrait};
+    use tournaments::components::libs::schedule::{
+        ScheduleTrait, ScheduleImpl, ScheduleAssertionsTrait, ScheduleAssertionsImpl,
+    };
+    use tournaments::components::game::{ISettingsDispatcher, ISettingsDispatcherTrait};
 
     use dojo::contract::components::world_provider::{IWorldProvider};
-
 
     use starknet::{ContractAddress, get_block_timestamp, get_contract_address, get_caller_address};
 
@@ -110,26 +111,26 @@ pub mod tournament_component {
         +Drop<TContractState>,
     > of ITournament<ComponentState<TContractState>> {
         fn total_tournaments(self: @ComponentState<TContractState>) -> u64 {
-            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), DEFAULT_NS());
+            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), @DEFAULT_NS());
             let store: Store = StoreTrait::new(world);
             store.get_platform_metrics().total_tournaments
         }
         fn tournament(
             self: @ComponentState<TContractState>, tournament_id: u64,
         ) -> TournamentModel {
-            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), DEFAULT_NS());
+            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), @DEFAULT_NS());
             let store: Store = StoreTrait::new(world);
             store.get_tournament(tournament_id)
         }
         fn get_registration(
             self: @ComponentState<TContractState>, tournament_id: u64, token_id: u64,
         ) -> Registration {
-            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), DEFAULT_NS());
+            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), @DEFAULT_NS());
             let store: Store = StoreTrait::new(world);
             store.get_registration(tournament_id, token_id)
         }
         fn tournament_entries(self: @ComponentState<TContractState>, tournament_id: u64) -> u32 {
-            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), DEFAULT_NS());
+            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), @DEFAULT_NS());
             let store: Store = StoreTrait::new(world);
             store.get_tournament_entry_count(tournament_id).count
         }
@@ -137,7 +138,7 @@ pub mod tournament_component {
         fn is_token_registered(
             self: @ComponentState<TContractState>, address: ContractAddress,
         ) -> bool {
-            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), DEFAULT_NS());
+            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), @DEFAULT_NS());
             let store: Store = StoreTrait::new(world);
             let token = store.get_token(address);
             self._is_token_registered(@token)
@@ -165,16 +166,16 @@ pub mod tournament_component {
         fn get_leaderboard(
             self: @ComponentState<TContractState>, tournament_id: u64,
         ) -> Array<u64> {
-            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), DEFAULT_NS());
+            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), @DEFAULT_NS());
             let store: Store = StoreTrait::new(world);
             store.get_leaderboard(tournament_id)
         }
 
-        fn get_state(self: @ComponentState<TContractState>, tournament_id: u64) -> TournamentState {
-            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), DEFAULT_NS());
+        fn current_phase(self: @ComponentState<TContractState>, tournament_id: u64) -> Phase {
+            let world = WorldTrait::storage(self.get_contract().world_dispatcher(), @DEFAULT_NS());
             let store: Store = StoreTrait::new(world);
             let tournament = store.get_tournament(tournament_id);
-            self._get_state(@tournament.schedule)
+            tournament.schedule.current_phase(get_block_timestamp())
         }
 
         /// @title Create tournament
@@ -195,11 +196,11 @@ pub mod tournament_component {
             entry_requirement: Option<EntryRequirement>,
         ) -> (TournamentModel, u64) {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), DEFAULT_NS(),
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
 
-            self._assert_valid_tournament_schedule(schedule);
+            schedule.assert_is_valid(get_block_timestamp());
 
             self._assert_valid_game_config(game_config);
 
@@ -252,13 +253,13 @@ pub mod tournament_component {
             qualification: Option<QualificationProof>,
         ) -> (u64, u32) {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), DEFAULT_NS(),
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
             let tournament = store.get_tournament(tournament_id);
 
             // assert registration is open
-            self._assert_registration_is_open(tournament_id, @tournament.schedule);
+            tournament.schedule.assert_registration_open(get_block_timestamp());
 
             // if tournament includes an entry requirement, validate player entry
             if let Option::Some(entry_requirement) = tournament.entry_requirement {
@@ -310,7 +311,7 @@ pub mod tournament_component {
             position: u8,
         ) {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), DEFAULT_NS(),
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
 
@@ -359,12 +360,13 @@ pub mod tournament_component {
             ref self: ComponentState<TContractState>, tournament_id: u64, prize_type: PrizeType,
         ) {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), DEFAULT_NS(),
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
             let tournament = store.get_tournament(tournament_id);
 
-            self._validate_tournament_finalized(tournament_id, @tournament.schedule);
+            tournament.schedule.assert_tournament_is_finalized(get_block_timestamp());
+
             self._assert_prize_not_claimed(store, tournament_id, prize_type);
 
             match prize_type {
@@ -395,12 +397,12 @@ pub mod tournament_component {
             position: u8,
         ) -> u64 {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), DEFAULT_NS(),
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
             let mut tournament = store.get_tournament(tournament_id);
 
-            self._assert_tournament_not_ended(tournament.schedule.game.end, tournament_id);
+            tournament.schedule.game.assert_is_active(get_block_timestamp());
             self._assert_prize_token_registered(@store.get_token(token_address));
             self._assert_position_on_leaderboard(tournament.game_config.prize_spots, position);
 
@@ -446,7 +448,7 @@ pub mod tournament_component {
         /// @param test_mode A bool representing whether to use test mode.
         fn initialize(ref self: ComponentState<TContractState>, safe_mode: bool, test_mode: bool) {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), DEFAULT_NS(),
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
             // Store the config
@@ -470,7 +472,7 @@ pub mod tournament_component {
             symbol: ByteArray,
         ) {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), DEFAULT_NS(),
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
 
@@ -495,7 +497,7 @@ pub mod tournament_component {
             symbol: ByteArray,
         ) {
             let mut world = WorldTrait::storage(
-                self.get_contract().world_dispatcher(), DEFAULT_NS(),
+                self.get_contract().world_dispatcher(), @DEFAULT_NS(),
             );
             let mut store: Store = StoreTrait::new(world);
             let token_model = store.get_token(address);
@@ -515,9 +517,9 @@ pub mod tournament_component {
         #[inline(always)]
         fn get_score_for_token_id(
             self: @ComponentState<TContractState>, contract_address: ContractAddress, token_id: u64,
-        ) -> u64 {
+        ) -> u32 {
             let game_dispatcher = IGameDispatcher { contract_address };
-            game_dispatcher.get_score(token_id)
+            game_dispatcher.score(token_id)
         }
 
         #[inline(always)]
@@ -531,7 +533,12 @@ pub mod tournament_component {
 
         #[inline(always)]
         fn _is_token_registered(self: @ComponentState<TContractState>, token: @Token) -> bool {
-            *token.is_registered
+            let chain_id = starknet::get_tx_info().unbox().chain_id;
+            if chain_id == SEPOLIA_CHAIN_ID {
+                true
+            } else {
+                *token.is_registered
+            }
         }
 
         // @dev instead of iterating over all scores, we just check if the submitted score is
@@ -541,7 +548,7 @@ pub mod tournament_component {
             self: @ComponentState<TContractState>,
             game_address: ContractAddress,
             leaderboard: Span<u64>,
-            score: u64,
+            score: u32,
         ) -> bool {
             let num_scores = leaderboard.len();
 
@@ -604,165 +611,6 @@ pub mod tournament_component {
             self._assert_supports_game_interface(src5_dispatcher, contract_address);
             self._assert_supports_game_metadata_interface(src5_dispatcher, contract_address);
             self._assert_game_supports_erc721_interface(src5_dispatcher, contract_address);
-        }
-
-        #[inline(always)]
-        fn _assert_valid_tournament_schedule(
-            self: @ComponentState<TContractState>, schedule: Schedule,
-        ) {
-            self._assert_valid_game_schedule(schedule.game);
-            self._assert_valid_submission_duration(schedule.submission_period);
-            if let Option::Some(registration_period) = schedule.registration {
-                self._assert_valid_registration_schedule(registration_period, schedule.game);
-            }
-        }
-
-        #[inline(always)]
-        fn _assert_valid_submission_duration(
-            self: @ComponentState<TContractState>, submission_duration: u64,
-        ) {
-            self._assert_submission_period_larger_than_minimum(submission_duration);
-            self._assert_submission_period_less_than_maximum(submission_duration);
-        }
-
-        #[inline(always)]
-        fn _assert_valid_game_schedule(self: @ComponentState<TContractState>, game_period: Period) {
-            self._assert_start_time_in_future(game_period.start);
-            self._assert_tournament_length_not_too_short(game_period.start, game_period.end);
-            self._assert_tournament_length_not_too_long(game_period.start, game_period.end);
-        }
-
-        #[inline(always)]
-        fn _assert_valid_registration_schedule(
-            self: @ComponentState<TContractState>, registration_period: Period, game_period: Period,
-        ) {
-            self._assert_registration_start_time(registration_period.start);
-            self._assert_min_registration_period(registration_period);
-            self._assert_less_than_max_registration_period(registration_period);
-            self
-                ._assert_registration_starts_before_tournament(
-                    registration_period.start, game_period.start,
-                );
-            self
-                ._assert_registration_ends_before_tournament(
-                    registration_period.end, game_period.end,
-                );
-        }
-
-        #[inline(always)]
-        fn _assert_start_time_in_future(self: @ComponentState<TContractState>, start_time: u64) {
-            assert!(
-                start_time >= get_block_timestamp(),
-                "Tournament: Start time {} is not in the future.",
-                start_time,
-            );
-        }
-
-        #[inline(always)]
-        fn _assert_registration_start_time(self: @ComponentState<TContractState>, start_time: u64) {
-            assert!(
-                start_time >= get_block_timestamp(),
-                "Tournament: Registration time {} is not in the future.",
-                start_time,
-            );
-        }
-
-        #[inline(always)]
-        fn _assert_min_registration_period(self: @ComponentState<TContractState>, period: Period) {
-            let registration_duration = period.end - period.start;
-            assert!(
-                registration_duration >= MIN_REGISTRATION_PERIOD.into(),
-                "Tournament: Registration period of {} lower than minimum {}",
-                registration_duration,
-                MIN_REGISTRATION_PERIOD,
-            );
-        }
-
-        #[inline(always)]
-        fn _assert_less_than_max_registration_period(
-            self: @ComponentState<TContractState>, period: Period,
-        ) {
-            let registration_duration = period.end - period.start;
-            assert!(
-                registration_duration < MAX_REGISTRATION_PERIOD.into(),
-                "Tournament: Registration period of {} higher than maximum {}",
-                registration_duration,
-                MAX_REGISTRATION_PERIOD,
-            );
-        }
-
-        #[inline(always)]
-        fn _assert_registration_starts_before_tournament(
-            self: @ComponentState<TContractState>, registration_start: u64, tournament_start: u64,
-        ) {
-            assert!(
-                registration_start <= tournament_start,
-                "Tournament: Registration start time {} after tournament start time {}",
-                registration_start,
-                tournament_start,
-            );
-        }
-
-        #[inline(always)]
-        fn _assert_registration_ends_before_tournament(
-            self: @ComponentState<TContractState>, registration_end: u64, tournament_end: u64,
-        ) {
-            assert!(
-                registration_end <= tournament_end,
-                "Tournament: Registration end time {} after tournament end time {}",
-                registration_end,
-                tournament_end,
-            );
-        }
-
-        #[inline(always)]
-        fn _assert_tournament_length_not_too_short(
-            self: @ComponentState<TContractState>, start: u64, end: u64,
-        ) {
-            let tournament_length = end - start;
-            assert!(
-                tournament_length >= MIN_TOURNAMENT_LENGTH.into(),
-                "Tournament: Tournament period of {} lower than minimum {}",
-                tournament_length,
-                MIN_TOURNAMENT_LENGTH,
-            );
-        }
-
-        #[inline(always)]
-        fn _assert_tournament_length_not_too_long(
-            self: @ComponentState<TContractState>, start: u64, end: u64,
-        ) {
-            let tournament_length = end - start;
-            assert!(
-                tournament_length <= MAX_TOURNAMENT_LENGTH.into(),
-                "Tournament: Tournament period of {} higher than maximum {}",
-                tournament_length,
-                MAX_TOURNAMENT_LENGTH,
-            );
-        }
-
-        #[inline(always)]
-        fn _assert_submission_period_larger_than_minimum(
-            self: @ComponentState<TContractState>, submission_period: u64,
-        ) {
-            assert!(
-                submission_period >= MIN_SUBMISSION_PERIOD.into(),
-                "Tournament: Submission period of {} lower than the minimum {}",
-                submission_period,
-                MIN_SUBMISSION_PERIOD,
-            );
-        }
-
-        #[inline(always)]
-        fn _assert_submission_period_less_than_maximum(
-            self: @ComponentState<TContractState>, submission_period: u64,
-        ) {
-            assert!(
-                submission_period <= MAX_SUBMISSION_PERIOD.into(),
-                "Tournament: Submission period of {} higher than the maximum {}",
-                submission_period,
-                MAX_SUBMISSION_PERIOD,
-            );
         }
 
         #[inline(always)]
@@ -854,8 +702,8 @@ pub mod tournament_component {
         fn _assert_settings_exists(
             self: @ComponentState<TContractState>, game: ContractAddress, settings_id: u32,
         ) {
-            let game_dispatcher = IGameDispatcher { contract_address: game };
-            let settings_exist = game_dispatcher.get_settings_details(settings_id).exists;
+            let settings_dispatcher = ISettingsDispatcher { contract_address: game };
+            let settings_exist = settings_dispatcher.setting_exists(settings_id);
             let game_address: felt252 = game.into();
             assert!(
                 settings_exist,
@@ -907,57 +755,6 @@ pub mod tournament_component {
             assert!(self._is_token_registered(token), "Tournament: Prize token is not registered");
         }
 
-        #[inline(always)]
-        fn _assert_registration_is_open(
-            self: @ComponentState<TContractState>, tournament_id: u64, schedule: @Schedule,
-        ) {
-            match schedule.registration {
-                Option::Some(_) => {
-                    let state = self._get_state(schedule);
-                    assert!(
-                        state == TournamentState::Registration,
-                        "Tournament: tournament {} is not open for registration.",
-                        tournament_id,
-                    );
-                },
-                // if registration period is None, then registration is always open
-                Option::None => {},
-            }
-        }
-
-        #[inline(always)]
-        fn _assert_game_ended(
-            self: @ComponentState<TContractState>, token_id: u64, expires_at: u64,
-        ) {
-            assert!(
-                get_block_timestamp() >= expires_at,
-                "Tournament: Game on token id {} is still live. Expires at {}",
-                token_id,
-                expires_at,
-            );
-        }
-
-        #[inline(always)]
-        fn _assert_tournament_ended(
-            self: @ComponentState<TContractState>, end_time: u64, tournament_id: u64,
-        ) {
-            assert!(
-                end_time <= get_block_timestamp(),
-                "Tournament: Tournament id {} has not ended",
-                tournament_id,
-            );
-        }
-
-        #[inline(always)]
-        fn _assert_tournament_not_ended(
-            self: @ComponentState<TContractState>, end_time: u64, tournament_id: u64,
-        ) {
-            assert!(
-                end_time > get_block_timestamp(),
-                "Tournament: Tournament id {} has already ended",
-                tournament_id,
-            );
-        }
 
         #[inline(always)]
         fn _assert_scores_count_valid(
@@ -1071,10 +868,9 @@ pub mod tournament_component {
                                 }
                                 let tournament = store
                                     .get_tournament(*tournament_ids.at(loop_index));
-                                self
-                                    ._validate_tournament_finalized(
-                                        tournament.id, @tournament.schedule,
-                                    );
+                                tournament
+                                    .schedule
+                                    .assert_tournament_is_finalized(get_block_timestamp());
                                 loop_index += 1;
                             }
                         },
@@ -1086,10 +882,9 @@ pub mod tournament_component {
                                 }
                                 let tournament = store
                                     .get_tournament(*tournament_ids.at(loop_index));
-                                self
-                                    ._validate_tournament_finalized(
-                                        tournament.id, @tournament.schedule,
-                                    );
+                                tournament
+                                    .schedule
+                                    .assert_tournament_is_finalized(get_block_timestamp());
                                 loop_index += 1;
                             }
                         },
@@ -1097,30 +892,6 @@ pub mod tournament_component {
                 },
                 EntryRequirement::allowlist(_) => {},
             }
-        }
-
-        #[inline(always)]
-        fn _validate_tournament_finalized(
-            self: @ComponentState<TContractState>, tournament_id: u64, schedule: @Schedule,
-        ) {
-            let state = self._get_state(schedule);
-            assert!(
-                state == TournamentState::Finalized,
-                "Tournament: Tournament {} is not finalized",
-                tournament_id,
-            );
-        }
-
-        #[inline(always)]
-        fn _assert_tournament_not_finalized(
-            self: @ComponentState<TContractState>, tournament_id: u64, schedule: @Schedule,
-        ) {
-            let state = self._get_state(schedule);
-            assert!(
-                state != TournamentState::Finalized,
-                "Tournament: Tournament {} is finalized",
-                tournament_id,
-            );
         }
 
         fn _assert_player_is_eligible(
@@ -1403,8 +1174,9 @@ pub mod tournament_component {
         ) -> u64 {
             let address = *tournament.game_config.address;
             let settings = *tournament.game_config.settings_id;
-            let start = 0;
-            let end = starknet::get_block_timestamp() - 1;
+            let start = Option::None;
+            // creator game are not intended to be played so they are minted already expired
+            let end = Option::Some(1);
             let name = *tournament.metadata.name;
             let creator_address = *tournament.creator;
             self._mint_game(address, settings, start, end, name, creator_address)
@@ -1416,21 +1188,23 @@ pub mod tournament_component {
             player_name: felt252,
             player_address: ContractAddress,
         ) -> u64 {
-            let address = *tournament.game_config.address;
+            let game_address = *tournament.game_config.address;
             let settings = *tournament.game_config.settings_id;
-            let start = *tournament.schedule.game.start;
-            let end = *tournament.schedule.game.end;
-            let name = player_name;
+            let game_start = Option::Some(*tournament.schedule.game.start);
+            let game_end = Option::Some(*tournament.schedule.game.end);
 
-            self._mint_game(address, settings, start, end, name, player_address)
+            self
+                ._mint_game(
+                    game_address, settings, game_start, game_end, player_name, player_address,
+                )
         }
 
         /// @title mint_game
         /// @notice Mints a new game token to the provided player address.
         /// @param game_address The address of the game contract.
         /// @param settings_id The id of the game settings.
-        /// @param start_time The start time of the game.
-        /// @param end_time The end time of the game.
+        /// @param game_start An optional start time for the game.
+        /// @param game_end An optional end time for the game.
         /// @param player_name The name of the player to mint the game token to.
         /// @param player_address The address of the player to mint the game token to.
         /// @return The game token id.
@@ -1438,14 +1212,14 @@ pub mod tournament_component {
             ref self: ComponentState<TContractState>,
             game_address: ContractAddress,
             settings_id: u32,
-            start_time: u64,
-            end_time: u64,
+            game_start: Option<u64>,
+            game_end: Option<u64>,
             player_name: felt252,
             player_address: ContractAddress,
         ) -> u64 {
             let game_dispatcher = IGameDispatcher { contract_address: game_address };
             let game_token_id = game_dispatcher
-                .new_game(player_name, settings_id, start_time, end_time, player_address);
+                .mint(player_name, settings_id, game_start, game_end, player_address);
             game_token_id
         }
 
@@ -1605,44 +1379,17 @@ pub mod tournament_component {
             };
         }
 
-        fn _get_state(
-            self: @ComponentState<TContractState>, schedule: @Schedule,
-        ) -> TournamentState {
-            let current_timestamp = get_block_timestamp();
-
-            let mut registration_start = 0;
-            let mut registration_end = 0;
-
-            if let Option::Some(registration_period) = schedule.registration {
-                registration_start = *registration_period.start;
-                registration_end = *registration_period.end;
-            }
-
-            if current_timestamp < registration_start {
-                TournamentState::Scheduled
-            } else if current_timestamp < registration_end {
-                TournamentState::Registration
-            } else if current_timestamp < *schedule.game.start {
-                TournamentState::Staging
-            } else if current_timestamp < *schedule.game.end {
-                TournamentState::Live
-            } else if current_timestamp < *schedule.game.end + *schedule.submission_period {
-                TournamentState::Submission
-            } else {
-                TournamentState::Finalized
-            }
-        }
-
         fn _validate_score_submission(
             self: @ComponentState<TContractState>,
             tournament: @TournamentModel,
             registration: @Registration,
             current_leaderboard: Span<u64>,
-            submitted_score: u64,
+            submitted_score: u32,
             submitted_position: u8,
         ) {
+            let schedule = *tournament.schedule;
             assert!(
-                self._get_state(tournament.schedule) == TournamentState::Submission,
+                schedule.current_phase(get_block_timestamp()) == Phase::Submission,
                 "Tournament: Not in submission period",
             );
 
@@ -1677,7 +1424,7 @@ pub mod tournament_component {
             if position_index < current_leaderboard.len() {
                 // validate it's higher
                 let current_score_at_position = game_dispatcher
-                    .get_score(*current_leaderboard.at(position_index));
+                    .score(*current_leaderboard.at(position_index));
 
                 assert!(
                     submitted_score > current_score_at_position,
@@ -1692,7 +1439,7 @@ pub mod tournament_component {
             if submitted_position > 1 {
                 // validate it is less than the score above it.
                 let current_score_above_position = game_dispatcher
-                    .get_score(*current_leaderboard.at(position_index - 1));
+                    .score(*current_leaderboard.at(position_index - 1));
 
                 assert!(
                     submitted_score < current_score_above_position,
@@ -1841,10 +1588,7 @@ pub mod tournament_component {
             let leaderboard = store.get_leaderboard(qualification.tournament_id);
 
             // assert tournament is finalized
-            self
-                ._validate_tournament_finalized(
-                    qualification.tournament_id, @qualifying_tournament.schedule,
-                );
+            qualifying_tournament.schedule.assert_tournament_is_finalized(get_block_timestamp());
 
             // assert tournament is in qualifying set
             self._validate_tournament_eligibility(tournament_type, qualification.tournament_id);

@@ -17,6 +17,7 @@ import {
   ByteArray,
   byteArray,
   Uint256,
+  AccountInterface,
 } from "starknet";
 import { useToast } from "@/hooks/useToast";
 import { useOptimisticUpdates } from "@/dojo/hooks/useOptimisticUpdates";
@@ -107,7 +108,7 @@ export const useSystemCalls = () => {
         ]),
       });
 
-      const tx = await (account as Account)?.execute(calls);
+      const tx = await account?.execute(calls);
 
       await wait();
 
@@ -200,7 +201,7 @@ export const useSystemCalls = () => {
         ]),
       });
 
-      const tx = await (account as Account)?.execute(calls);
+      const tx = await account?.execute(calls);
 
       await wait();
 
@@ -257,6 +258,7 @@ export const useSystemCalls = () => {
           ]),
         };
         calls.push(approvePrizeCall);
+        console.log(prize.token_type);
         const addPrizesCall = {
           contractAddress: tournamentAddress,
           entrypoint: "add_prize",
@@ -333,7 +335,11 @@ export const useSystemCalls = () => {
   const endGame = async (gameId: BigNumberish, score: BigNumberish) => {
     try {
       const resolvedClient = await client;
-      resolvedClient.game_mock.endGame(account!, gameId, score);
+      resolvedClient.game_mock.endGame(
+        account as unknown as Account | AccountInterface,
+        gameId,
+        score
+      );
     } catch (error) {
       console.error("Error executing end game:", error);
       throw error;
@@ -341,13 +347,13 @@ export const useSystemCalls = () => {
   };
 
   const getBalanceGeneral = async (tokenAddress: string) => {
-    const result = await (account as Account)?.callContract({
+    const result = await account?.callContract({
       contractAddress: tokenAddress,
       entrypoint: "balance_of",
       calldata: [address!],
     });
     console.log(result);
-    return BigInt(result[0]);
+    return BigInt(result?.[0]!);
   };
 
   const approveERC20Multiple = async (tokens: Token[]) => {
@@ -387,7 +393,7 @@ export const useSystemCalls = () => {
       calldata,
     }));
     console.log(summedCalls);
-    await (account as Account)?.execute(summedCalls);
+    await account?.execute(summedCalls);
   };
 
   const approveERC721Multiple = async (tokens: Token[]) => {
@@ -403,17 +409,25 @@ export const useSystemCalls = () => {
         ]),
       });
     }
-    await (account as Account)?.execute(calls);
+    await account?.execute(calls);
   };
 
   const mintErc20 = async (recipient: string, amount: Uint256) => {
     const resolvedClient = await client;
-    await resolvedClient.erc20_mock.mint(account!, recipient, amount);
+    await resolvedClient.erc20_mock.mint(
+      account as unknown as Account | AccountInterface,
+      recipient,
+      amount
+    );
   };
 
   const mintErc721 = async (recipient: string, tokenId: Uint256) => {
     const resolvedClient = await client;
-    await resolvedClient.erc721_mock.mint(account!, recipient, tokenId);
+    await resolvedClient.erc721_mock.mint(
+      account as unknown as Account | AccountInterface,
+      recipient,
+      tokenId
+    );
   };
 
   const getErc20Balance = async (address: string) => {

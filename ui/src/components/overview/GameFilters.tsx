@@ -1,4 +1,4 @@
-import Games from "@/assets/games";
+import { getGames } from "@/assets/games";
 import { Button } from "@/components/ui/button";
 import useUIStore from "@/hooks/useUIStore";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
@@ -7,7 +7,7 @@ const GameFilters = () => {
   const { gameFilters, setGameFilters } = useUIStore();
   return (
     <div className="flex flex-col gap-4 w-1/5">
-      {Object.entries(Games).map(([key, game]) => (
+      {Object.entries(getGames()).map(([key, game]) => (
         <Button
           key={key}
           size={"xl"}

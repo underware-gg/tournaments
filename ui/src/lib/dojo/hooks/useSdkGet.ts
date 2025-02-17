@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { BigNumberish } from "starknet";
 import { QueryType } from "@dojoengine/sdk";
 import { useDojo } from "@/context/dojo";
@@ -27,7 +27,6 @@ export type UseSdkGetEntitiesProps = {
   limit?: number;
   offset?: number;
   orderBy?: OrderBy[];
-  enabled?: boolean;
 };
 
 export const useSdkGetEntities = ({
@@ -35,7 +34,6 @@ export const useSdkGetEntities = ({
   limit = 100,
   offset = 0,
   orderBy = [],
-  enabled = true,
 }: UseSdkGetEntitiesProps): UseSdkGetEntitiesResult => {
   const { sdk, nameSpace } = useDojo();
 
@@ -43,10 +41,12 @@ export const useSdkGetEntities = ({
   const [entities, setEntities] = useState<EntityResult[] | null>(null);
   const { setEntities: setStoreEntities } = useDojoStore.getState();
 
-  // Add a mount ref
-  const isMounted = useRef(false);
+  const orderByKey = useMemo(() => JSON.stringify(orderBy), [orderBy]);
 
   const fetchEntities = useCallback(async () => {
+    setIsLoading(true);
+    console.log("orderBy", orderBy);
+    console.log("query", query);
     try {
       console.log(query);
       setIsLoading(true);
@@ -59,39 +59,15 @@ export const useSdkGetEntities = ({
     } finally {
       setIsLoading(false);
     }
-  }, [sdk, query, orderBy, limit, offset, nameSpace, setStoreEntities]);
+  }, [sdk, query, orderByKey, limit, offset]);
 
   useEffect(() => {
-    if (!isMounted.current) {
-      isMounted.current = true;
-
-      if (enabled) {
-        fetchEntities();
-      } else {
-        setIsLoading(false);
-      }
-    }
-  }, [enabled, fetchEntities]);
+    fetchEntities();
+  }, [fetchEntities]);
 
   return {
     entities,
     isLoading,
     refetch: fetchEntities,
-  };
-};
-
-//
-// Single Entity fetch
-// (use only when fetching with a keys)
-export const useSdkGetEntity = (
-  props: UseSdkGetEntitiesProps
-): UseSdkGetEntityResult => {
-  const { isLoading, refetch } = useSdkGetEntities({
-    ...props,
-    limit: 1,
-  });
-  return {
-    isLoading,
-    refetch,
   };
 };

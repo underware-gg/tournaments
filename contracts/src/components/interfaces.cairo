@@ -11,15 +11,15 @@ pub const IGAME_METADATA_ID: felt252 =
 
 #[starknet::interface]
 pub trait IGame<TState> {
-    fn new_game(
+    fn mint(
         ref self: TState,
         player_name: felt252,
         settings_id: u32,
-        available_at: u64,
-        expires_at: u64,
+        start: Option<u64>,
+        end: Option<u64>,
         to: ContractAddress,
     ) -> u64;
-    fn get_score(self: @TState, token_id: u64) -> u64;
+    fn score(self: @TState, token_id: u64) -> u32;
     fn get_settings_id(self: @TState, token_id: u64) -> u32;
     fn get_settings_details(self: @TState, settings_id: u32) -> SettingsDetails;
     fn settings_exists(self: @TState, settings_id: u32) -> bool;

@@ -343,3 +343,20 @@ export const ALERT: React.FC = () => (
     />
   </svg>
 );
+
+export const MINUS: React.FC = () => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17 13.5V10.5H7V13.5H17Z" fill="currentColor" />
+  </svg>
+);
+
+export const GEAR: React.FC = () => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M10 4H7V5H6V7H7V9H6V10H4V11H3V13H4V14H6V15H7V17H6V19H7V20H10V19H11V18H13V19H14V20H17V19H18V17H17V15H18V14H20V13H21V11H20V10H18V9H17V7H18V5H17V4H14V5H13V6H11V5H10V4ZM15 11H16V13H15V15H13V16H11V15H9V13H8V11H9V9H11V8H13V9H15V11Z"
+      fill="currentColor"
+    />
+  </svg>
+);

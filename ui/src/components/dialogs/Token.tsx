@@ -14,6 +14,9 @@ import { getTokenLogoUrl } from "@/lib/tokensMeta";
 import { useDojo } from "@/context/dojo";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { Token } from "@/generated/models.gen";
+import { ChainId } from "@/dojo/config";
+import { addAddressPadding, CairoCustomEnum } from "starknet";
+import { bigintToHex } from "@/lib/utils";
 
 interface TokenDialogProps {
   selectedToken: Token | null;
@@ -22,11 +25,31 @@ interface TokenDialogProps {
 
 const TokenDialog = ({ selectedToken, onSelect }: TokenDialogProps) => {
   const [tokenSearchQuery, setTokenSearchQuery] = useState("");
-  const { nameSpace } = useDojo();
-  const tokens = useDojoStore
-    .getState()
-    .getEntitiesByModel(nameSpace, "Token")
-    .map((token) => token.models[nameSpace].Token as Token);
+  const { selectedChainConfig, nameSpace } = useDojo();
+
+  const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
+
+  const sepoliaTokens = [
+    {
+      address:
+        "0x064fd80fcb41d00214430574a0aa19d21cc5d6452aeb4996f31b6e9ba4f466a0",
+      is_registered: true,
+      name: "Lords",
+      symbol: "LORDS",
+      token_type: new CairoCustomEnum({
+        erc20: {
+          amount: addAddressPadding(bigintToHex(BigInt(1))),
+        },
+      }),
+    },
+  ];
+
+  const tokens = isSepolia
+    ? sepoliaTokens
+    : useDojoStore
+        .getState()
+        .getEntitiesByModel(nameSpace, "Token")
+        .map((token) => token.models[nameSpace].Token as Token);
 
   const filteredTokens = tokens.filter((token) =>
     token.name.toLowerCase().includes(tokenSearchQuery.toLowerCase())

@@ -1,7 +1,7 @@
 import { Connector } from "@starknet-react/core";
 import { ControllerConnector } from "@cartridge/connector";
 import { DojoManifest } from "@/dojo/hooks/useDojoSystem";
-import { DojoChainConfig, ChainId } from "@/dojo/config";
+import { ChainId } from "@/dojo/config";
 import { stringToFelt } from "@/lib/utils";
 import { SessionPolicies } from "@cartridge/controller";
 
@@ -36,8 +36,7 @@ const _makeControllerPolicies = (manifest: DojoManifest): SessionPolicies => {
 export const initializeController = (
   manifest: DojoManifest,
   rpcUrl: string,
-  defaultChainId: string,
-  dojoChainConfig: DojoChainConfig
+  defaultChainId: string
 ): Connector => {
   const policies = _makeControllerPolicies(manifest);
 

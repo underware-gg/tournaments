@@ -1,6 +1,5 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -13,9 +12,6 @@ import {
 } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
 import { StepProps } from "@/containers/CreateTournament";
-import { FLAG, LEADERBOARD, REGISTER } from "@/components/Icons";
-import { motion } from "framer-motion";
-import { format, addDays, addHours } from "date-fns";
 import TournamentTimeline from "@/components/TournamentTimeline";
 
 const Schedule = ({ form }: StepProps) => {

@@ -3,23 +3,27 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { WEDGE_LEFT, WEDGE_RIGHT } from "@/components/Icons";
 import {
-  GameSettings,
+  getGameSettings,
   GameType,
 } from "@/components/createTournament/settings/types";
 import SettingsTable from "@/components/createTournament/settings/SettingsTable";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
+
+interface SettingsCarouselProps {
+  game: GameType;
+  settings: ReturnType<typeof getGameSettings>[keyof ReturnType<
+    typeof getGameSettings
+  >];
+  value: string;
+  onChange: (value: string) => void;
+}
 
 const SettingsCarousel = ({
   game,
   settings,
   value,
   onChange,
-}: {
-  game: GameType;
-  settings: (typeof GameSettings)[GameType];
-  value: string;
-  onChange: (value: string) => void;
-}) => {
+}: SettingsCarouselProps) => {
   const [currentIndex, setCurrentIndex] = React.useState(() => {
     if (!settings?.length) return 0;
     return Math.max(
@@ -27,7 +31,6 @@ const SettingsCarousel = ({
       settings.findIndex((s) => s.id === value)
     );
   });
-
   // If no settings available, show fallback UI
   if (!settings?.length) {
     return (
