@@ -46,7 +46,9 @@ const ScoreTable = ({
   const tokenIds = useMemo(
     () =>
       registrations?.map((registration) =>
-        addAddressPadding(bigintToHex(registration.Registration?.game_token_id))
+        addAddressPadding(
+          bigintToHex(registration.Registration?.game_token_id!)
+        )
       ),
     [registrations]
   );
@@ -69,7 +71,7 @@ const ScoreTable = ({
     return scores.reduce(
       (acc: Record<string, { score: number; playerName: string }>, entity) => {
         if (entity?.TokenMetadata?.token_id) {
-          acc[entity?.TokenMetadata?.token_id] = {
+          acc[entity?.TokenMetadata?.token_id.toString()] = {
             score: entity.Score?.score,
             playerName: feltToString(entity.TokenMetadata?.player_name),
           };

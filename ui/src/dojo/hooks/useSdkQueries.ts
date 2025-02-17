@@ -10,15 +10,14 @@ import {
 } from "@/lib/dojo/hooks/useSdkSub";
 import { bigintToHex } from "@/lib/utils";
 import { ParsedEntity, ToriiQueryBuilder, KeysClause } from "@dojoengine/sdk";
-import { SchemaType } from "@/generated/models.gen";
+import { SchemaType, ModelsMapping } from "@/generated/models.gen";
 import { addAddressPadding, BigNumberish } from "starknet";
 
 export const useGetTokensQuery = () => {
   const { nameSpace } = useDojo();
   const query = new ToriiQueryBuilder()
-    .withClause(KeysClause(["tournaments-Token"], [undefined]).build())
-    .withEntityModels(["tournaments-Token"])
-    .withLimit(100)
+    .withClause(KeysClause([ModelsMapping.Token], []).build())
+    .withEntityModels([ModelsMapping.Token])
     .includeHashedKeys();
 
   const { entities, isLoading, refetch } = useSdkGetEntities({
@@ -59,20 +58,48 @@ export const useGetUpcomingTournamentsQuery = (
   offset: number
 ) => {
   const { nameSpace } = useDojo();
-  const query = useMemo<TournamentGetQuery>(
-    () => ({
-      [nameSpace]: {
-        Tournament: {
-          $: {
-            where: {
-              "schedule.game.start": { $gt: addAddressPadding(currentTime) },
-            },
-          },
-        },
-      },
-    }),
-    [currentTime]
-  );
+  const query = new ToriiQueryBuilder()
+    .withClause(
+      KeysClause([ModelsMapping.Tournament], [])
+        .where(
+          ModelsMapping.Tournament,
+          "schedule.game.start",
+          "Gt",
+          addAddressPadding(currentTime)
+        )
+        .build()
+    )
+    .withLimit(limit)
+    .withOffset(offset)
+    .includeHashedKeys();
+
+  // console.log(
+  //   convertQueryToClause({
+  //     [nameSpace]: {
+  //       Tournament: {
+  //         $: {
+  //           where: {
+  //             "schedule.game.start": { $gt: addAddressPadding(currentTime) },
+  //           },
+  //         },
+  //       },
+  //     },
+  //   })
+  // );
+  // const query = useMemo<TournamentGetQuery>(
+  //   () => ({
+  //     [nameSpace]: {
+  //       Tournament: {
+  //         $: {
+  //           where: {
+  //             "schedule.game.start": { $gt: addAddressPadding(currentTime) },
+  //           },
+  //         },
+  //       },
+  //     },
+  //   }),
+  //   [currentTime]
+  // );
 
   const { entities, isLoading, refetch } = useSdkGetEntities({
     query,

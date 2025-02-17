@@ -209,7 +209,7 @@ const localKatanaConfig: DojoChainConfig = {
   chainId: ChainId.KATANA_LOCAL,
   name: "Katana Local",
   rpcUrl: LOCAL_KATANA,
-  toriiUrl: "http://0.0.0.0:8080", //LOCAL_TORII,
+  toriiUrl: "http://localhost:8080", //LOCAL_TORII,
   relayUrl: LOCAL_RELAY,
   blastRpc: undefined,
   blockExplorerUrl: undefined,

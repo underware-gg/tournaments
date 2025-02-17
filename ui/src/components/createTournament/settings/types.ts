@@ -5,7 +5,18 @@ import { getGames } from "@/assets/games";
 export const getGameSettings = () => {
   const { selectedChainConfig } = useDojo();
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
-  if (isSepolia) {
+  const isLocalKatana = selectedChainConfig.chainId === ChainId.KATANA_LOCAL;
+  if (isLocalKatana) {
+    return {
+      "0x032ffff023e926e396e56e3a5cb3ce6ef68cb6f620e95dc38db12781fbc9425f": [
+        {
+          id: "lootSurvivor_standard",
+          name: "Standard",
+          description: "Classic Loot Survivor rules",
+        },
+      ],
+    };
+  } else if (isSepolia) {
     return {
       "0x0711a2ed50ba5442259950cf741b81f66f17b9b751e44d0368a87926a3233e3e": [
         {
@@ -50,7 +61,19 @@ export const getGameSettings = () => {
 export const getGameSettingsConfig = () => {
   const { selectedChainConfig } = useDojo();
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
-  if (isSepolia) {
+  const isLocalKatana = selectedChainConfig.chainId === ChainId.KATANA_LOCAL;
+  if (isLocalKatana) {
+    return {
+      "0x032ffff023e926e396e56e3a5cb3ce6ef68cb6f620e95dc38db12781fbc9425f": [
+        {
+          id: "lootSurvivor_standard",
+          settings: [
+            // ... Loot Survivor settings
+          ],
+        },
+      ],
+    };
+  } else if (isSepolia) {
     return {
       "0x0711a2ed50ba5442259950cf741b81f66f17b9b751e44d0368a87926a3233e3e": [
         {

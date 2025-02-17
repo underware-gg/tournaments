@@ -49,7 +49,7 @@ const UpcomingTournaments = ({ gameFilters }: UpcomingTournamentsProps) => {
     addAddressPadding(bigintToHex(BigInt(tournament.id)))
   );
 
-  useGetTournamentDetailsInListQuery(prizeTournamentIds);
+  // useGetTournamentDetailsInListQuery(prizeTournamentIds);
 
   return (
     <>

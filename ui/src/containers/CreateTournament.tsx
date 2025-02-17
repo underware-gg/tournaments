@@ -398,13 +398,13 @@ const CreateTournament = () => {
       const processedTournament = processTournamentData(
         formData,
         address!,
-        tournamentCount
+        Number(tournamentCount)
       );
       // Process the prizes if they exist
       const processedPrizes = processPrizes(
         formData,
-        tournamentCount,
-        prizeCount
+        Number(tournamentCount),
+        Number(prizeCount)
       );
       await createTournamentAndApproveAndAddPrizes(
         processedTournament,

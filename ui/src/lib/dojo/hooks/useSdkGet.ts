@@ -41,6 +41,7 @@ export const useSdkGetEntities = ({
   const [entities, setEntities] = useState<EntityResult[] | null>(null);
   const { setEntities: setStoreEntities } = useDojoStore.getState();
 
+  const memoizedQuery = useMemo(() => query, [JSON.stringify(query)]);
   const orderByKey = useMemo(() => JSON.stringify(orderBy), [orderBy]);
 
   const fetchEntities = useCallback(async () => {
@@ -51,7 +52,7 @@ export const useSdkGetEntities = ({
       console.log(query);
       setIsLoading(true);
       const response = await sdk.getEntities({
-        query,
+        query: memoizedQuery,
       });
       console.log(response);
     } catch (error) {
@@ -59,7 +60,7 @@ export const useSdkGetEntities = ({
     } finally {
       setIsLoading(false);
     }
-  }, [sdk, query, orderByKey, limit, offset]);
+  }, [sdk, memoizedQuery, orderByKey, limit, offset]);
 
   useEffect(() => {
     fetchEntities();
