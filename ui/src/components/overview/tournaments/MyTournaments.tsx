@@ -8,6 +8,7 @@ import { Tournament } from "@/generated/models.gen";
 import { TournamentCard } from "@/components/overview/TournamanentCard";
 import { addAddressPadding } from "starknet";
 import EmptyResults from "@/components/overview/tournaments/EmptyResults";
+import NoAccount from "@/components/overview/tournaments/NoAccount";
 import { useAccount } from "@starknet-react/core";
 import { useGetAccountTokenIds } from "@/dojo/hooks/useSqlQueries";
 
@@ -23,12 +24,9 @@ const MyTournaments = ({ gameFilters }: MyTournamentsProps) => {
     return indexAddress(address);
   }, [address]);
 
-  const { data: ownedTokens } = useGetAccountTokenIds(
-    // indexAddress(address ?? "0x0"),
-    queryAddress ?? "0x0",
-    // "0x77b8ed8356a7c1f0903fc4ba6e15f9b09cf437ce04f21b2cbf32dc2790183d0",
-    ["0x2f3f1675be75c1c9424d777cc79f60f29c9e24cf08775a4bb90f3d44812781c"]
-  );
+  const { data: ownedTokens } = useGetAccountTokenIds(queryAddress ?? "0x0", [
+    "0x32ffff023e926e396e56e3a5cb3ce6ef68cb6f620e95dc38db12781fbc9425f",
+  ]);
 
   const ownedTokenIds = useMemo(() => {
     return ownedTokens
@@ -39,23 +37,7 @@ const MyTournaments = ({ gameFilters }: MyTournamentsProps) => {
       .filter(Boolean);
   }, [ownedTokens]);
 
-  console.log(ownedTokenIds);
-
-  // const handleGetGameTokens = async () => {
-  //   const tokenBalances = await sdk.getTokenBalances(
-  //     ["0x77b8ed8356a7c1f0903fc4ba6e15f9b09cf437ce04f21b2cbf32dc2790183d0"],
-  //     ["0x2f3f1675be75c1c9424d777cc79f60f29c9e24cf08775a4bb90f3d44812781c"]
-  //   );
-  //   console.log(tokenBalances);
-  //   // const gameTokens = tokenBalances.filter((token) =>
-  //   //   gameFilters.includes(token.contractAddress)
-  //   // );
-  //   // return gameTokens;
-  // };
-
-  // useEffect(() => {
-  //   handleGetGameTokens();
-  // }, [sdk]);
+  console.log(queryAddress, ownedTokenIds);
 
   const hexTimestamp = useMemo(
     () => bigintToHex(BigInt(new Date().getTime()) / 1000n),
@@ -96,17 +78,21 @@ const MyTournaments = ({ gameFilters }: MyTournamentsProps) => {
 
   return (
     <>
-      {filteredTournaments.length > 0 ? (
-        filteredTournaments.map((tournament, index) => (
-          <TournamentCard
-            key={index}
-            tournament={tournament}
-            index={index}
-            status="live"
-          />
-        ))
+      {address ? (
+        filteredTournaments.length > 0 ? (
+          filteredTournaments.map((tournament, index) => (
+            <TournamentCard
+              key={index}
+              tournament={tournament}
+              index={index}
+              status="live"
+            />
+          ))
+        ) : (
+          <EmptyResults gameFilters={gameFilters} />
+        )
       ) : (
-        <EmptyResults gameFilters={gameFilters} />
+        <NoAccount />
       )}
     </>
   );

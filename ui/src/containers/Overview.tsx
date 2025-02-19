@@ -15,6 +15,7 @@ import GameIcon from "@/components/icons/GameIcon";
 import UpcomingTournaments from "@/components/overview/tournaments/UpcomingTournaments";
 import MyTournaments from "@/components/overview/tournaments/MyTournaments";
 import LiveTournaments from "@/components/overview/tournaments/LiveTournaments";
+import EndedTournaments from "@/components/overview/tournaments/EndedTournaments";
 import TournamentTabs from "@/components/overview/TournamentTabs";
 import {
   useGetUpcomingTournamentsCount,
@@ -151,6 +152,8 @@ const Overview = () => {
               <UpcomingTournaments gameFilters={gameFilters} />
             ) : selectedTab === "live" ? (
               <LiveTournaments gameFilters={gameFilters} />
+            ) : selectedTab === "ended" ? (
+              <EndedTournaments gameFilters={gameFilters} />
             ) : (
               <MyTournaments gameFilters={gameFilters} />
             )}

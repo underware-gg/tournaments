@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
+import { useDojo } from "@/context/dojo";
 
 export function useSqlExecute(query: string) {
+  const { selectedChainConfig } = useDojo();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<any[]>([]);
@@ -11,9 +13,13 @@ export function useSqlExecute(query: string) {
       setError(null);
 
       try {
+        if (!selectedChainConfig?.toriiUrl) {
+          throw new Error("toriiUrl is not configured for the selected chain");
+        }
+
         const encodedQuery = encodeURIComponent(query);
         const response = await fetch(
-          `https://api.cartridge.gg/x/tournaments/torii/sql?query=${encodedQuery}`,
+          `${selectedChainConfig.toriiUrl}/sql?query=${encodedQuery}`,
           {
             method: "GET",
             headers: {
@@ -39,7 +45,7 @@ export function useSqlExecute(query: string) {
     };
 
     fetchData();
-  }, [query]);
+  }, [query, selectedChainConfig?.toriiUrl]);
 
   return {
     data,

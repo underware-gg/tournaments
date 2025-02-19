@@ -5,15 +5,16 @@ import { displayAddress } from "@/lib/utils";
 import {
   useControllerUsername,
   useControllerProfile,
-  useConnectController,
 } from "@/hooks/useController";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDojo } from "@/context/dojo";
 import { ChainId } from "@/dojo/config";
+import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
 
 const Header = () => {
   const { account } = useAccount();
-  const { connectController } = useConnectController();
+  const { connect } = useConnectToSelectedChain();
+
   const { disconnect } = useDisconnect();
   const { openProfile } = useControllerProfile();
   const { username } = useControllerUsername();
@@ -66,7 +67,7 @@ const Header = () => {
         <Button
           onClick={() => {
             if (!account) {
-              connectController();
+              connect();
             }
           }}
         >

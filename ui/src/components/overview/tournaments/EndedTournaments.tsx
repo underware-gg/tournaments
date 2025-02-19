@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import {
-  useGetUpcomingTournamentsQuery,
+  useGetEndedTournamentsQuery,
   useGetTournamentDetailsInListQuery,
 } from "@/dojo/hooks/useSdkQueries";
 import { bigintToHex } from "@/lib/utils";
@@ -8,32 +8,26 @@ import { Tournament } from "@/generated/models.gen";
 import { TournamentCard } from "@/components/overview/TournamanentCard";
 import { addAddressPadding } from "starknet";
 import EmptyResults from "@/components/overview/tournaments/EmptyResults";
-import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 
-interface UpcomingTournamentsProps {
+interface EndedTournamentsProps {
   gameFilters: string[];
 }
 
-const UpcomingTournaments = ({ gameFilters }: UpcomingTournamentsProps) => {
-  const state = useDojoStore.getState();
+const EndedTournaments = ({ gameFilters }: EndedTournamentsProps) => {
   const hexTimestamp = useMemo(
     () => bigintToHex(BigInt(new Date().getTime()) / 1000n),
     []
   );
 
-  const { entities: tournamentEntities } = useGetUpcomingTournamentsQuery(
+  const { entities: tournamentEntities } = useGetEndedTournamentsQuery(
     hexTimestamp,
     12,
     0
   );
 
-  console.log(state.entities);
-
   const formattedTournaments = (tournamentEntities ?? []).map(
     (tournament) => tournament?.Tournament! as unknown as Tournament
   );
-
-  console.log(formattedTournaments);
 
   const filteredTournaments = useMemo(() => {
     if (gameFilters.length === 0) return formattedTournaments;
@@ -65,7 +59,7 @@ const UpcomingTournaments = ({ gameFilters }: UpcomingTournamentsProps) => {
             key={index}
             tournament={tournament}
             index={index}
-            status="upcoming"
+            status="live"
           />
         ))
       ) : (
@@ -75,4 +69,4 @@ const UpcomingTournaments = ({ gameFilters }: UpcomingTournamentsProps) => {
   );
 };
 
-export default UpcomingTournaments;
+export default EndedTournaments;

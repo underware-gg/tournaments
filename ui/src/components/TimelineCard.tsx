@@ -43,13 +43,13 @@ const TimelineCard = ({
         </div>
       )}
       {label && (
-        <span className="absolute -top-6 left-[calc(100%_-_0px)] w-[calc(100%_+_20px)] text-[14px] text-center font-astronaut whitespace-nowrap">
+        <span className="absolute -top-6 left-[calc(100%_-_0px)] w-[calc(100%_+_20px)] text-[14px] text-center font-astronaut whitespace-nowrap text-retro-green-dark">
           {label}
         </span>
       )}
       {duraton && (
         <span className="absolute top-0 left-[calc(100%_-_0px)] w-[calc(100%_+_20px)] text-[14px] text-center whitespace-nowrap">
-          {formatTime(duraton)}
+          {duraton > 0 ? formatTime(duraton) : "Ended"}
         </span>
       )}
       {showConnector && (

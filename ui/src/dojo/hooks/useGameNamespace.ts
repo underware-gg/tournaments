@@ -21,8 +21,10 @@ export const useGameNamespace = (gameAddress: string) => {
   };
 
   useEffect(() => {
-    getGameNamespace();
-  }, [provider]);
+    if (gameAddress) {
+      getGameNamespace();
+    }
+  }, [provider, gameAddress]);
 
   return { gameNamespace };
 };

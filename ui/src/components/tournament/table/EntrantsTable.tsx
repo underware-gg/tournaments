@@ -3,18 +3,20 @@ import Pagination from "@/components/table/Pagination";
 import { USER } from "@/components/Icons";
 import { useState, useEffect, useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
-import {
-  useGetTournamentRegistrationsQuery,
-  useGetGameScoresInListQuery,
-} from "@/dojo/hooks/useSdkQueries";
 import { addAddressPadding, BigNumberish } from "starknet";
-import { useGetTokenOwnerQuery } from "@/dojo/hooks/useSqlQueries";
+import {
+  useGetTokenOwnerQuery,
+  useGetTournamentEntrants,
+} from "@/dojo/hooks/useSqlQueries";
 import {
   bigintToHex,
   displayAddress,
   feltToString,
   indexAddress,
 } from "@/lib/utils";
+import { useDojo } from "@/context/dojo";
+import { ChainId } from "@/dojo/config";
+import { useGetUsernames } from "@/hooks/useController";
 
 interface EntrantsTableProps {
   tournamentId: BigNumberish;
@@ -31,18 +33,24 @@ const EntrantsTable = ({
 }: EntrantsTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showParticipants, setShowParticipants] = useState(false);
-  const { entities: registrations } = useGetTournamentRegistrationsQuery({
+  const { selectedChainConfig } = useDojo();
+
+  const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
+
+  const { data: entrants } = useGetTournamentEntrants({
     tournamentId: tournamentId,
+    gameNamespace: gameNamespace,
+    isSepolia: isSepolia,
     limit: 5,
     offset: (currentPage - 1) * 5,
   });
 
   const tokenIds = useMemo(
     () =>
-      registrations?.map((registration) =>
-        addAddressPadding(bigintToHex(registration.Registration?.game_token_id))
+      entrants?.map((entrant) =>
+        addAddressPadding(bigintToHex(entrant?.game_token_id ?? 0n))
       ),
-    [registrations]
+    [entrants]
   );
 
   const { data: tokenOwners } = useGetTokenOwnerQuery(
@@ -50,31 +58,16 @@ const EntrantsTable = ({
     tokenIds ?? []
   );
 
-  const { entities: scores } = useGetGameScoresInListQuery({
-    namespace: gameNamespace,
-    gameIds: tokenIds ?? [],
-    isSepolia: false,
-  });
-
-  const currentScores = useMemo(() => {
-    if (!scores) return {};
-    return scores.reduce(
-      (acc: Record<string, { score: number; playerName: string }>, entity) => {
-        if (entity?.TokenMetadata?.token_id) {
-          acc[entity?.TokenMetadata?.token_id] = {
-            score: entity.Score?.score,
-            playerName: feltToString(entity.TokenMetadata?.player_name),
-          };
-        }
-        return acc;
-      },
-      {}
-    );
-  }, [scores]);
-
   useEffect(() => {
     setShowParticipants(entryCount > 0);
   }, [entryCount]);
+
+  const ownerAddresses = useMemo(
+    () => tokenOwners?.map((owner) => owner.account_address),
+    [tokenOwners]
+  );
+
+  const { usernames } = useGetUsernames(ownerAddresses ?? []);
 
   return (
     <Card
@@ -89,7 +82,7 @@ const EntrantsTable = ({
           <span className="font-astronaut text-2xl">Entrants</span>
           {showParticipants && entryCount > 5 && (
             <Pagination
-              totalPages={10}
+              totalPages={Math.ceil(entryCount / 5)}
               currentPage={currentPage}
               setCurrentPage={setCurrentPage}
             />
@@ -121,21 +114,32 @@ const EntrantsTable = ({
         >
           <div className="w-full h-0.5 bg-retro-green/25 mt-2" />
           <div className="flex flex-col py-2">
-            {registrations?.map((registration, index) => (
+            {entrants?.map((entrant, index) => (
               <div key={index} className="flex flex-row items-center gap-2">
-                <span className="w-6">
+                <span className="w-4 flex-none">
+                  {index + 1 + (currentPage - 1) * 5}.
+                </span>
+                <span className="w-6 flex-none">
                   <USER />
                 </span>
                 <span className="flex-none">
-                  {
-                    currentScores[registration.Registration?.game_token_id]
-                      ?.playerName
-                  }
+                  {feltToString(entrant?.player_name)}
                 </span>
-                {displayAddress(tokenOwners?.[index]?.account_address)}
-                <span className="flex items-center justify-center rounded-xl bg-retro-green text-black px-2 text-sm">
-                  {registration.Registration?.entry_number}
-                </span>
+                -
+                <div className="relative flex-none">
+                  <span className="text-retro-green-dark">
+                    {usernames?.get(
+                      indexAddress(tokenOwners?.[index]?.account_address ?? "")
+                    ) ||
+                      displayAddress(
+                        tokenOwners?.[index]?.account_address ?? ""
+                      )}
+                  </span>
+                  <div className="absolute -top-1 -right-8 flex items-center justify-center rounded-lg bg-retro-green-dark text-black h-4 w-6 text-[10px]">
+                    <span>x</span>
+                    <span>{entrant?.entry_number?.toString()}</span>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

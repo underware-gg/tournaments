@@ -44,13 +44,12 @@ export const useOptimisticUpdates = () => {
   const applyTournamentEntryUpdate = (
     tournamentId: BigNumberish,
     newEntryCount: BigNumberish,
-    newEntryAddressCount: BigNumberish,
-    accountAddress?: string
+    gameCount: BigNumberish
   ) => {
     const entriesEntityId = getEntityIdFromKeys([BigInt(tournamentId)]);
-    const entriesAddressEntityId = getEntityIdFromKeys([
+    const entriesGameTokenEntityId = getEntityIdFromKeys([
       BigInt(tournamentId),
-      BigInt(accountAddress ?? "0x0"),
+      BigInt(gameCount),
     ]);
 
     const transactionId = uuidv4();
@@ -62,7 +61,7 @@ export const useOptimisticUpdates = () => {
       });
       applyModelUpdate(
         draft,
-        entriesAddressEntityId,
+        entriesGameTokenEntityId,
         nameSpace,
         "Registration",
         {
@@ -84,17 +83,18 @@ export const useOptimisticUpdates = () => {
         }
       );
 
-      const addressPromise = await state.waitForEntityChange(
-        entriesAddressEntityId,
-        (entity) => {
-          return (
-            entity?.models?.[nameSpace]?.Registration?.entry_number ==
-            newEntryAddressCount
-          );
-        }
-      );
+      // TODO: fix the getting game count query
+      // const addressPromise = await state.waitForEntityChange(
+      //   entriesGameTokenEntityId,
+      //   (entity) => {
+      //     return (
+      //       entity?.models?.[nameSpace]?.Registration?.entry_number ==
+      //       newEntryAddressCount
+      //     );
+      //   }
+      // );
 
-      return await Promise.all([entriesPromise, addressPromise]);
+      return await Promise.all([entriesPromise]);
     };
 
     return {

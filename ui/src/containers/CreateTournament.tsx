@@ -20,11 +20,11 @@ import { useAccount } from "@starknet-react/core";
 import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import {
-  useGetTournamentCountsQuery,
-  useGetPrizeCountsQuery,
+  // useGetTournamentCountsQuery,
+  // useGetPrizeCountsQuery,
   useSubscribeTournamentsQuery,
 } from "@/dojo/hooks/useSdkQueries";
-import { TOURNAMENT_VERSION_KEY } from "@/lib/constants";
+// import { TOURNAMENT_VERSION_KEY } from "@/lib/constants";
 
 export type TournamentFormData = z.infer<typeof formSchema>;
 
@@ -107,10 +107,12 @@ const CreateTournament = () => {
   const { createTournamentAndApproveAndAddPrizes } = useSystemCalls();
 
   useSubscribeTournamentsQuery();
-  const { entity: tournamentCountsEntity } = useGetTournamentCountsQuery(
-    TOURNAMENT_VERSION_KEY
-  );
-  useGetPrizeCountsQuery(TOURNAMENT_VERSION_KEY);
+  // const { entity: tournamentCountsEntity } = useGetTournamentCountsQuery(
+  //   TOURNAMENT_VERSION_KEY
+  // );
+  // const { entity: prizeCountsEntity } = useGetPrizeCountsQuery(
+  //   TOURNAMENT_VERSION_KEY
+  // );
   const state = useDojoStore.getState();
   console.log(state);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -153,11 +155,13 @@ const CreateTournament = () => {
     },
   });
 
-  const tournamentCount =
-    tournamentCountsEntity?.PlatformMetrics?.total_tournaments ?? 0;
-  const prizeCount = tournamentCountsEntity?.PrizeMetrics?.total_prizes ?? 0;
-  // const tournamentCount = 0n;
-  // const prizeCount = 0;
+  // const tournamentCount =
+  //   tournamentCountsEntity?.PlatformMetrics?.total_tournaments ?? 0;
+  // console.log(tournamentCount);
+  // const prizeCount = prizeCountsEntity?.PrizeMetrics?.total_prizes ?? 0;
+  // console.log(prizeCount);
+  const tournamentCount = 0n;
+  const prizeCount = 0;
 
   // Add state for current step
   const [currentStep, setCurrentStep] = React.useState<
@@ -398,13 +402,13 @@ const CreateTournament = () => {
       const processedTournament = processTournamentData(
         formData,
         address!,
-        tournamentCount
+        Number(tournamentCount)
       );
       // Process the prizes if they exist
       const processedPrizes = processPrizes(
         formData,
-        tournamentCount,
-        prizeCount
+        Number(tournamentCount),
+        Number(prizeCount)
       );
       await createTournamentAndApproveAndAddPrizes(
         processedTournament,

@@ -145,6 +145,7 @@ const RegisterToken = () => {
             }}
             onCopy={handleCopyAddress}
             isCopied={copiedStates["erc20"]}
+            disabled={!address}
           />
 
           <TokenBox
@@ -161,6 +162,7 @@ const RegisterToken = () => {
             onCopy={handleCopyAddress}
             isCopied={copiedStates["erc721"]}
             variant="erc721"
+            disabled={!address}
           />
         </div>
         <h1 className="text-4xl text-center uppercase">Registered Tokens</h1>

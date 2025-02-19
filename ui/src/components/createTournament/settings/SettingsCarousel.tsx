@@ -1,19 +1,21 @@
 import React from "react";
-import { cn } from "@/lib/utils";
+import { cn, feltToString } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { WEDGE_LEFT, WEDGE_RIGHT } from "@/components/Icons";
-import {
-  getGameSettings,
-  GameType,
-} from "@/components/createTournament/settings/types";
+import { GameType } from "@/components/createTournament/settings/types";
 import SettingsTable from "@/components/createTournament/settings/SettingsTable";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
+import { Settings, SettingsDetails } from "@/generated/models.gen";
 
 interface SettingsCarouselProps {
   game: GameType;
-  settings: ReturnType<typeof getGameSettings>[keyof ReturnType<
-    typeof getGameSettings
-  >];
+  settings: Record<
+    string,
+    SettingsDetails & {
+      hasSettings: boolean;
+      settings: Settings[];
+    }
+  >;
   value: string;
   onChange: (value: string) => void;
 }
@@ -25,14 +27,14 @@ const SettingsCarousel = ({
   onChange,
 }: SettingsCarouselProps) => {
   const [currentIndex, setCurrentIndex] = React.useState(() => {
-    if (!settings?.length) return 0;
+    if (!Object.values(settings)?.length) return 0;
     return Math.max(
       0,
-      settings.findIndex((s) => s.id === value)
+      Object.values(settings).findIndex((s) => s.id === value)
     );
   });
   // If no settings available, show fallback UI
-  if (!settings?.length) {
+  if (!Object.values(settings)?.length) {
     return (
       <div className="space-y-4">
         <div className="flex flex-col items-center justify-center text-center gap-2 text-muted-foreground">
@@ -46,18 +48,21 @@ const SettingsCarousel = ({
 
   const currentSetting = settings[currentIndex];
 
-  console.log(settings);
-
   return (
     <div className="space-y-4">
       <div className="relative px-6 min-h-[200px]">
         <div className="flex flex-col items-center w-full">
           <TokenGameIcon size="lg" game={game} />
-          <h3 className="text-2xl font-astronaut">{currentSetting.name}</h3>
+          <h3 className="text-2xl font-astronaut">
+            {feltToString(currentSetting.name)}
+          </h3>
           <p className="text-muted-foreground">{currentSetting.description}</p>
 
           {/* Add the settings table */}
-          <SettingsTable game={game} settingId={currentSetting.id} />
+          <SettingsTable
+            hasSettings={currentSetting.hasSettings}
+            settings={currentSetting.settings}
+          />
         </div>
 
         <div className="absolute -inset-x-4 top-1/2 flex justify-between -translate-y-1/2">
@@ -74,9 +79,11 @@ const SettingsCarousel = ({
             variant="outline"
             size="icon"
             onClick={() =>
-              setCurrentIndex((i) => Math.min(settings.length - 1, i + 1))
+              setCurrentIndex((i) =>
+                Math.min(Object.values(settings).length - 1, i + 1)
+              )
             }
-            disabled={currentIndex === settings.length - 1}
+            disabled={currentIndex === Object.values(settings).length - 1}
             className="h-8 w-8 rounded-full"
           >
             <WEDGE_RIGHT />
@@ -86,7 +93,7 @@ const SettingsCarousel = ({
 
       <div className="flex justify-between items-center">
         <div className="flex gap-1">
-          {settings.map((_, i) => (
+          {Object.values(settings).map((_, i) => (
             <div
               key={i}
               className={cn(
@@ -98,15 +105,16 @@ const SettingsCarousel = ({
         </div>
         <Button
           onClick={() => {
-            onChange(currentSetting.id);
+            onChange(currentSetting.id.toString());
             // Close dialog
             const dialogClose = document.querySelector("[data-dialog-close]");
             if (dialogClose instanceof HTMLElement) {
               dialogClose.click();
             }
           }}
+          disabled={currentIndex === Number(value)}
         >
-          Select
+          {currentIndex === Number(value) ? "Selected" : "Select"}
         </Button>
       </div>
     </div>

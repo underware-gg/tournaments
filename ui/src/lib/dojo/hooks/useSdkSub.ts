@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BigNumberish } from "starknet";
 import { SubscriptionQueryType, ParsedEntity } from "@dojoengine/sdk";
 import { useDojo } from "@/context/dojo";
@@ -9,7 +9,7 @@ export type TournamentSubQuery = SubscriptionQueryType<SchemaType>;
 
 export type EntityResult = {
   entityId: BigNumberish;
-} & Partial<SchemaType["tournament"]>;
+} & Partial<SchemaType["tournaments"]>;
 
 export type UseSdkSubEntitiesResult = {
   entities: EntityResult[] | null;
@@ -17,7 +17,7 @@ export type UseSdkSubEntitiesResult = {
 };
 
 export type UseSdkSubEntitiesProps = {
-  query: TournamentSubQuery;
+  query: any;
   logging?: boolean;
   enabled?: boolean;
 };
@@ -31,12 +31,15 @@ export const useSdkSubscribeEntities = ({
   const [entities, setEntities] = useState<EntityResult[] | null>(null);
   const state = useDojoStore.getState();
 
+  const memoizedQuery = useMemo(() => query, [JSON.stringify(query)]);
+
   useEffect(() => {
     let _unsubscribe: (() => void) | undefined;
 
     const _subscribe = async () => {
-      const subscription = await sdk.subscribeEntityQuery({
-        query,
+      console.log(memoizedQuery);
+      const [initialEntities, subscription] = await sdk.subscribeEntityQuery({
+        query: memoizedQuery,
         callback: (response) => {
           if (response.error) {
             console.error(
@@ -67,11 +70,11 @@ export const useSdkSubscribeEntities = ({
           }
         },
       });
+      state.setEntities(initialEntities as ParsedEntity<SchemaType>[]);
       setIsSubscribed(true);
       _unsubscribe = () => subscription.cancel();
     };
 
-    // mount
     setIsSubscribed(false);
     if (enabled) {
       _subscribe();
@@ -85,7 +88,7 @@ export const useSdkSubscribeEntities = ({
       _unsubscribe?.();
       _unsubscribe = undefined;
     };
-  }, [sdk, query, enabled]);
+  }, [sdk, memoizedQuery, enabled]);
 
   return {
     entities,
