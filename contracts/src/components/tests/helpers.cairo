@@ -7,12 +7,12 @@ use tournaments::tests::{
     constants::{
         TOURNAMENT_NAME, TOURNAMENT_DESCRIPTION, TEST_REGISTRATION_START_TIME,
         TEST_REGISTRATION_END_TIME, TEST_START_TIME, TEST_END_TIME, SETTINGS_NAME,
-        SETTINGS_DESCRIPTION,
+        SETTINGS_DESCRIPTION, OWNER,
     },
 };
 use tournaments::components::tests::interfaces::{
-    ITournamentMockDispatcher, ITournamentMockDispatcherTrait, IGameMockDispatcher,
-    IGameMockDispatcherTrait,
+    ITournamentMockDispatcher, ITournamentMockDispatcherTrait, IGameTokenMockDispatcher,
+    IGameTokenMockDispatcherTrait,
 };
 
 use tournaments::components::models::tournament::{Tournament, Metadata, GameConfig};
@@ -105,14 +105,19 @@ pub fn registration_open_beyond_tournament_end() -> Schedule {
 
 pub fn create_basic_tournament(
     tournament: ITournamentMockDispatcher, game: ContractAddress,
-) -> (Tournament, u64) {
+) -> Tournament {
     tournament
         .create_tournament(
-            test_metadata(), test_schedule(), test_game_config(game), Option::None, Option::None,
+            OWNER(),
+            test_metadata(),
+            test_schedule(),
+            test_game_config(game),
+            Option::None,
+            Option::None,
         )
 }
 
-pub fn create_settings_details(game: IGameMockDispatcher) {
+pub fn create_settings_details(game: IGameTokenMockDispatcher) {
     game.set_settings(1, SETTINGS_NAME(), SETTINGS_DESCRIPTION(), true);
 }
 // pub fn register_tokens_for_test(
