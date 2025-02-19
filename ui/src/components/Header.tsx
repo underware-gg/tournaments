@@ -5,7 +5,6 @@ import { displayAddress } from "@/lib/utils";
 import {
   useControllerUsername,
   useControllerProfile,
-  useConnectController,
 } from "@/hooks/useController";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDojo } from "@/context/dojo";
@@ -15,7 +14,6 @@ import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
 const Header = () => {
   const { account } = useAccount();
   const { connect } = useConnectToSelectedChain();
-  // const { connectController } = useConnectController();
 
   const { disconnect } = useDisconnect();
   const { openProfile } = useControllerProfile();

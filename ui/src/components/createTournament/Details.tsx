@@ -2,13 +2,6 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   FormControl,
   FormField,
   FormItem,
@@ -21,8 +14,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { StepProps } from "@/containers/CreateTournament";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
 import { getGames } from "@/assets/games";
-import SettingsCarousel from "@/components/createTournament/settings/SettingsCarousel";
-import SmallSettingsTable from "@/components/createTournament/settings/SmallSettingsTable";
 import {
   getGameSettings,
   GameType,
@@ -35,6 +26,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import SettingsSection from "@/components/createTournament/settings/SettingsSection";
 
 const Details = ({ form }: StepProps) => {
   const PREDEFINED_SIZES = [1, 3, 10, 20] as const;
@@ -42,13 +34,7 @@ const Details = ({ form }: StepProps) => {
   React.useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === "game") {
-        const game = value.game as GameType;
-        const firstSetting =
-          gameSettings[game as keyof ReturnType<typeof getGameSettings>]?.[0]
-            ?.id;
-        if (firstSetting) {
-          form.setValue("settings", firstSetting);
-        }
+        form.setValue("settings", "0");
       }
     });
 
@@ -112,77 +98,7 @@ const Details = ({ form }: StepProps) => {
             control={form.control}
             name="settings"
             render={({ field }) => (
-              <FormItem>
-                <div className="flex flex-row items-center gap-5">
-                  <FormLabel className="font-astronaut text-2xl">
-                    Settings
-                  </FormLabel>
-                  <FormDescription>Select the game settings</FormDescription>
-                </div>
-                <FormControl>
-                  <div className="flex flex-col gap-4">
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-start">
-                        <div className="flex flex-col">
-                          <h3 className="font-astronaut text-lg">
-                            {
-                              gameSettings[
-                                form.watch("game") as keyof ReturnType<
-                                  typeof getGameSettings
-                                >
-                              ]?.find((s) => s.id === field.value)?.name
-                            }
-                          </h3>
-                          <p className="text-sm text-retro-green-dark">
-                            {
-                              gameSettings[
-                                form.watch("game") as keyof ReturnType<
-                                  typeof getGameSettings
-                                >
-                              ]?.find((s) => s.id === field.value)?.name
-                            }
-                          </p>
-                        </div>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              disabled={!form.watch("game")}
-                            >
-                              Select Settings
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="sm:max-w-[500px]">
-                            <DialogHeader>
-                              <DialogTitle>Game Settings</DialogTitle>
-                            </DialogHeader>
-                            {form.watch("game") && (
-                              <SettingsCarousel
-                                game={form.watch("game") as GameType}
-                                settings={
-                                  gameSettings[
-                                    form.watch("game") as keyof ReturnType<
-                                      typeof getGameSettings
-                                    >
-                                  ]
-                                }
-                                value={field.value}
-                                onChange={field.onChange}
-                              />
-                            )}
-                          </DialogContent>
-                        </Dialog>
-                      </div>
-
-                      <SmallSettingsTable
-                        game={form.watch("game") as GameType}
-                        settingId={field.value}
-                      />
-                    </div>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+              <SettingsSection form={form} field={field} />
             )}
           />
         </div>

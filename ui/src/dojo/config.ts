@@ -260,7 +260,7 @@ const snSepoliaConfig: DojoChainConfig = {
   toriiUrl: "https://api.cartridge.gg/x/darkshuffle-sepolia/torii",
   relayUrl: undefined,
   blastRpc: undefined,
-  blockExplorerUrl: undefined,
+  blockExplorerUrl: "https://sepolia.voyager.online/",
   ekuboPriceAPI: "https://sepolia-api.ekubo.org/price",
   // masterAddress: KATANA_PREFUNDED_ADDRESS,
   // masterPrivateKey: KATANA_PREFUNDED_PRIVATE_KEY,

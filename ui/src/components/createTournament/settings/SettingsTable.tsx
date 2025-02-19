@@ -1,21 +1,14 @@
-import {
-  getGameSettingsConfig,
-  GameType,
-} from "@/components/createTournament/settings/types";
+import { Settings } from "@/generated/models.gen";
+import { feltToString } from "@/lib/utils";
 
-const SettingsTable = <T extends GameType>({
-  game,
-  settingId,
-}: {
-  game: T;
-  settingId: string;
-}) => {
-  const setting = getGameSettingsConfig()[
-    game as keyof ReturnType<typeof getGameSettingsConfig>
-  ]?.find((s) => s.id === settingId);
+interface SettingsTableProps {
+  hasSettings: boolean;
+  settings: Settings[];
+}
 
+const SettingsTable = ({ hasSettings, settings }: SettingsTableProps) => {
   // If game doesn't exist in config or has no settings
-  if (!setting?.settings?.length) {
+  if (!hasSettings) {
     return (
       <div className="border border-retro-green-dark rounded-lg overflow-hidden w-3/4 p-4">
         <div className="flex flex-col items-center justify-center text-center gap-2 text-muted-foreground">
@@ -30,21 +23,23 @@ const SettingsTable = <T extends GameType>({
     <div className="border border-retro-green-dark rounded-lg overflow-hidden w-3/4">
       <table className="w-full">
         <tbody className="divide-y divide-retro-green-dark">
-          {setting.settings.map((item) => (
+          {settings.map((setting, index) => (
             <tr
-              key={item.key}
+              key={index}
               className="hover:bg-retro-green/5 transition-colors"
             >
-              <td className="p-2 pl-4">
+              {/* <td className="p-2 pl-4">
                 <img
                   src={`/icons/${game}/${item.icon}`}
                   alt={item.label}
                   className="w-6 h-6 text-retro-green"
                 />
+              </td> */}
+              <td className="p-2 text-sm font-medium">
+                {feltToString(setting.name)}
               </td>
-              <td className="p-2 text-sm font-medium">{item.label}</td>
               <td className="p-2 pr-4 text-sm text-muted-foreground text-right">
-                {item.value}
+                {setting.value.toString()}
               </td>
             </tr>
           ))}

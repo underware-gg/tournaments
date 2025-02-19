@@ -156,7 +156,7 @@ export const TournamentCard = ({
         <div className="flex flex-row items-center justify-between w-3/4 mx-auto">
           <div className="flex flex-row items-center gap-2">
             <span className="text-retro-green-dark">Fee:</span>
-            <span>{hasEntryFee ? `"$${entryFee}"` : "FREE"}</span>
+            <span>{hasEntryFee ? `$${entryFee}` : "FREE"}</span>
           </div>
           <div className="flex flex-row items-center gap-2">
             <span className="text-retro-green-dark">Pot:</span>

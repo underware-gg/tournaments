@@ -11,7 +11,8 @@ import { format } from "date-fns";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
 import { ALERT } from "@/components/Icons";
 import { useAccount } from "@starknet-react/core";
-import { useConnectController } from "@/hooks/useController";
+import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
+
 interface TournamentConfirmationProps {
   formData: TournamentFormData;
   onConfirm: () => void;
@@ -26,7 +27,7 @@ const TournamentConfirmation = ({
   onOpenChange,
 }: TournamentConfirmationProps) => {
   const { address } = useAccount();
-  const { connectController } = useConnectController();
+  const { connect } = useConnectToSelectedChain();
   // Helper function to safely check array length
   const hasBonusPrizes =
     formData.bonusPrizes && formData.bonusPrizes.length > 0;
@@ -156,7 +157,7 @@ const TournamentConfirmation = ({
               <Button onClick={onConfirm}>Confirm & Create</Button>
             </DialogClose>
           ) : (
-            <Button onClick={() => connectController()}>Connect Wallet</Button>
+            <Button onClick={() => connect()}>Connect Wallet</Button>
           )}
         </div>
       </DialogContent>

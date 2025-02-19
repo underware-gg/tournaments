@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ARROW_LEFT, TROPHY } from "@/components/Icons";
 import { useNavigate, useParams } from "react-router-dom";
-import { Card } from "@/components/ui/card";
 import EntrantsTable from "@/components/tournament/table/EntrantsTable";
 import TournamentTimeline from "@/components/TournamentTimeline";
 import { bigintToHex, feltToString, formatTime } from "@/lib/utils";
@@ -10,6 +9,8 @@ import { addAddressPadding } from "starknet";
 import {
   useGetTournamentDetailsQuery,
   useSubscribeGamesQuery,
+  useSubscribeEntriesQuery,
+  useGetGameCounterQuery,
 } from "@/dojo/hooks/useSdkQueries";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import {
@@ -21,13 +22,24 @@ import {
 } from "@/generated/models.gen";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { useDojo } from "@/context/dojo";
-import PrizeDisplay from "@/components/tournament/Prize";
-import { groupPrizesByPositions } from "@/lib/utils/formatting";
+import {
+  calculateTotalValue,
+  countTotalNFTs,
+  getErc20TokenSymbols,
+  groupPrizesByPositions,
+  groupPrizesByTokens,
+} from "@/lib/utils/formatting";
 import useModel from "@/dojo/hooks/useModel";
 import { useGameNamespace } from "@/dojo/hooks/useGameNamespace";
 import { EnterTournamentDialog } from "@/components/dialogs/EnterTournament";
 import ScoreTable from "@/components/tournament/table/ScoreTable";
 import { ChainId } from "@/dojo/config";
+import { TOURNAMENT_VERSION_KEY } from "@/lib/constants";
+import { useEkuboPrices } from "@/hooks/useEkuboPrices";
+import MyEntries from "@/components/tournament/MyEntries";
+import TokenGameIcon from "@/components/icons/TokenGameIcon";
+import EntryRequirements from "@/components/tournament/EntryRequirements";
+import PrizesContainer from "@/components/tournament/prizes/PrizesContainer";
 
 const Tournament = () => {
   const { id } = useParams<{ id: string }>();
@@ -36,6 +48,7 @@ const Tournament = () => {
   const { nameSpace, selectedChainConfig } = useDojo();
   const state = useDojoStore.getState();
   const [enterDialogOpen, setEnterDialogOpen] = useState(false);
+
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
   // const tournament = tournaments[Number(id)];
 
@@ -69,6 +82,15 @@ const Tournament = () => {
     tournamentModel?.game_config?.address
   );
 
+  const { entity: gameCounterEntity } = useGetGameCounterQuery({
+    key: addAddressPadding(BigInt(TOURNAMENT_VERSION_KEY)),
+    nameSpace: gameNamespace ?? "",
+  });
+
+  const gameCount = gameCounterEntity?.GameCounter?.count ?? 0;
+
+  useSubscribeEntriesQuery();
+
   useSubscribeGamesQuery({
     nameSpace: gameNamespace ?? "",
     isSepolia: isSepolia,
@@ -92,6 +114,17 @@ const Tournament = () => {
     return () => window.removeEventListener("resize", checkOverflow);
   }, [tournamentModel?.metadata.description]); // Recheck when description changes
 
+  const groupedByTokensPrizes = groupPrizesByTokens(prizes, tokens);
+
+  const erc20TokenSymbols = getErc20TokenSymbols(groupedByTokensPrizes);
+  const { prices } = useEkuboPrices({ tokens: erc20TokenSymbols });
+  const totalPrizesValueUSD = calculateTotalValue(
+    groupedByTokensPrizes,
+    prices
+  );
+
+  const totalPrizeNFTs = countTotalNFTs(groupedByTokensPrizes);
+
   if (!tournamentModel) {
     return (
       <div className="w-3/4 h-full m-auto flex items-center justify-center">
@@ -106,10 +139,14 @@ const Tournament = () => {
   );
 
   const registrationType = tournamentModel?.schedule.registration.isNone()
-    ? "Open"
-    : "Fixed";
+    ? "open"
+    : "fixed";
 
   const groupedPrizes = groupPrizesByPositions(prizes, tokens);
+  const lowestPrizePosition =
+    Object.keys(groupedPrizes).length > 0
+      ? Math.max(...Object.keys(groupedPrizes).map(Number))
+      : 0;
 
   const hasEntryFee = tournamentModel?.entry_fee.isSome();
 
@@ -132,6 +169,12 @@ const Tournament = () => {
     Number(tournamentModel?.schedule.game.end) -
     Number(BigInt(Date.now()) / 1000n);
 
+  const status = useMemo(() => {
+    if (isEnded) return "ended";
+    if (isStarted) return "live";
+    return "upcoming";
+  }, [isStarted, isEnded]);
+
   return (
     <div className="w-3/4 px-20 pt-20 mx-auto flex flex-col gap-5">
       <div className="flex flex-row justify-between">
@@ -140,22 +183,30 @@ const Tournament = () => {
           Back
         </Button>
         <div className="flex flex-row items-center gap-5">
+          <span className="text-retro-green uppercase font-astronaut text-2xl">
+            {status}
+          </span>
+          <TokenGameIcon
+            game={tournamentModel?.game_config?.address}
+            size={"md"}
+          />
           {/* <Button variant="outline">
             <PLUS /> Add Prizes
           </Button> */}
-          {(registrationType === "Fixed" && !isStarted) ||
-            (registrationType === "Open" && !isEnded && (
-              <Button
-                className="uppercase"
-                onClick={() => setEnterDialogOpen(true)}
-              >
-                <TROPHY />
-                {` Enter | `}
-                <span className="font-bold">
-                  {hasEntryFee ? `$${entryFee}` : "Free"}
-                </span>
-              </Button>
-            ))}
+          <EntryRequirements tournamentModel={tournamentModel} />
+          {((registrationType === "fixed" && !isStarted) ||
+            (registrationType === "open" && !isEnded)) && (
+            <Button
+              className="uppercase"
+              onClick={() => setEnterDialogOpen(true)}
+            >
+              <TROPHY />
+              {` Enter | `}
+              <span className="font-bold">
+                {hasEntryFee ? `$${entryFee}` : "Free"}
+              </span>
+            </Button>
+          )}
           <EnterTournamentDialog
             open={enterDialogOpen}
             onOpenChange={setEnterDialogOpen}
@@ -163,6 +214,7 @@ const Tournament = () => {
             entryFee={entryFee}
             tournamentModel={tournamentModel}
             entryCountModel={entryCountModel}
+            gameCount={gameCount}
           />
         </div>
       </div>
@@ -173,22 +225,42 @@ const Tournament = () => {
               {feltToString(tournamentModel.metadata.name)}
             </span>
             <div className="flex flex-row items-center gap-4 text-retro-green-dark">
-              <span>
-                Pot: <span className="text-retro-green">${100}</span>
-              </span>
-              {/* <span>
-              Leaderboard: <span className="text-retro-green">Top 5</span>
-            </span> */}
-              <span>
-                Duration:{" "}
+              <div className="flex flex-row gap-2">
+                <span>Pot:</span>
+                <span className="text-retro-green">
+                  {totalPrizesValueUSD > 0 || totalPrizeNFTs > 0 ? (
+                    <div className="flex flex-row items-center gap-2">
+                      {totalPrizesValueUSD > 0 && (
+                        <span>${totalPrizesValueUSD}</span>
+                      )}
+                      {totalPrizeNFTs > 0 && (
+                        <span>
+                          {totalPrizeNFTs} NFT{totalPrizeNFTs === 1 ? "" : "s"}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <span>No Prizes</span>
+                  )}
+                </span>
+              </div>
+              <div className="flex flex-row gap-2">
+                <span>Winners:</span>
+                <span className="text-retro-green">Top 5</span>
+              </div>
+              <div className="flex flex-row gap-2">
+                <span>Duration:</span>
                 <span className="text-retro-green">
                   {formatTime(durationSeconds)}
                 </span>
-              </span>
-              <span>
-                Registration Type:{" "}
-                <span className="text-retro-green">{registrationType}</span>
-              </span>
+              </div>
+              <div className="flex flex-row gap-2">
+                <span>Registration:</span>
+                <span className="text-retro-green">
+                  {registrationType.charAt(0).toUpperCase() +
+                    registrationType.slice(1)}
+                </span>
+              </div>
             </div>
           </div>
           <div className="flex flex-row">
@@ -234,8 +306,8 @@ const Tournament = () => {
         </div>
       </div>
       <div className="flex flex-col gap-10">
-        <div className="flex flex-row items-center h-[150px] gap-5">
-          <div className="w-1/2">
+        <div className="flex flex-row h-[150px] gap-5">
+          <div className="w-1/2 flex justify-center items-center">
             <TournamentTimeline
               type={registrationType}
               startTime={Number(tournamentModel?.schedule.game.start)}
@@ -246,46 +318,16 @@ const Tournament = () => {
               pulse={true}
             />
           </div>
-          <Card variant="outline" className="w-1/2 h-full">
-            <div className="flex flex-col">
-              <div className="flex flex-row justify-between font-astronaut text-2xl h-8">
-                <span>Prizes</span>
-                <div className="flex flex-row items-center">
-                  <span className="w-8">
-                    <TROPHY />
-                  </span>
-                  : {Number(tournamentModel.game_config.prize_spots)}
-                </div>
-              </div>
-              <div className="w-full h-0.5 bg-retro-green/25" />
-              <div className="p-4">
-                {prizes.length > 0 ? (
-                  <div className="flex flex-col gap-3">
-                    {Object.entries(groupedPrizes)
-                      .sort(
-                        (a, b) =>
-                          Number(a[1].payout_position) -
-                          Number(b[1].payout_position)
-                      )
-                      .map(([position, prizes], index) => (
-                        <PrizeDisplay
-                          key={index}
-                          position={Number(position)}
-                          prizes={prizes}
-                        />
-                      ))}
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-32 text-retro-green/50 font-astronaut">
-                    No prizes announced yet
-                  </div>
-                )}
-              </div>
-            </div>
-          </Card>
+          <div className="w-1/2">
+            <PrizesContainer
+              prizesExist={prizes.length > 0}
+              lowestPrizePosition={lowestPrizePosition}
+              groupedPrizes={groupedPrizes}
+            />
+          </div>
         </div>
         <div className="flex flex-row gap-5">
-          {registrationType === "Fixed" && !isStarted ? (
+          {registrationType === "fixed" && !isStarted ? (
             <EntrantsTable
               tournamentId={tournamentModel?.id}
               entryCount={entryCountModel ? Number(entryCountModel.count) : 0}
@@ -302,24 +344,12 @@ const Tournament = () => {
           ) : (
             <></>
           )}
-          <Card
-            variant="outline"
-            borderColor="rgba(0, 218, 163, 1)"
-            className="w-1/2 flex flex-col justify-between"
-          >
-            <div className="flex flex-col">
-              <div className="flex flex-row justify-between font-astronaut text-2xl h-8">
-                <span>My Entries</span>
-                <div className="flex flex-row items-center">
-                  <span className="w-6">
-                    <TROPHY />
-                  </span>
-                  : {5}
-                </div>
-              </div>
-              <div className="w-full h-0.5 bg-retro-green/25" />
-            </div>
-          </Card>
+          <MyEntries
+            tournamentId={tournamentModel?.id}
+            gameAddress={tournamentModel?.game_config?.address}
+            gameNamespace={gameNamespace ?? ""}
+            isSepolia={isSepolia}
+          />
         </div>
       </div>
     </div>

@@ -11,13 +11,13 @@ import {
 type WithFieldOrder<T> = T & { fieldOrder: string[] };
 
 // Type definition for `tournaments::components::models::game::GameCount` struct
-export interface GameCount {
+export interface GameCounter {
   key: BigNumberish;
   count: BigNumberish;
 }
 
 // Type definition for `tournaments::components::models::game::GameCountValue` struct
-export interface GameCountValue {
+export interface GameCounterValue {
   count: BigNumberish;
 }
 
@@ -68,15 +68,32 @@ export interface SettingsDetailsValue {
   exists: boolean;
 }
 
+// Type definition for `tournaments::components::models::game::Settings` struct
+export interface Settings {
+  id: BigNumberish;
+  name: BigNumberish;
+  value: BigNumberish;
+}
+
+// Type definition for `tournaments::components::models::game::SettingsValue` struct
+export interface SettingsValue {
+  name: BigNumberish;
+  value: BigNumberish;
+}
+
 // Type definition for `tournaments::components::models::game::TokenMetadata` struct
 export interface TokenMetadata {
   token_id: BigNumberish;
   minted_by: string;
   player_name: BigNumberish;
   settings_id: BigNumberish;
-  minted_at: BigNumberish;
-  available_at: BigNumberish;
-  expires_at: BigNumberish;
+  lifecycle: Lifecycle;
+}
+
+export interface Lifecycle {
+  mint: BigNumberish;
+  start: CairoOption<BigNumberish>;
+  end: CairoOption<BigNumberish>;
 }
 
 // Type definition for `tournaments::components::models::game::TokenMetadataValue` struct
@@ -339,14 +356,16 @@ export type NFTQualification = {
 
 export interface SchemaType extends ISchemaType {
   tournaments: {
-    GameCount: WithFieldOrder<GameCount>;
-    GameCountValue: WithFieldOrder<GameCountValue>;
+    GameCounter: WithFieldOrder<GameCounter>;
+    GameCounterValue: WithFieldOrder<GameCounterValue>;
     GameMetadata: WithFieldOrder<GameMetadata>;
     GameMetadataValue: WithFieldOrder<GameMetadataValue>;
     Score: WithFieldOrder<Score>;
     ScoreValue: WithFieldOrder<ScoreValue>;
     SettingsDetails: WithFieldOrder<SettingsDetails>;
     SettingsDetailsValue: WithFieldOrder<SettingsDetailsValue>;
+    Settings: WithFieldOrder<Settings>;
+    SettingsValue: WithFieldOrder<SettingsValue>;
     TokenMetadata: WithFieldOrder<TokenMetadata>;
     TokenMetadataValue: WithFieldOrder<TokenMetadataValue>;
     ERC20Data: WithFieldOrder<ERC20Data>;
@@ -382,12 +401,12 @@ export interface SchemaType extends ISchemaType {
 }
 export const schema: SchemaType = {
   tournaments: {
-    GameCount: {
+    GameCounter: {
       fieldOrder: ["key", "count"],
       key: 0,
       count: 0,
     },
-    GameCountValue: {
+    GameCounterValue: {
       fieldOrder: ["count"],
       count: 0,
     },
@@ -447,23 +466,34 @@ export const schema: SchemaType = {
       description: "",
       exists: false,
     },
+    Settings: {
+      fieldOrder: ["id", "name", "value"],
+      id: 0,
+      name: 0,
+      value: 0,
+    },
+    SettingsValue: {
+      fieldOrder: ["name", "value"],
+      name: 0,
+      value: 0,
+    },
     TokenMetadata: {
       fieldOrder: [
         "token_id",
         "minted_by",
         "player_name",
         "settings_id",
-        "minted_at",
-        "available_at",
-        "expires_at",
+        "lifecycle",
       ],
       token_id: 0,
       minted_by: "",
       player_name: 0,
       settings_id: 0,
-      minted_at: 0,
-      available_at: 0,
-      expires_at: 0,
+      lifecycle: {
+        mint: 0,
+        start: new CairoOption(CairoOptionVariant.None),
+        end: new CairoOption(CairoOptionVariant.None),
+      },
     },
     TokenMetadataValue: {
       fieldOrder: [
@@ -716,8 +746,8 @@ export const schema: SchemaType = {
   },
 };
 export enum ModelsMapping {
-  GameCount = "tournaments-GameCount",
-  GameCountValue = "tournaments-GameCountValue",
+  GameCounter = "tournaments-GameCounter",
+  GameCounterValue = "tournaments-GameCounterValue",
   GameMetadata = "tournaments-GameMetadata",
   GameMetadataValue = "tournaments-GameMetadataValue",
   Score = "tournaments-Score",

@@ -5,7 +5,9 @@ import { useState, useEffect, useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
 import {
   useGetTournamentRegistrationsQuery,
+  useGetGameMetadataInListQuery,
   useGetGameScoresInListQuery,
+  useGetTournamentLeaderboardQuery,
 } from "@/dojo/hooks/useSdkQueries";
 import { addAddressPadding, BigNumberish } from "starknet";
 import { useGetTokenOwnerQuery } from "@/dojo/hooks/useSqlQueries";
@@ -58,36 +60,45 @@ const ScoreTable = ({
     tokenIds ?? []
   );
 
+  const { entities: metadata } = useGetGameMetadataInListQuery({
+    namespace: gameNamespace,
+    gameIds: tokenIds ?? [],
+    isSepolia: isSepolia,
+  });
+
   const { entities: scores } = useGetGameScoresInListQuery({
     namespace: gameNamespace,
     gameIds: tokenIds ?? [],
     isSepolia: isSepolia,
   });
 
-  console.log(scores, tokenIds);
+  console.log(metadata, scores, tokenIds);
 
-  const currentScores = useMemo(() => {
-    if (!scores) return {};
-    return scores.reduce(
-      (acc: Record<string, { score: number; playerName: string }>, entity) => {
-        if (entity?.TokenMetadata?.token_id) {
-          acc[entity?.TokenMetadata?.token_id.toString()] = {
-            score: entity.Score?.score,
-            playerName: feltToString(entity.TokenMetadata?.player_name),
+  const mergedScores =
+    useMemo(() => {
+      if (!metadata || !scores || !tokenIds) return {};
+
+      return tokenIds.reduce((acc: Record<string, any>, tokenId) => {
+        const metadataEntry = metadata.find(
+          (m) => m.TokenMetadata?.token_id === Number(tokenId)
+        );
+        const scoreEntry = scores.find(
+          (s) => s.Score?.game_id === Number(tokenId)
+        );
+
+        if (tokenId) {
+          acc[Number(tokenId).toString()] = {
+            score: Number(scoreEntry?.Score?.score ?? 0),
+            playerName: feltToString(
+              metadataEntry?.TokenMetadata?.player_name ?? ""
+            ),
+            metadata: metadataEntry?.TokenMetadata ?? null,
+            scoreData: scoreEntry?.Score ?? null,
           };
         }
         return acc;
-      },
-      {}
-    );
-  }, [scores]);
-
-  console.log(currentScores);
-
-  // const { entities: gameMetadata } = useGetGameMetadataInListQuery({
-  //   nameSpace: gameNamespace,
-  //   gameIds: tokenIds ?? [],
-  // });
+      }, {});
+    }, [metadata, scores, tokenIds]) || {};
 
   useEffect(() => {
     setShowParticipants(entryCount > 0);
@@ -99,6 +110,14 @@ const ScoreTable = ({
   );
 
   const { usernames } = useGetUsernames(ownerAddresses ?? []);
+
+  const { entities: leaderboard } = useGetTournamentLeaderboardQuery({
+    tournamentId: tournamentId,
+    namespace: gameNamespace,
+    isSepolia: isSepolia,
+  });
+
+  console.log(addAddressPadding(2));
 
   return (
     <Card
@@ -113,7 +132,7 @@ const ScoreTable = ({
           <span className="font-astronaut text-2xl">Scores</span>
           {showParticipants && entryCount > 5 && (
             <Pagination
-              totalPages={entryCount}
+              totalPages={Math.ceil(entryCount / 5)}
               currentPage={currentPage}
               setCurrentPage={setCurrentPage}
             />
@@ -155,20 +174,27 @@ const ScoreTable = ({
                 </span>
                 <span className="flex-none">
                   {
-                    currentScores[registration.Registration?.game_token_id]
-                      ?.playerName
+                    mergedScores[
+                      registration.Registration?.game_token_id?.toString() ?? ""
+                    ]?.playerName
                   }
                 </span>
                 -
                 <div className="relative flex-none">
                   <span className="text-retro-green-dark">
                     {usernames?.get(
-                      indexAddress(tokenOwners?.[index]?.account_address)
-                    ) || displayAddress(tokenOwners?.[index]?.account_address)}
+                      indexAddress(tokenOwners?.[index]?.account_address ?? "")
+                    ) ||
+                      displayAddress(
+                        tokenOwners?.[index]?.account_address ?? ""
+                      )}
                   </span>
-                  <span className="absolute -top-2 -right-3 flex items-center justify-center rounded-lg bg-retro-green-dark text-black h-4 w-4 text-[10px]">
-                    {registration.Registration?.entry_number}
-                  </span>
+                  <div className="absolute -top-1 -right-8 flex items-center justify-center rounded-lg bg-retro-green-dark text-black h-4 w-6 text-[10px]">
+                    <span>x</span>
+                    <span>
+                      {registration.Registration?.entry_number?.toString()}
+                    </span>
+                  </div>
                 </div>
                 <p
                   className="flex-1 h-[2px] bg-repeat-x"
@@ -180,8 +206,9 @@ const ScoreTable = ({
                   }}
                 ></p>
                 <span className="flex-none text-retro-green">
-                  {currentScores[registration.Registration?.game_token_id]
-                    ?.score ?? 0}
+                  {mergedScores[
+                    registration.Registration?.game_token_id?.toString() ?? ""
+                  ]?.score ?? 0}
                 </span>
               </div>
             ))}

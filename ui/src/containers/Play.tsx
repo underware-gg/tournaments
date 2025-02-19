@@ -25,7 +25,9 @@ const Play = () => {
     return entities
       .filter((entity) => entity?.Registration?.game_token_id != null)
       .map((entity) =>
-        addAddressPadding(bigintToHex(entity?.Registration?.game_token_id))
+        addAddressPadding(
+          bigintToHex(entity?.Registration?.game_token_id ?? 0n)
+        )
       );
   }, [entities]);
 
@@ -40,7 +42,7 @@ const Play = () => {
     return currentScoreEntities.reduce(
       (acc: Record<string, number>, entity) => {
         if (entity?.Score?.game_id) {
-          acc[entity.Score.game_id] = entity.Score.score;
+          acc[entity.Score.game_id.toString()] = Number(entity.Score.score);
         }
         return acc;
       },
@@ -70,36 +72,55 @@ const Play = () => {
           <div key={index} className="flex flex-row items-center gap-10">
             <div className="flex flex-row items-center gap-2">
               <p className="text-retro-green-dark">Tournament</p>
-              <p>{entity?.Registration?.tournament_id}</p>
+              <p>{entity?.Registration?.tournament_id?.toString()}</p>
             </div>
             <div className="flex flex-row items-center gap-2">
               <p className="text-retro-green-dark">Game</p>
-              <p>{entity?.Registration?.game_token_id}</p>
+              <p>{entity?.Registration?.game_token_id?.toString()}</p>
             </div>
             <div className="flex flex-row items-center gap-2">
-              {!currentScores[entity?.Registration?.game_token_id] ? (
+              {!currentScores[
+                entity?.Registration?.game_token_id?.toString() ?? ""
+              ] ? (
                 <Input
                   type="number"
-                  value={scores[entity?.Registration?.game_token_id]}
+                  value={
+                    scores[
+                      entity?.Registration?.game_token_id?.toString() ?? ""
+                    ]
+                  }
                   onChange={(e) =>
                     handleScoreChange(
-                      entity?.Registration?.game_token_id,
+                      entity?.Registration?.game_token_id?.toString() ?? "",
                       e.target.value
                     )
                   }
                   placeholder="Enter XP"
                 />
               ) : (
-                <p>{currentScores[entity?.Registration?.game_token_id]} XP</p>
+                <p>
+                  {
+                    currentScores[
+                      entity?.Registration?.game_token_id?.toString() ?? ""
+                    ]
+                  }
+                  XP
+                </p>
               )}
               <Button
                 onClick={() =>
                   endGame(
-                    entity?.Registration?.game_token_id,
-                    scores[entity?.Registration?.game_token_id]
+                    entity?.Registration?.game_token_id?.toString() ?? "",
+                    scores[
+                      entity?.Registration?.game_token_id?.toString() ?? ""
+                    ]
                   )
                 }
-                disabled={!!currentScores[entity?.Registration?.game_token_id]}
+                disabled={
+                  !!currentScores[
+                    entity?.Registration?.game_token_id?.toString() ?? ""
+                  ]
+                }
               >
                 End Game
               </Button>

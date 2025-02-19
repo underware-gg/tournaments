@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
 import { BigNumberish } from "starknet";
-import { QueryType } from "@dojoengine/sdk";
+import { QueryType, ParsedEntity } from "@dojoengine/sdk";
 import { useDojo } from "@/context/dojo";
 import { SchemaType } from "@/generated/models.gen";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
-import { OrderBy } from "@dojoengine/torii-wasm";
 
 export type TournamentGetQuery = QueryType<SchemaType>;
 
@@ -24,16 +23,12 @@ export type UseSdkGetEntityResult = {
 
 export type UseSdkGetEntitiesProps = {
   query: any;
-  limit?: number;
-  offset?: number;
-  orderBy?: OrderBy[];
+  enabled?: boolean;
 };
 
 export const useSdkGetEntities = ({
   query,
-  limit = 100,
-  offset = 0,
-  orderBy = [],
+  enabled = true,
 }: UseSdkGetEntitiesProps): UseSdkGetEntitiesResult => {
   const { sdk, nameSpace } = useDojo();
 
@@ -42,29 +37,38 @@ export const useSdkGetEntities = ({
   const { setEntities: setStoreEntities } = useDojoStore.getState();
 
   const memoizedQuery = useMemo(() => query, [JSON.stringify(query)]);
-  const orderByKey = useMemo(() => JSON.stringify(orderBy), [orderBy]);
 
   const fetchEntities = useCallback(async () => {
     setIsLoading(true);
-    console.log("orderBy", orderBy);
-    console.log("query", query);
     try {
-      console.log(query);
       setIsLoading(true);
-      const response = await sdk.getEntities({
+      console.log("memoizedQuery", memoizedQuery);
+      const entities = await sdk.getEntities({
         query: memoizedQuery,
       });
-      console.log(response);
+      console.log("entities", entities);
+      setStoreEntities(entities as ParsedEntity<SchemaType>[]);
+      setEntities(
+        entities.map(
+          (e: any) =>
+            ({
+              entityId: e.entityId,
+              ...e.models[nameSpace],
+            } as any)
+        )
+      );
     } catch (error) {
       console.error("useSdkGetEntities() exception:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [sdk, memoizedQuery, orderByKey, limit, offset]);
+  }, [sdk, memoizedQuery]);
 
   useEffect(() => {
-    fetchEntities();
-  }, [fetchEntities]);
+    if (enabled) {
+      fetchEntities();
+    }
+  }, [fetchEntities, enabled]);
 
   return {
     entities,

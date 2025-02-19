@@ -13,6 +13,7 @@ interface TokenBoxProps {
   onCopy: (address: string, standard: string) => void;
   isCopied: boolean;
   variant?: "erc20" | "erc721";
+  disabled?: boolean;
 }
 
 const TokenBox = ({
@@ -24,6 +25,7 @@ const TokenBox = ({
   onCopy,
   isCopied,
   variant,
+  disabled,
 }: TokenBoxProps) => {
   const { address } = useAccount();
   const [tokenId, setTokenId] = useState(0);
@@ -53,6 +55,7 @@ const TokenBox = ({
           />
         )}
         <Button
+          disabled={disabled}
           onClick={async () => {
             if (!variant) {
               onMint();

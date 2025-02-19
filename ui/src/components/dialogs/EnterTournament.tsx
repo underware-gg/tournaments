@@ -11,10 +11,15 @@ import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
 import { useAccount } from "@starknet-react/core";
 import { Tournament, EntryCount } from "@/generated/models.gen";
 import { stringToFelt, feltToString } from "@/lib/utils";
-import { CairoOption, CairoOptionVariant } from "starknet";
-import { addAddressPadding } from "starknet";
+import {
+  CairoOption,
+  CairoOptionVariant,
+  addAddressPadding,
+  BigNumberish,
+} from "starknet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
 
 interface EnterTournamentDialogProps {
   open: boolean;
@@ -23,6 +28,7 @@ interface EnterTournamentDialogProps {
   entryFee?: number | "Free";
   tournamentModel: Tournament;
   entryCountModel: EntryCount;
+  gameCount: BigNumberish;
 }
 
 export function EnterTournamentDialog({
@@ -32,8 +38,10 @@ export function EnterTournamentDialog({
   entryFee,
   tournamentModel,
   entryCountModel,
+  gameCount,
 }: EnterTournamentDialogProps) {
   const { address } = useAccount();
+  const { connect } = useConnectToSelectedChain();
   const { approveAndEnterTournament } = useSystemCalls();
   const [playerName, setPlayerName] = useState("");
 
@@ -48,7 +56,8 @@ export function EnterTournamentDialog({
       0,
       stringToFelt(playerName.trim()),
       addAddressPadding(address!),
-      new CairoOption(CairoOptionVariant.None)
+      new CairoOption(CairoOptionVariant.None),
+      gameCount
     );
 
     setPlayerName("");
@@ -85,14 +94,13 @@ export function EnterTournamentDialog({
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <DialogClose asChild>
-            <Button
-              onClick={handleEnterTournament}
-              disabled={!playerName.trim()}
-            >
-              Enter
-            </Button>
-          </DialogClose>
+          {address ? (
+            <DialogClose asChild>
+              <Button onClick={handleEnterTournament}>Confirm & Create</Button>
+            </DialogClose>
+          ) : (
+            <Button onClick={() => connect()}>Connect Wallet</Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>

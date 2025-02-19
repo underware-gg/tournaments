@@ -75,13 +75,14 @@ export const useSystemCalls = () => {
     newEntryAddressCount: BigNumberish,
     player_name: BigNumberish,
     player_address: BigNumberish,
-    qualification: CairoOption<QualificationProof>
+    qualification: CairoOption<QualificationProof>,
+    gameCount: BigNumberish
   ) => {
     const { wait, revert, confirm } = applyTournamentEntryUpdate(
       tournamentId,
       newEntryCount,
       newEntryAddressCount,
-      address
+      gameCount
     );
 
     try {
@@ -107,6 +108,8 @@ export const useSystemCalls = () => {
           qualification,
         ]),
       });
+
+      console.log(calls);
 
       const tx = await account?.execute(calls);
 
@@ -258,7 +261,6 @@ export const useSystemCalls = () => {
           ]),
         };
         calls.push(approvePrizeCall);
-        console.log(prize.token_type);
         const addPrizesCall = {
           contractAddress: tournamentAddress,
           entrypoint: "add_prize",
@@ -271,6 +273,8 @@ export const useSystemCalls = () => {
         };
         calls.push(addPrizesCall);
       }
+
+      console.log(calls);
 
       const tx = account?.execute(calls);
 
