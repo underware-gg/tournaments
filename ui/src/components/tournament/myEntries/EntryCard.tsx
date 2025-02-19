@@ -8,7 +8,6 @@ import { feltToString } from "@/lib/utils";
 import { TokenMetadata } from "@/generated/models.gen";
 import { BigNumberish } from "starknet";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 
 interface EntryCardProps {
   gameAddress: string;

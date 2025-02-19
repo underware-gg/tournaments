@@ -20,11 +20,11 @@ import { useAccount } from "@starknet-react/core";
 import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import {
-  useGetTournamentCountsQuery,
-  useGetPrizeCountsQuery,
+  // useGetTournamentCountsQuery,
+  // useGetPrizeCountsQuery,
   useSubscribeTournamentsQuery,
 } from "@/dojo/hooks/useSdkQueries";
-import { TOURNAMENT_VERSION_KEY } from "@/lib/constants";
+// import { TOURNAMENT_VERSION_KEY } from "@/lib/constants";
 
 export type TournamentFormData = z.infer<typeof formSchema>;
 

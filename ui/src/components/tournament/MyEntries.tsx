@@ -109,7 +109,6 @@ const MyEntries = ({
   return (
     <Card
       variant="outline"
-      borderColor="rgba(0, 218, 163, 1)"
       className={`w-1/2 transition-all duration-300 ease-in-out ${
         showMyEntries ? "h-[200px]" : "h-[60px]"
       }`}

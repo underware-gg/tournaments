@@ -1,6 +1,5 @@
 import { CONTROLLER } from "@/components/Icons";
 import { Button } from "@/components/ui/button";
-import { getGames } from "@/assets/games";
 import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
 
 const NoAccount = () => {

@@ -3,12 +3,11 @@ import Pagination from "@/components/table/Pagination";
 import { USER } from "@/components/Icons";
 import { useState, useEffect, useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
-import {
-  useGetGameMetadataInListQuery,
-  useGetTournamentRegistrationsQuery,
-} from "@/dojo/hooks/useSdkQueries";
 import { addAddressPadding, BigNumberish } from "starknet";
-import { useGetTokenOwnerQuery } from "@/dojo/hooks/useSqlQueries";
+import {
+  useGetTokenOwnerQuery,
+  useGetTournamentEntrants,
+} from "@/dojo/hooks/useSqlQueries";
 import {
   bigintToHex,
   displayAddress,
@@ -38,47 +37,26 @@ const EntrantsTable = ({
 
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
 
-  const { entities: registrations } = useGetTournamentRegistrationsQuery({
+  const { data: entrants } = useGetTournamentEntrants({
     tournamentId: tournamentId,
+    gameNamespace: gameNamespace,
+    isSepolia: isSepolia,
     limit: 5,
     offset: (currentPage - 1) * 5,
   });
 
   const tokenIds = useMemo(
     () =>
-      registrations?.map((registration) =>
-        addAddressPadding(
-          bigintToHex(registration?.Registration?.game_token_id ?? 0n)
-        )
+      entrants?.map((entrant) =>
+        addAddressPadding(bigintToHex(entrant?.game_token_id ?? 0n))
       ),
-    [registrations]
+    [entrants]
   );
 
   const { data: tokenOwners } = useGetTokenOwnerQuery(
     indexAddress(gameAddress.toString()),
     tokenIds ?? []
   );
-
-  const { entities: metadata } = useGetGameMetadataInListQuery({
-    namespace: gameNamespace,
-    gameIds: tokenIds ?? [],
-    isSepolia: isSepolia,
-  });
-
-  const currentMetadata = useMemo(() => {
-    if (!metadata) return {};
-    return metadata.reduce(
-      (acc: Record<string, { playerName: string }>, entity) => {
-        if (entity?.TokenMetadata?.token_id) {
-          acc[entity?.TokenMetadata?.token_id.toString()] = {
-            playerName: feltToString(entity.TokenMetadata?.player_name),
-          };
-        }
-        return acc;
-      },
-      {}
-    );
-  }, [metadata]);
 
   useEffect(() => {
     setShowParticipants(entryCount > 0);
@@ -136,7 +114,7 @@ const EntrantsTable = ({
         >
           <div className="w-full h-0.5 bg-retro-green/25 mt-2" />
           <div className="flex flex-col py-2">
-            {registrations?.map((registration, index) => (
+            {entrants?.map((entrant, index) => (
               <div key={index} className="flex flex-row items-center gap-2">
                 <span className="w-4 flex-none">
                   {index + 1 + (currentPage - 1) * 5}.
@@ -145,11 +123,7 @@ const EntrantsTable = ({
                   <USER />
                 </span>
                 <span className="flex-none">
-                  {
-                    currentMetadata[
-                      registration.Registration?.game_token_id?.toString() ?? ""
-                    ]?.playerName
-                  }
+                  {feltToString(entrant?.player_name)}
                 </span>
                 -
                 <div className="relative flex-none">
@@ -163,20 +137,9 @@ const EntrantsTable = ({
                   </span>
                   <div className="absolute -top-1 -right-8 flex items-center justify-center rounded-lg bg-retro-green-dark text-black h-4 w-6 text-[10px]">
                     <span>x</span>
-                    <span>
-                      {registration.Registration?.entry_number?.toString()}
-                    </span>
+                    <span>{entrant?.entry_number?.toString()}</span>
                   </div>
                 </div>
-                {/* <p
-                  className="flex-1 h-[2px] bg-repeat-x"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(circle, currentColor 1px, transparent 1px)",
-                    backgroundSize: "8px 8px",
-                    backgroundPosition: "0 center",
-                  }}
-                ></p> */}
               </div>
             ))}
           </div>

@@ -14,10 +14,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { StepProps } from "@/containers/CreateTournament";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
 import { getGames } from "@/assets/games";
-import {
-  getGameSettings,
-  GameType,
-} from "@/components/createTournament/settings/types";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { INFO } from "@/components/Icons";
@@ -32,7 +28,7 @@ const Details = ({ form }: StepProps) => {
   const PREDEFINED_SIZES = [1, 3, 10, 20] as const;
 
   React.useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
+    const subscription = form.watch((_value, { name }) => {
       if (name === "game") {
         form.setValue("settings", "0");
       }
@@ -42,7 +38,6 @@ const Details = ({ form }: StepProps) => {
   }, [form]);
 
   const games = getGames();
-  const gameSettings = getGameSettings();
 
   return (
     <div className="flex flex-col p-4 gap-5">

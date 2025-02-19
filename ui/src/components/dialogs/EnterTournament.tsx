@@ -53,7 +53,6 @@ export function EnterTournamentDialog({
       tournamentModel?.id,
       feltToString(tournamentModel?.metadata.name),
       entryCountModel?.count,
-      0,
       stringToFelt(playerName.trim()),
       addAddressPadding(address!),
       new CairoOption(CairoOptionVariant.None),

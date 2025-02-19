@@ -42,6 +42,7 @@ world_address = "0x02f808e319783173b7a36bae6ab318fb98f6553fce73786b430cc02110483
 "tournaments-TokenMetadata" = ["tournaments-game_mock"]
 "tournaments-Score" = ["tournaments-game_mock"]
 
+
 [migration]
 order_inits = []
 skip_contracts = ["tournaments-Bodukan"]

@@ -72,7 +72,6 @@ export const useSystemCalls = () => {
     tournamentId: BigNumberish,
     tournamentName: string,
     newEntryCount: BigNumberish,
-    newEntryAddressCount: BigNumberish,
     player_name: BigNumberish,
     player_address: BigNumberish,
     qualification: CairoOption<QualificationProof>,
@@ -81,7 +80,6 @@ export const useSystemCalls = () => {
     const { wait, revert, confirm } = applyTournamentEntryUpdate(
       tournamentId,
       newEntryCount,
-      newEntryAddressCount,
       gameCount
     );
 

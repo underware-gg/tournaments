@@ -44,7 +44,6 @@ export const useOptimisticUpdates = () => {
   const applyTournamentEntryUpdate = (
     tournamentId: BigNumberish,
     newEntryCount: BigNumberish,
-    newEntryAddressCount: BigNumberish,
     gameCount: BigNumberish
   ) => {
     const entriesEntityId = getEntityIdFromKeys([BigInt(tournamentId)]);

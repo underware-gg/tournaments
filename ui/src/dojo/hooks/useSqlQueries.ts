@@ -1,6 +1,6 @@
 import { useSqlExecute } from "@/lib/dojo/hooks/useSqlExecute";
 import { useMemo } from "react";
-import { addAddressPadding } from "starknet";
+import { addAddressPadding, BigNumberish } from "starknet";
 
 export const useGetUpcomingTournamentsCount = (currentTime: string) => {
   const query = useMemo(
@@ -83,6 +83,61 @@ export const useGetAccountTokenIds = (
   return { data: data, loading, error };
 };
 
+export const useGetTournamentEntrants = ({
+  tournamentId,
+  gameNamespace,
+  isSepolia = false,
+  offset = 0,
+  limit = 5,
+}: {
+  tournamentId: BigNumberish;
+  gameNamespace: string;
+  isSepolia?: boolean;
+  offset?: number;
+  limit?: number;
+}) => {
+  const query = useMemo(
+    () => `
+    SELECT 
+    r.tournament_id,
+    r.entry_number,
+    r.game_token_id,
+    r.has_submitted,
+    m.player_name,
+    m."lifecycle.mint"
+    FROM "tournaments-Registration" r
+    LEFT JOIN "${gameNamespace}-TokenMetadata" m ON r.game_token_id = m.token_id
+    WHERE r.tournament_id = "${addAddressPadding(tournamentId)}"
+    ORDER BY r.entry_number DESC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `,
+    [tournamentId, offset, limit, gameNamespace]
+  );
+  const sepoliaQuery = useMemo(
+    () => `
+    SELECT 
+    r.tournament_id,
+    r.entry_number,
+    r.game_token_id,
+    r.has_submitted,
+    m.player_name,
+    m."lifecycle.mint"
+    FROM "tournaments-Registration" r
+    LEFT JOIN "ds-TokenMetadata" m ON r.game_token_id = m.token_id
+    WHERE r.tournament_id = "${addAddressPadding(tournamentId)}"
+    ORDER BY r.entry_number DESC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `,
+    [tournamentId, offset, limit]
+  );
+  const { data, loading, error } = useSqlExecute(
+    isSepolia ? sepoliaQuery : query
+  );
+  return { data: data, loading, error };
+};
+
 export const useGetTournamentLeaderboard = ({
   tournamentId,
   gameNamespace,
@@ -90,7 +145,7 @@ export const useGetTournamentLeaderboard = ({
   offset = 0,
   limit = 5,
 }: {
-  tournamentId: string;
+  tournamentId: BigNumberish;
   gameNamespace: string;
   isSepolia?: boolean;
   offset?: number;
@@ -114,7 +169,7 @@ export const useGetTournamentLeaderboard = ({
     LIMIT ${limit}
     OFFSET ${offset}
   `,
-    [tournamentId, offset, limit]
+    [tournamentId, offset, limit, gameNamespace]
   );
   const sepoliaQuery = useMemo(
     () => `
