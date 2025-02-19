@@ -13,6 +13,10 @@ export function useSqlExecute(query: string) {
       setError(null);
 
       try {
+        if (!selectedChainConfig?.toriiUrl) {
+          throw new Error("toriiUrl is not configured for the selected chain");
+        }
+
         const encodedQuery = encodeURIComponent(query);
         const response = await fetch(
           `${selectedChainConfig.toriiUrl}/sql?query=${encodedQuery}`,
@@ -41,7 +45,7 @@ export function useSqlExecute(query: string) {
     };
 
     fetchData();
-  }, [query]);
+  }, [query, selectedChainConfig?.toriiUrl]);
 
   return {
     data,

@@ -11,7 +11,6 @@ export default defineConfig({
     react(),
     wasm(),
     process.env.VITE_CHAIN_ID !== "KATANA_LOCAL" && mkcert(),
-    ,
     topLevelAwait(),
   ],
   resolve: {

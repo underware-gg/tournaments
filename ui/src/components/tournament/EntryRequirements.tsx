@@ -12,8 +12,13 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { Tournament as TournamentModel } from "@/generated/models.gen";
 
-const EntryRequirements = ({ tournamentModel }: { tournamentModel: any }) => {
+const EntryRequirements = ({
+  tournamentModel,
+}: {
+  tournamentModel: TournamentModel;
+}) => {
   if (!tournamentModel.entry_requirement.isSome()) {
     return null;
   }
@@ -46,7 +51,7 @@ const EntryRequirements = ({ tournamentModel }: { tournamentModel: any }) => {
 
   const token = tokens.find(
     (token) =>
-      token.address === tournamentModel.entry_requirement.Some.variant.token
+      token.address === tournamentModel.entry_requirement.Some?.variant.token
   );
 
   const activeVariant = tournamentModel.entry_requirement.Some?.activeVariant();

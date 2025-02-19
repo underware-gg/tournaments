@@ -178,7 +178,7 @@ export const useGetTournamentLeaderboard = ({
     r.entry_number,
     r.game_token_id,
     r.has_submitted,
-    COALESCE(s.hero_xp, 0) as score
+    COALESCE(s.hero_xp, 0) as score,
     m.player_name,
     m."lifecycle.mint"
     FROM "tournaments-Registration" r
