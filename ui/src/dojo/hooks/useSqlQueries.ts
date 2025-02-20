@@ -43,10 +43,12 @@ export const useGetEndedTournamentsCount = (currentTime: string) => {
 
 export const useGetUpcomingTournaments = ({
   currentTime,
+  gameFilters,
   offset = 0,
   limit = 5,
 }: {
   currentTime: string;
+  gameFilters: string[];
   offset?: number;
   limit?: number;
 }) => {
@@ -75,19 +77,148 @@ export const useGetUpcomingTournaments = ({
             ),
             '|'
         )
-    END as prizes
+    END as prizes,
+    COALESCE(e.count, 0) as entry_count
     FROM "tournaments-Tournament" as t
     LEFT JOIN "tournaments-Prize" p ON t.id = p.tournament_id
+    LEFT JOIN "tournaments-EntryCount" e ON t.id = e.tournament_id
     WHERE t.'schedule.game.start' > '${currentTime}'
+        ${
+          gameFilters.length > 0
+            ? `AND t.'game_config.address' IN (${gameFilters
+                .map((address) => `'${address}'`)
+                .join(",")})`
+            : ""
+        }
     GROUP BY t.id
     ORDER BY t.'schedule.game.start' ASC
     LIMIT ${limit}
     OFFSET ${offset}
   `,
-    [currentTime, offset, limit]
+    [currentTime, gameFilters, offset, limit]
   );
-  const { data, loading, error } = useSqlExecute(query);
-  return { data, loading, error };
+  const { data, loading, error, refetch } = useSqlExecute(query);
+  return { data, loading, error, refetch };
+};
+
+export const useGetLiveTournaments = ({
+  currentTime,
+  gameFilters,
+  offset = 0,
+  limit = 5,
+}: {
+  currentTime: string;
+  gameFilters: string[];
+  offset?: number;
+  limit?: number;
+}) => {
+  const query = useMemo(
+    () => `
+    SELECT 
+    t.*,
+    CASE 
+        WHEN COUNT(p.tournament_id) = 0 THEN NULL
+        ELSE GROUP_CONCAT(
+            json_object(
+                'prizeId', p.id,
+                'position', p.payout_position,
+                'tokenType', p.token_type,
+                'tokenAddress', p.token_address,
+                'amount', CASE 
+                    WHEN p.token_type = 'erc20' THEN p."token_type.erc20.amount"
+                    WHEN p.token_type = 'erc721' THEN p."token_type.erc721.id"
+                    ELSE NULL 
+                END,
+                'isValid', CASE 
+                    WHEN p.token_type = 'erc20' AND p."token_type.erc20.amount" IS NOT NULL THEN 1
+                    WHEN p.token_type = 'erc721' AND p."token_type.erc721.id" IS NOT NULL THEN 1
+                    ELSE 0
+                END
+            ),
+            '|'
+        )
+    END as prizes,
+    COALESCE(e.count, 0) as entry_count
+    FROM "tournaments-Tournament" as t
+    LEFT JOIN "tournaments-Prize" p ON t.id = p.tournament_id
+    LEFT JOIN "tournaments-EntryCount" e ON t.id = e.tournament_id
+    WHERE t.'schedule.game.start' <= '${currentTime}' AND t.'schedule.game.end' > '${currentTime}'
+        ${
+          gameFilters.length > 0
+            ? `AND t.'game_config.address' IN (${gameFilters
+                .map((address) => `'${address}'`)
+                .join(",")})`
+            : ""
+        }
+    GROUP BY t.id
+    ORDER BY t.'schedule.game.start' ASC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `,
+    [currentTime, gameFilters, offset, limit]
+  );
+  const { data, loading, error, refetch } = useSqlExecute(query);
+  return { data, loading, error, refetch };
+};
+
+export const useGetEndedTournaments = ({
+  currentTime,
+  gameFilters,
+  offset = 0,
+  limit = 5,
+}: {
+  currentTime: string;
+  gameFilters: string[];
+  offset?: number;
+  limit?: number;
+}) => {
+  const query = useMemo(
+    () => `
+    SELECT 
+    t.*,
+    CASE 
+        WHEN COUNT(p.tournament_id) = 0 THEN NULL
+        ELSE GROUP_CONCAT(
+            json_object(
+                'prizeId', p.id,
+                'position', p.payout_position,
+                'tokenType', p.token_type,
+                'tokenAddress', p.token_address,
+                'amount', CASE 
+                    WHEN p.token_type = 'erc20' THEN p."token_type.erc20.amount"
+                    WHEN p.token_type = 'erc721' THEN p."token_type.erc721.id"
+                    ELSE NULL 
+                END,
+                'isValid', CASE 
+                    WHEN p.token_type = 'erc20' AND p."token_type.erc20.amount" IS NOT NULL THEN 1
+                    WHEN p.token_type = 'erc721' AND p."token_type.erc721.id" IS NOT NULL THEN 1
+                    ELSE 0
+                END
+            ),
+            '|'
+        )
+    END as prizes,
+    COALESCE(e.count, 0) as entry_count
+    FROM "tournaments-Tournament" as t
+    LEFT JOIN "tournaments-Prize" p ON t.id = p.tournament_id
+    LEFT JOIN "tournaments-EntryCount" e ON t.id = e.tournament_id
+    WHERE t.'schedule.game.end' <= '${currentTime}'
+        ${
+          gameFilters.length > 0
+            ? `AND t.'game_config.address' IN (${gameFilters
+                .map((address) => `'${address}'`)
+                .join(",")})`
+            : ""
+        }
+    GROUP BY t.id
+    ORDER BY t.'schedule.game.start' ASC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `,
+    [currentTime, gameFilters, offset, limit]
+  );
+  const { data, loading, error, refetch } = useSqlExecute(query);
+  return { data, loading, error, refetch };
 };
 
 export const useGetTokenOwnerQuery = (
@@ -105,6 +236,7 @@ export const useGetTokenOwnerQuery = (
   `,
     [tokenAddress, tokenIdsKey]
   );
+  console.log(query);
   const { data, loading, error } = useSqlExecute(query);
   return { data, loading, error };
 };
@@ -181,10 +313,10 @@ export const useGetTournamentEntrants = ({
   `,
     [tournamentId, offset, limit]
   );
-  const { data, loading, error } = useSqlExecute(
+  const { data, loading, error, refetch } = useSqlExecute(
     isSepolia ? sepoliaQuery : query
   );
-  return { data, loading, error };
+  return { data, loading, error, refetch };
 };
 
 export const useGetTournamentLeaderboard = ({

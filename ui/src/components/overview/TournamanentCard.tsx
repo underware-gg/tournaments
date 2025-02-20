@@ -3,7 +3,7 @@ import { feltToString, formatTime } from "@/lib/utils";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
 import { USER } from "@/components/Icons";
 import { useNavigate } from "react-router-dom";
-import { Tournament, Prize, Token, EntryCount } from "@/generated/models.gen";
+import { Tournament, Token } from "@/generated/models.gen";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { useDojo } from "@/context/dojo";
 import {
@@ -13,38 +13,25 @@ import {
   countTotalNFTs,
 } from "@/lib/utils/formatting";
 import { useEkuboPrices } from "@/hooks/useEkuboPrices";
-import useModel from "@/dojo/hooks/useModel";
-import { getEntityIdFromKeys } from "@dojoengine/utils";
-import { useMemo } from "react";
-import { ModelsMapping } from "@/generated/models.gen";
 
 interface TournamentCardProps {
   tournament: Tournament;
   index: number;
-  status: "live" | "upcoming" | "finished";
+  status: "live" | "upcoming" | "ended";
+  prizes: any[];
+  entryCount: number;
 }
 
 export const TournamentCard = ({
   tournament,
   index,
   status,
+  prizes,
+  entryCount,
 }: TournamentCardProps) => {
   const { nameSpace } = useDojo();
   const navigate = useNavigate();
   const state = useDojoStore.getState();
-
-  const tournamentEntityId = useMemo(
-    () => getEntityIdFromKeys([BigInt(tournament.id!)]),
-    [tournament.id]
-  );
-
-  // prize entities
-  const prizeEntities = state.getEntitiesByModel(nameSpace, "Prize");
-  const tournamentPrizes = prizeEntities
-    .filter(
-      (p) => p.models?.tournaments?.Prize?.tournament_id === tournament.id
-    )
-    .map((p) => p.models?.tournaments?.Prize as Prize);
 
   // token entities
   const tokenModels = state.getEntitiesByModel(nameSpace, "Token");
@@ -52,13 +39,7 @@ export const TournamentCard = ({
     (model) => model.models[nameSpace].Token
   ) as Token[];
 
-  // entry count model
-  const entryCountModel = useModel(
-    tournamentEntityId,
-    ModelsMapping.EntryCount
-  ) as unknown as EntryCount;
-
-  const groupedPrizes = groupPrizesByTokens(tournamentPrizes, tokens);
+  const groupedPrizes = groupPrizesByTokens(prizes ?? [], tokens);
 
   const erc20TokenSymbols = getErc20TokenSymbols(groupedPrizes);
   const { prices } = useEkuboPrices({ tokens: erc20TokenSymbols });
@@ -86,13 +67,15 @@ export const TournamentCard = ({
     ? Number(BigInt(tournament?.entry_fee.Some?.amount!) / 10n ** 18n)
     : "Free";
 
+  console.log(groupedPrizes);
+
   return (
     <Card
       variant="outline"
       interactive={true}
       borderColor="rgba(0, 218, 163, 1)"
       onClick={() => {
-        navigate(`/tournament/${tournament.id}`);
+        navigate(`/tournament/${Number(tournament.id).toString()}`);
       }}
       className="animate-in fade-in zoom-in duration-300 ease-out"
     >
@@ -104,7 +87,7 @@ export const TournamentCard = ({
               <span className="w-6">
                 <USER />
               </span>
-              : {entryCountModel ? Number(entryCountModel.count) : 0}
+              : {entryCount}
             </div>
           </div>
           <div className="w-full h-0.5 bg-retro-green/25" />

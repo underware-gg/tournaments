@@ -24,12 +24,10 @@ const TournamentTimeline = ({
   const submissionEndDate = new Date(
     (startTime + duration + submissionPeriod) * 1000
   );
-  const registrationPeriod =
-    startTime - Number(BigInt(new Date().getTime()) / BigInt(1000));
+  const registrationPeriod = startTime - createdTime;
 
   const isStarted =
     startTime < Number(BigInt(new Date().getTime()) / BigInt(1000));
-  console.log(isStarted);
   const isEnded =
     startTime + duration < Number(BigInt(new Date().getTime()) / BigInt(1000));
   const isSubmissionEnded =

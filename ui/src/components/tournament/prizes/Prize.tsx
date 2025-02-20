@@ -3,6 +3,7 @@ import { getOrdinalSuffix } from "@/lib/utils";
 import { useEkuboPrices } from "@/hooks/useEkuboPrices";
 import {
   getErc20TokenSymbols,
+  calculatePrizeValue,
   calculateTotalValue,
   countTotalNFTs,
 } from "@/lib/utils/formatting";
@@ -65,33 +66,38 @@ const Prize = ({ position, prizes }: PrizeProps) => {
         </motion.div>
       </HoverCardTrigger>
       <HoverCardContent
-        className="w-80 p-4 text-sm z-50"
+        className="w-48 p-4 text-sm z-50"
         align="start"
         side="top"
         sideOffset={5}
       >
         <div className="space-y-2">
-          <h4 className="font-medium">
+          <h4 className="font-medium font-astronaut">
             {position}
-            <sup>{getOrdinalSuffix(position)}</sup> Place Prizes
+            <sup>{getOrdinalSuffix(position)}</sup> Prize
           </h4>
           <div className="space-y-3">
-            {Object.entries(prizes).map(([symbol, prize]) => (
-              <div key={symbol} className="flex justify-between items-center">
-                <span>{symbol}</span>
-                <span>
-                  {prize.type === "erc20"
-                    ? `${prize.value} ${symbol}`
-                    : `${(prize.value as bigint[]).length} NFT${
-                        (prize.value as bigint[]).length === 1 ? "" : "s"
-                      }`}
-                </span>
-              </div>
-            ))}
+            {Object.entries(prizes).map(([symbol, prize]) => {
+              const USDValue = calculatePrizeValue(prize, symbol, prices);
+              return (
+                <div key={symbol} className="flex justify-between items-center">
+                  <span className="text-retro-green-dark">
+                    {prize.type === "erc20"
+                      ? `${prize.value} ${symbol}`
+                      : `${(prize.value as bigint[]).length} NFT${
+                          (prize.value as bigint[]).length === 1 ? "" : "s"
+                        }`}
+                  </span>
+                  {prize.type === "erc20" && (
+                    <span className="text-neutral-500">~${USDValue}</span>
+                  )}
+                </div>
+              );
+            })}
             {totalPrizesValueUSD > 0 && (
               <div className="pt-2 border-t border-retro-green/20">
                 <div className="flex justify-between items-center">
-                  <span>Total Value</span>
+                  <span className="font-astronaut">Total</span>
                   <span>${totalPrizesValueUSD}</span>
                 </div>
               </div>

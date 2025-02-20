@@ -86,6 +86,8 @@ const MyTournaments = ({ gameFilters }: MyTournamentsProps) => {
               tournament={tournament}
               index={index}
               status="live"
+              prizes={[]}
+              entryCount={0}
             />
           ))
         ) : (

@@ -5,6 +5,7 @@ import {
   CairoOption,
   CairoOptionVariant,
   CairoCustomEnum,
+  BigNumberish,
 } from "starknet";
 import { Prize, Tournament, Token } from "@/generated/models.gen";
 
@@ -140,7 +141,7 @@ export const processPrizes = (
         : new CairoCustomEnum({
             erc20: undefined,
             erc721: {
-              token_id: addAddressPadding(bigintToHex(prize.tokenId!)),
+              id: addAddressPadding(bigintToHex(prize.tokenId!)),
             },
           }),
     payout_position: prize.position,
@@ -187,9 +188,9 @@ export const groupPrizesByPositions = (prizes: Prize[], tokens: Token[]) =>
           );
         } else if (prize.token_type.activeVariant() === "erc20") {
           const currentAmount = acc[position][tokenSymbol].value as bigint;
-          const newAmount = BigInt(prize.token_type.variant.erc20.amount);
-          acc[position][tokenSymbol].value =
-            (currentAmount + newAmount) / 10n ** 18n;
+          const newAmount =
+            BigInt(prize.token_type.variant.erc20.amount) / 10n ** 18n;
+          acc[position][tokenSymbol].value = currentAmount + newAmount;
         }
 
         return acc;
@@ -216,10 +217,10 @@ export const groupPrizesByTokens = (prizes: Prize[], tokens: Token[]) =>
 
       if (!acc[tokenSymbol]) {
         acc[tokenSymbol] = {
-          type: prize.token_type.variant.erc721 ? "erc721" : "erc20",
+          type: prize.token_type.activeVariant() as "erc20" | "erc721",
           payout_position: prize.payout_position.toString(),
           address: prize.token_address,
-          value: prize.token_type.variant.erc721 ? [] : 0n,
+          value: prize.token_type.activeVariant() === "erc721" ? [] : 0n,
         };
       }
 
@@ -231,8 +232,9 @@ export const groupPrizesByTokens = (prizes: Prize[], tokens: Token[]) =>
       } else if (prize.token_type.activeVariant() === "erc20") {
         // For ERC20, sum up the values
         const currentAmount = acc[tokenSymbol].value as bigint;
-        const newAmount = BigInt(prize.token_type.variant.erc20.amount);
-        acc[tokenSymbol].value = (currentAmount + newAmount) / 10n ** 18n;
+        const newAmount =
+          BigInt(prize.token_type.variant.erc20.amount) / 10n ** 18n;
+        acc[tokenSymbol].value = currentAmount + newAmount;
       }
 
       return acc;
@@ -264,6 +266,21 @@ export const getErc20TokenSymbols = (
     .map(([symbol, _]) => symbol);
 };
 
+export const calculatePrizeValue = (
+  prize: {
+    type: "erc20" | "erc721";
+    value: bigint[] | bigint;
+  },
+  symbol: string,
+  prices: Record<string, bigint | undefined>
+): number => {
+  if (prize.type !== "erc20") return 0;
+
+  const price = prices[symbol] || 1n;
+  const amount = prize.value as bigint;
+  return Number(price * amount);
+};
+
 export const calculateTotalValue = (
   groupedPrizes: Record<
     string,
@@ -293,4 +310,135 @@ export const countTotalNFTs = (
     .reduce((total, [_, prize]) => {
       return total + (prize.value as bigint[]).length;
     }, 0);
+};
+
+export const processTournamentFromSql = (tournament: any): Tournament => {
+  let entryRequirement;
+  if (tournament["entry_requirement"] === "Some") {
+    switch (tournament["entry_requirement.Some"]) {
+      case "token":
+        entryRequirement = new CairoCustomEnum({
+          token: tournament["entry_requirement.Some.token"],
+          tournament: undefined,
+          allowlist: undefined,
+        });
+        break;
+      case "tournament":
+        entryRequirement = new CairoCustomEnum({
+          token: undefined,
+          tournament: {
+            winners:
+              tournament["entry_requirement.Some.tournament"] === "winners"
+                ? tournament["entry_requirement.Some.tournament.winners"]
+                : [],
+            participants:
+              tournament["entry_requirement.Some.tournament"] === "participants"
+                ? tournament["entry_requirement.Some.tournament.participants"]
+                : [],
+          },
+          allowlist: undefined,
+        });
+        break;
+      case "allowlist":
+        entryRequirement = new CairoCustomEnum({
+          token: undefined,
+          tournament: undefined,
+          allowlist: tournament["entry_requirement.Some.allowlist"],
+        });
+        break;
+    }
+  }
+
+  return {
+    id: tournament.id,
+    created_at: tournament.created_at,
+    created_by: tournament.created_by,
+    creator_token_id: tournament.creator_token_id,
+    metadata: {
+      name: tournament["metadata.name"],
+      description: tournament["metadata.description"],
+    },
+    schedule: {
+      registration:
+        tournament["schedule.registration"] === "Some"
+          ? new CairoOption(CairoOptionVariant.Some, {
+              start: tournament["schedule.registration.Some.start"],
+              end: tournament["schedule.registration.Some.end"],
+            })
+          : new CairoOption(CairoOptionVariant.None),
+      game: {
+        start: tournament["schedule.game.start"],
+        end: tournament["schedule.game.end"],
+      },
+      submission_duration: tournament["schedule.submission_duration"],
+    },
+    game_config: {
+      address: tournament["game_config.address"],
+      settings_id: tournament["game_config.settings_id"],
+      prize_spots: tournament["game_config.prize_spots"],
+    },
+    entry_fee:
+      tournament["entry_fee"] === "Some"
+        ? new CairoOption(CairoOptionVariant.Some, {
+            token_address: tournament["entry_fee.Some.token_address"],
+            amount: tournament["entry_fee.Some.amount"],
+            distribution: JSON.parse(tournament["entry_fee.Some.distribution"]),
+            tournament_creator_share:
+              tournament["entry_fee.Some.tournament_creator_share"] === "Some"
+                ? new CairoOption(
+                    CairoOptionVariant.Some,
+                    tournament["entry_fee.Some.tournament_creator_share.Some"]
+                  )
+                : new CairoOption(CairoOptionVariant.None),
+            game_creator_share:
+              tournament["entry_fee.Some.game_creator_share"] === "Some"
+                ? new CairoOption(
+                    CairoOptionVariant.Some,
+                    tournament["entry_fee.Some.game_creator_share.Some"]
+                  )
+                : new CairoOption(CairoOptionVariant.None),
+          })
+        : new CairoOption(CairoOptionVariant.None),
+    entry_requirement:
+      tournament["entry_requirement"] === "Some"
+        ? new CairoOption(CairoOptionVariant.Some, entryRequirement)
+        : new CairoOption(CairoOptionVariant.None),
+  };
+};
+
+export const processPrizesFromSql = (
+  prizes: any,
+  tournamentId: BigNumberish
+): Prize[] => {
+  return prizes
+    ? prizes
+        .split("|")
+        .map((prizeStr: string) => {
+          const prize = JSON.parse(prizeStr);
+          return {
+            id: prize.prizeId,
+            tournament_id: tournamentId,
+            payout_position: prize.position,
+            token_address: prize.tokenAddress,
+            token_type:
+              prize.tokenType === "erc20"
+                ? new CairoCustomEnum({
+                    erc20: {
+                      amount: prize.amount,
+                    },
+                    erc721: undefined,
+                  })
+                : new CairoCustomEnum({
+                    erc20: undefined,
+                    erc721: {
+                      id: prize.amount,
+                    },
+                  }),
+          };
+        })
+        .sort(
+          (a: Prize, b: Prize) =>
+            Number(a.payout_position) - Number(b.payout_position)
+        )
+    : null;
 };

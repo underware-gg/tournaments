@@ -1,13 +1,13 @@
 import { useMemo } from "react";
-import {
-  useGetEndedTournamentsQuery,
-  useGetTournamentDetailsInListQuery,
-} from "@/dojo/hooks/useSdkQueries";
+import { useGetEndedTournaments } from "@/dojo/hooks/useSqlQueries";
 import { bigintToHex } from "@/lib/utils";
-import { Tournament } from "@/generated/models.gen";
 import { TournamentCard } from "@/components/overview/TournamanentCard";
 import { addAddressPadding } from "starknet";
 import EmptyResults from "@/components/overview/tournaments/EmptyResults";
+import {
+  processPrizesFromSql,
+  processTournamentFromSql,
+} from "@/lib/utils/formatting";
 
 interface EndedTournamentsProps {
   gameFilters: string[];
@@ -15,51 +15,41 @@ interface EndedTournamentsProps {
 
 const EndedTournaments = ({ gameFilters }: EndedTournamentsProps) => {
   const hexTimestamp = useMemo(
-    () => bigintToHex(BigInt(new Date().getTime()) / 1000n),
+    () => addAddressPadding(bigintToHex(BigInt(new Date().getTime()) / 1000n)),
     []
   );
 
-  const { entities: tournamentEntities } = useGetEndedTournamentsQuery(
-    hexTimestamp,
-    12,
-    0
-  );
+  const { data: endedTournaments } = useGetEndedTournaments({
+    currentTime: hexTimestamp,
+    gameFilters: gameFilters,
+    offset: 0,
+    limit: 12,
+  });
 
-  const formattedTournaments = (tournamentEntities ?? []).map(
-    (tournament) => tournament?.Tournament! as unknown as Tournament
-  );
-
-  const filteredTournaments = useMemo(() => {
-    if (gameFilters.length === 0) return formattedTournaments;
-
-    return formattedTournaments.filter((tournament) => {
-      // Get the game address from the tournament
-      const tournamentGameAddress = addAddressPadding(
-        tournament.game_config.address
-      );
-
-      // Check if any of the selected game filters match the tournament's game
-      return gameFilters.some((gameAddress) => {
-        return gameAddress === tournamentGameAddress;
-      });
-    });
-  }, [formattedTournaments, gameFilters]);
-
-  const prizeTournamentIds = filteredTournaments.map((tournament) =>
-    addAddressPadding(bigintToHex(BigInt(tournament.id)))
-  );
-
-  useGetTournamentDetailsInListQuery(prizeTournamentIds);
+  const endedTournamentsData = endedTournaments.map((tournament) => {
+    const processedTournament = processTournamentFromSql(tournament);
+    const processedPrizes = processPrizesFromSql(
+      tournament.prizes,
+      tournament.id
+    );
+    return {
+      tournament: processedTournament,
+      prizes: processedPrizes,
+      entryCount: Number(tournament.entry_count),
+    };
+  });
 
   return (
     <>
-      {filteredTournaments.length > 0 ? (
-        filteredTournaments.map((tournament, index) => (
+      {endedTournamentsData.length > 0 ? (
+        endedTournamentsData.map((tournament, index) => (
           <TournamentCard
             key={index}
-            tournament={tournament}
+            tournament={tournament.tournament}
             index={index}
-            status="live"
+            status="ended"
+            prizes={tournament.prizes}
+            entryCount={tournament.entryCount}
           />
         ))
       ) : (
