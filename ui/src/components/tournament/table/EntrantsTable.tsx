@@ -37,13 +37,19 @@ const EntrantsTable = ({
 
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
 
-  const { data: entrants } = useGetTournamentEntrants({
-    tournamentId: tournamentId,
-    gameNamespace: gameNamespace,
-    isSepolia: isSepolia,
-    limit: 5,
-    offset: (currentPage - 1) * 5,
-  });
+  const { data: entrants, refetch: refetchEntrants } = useGetTournamentEntrants(
+    {
+      tournamentId: tournamentId,
+      gameNamespace: gameNamespace,
+      isSepolia: isSepolia,
+      limit: 5,
+      offset: (currentPage - 1) * 5,
+    }
+  );
+
+  useEffect(() => {
+    refetchEntrants();
+  }, [entryCount]);
 
   const tokenIds = useMemo(
     () =>

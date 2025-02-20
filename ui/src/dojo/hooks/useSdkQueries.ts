@@ -128,7 +128,7 @@ export const useGetTournamentDetailsQuery = (tournamentId: BigNumberish) => {
     .withClause(
       new ClauseBuilder()
         .compose()
-        .and([
+        .or([
           new ClauseBuilder().where(
             ModelsMapping.Tournament,
             "id",

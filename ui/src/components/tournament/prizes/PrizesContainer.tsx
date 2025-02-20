@@ -69,7 +69,7 @@ const PrizesContainer = ({
           <div className="w-full h-0.5 bg-retro-green/25 mt-2" />
           <div className="p-4">
             {prizesExist && (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-row gap-3">
                 {Object.entries(groupedPrizes)
                   .sort(
                     (a, b) =>

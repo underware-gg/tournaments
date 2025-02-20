@@ -125,17 +125,9 @@ const Tournament = () => {
 
   const totalPrizeNFTs = countTotalNFTs(groupedByTokensPrizes);
 
-  if (!tournamentModel) {
-    return (
-      <div className="w-3/4 h-full m-auto flex items-center justify-center">
-        <span className="font-astronaut text-2xl">Loading tournament...</span>
-      </div>
-    );
-  }
-
   const durationSeconds = Number(
-    BigInt(tournamentModel?.schedule.game.end) -
-      BigInt(tournamentModel?.schedule.game.start)
+    BigInt(tournamentModel?.schedule?.game?.end ?? 0n) -
+      BigInt(tournamentModel?.schedule?.game?.start ?? 0n)
   );
 
   const registrationType = tournamentModel?.schedule.registration.isNone()
@@ -143,6 +135,7 @@ const Tournament = () => {
     : "fixed";
 
   const groupedPrizes = groupPrizesByPositions(prizes, tokens);
+
   const lowestPrizePosition =
     Object.keys(groupedPrizes).length > 0
       ? Math.max(...Object.keys(groupedPrizes).map(Number))
@@ -174,6 +167,14 @@ const Tournament = () => {
     if (isStarted) return "live";
     return "upcoming";
   }, [isStarted, isEnded]);
+
+  if (!tournamentModel) {
+    return (
+      <div className="w-3/4 h-full m-auto flex items-center justify-center">
+        <span className="font-astronaut text-2xl">Loading tournament...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="w-3/4 px-20 pt-20 mx-auto flex flex-col gap-5">

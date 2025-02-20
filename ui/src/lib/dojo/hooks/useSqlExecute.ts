@@ -7,43 +7,43 @@ export function useSqlExecute(query: string) {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<any[]>([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
 
-      try {
-        if (!selectedChainConfig?.toriiUrl) {
-          throw new Error("toriiUrl is not configured for the selected chain");
-        }
-
-        const encodedQuery = encodeURIComponent(query);
-        const response = await fetch(
-          `${selectedChainConfig.toriiUrl}/sql?query=${encodedQuery}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.error || "Failed to execute query");
-        }
-
-        setData(result);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "An unknown error occurred";
-        setError(errorMessage);
-      } finally {
-        setLoading(false);
+    try {
+      if (!selectedChainConfig?.toriiUrl) {
+        throw new Error("toriiUrl is not configured for the selected chain");
       }
-    };
 
+      const encodedQuery = encodeURIComponent(query);
+      const response = await fetch(
+        `${selectedChainConfig.toriiUrl}/sql?query=${encodedQuery}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to execute query");
+      }
+
+      setData(result);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An unknown error occurred";
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [query, selectedChainConfig?.toriiUrl]);
 
@@ -51,5 +51,6 @@ export function useSqlExecute(query: string) {
     data,
     loading,
     error,
+    refetch: fetchData,
   };
 }
