@@ -105,81 +105,6 @@ export const useOptimisticUpdates = () => {
     };
   };
 
-  const applyTournamentStartUpdate = (
-    tournamentId: BigNumberish,
-    newAddressStartCount: BigNumberish,
-    accountAddress?: string
-  ) => {
-    const startsAddressEntityId = getEntityIdFromKeys([
-      BigInt(tournamentId),
-      BigInt(accountAddress ?? "0x0"),
-    ]);
-    const transactionId = uuidv4();
-
-    console.log(startsAddressEntityId, nameSpace, "TournamentStartsAddress", {
-      tournament_id: tournamentId,
-      address: accountAddress,
-      start_count: newAddressStartCount,
-    });
-
-    state.applyOptimisticUpdate(transactionId, (draft) => {
-      applyModelUpdate(
-        draft,
-        startsAddressEntityId,
-        nameSpace,
-        "TournamentStartsAddress",
-        {
-          tournament_id: tournamentId,
-          address: accountAddress,
-          start_count: newAddressStartCount,
-        }
-      );
-    });
-
-    const waitForStartsEntityChange = async () => {
-      return await state.waitForEntityChange(
-        startsAddressEntityId,
-        (entity) => {
-          return (
-            entity?.models?.[nameSpace]?.TournamentStartsAddress?.start_count ==
-            newAddressStartCount
-          );
-        }
-      );
-    };
-
-    return {
-      transactionId,
-      wait: () => waitForStartsEntityChange(),
-      revert: () => state.revertOptimisticUpdate(transactionId),
-      confirm: () => state.confirmTransaction(transactionId),
-    };
-  };
-
-  const applyTournamentCreateUpdate = (tournament: Tournament) => {
-    const entityId = getEntityIdFromKeys([BigInt(tournament.id)]);
-    const transactionId = uuidv4();
-
-    state.applyOptimisticUpdate(transactionId, (draft) => {
-      applyModelUpdate(draft, entityId, nameSpace, "Tournament", tournament);
-    });
-
-    const waitForPrizeEntityChange = async () => {
-      return await state.waitForEntityChange(entityId, (entity) => {
-        return (
-          (entity?.models?.[nameSpace]?.Tournament as Tournament) == tournament
-        );
-      });
-    };
-
-    return {
-      transactionId,
-      wait: () => waitForPrizeEntityChange(),
-      revert: () => state.revertOptimisticUpdate(transactionId),
-      confirm: () => state.confirmTransaction(transactionId),
-    };
-  };
-
   const applyTournamentSubmitScoresUpdate = (
     tournamentId: BigNumberish,
     gameIds: BigNumberish[]
@@ -291,8 +216,6 @@ export const useOptimisticUpdates = () => {
 
   return {
     applyTournamentEntryUpdate,
-    applyTournamentStartUpdate,
-    applyTournamentCreateUpdate,
     applyTournamentSubmitScoresUpdate,
     applyTournamentPrizeUpdate,
     applyTournamentCreateAndAddPrizesUpdate,

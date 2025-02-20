@@ -65,7 +65,9 @@ export const processTournamentData = (
 
   return {
     id: tournamentCount + 1,
-    creator: addAddressPadding(address),
+    created_at: 0,
+    created_by: addAddressPadding(address),
+    creator_token_id: 0,
     metadata: {
       name: addAddressPadding(bigintToHex(stringToFelt(formData.name))),
       description: formData.description,

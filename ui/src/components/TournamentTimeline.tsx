@@ -3,6 +3,7 @@ import TimelineCard from "@/components/TimelineCard";
 
 interface TournamentTimelineProps {
   type: string;
+  createdTime: number;
   startTime: number;
   duration: number;
   submissionPeriod: number;
@@ -11,11 +12,13 @@ interface TournamentTimelineProps {
 
 const TournamentTimeline = ({
   type,
+  createdTime,
   startTime,
   duration,
   submissionPeriod,
   pulse = false,
 }: TournamentTimelineProps) => {
+  const createdDate = new Date(createdTime * 1000);
   const startDate = new Date(startTime * 1000);
   const endDate = new Date((startTime + duration) * 1000);
   const submissionEndDate = new Date(
@@ -38,7 +41,7 @@ const TournamentTimeline = ({
       {type === "fixed" && (
         <TimelineCard
           icon={<REGISTER />}
-          date={new Date()}
+          date={createdDate}
           duraton={registrationPeriod}
           label="Registration"
           showConnector

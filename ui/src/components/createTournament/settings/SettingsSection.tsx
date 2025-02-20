@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import SettingsCarousel from "./SettingsCarousel";
 import SmallSettingsTable from "./SmallSettingsTable";
-import { GameType } from "@/components/createTournament/settings/types";
 import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
 import { useGameNamespace } from "@/dojo/hooks/useGameNamespace";
 import { useGetGameSettingsQuery } from "@/dojo/hooks/useSdkQueries";
@@ -101,7 +100,7 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
                   </DialogHeader>
                   {form.watch("game") && (
                     <SettingsCarousel
-                      game={form.watch("game") as GameType}
+                      game={form.watch("game")}
                       settings={mergedGameSettings}
                       value={field.value}
                       onChange={field.onChange}

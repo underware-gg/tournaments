@@ -41,6 +41,55 @@ export const useGetEndedTournamentsCount = (currentTime: string) => {
   return { data: data?.[0]?.count, loading, error };
 };
 
+export const useGetUpcomingTournaments = ({
+  currentTime,
+  offset = 0,
+  limit = 5,
+}: {
+  currentTime: string;
+  offset?: number;
+  limit?: number;
+}) => {
+  const query = useMemo(
+    () => `
+    SELECT 
+    t.*,
+    CASE 
+        WHEN COUNT(p.tournament_id) = 0 THEN NULL
+        ELSE GROUP_CONCAT(
+            json_object(
+                'prizeId', p.id,
+                'position', p.payout_position,
+                'tokenType', p.token_type,
+                'tokenAddress', p.token_address,
+                'amount', CASE 
+                    WHEN p.token_type = 'erc20' THEN p."token_type.erc20.amount"
+                    WHEN p.token_type = 'erc721' THEN p."token_type.erc721.id"
+                    ELSE NULL 
+                END,
+                'isValid', CASE 
+                    WHEN p.token_type = 'erc20' AND p."token_type.erc20.amount" IS NOT NULL THEN 1
+                    WHEN p.token_type = 'erc721' AND p."token_type.erc721.id" IS NOT NULL THEN 1
+                    ELSE 0
+                END
+            ),
+            '|'
+        )
+    END as prizes
+    FROM "tournaments-Tournament" as t
+    LEFT JOIN "tournaments-Prize" p ON t.id = p.tournament_id
+    WHERE t.'schedule.game.start' > '${currentTime}'
+    GROUP BY t.id
+    ORDER BY t.'schedule.game.start' ASC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `,
+    [currentTime, offset, limit]
+  );
+  const { data, loading, error } = useSqlExecute(query);
+  return { data, loading, error };
+};
+
 export const useGetTokenOwnerQuery = (
   tokenAddress: string,
   tokenIds: string[]
@@ -57,7 +106,7 @@ export const useGetTokenOwnerQuery = (
     [tokenAddress, tokenIdsKey]
   );
   const { data, loading, error } = useSqlExecute(query);
-  return { data: data, loading, error };
+  return { data, loading, error };
 };
 
 export const useGetAccountTokenIds = (
@@ -80,7 +129,7 @@ export const useGetAccountTokenIds = (
     [address, gameAddressesKey]
   );
   const { data, loading, error } = useSqlExecute(query);
-  return { data: data, loading, error };
+  return { data, loading, error };
 };
 
 export const useGetTournamentEntrants = ({
@@ -135,7 +184,7 @@ export const useGetTournamentEntrants = ({
   const { data, loading, error } = useSqlExecute(
     isSepolia ? sepoliaQuery : query
   );
-  return { data: data, loading, error };
+  return { data, loading, error };
 };
 
 export const useGetTournamentLeaderboard = ({
@@ -194,5 +243,5 @@ export const useGetTournamentLeaderboard = ({
   const { data, loading, error } = useSqlExecute(
     isSepolia ? sepoliaQuery : query
   );
-  return { data: data, loading, error };
+  return { data, loading, error };
 };

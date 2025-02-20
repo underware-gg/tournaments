@@ -2,13 +2,12 @@ import React from "react";
 import { cn, feltToString } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { WEDGE_LEFT, WEDGE_RIGHT } from "@/components/Icons";
-import { GameType } from "@/components/createTournament/settings/types";
 import SettingsTable from "@/components/createTournament/settings/SettingsTable";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
 import { Settings, SettingsDetails } from "@/generated/models.gen";
 
 interface SettingsCarouselProps {
-  game: GameType;
+  game: string;
   settings: Record<
     string,
     SettingsDetails & {

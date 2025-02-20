@@ -3,13 +3,14 @@ import {
   useGetUpcomingTournamentsQuery,
   useGetTournamentDetailsInListQuery,
 } from "@/dojo/hooks/useSdkQueries";
+import { useGetUpcomingTournaments } from "@/dojo/hooks/useSqlQueries";
 import { bigintToHex } from "@/lib/utils";
 import { Tournament } from "@/generated/models.gen";
 import { TournamentCard } from "@/components/overview/TournamanentCard";
 import { addAddressPadding } from "starknet";
 import EmptyResults from "@/components/overview/tournaments/EmptyResults";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
-
+import { Prize } from "@/generated/models.gen";
 interface UpcomingTournamentsProps {
   gameFilters: string[];
 }
@@ -17,7 +18,7 @@ interface UpcomingTournamentsProps {
 const UpcomingTournaments = ({ gameFilters }: UpcomingTournamentsProps) => {
   const state = useDojoStore.getState();
   const hexTimestamp = useMemo(
-    () => bigintToHex(BigInt(new Date().getTime()) / 1000n),
+    () => addAddressPadding(bigintToHex(BigInt(new Date().getTime()) / 1000n)),
     []
   );
 
@@ -56,6 +57,33 @@ const UpcomingTournaments = ({ gameFilters }: UpcomingTournamentsProps) => {
   );
 
   useGetTournamentDetailsInListQuery(prizeTournamentIds);
+
+  const { data: upcomingTournaments } = useGetUpcomingTournaments({
+    currentTime: hexTimestamp,
+    offset: 0,
+    limit: 12,
+  });
+
+  const upcomingTournamentsData = upcomingTournaments.map((tournament) => {
+    return {
+      ...tournament,
+      prizes: tournament.prizes
+        ? tournament.prizes
+            .split("|")
+            .map((prizeStr: string) => {
+              const prize = JSON.parse(prizeStr);
+              return {
+                ...prize,
+                isValid: Boolean(prize.isValid),
+              };
+            })
+            .filter((prize: any) => prize.isValid)
+            .sort((a: any, b: any) => a.position - b.position)
+        : null,
+    };
+  });
+
+  console.log(upcomingTournamentsData);
 
   return (
     <>

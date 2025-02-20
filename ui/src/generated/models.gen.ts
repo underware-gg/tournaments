@@ -258,7 +258,9 @@ export interface TokenValue {
 // Type definition for `tournaments::components::models::tournament::Tournament` struct
 export interface Tournament {
   id: BigNumberish;
-  creator: string;
+  created_at: BigNumberish;
+  created_by: string;
+  creator_token_id: BigNumberish;
   metadata: Metadata;
   schedule: Schedule;
   game_config: GameConfig;
@@ -677,7 +679,9 @@ export const schema: SchemaType = {
     Tournament: {
       fieldOrder: [
         "id",
-        "creator",
+        "created_at",
+        "created_by",
+        "creator_token_id",
         "metadata",
         "schedule",
         "game_config",
@@ -685,7 +689,9 @@ export const schema: SchemaType = {
         "entry_requirement",
       ],
       id: 0,
-      creator: "",
+      created_at: 0,
+      created_by: "",
+      creator_token_id: 0,
       metadata: { name: 0, description: "" },
       schedule: {
         registration: new CairoOption(CairoOptionVariant.None),

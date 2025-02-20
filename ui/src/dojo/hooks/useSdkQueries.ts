@@ -17,26 +17,10 @@ export const useGetTokensQuery = () => {
   return { entities, isLoading, refetch };
 };
 
-export const useGetTournamentCountsQuery = (key: bigint) => {
+export const useGetMetricsQuery = (key: string) => {
   const query = new ToriiQueryBuilder().withClause(
-    KeysClause([ModelsMapping.PlatformMetrics], [])
+    KeysClause([ModelsMapping.PlatformMetrics, ModelsMapping.PrizeMetrics], [])
       .where(ModelsMapping.PlatformMetrics, "key", "Eq", addAddressPadding(key))
-      .build()
-  );
-  const { entities, isLoading, refetch } = useSdkGetEntities({
-    query,
-  });
-  const entity = useMemo(
-    () => (Array.isArray(entities) ? entities[0] : entities),
-    [entities]
-  );
-  return { entity, isLoading, refetch };
-};
-
-export const useGetPrizeCountsQuery = (key: bigint) => {
-  const query = new ToriiQueryBuilder().withClause(
-    KeysClause([ModelsMapping.PrizeMetrics], [])
-      .where(ModelsMapping.PrizeMetrics, "key", "Eq", addAddressPadding(key))
       .build()
   );
   const { entities, isLoading, refetch } = useSdkGetEntities({

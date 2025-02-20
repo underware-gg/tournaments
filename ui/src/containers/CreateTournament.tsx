@@ -18,13 +18,12 @@ import TournamentConfirmation from "@/components/dialogs/TournamentConfirmation"
 import { processPrizes, processTournamentData } from "@/lib/utils/formatting";
 import { useAccount } from "@starknet-react/core";
 import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
-import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import {
-  // useGetTournamentCountsQuery,
-  // useGetPrizeCountsQuery,
+  useGetMetricsQuery,
   useSubscribeTournamentsQuery,
 } from "@/dojo/hooks/useSdkQueries";
-// import { TOURNAMENT_VERSION_KEY } from "@/lib/constants";
+import { TOURNAMENT_VERSION_KEY } from "@/lib/constants";
+import { addAddressPadding } from "starknet";
 
 export type TournamentFormData = z.infer<typeof formSchema>;
 
@@ -107,14 +106,10 @@ const CreateTournament = () => {
   const { createTournamentAndApproveAndAddPrizes } = useSystemCalls();
 
   useSubscribeTournamentsQuery();
-  // const { entity: tournamentCountsEntity } = useGetTournamentCountsQuery(
-  //   TOURNAMENT_VERSION_KEY
-  // );
-  // const { entity: prizeCountsEntity } = useGetPrizeCountsQuery(
-  //   TOURNAMENT_VERSION_KEY
-  // );
-  const state = useDojoStore.getState();
-  console.log(state);
+  const { entity: metricsEntity } = useGetMetricsQuery(
+    addAddressPadding(TOURNAMENT_VERSION_KEY)
+  );
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     shouldUnregister: false,
@@ -155,13 +150,9 @@ const CreateTournament = () => {
     },
   });
 
-  // const tournamentCount =
-  //   tournamentCountsEntity?.PlatformMetrics?.total_tournaments ?? 0;
-  // console.log(tournamentCount);
-  // const prizeCount = prizeCountsEntity?.PrizeMetrics?.total_prizes ?? 0;
-  // console.log(prizeCount);
-  const tournamentCount = 0n;
-  const prizeCount = 0;
+  const tournamentCount =
+    metricsEntity?.PlatformMetrics?.total_tournaments ?? 0;
+  const prizeCount = metricsEntity?.PrizeMetrics?.total_prizes ?? 0;
 
   // Add state for current step
   const [currentStep, setCurrentStep] = React.useState<
@@ -414,6 +405,8 @@ const CreateTournament = () => {
         processedTournament,
         processedPrizes
       );
+      form.reset();
+      navigate("/");
     } catch (error) {
       console.error("Error creating tournament:", error);
     }

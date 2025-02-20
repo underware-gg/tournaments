@@ -266,6 +266,7 @@ const Schedule = ({ form }: StepProps) => {
           <div className="w-full h-0.5 bg-retro-green/25" />
           <TournamentTimeline
             type={form.watch("type")}
+            createdTime={Math.floor(new Date().getTime() / 1000)} // Convert to Unix timestamp
             startTime={Math.floor(form.watch("startTime").getTime() / 1000)} // Convert to Unix timestamp
             duration={form.watch("duration") * 24 * 60 * 60} // Convert days to seconds
             submissionPeriod={form.watch("submissionPeriod") * 60 * 60} // Convert hours to seconds

@@ -310,6 +310,7 @@ const Tournament = () => {
           <div className="w-1/2 flex justify-center items-center">
             <TournamentTimeline
               type={registrationType}
+              createdTime={Number(tournamentModel?.created_at)}
               startTime={Number(tournamentModel?.schedule.game.start)}
               duration={durationSeconds}
               submissionPeriod={Number(

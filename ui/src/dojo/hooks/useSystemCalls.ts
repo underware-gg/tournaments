@@ -109,7 +109,9 @@ export const useSystemCalls = () => {
 
       console.log(calls);
 
-      const tx = await account?.execute(calls);
+      const tx = isMainnet
+        ? await account?.execute(calls)
+        : account?.execute(calls);
 
       await wait();
 
@@ -202,7 +204,9 @@ export const useSystemCalls = () => {
         ]),
       });
 
-      const tx = await account?.execute(calls);
+      const tx = isMainnet
+        ? await account?.execute(calls)
+        : account?.execute(calls);
 
       await wait();
 
@@ -225,7 +229,7 @@ export const useSystemCalls = () => {
     tournament: Tournament,
     prizes: Prize[]
   ) => {
-    const { wait, revert, confirm } = applyTournamentCreateAndAddPrizesUpdate(
+    const { revert, confirm } = applyTournamentCreateAndAddPrizesUpdate(
       tournament,
       prizes
     );
@@ -238,6 +242,7 @@ export const useSystemCalls = () => {
         contractAddress: tournamentAddress,
         entrypoint: "create_tournament",
         calldata: CallData.compile([
+          address!,
           executableTournament.metadata,
           executableTournament.schedule,
           executableTournament.game_config,
@@ -274,9 +279,9 @@ export const useSystemCalls = () => {
 
       console.log(calls);
 
-      const tx = account?.execute(calls);
-
-      await wait();
+      const tx = isMainnet
+        ? await account?.execute(calls)
+        : account?.execute(calls);
 
       if (tx) {
         toast({

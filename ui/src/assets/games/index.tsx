@@ -16,9 +16,10 @@ export const getGames = (): Record<string, Game> => {
   const { selectedChainConfig } = useDojo();
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
   const isLocalKatana = selectedChainConfig.chainId === ChainId.KATANA_LOCAL;
+  const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
   if (isLocalKatana) {
     return {
-      "0x032ffff023e926e396e56e3a5cb3ce6ef68cb6f620e95dc38db12781fbc9425f": {
+      "0x072e1affe9a2d0a1852238073bc2f81e059ad7ab500e788046ac2f0b89b0c94a": {
         name: "Loot Survivor",
         Icon: function LootSurvivorIcon(
           props: ImgHTMLAttributes<HTMLImageElement>
@@ -38,9 +39,20 @@ export const getGames = (): Record<string, Game> => {
         },
       },
     };
+  } else if (isMainnet) {
+    return {
+      "0x06f32edb41a707fc6e368b37dd74890b1a518f5fba6b7fef7061ef72afc27336": {
+        name: "Dark Shuffle",
+        Icon: function DarkShuffleIcon(
+          props: ImgHTMLAttributes<HTMLImageElement>
+        ) {
+          return <img src={darkShuffle} {...props} />;
+        },
+      },
+    };
   } else {
     return {
-      "0x02f3f1675be75c1c9424d777cc79f60f29c9e24cf08775a4bb90f3d44812781c": {
+      "0x072e1affe9a2d0a1852238073bc2f81e059ad7ab500e788046ac2f0b89b0c94a": {
         name: "Loot Survivor",
         Icon: function LootSurvivorIcon(
           props: ImgHTMLAttributes<HTMLImageElement>
