@@ -2154,8 +2154,6 @@
               "name": "TournamentEvent",
               "type": "tournaments::components::tournament::tournament_component::Event",
               "kind": "flat"
-              "type": "tournaments::components::tournament::tournament_component::Event",
-              "kind": "flat"
             }
           ]
         }
