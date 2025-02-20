@@ -8,18 +8,21 @@ import {
   processPrizesFromSql,
   processTournamentFromSql,
 } from "@/lib/utils/formatting";
+import { useDojo } from "@/context/dojo";
 
 interface LiveTournamentsProps {
   gameFilters: string[];
 }
 
 const LiveTournaments = ({ gameFilters }: LiveTournamentsProps) => {
+  const { nameSpace } = useDojo();
   const hexTimestamp = useMemo(
     () => addAddressPadding(bigintToHex(BigInt(new Date().getTime()) / 1000n)),
     []
   );
 
   const { data: liveTournaments } = useGetLiveTournaments({
+    namespace: nameSpace,
     currentTime: hexTimestamp,
     gameFilters: gameFilters,
     offset: 0,

@@ -24,8 +24,10 @@ import {
 } from "@/dojo/hooks/useSqlQueries";
 import { bigintToHex } from "@/lib/utils";
 import { addAddressPadding } from "starknet";
+import { useDojo } from "@/context/dojo";
 
 const Overview = () => {
+  const { nameSpace } = useDojo();
   const [selectedTab, setSelectedTab] = useState<
     "all" | "my" | "live" | "ended"
   >("all");
@@ -38,14 +40,20 @@ const Overview = () => {
     return addAddressPadding(bigintToHex(BigInt(Date.now()) / 1000n));
   }, []);
 
-  const { data: upcomingTournamentsCount } =
-    useGetUpcomingTournamentsCount(currentTime);
+  const { data: upcomingTournamentsCount } = useGetUpcomingTournamentsCount({
+    namespace: nameSpace,
+    currentTime: currentTime,
+  });
 
-  const { data: liveTournamentsCount } =
-    useGetLiveTournamentsCount(currentTime);
+  const { data: liveTournamentsCount } = useGetLiveTournamentsCount({
+    namespace: nameSpace,
+    currentTime: currentTime,
+  });
 
-  const { data: endedTournamentsCount } =
-    useGetEndedTournamentsCount(currentTime);
+  const { data: endedTournamentsCount } = useGetEndedTournamentsCount({
+    namespace: nameSpace,
+    currentTime: currentTime,
+  });
 
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -155,7 +163,7 @@ const Overview = () => {
             ) : selectedTab === "ended" ? (
               <EndedTournaments gameFilters={gameFilters} />
             ) : (
-              <MyTournaments gameFilters={gameFilters} />
+              <MyTournaments />
             )}
           </div>
         </div>

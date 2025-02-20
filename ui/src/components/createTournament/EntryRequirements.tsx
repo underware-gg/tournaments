@@ -26,10 +26,23 @@ import TokenGameIcon from "@/components/icons/TokenGameIcon";
 import { Search } from "lucide-react";
 import TokenDialog from "@/components/dialogs/Token";
 import { Token } from "@/generated/models.gen";
+import { useDojo } from "@/context/dojo";
+import { useGetTournaments } from "@/dojo/hooks/useSqlQueries";
+
 const EntryRequirements = ({ form }: StepProps) => {
+  const { nameSpace } = useDojo();
   const [newAddress, setNewAddress] = React.useState("");
   const [tournamentSearchQuery, setTournamentSearchQuery] = useState("");
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+
+  const { data: newTournaments } = useGetTournaments({
+    namespace: nameSpace,
+    gameFilters: [],
+    offset: 0,
+    limit: 100,
+  });
+
+  console.log(newTournaments);
 
   const filteredTournaments = tournaments.filter((tournament) =>
     tournament.name.toLowerCase().includes(tournamentSearchQuery.toLowerCase())

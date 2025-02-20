@@ -29,6 +29,7 @@ const MyEntries = ({
 }: MyEntriesProps) => {
   const { address } = useAccount();
   const [showMyEntries, setShowMyEntries] = useState(false);
+
   const queryAddress = useMemo(() => {
     if (!address || address === "0x0") return null;
     return indexAddress(address);
@@ -75,7 +76,7 @@ const MyEntries = ({
   );
 
   const { entities: metadata } = useGetGameMetadataInListQuery({
-    namespace: gameNamespace,
+    gameNamespace: gameNamespace ?? "",
     gameIds: tokenIds ?? [],
     isSepolia: isSepolia,
   });

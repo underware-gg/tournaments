@@ -38,7 +38,7 @@ export const useSdkSubscribeEntities = ({
 
     const _subscribe = async () => {
       console.log(memoizedQuery);
-      const [initialEntities, subscription] = await sdk.subscribeEntityQuery({
+      const [_initialEntities, subscription] = await sdk.subscribeEntityQuery({
         query: memoizedQuery,
         callback: (response) => {
           if (response.error) {
@@ -70,7 +70,6 @@ export const useSdkSubscribeEntities = ({
           }
         },
       });
-      state.setEntities(initialEntities as ParsedEntity<SchemaType>[]);
       setIsSubscribed(true);
       _unsubscribe = () => subscription.cancel();
     };

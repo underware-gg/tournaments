@@ -120,11 +120,12 @@ export const useOptimisticUpdates = () => {
     });
 
     const waitForPrizeEntityChange = async () => {
-      return await state.waitForEntityChange(entityId, (entity) => {
-        return (
-          entity?.models?.[nameSpace]?.TournamentScores?.top_score_ids ==
-          gameIds
-        );
+      return await state.waitForEntityChange(entityId, (_) => {
+        // return (
+        //   entity?.models?.[nameSpace]?.TournamentScores?.top_score_ids ==
+        //   gameIds
+        // );
+        return true;
       });
     };
 

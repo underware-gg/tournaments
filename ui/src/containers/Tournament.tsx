@@ -7,10 +7,11 @@ import TournamentTimeline from "@/components/TournamentTimeline";
 import { bigintToHex, feltToString, formatTime } from "@/lib/utils";
 import { addAddressPadding } from "starknet";
 import {
-  useGetTournamentDetailsQuery,
   useSubscribeGamesQuery,
   useSubscribeEntriesQuery,
   useGetGameCounterQuery,
+  useGetTournamentQuery,
+  useGetTournamentPrizesQuery,
 } from "@/dojo/hooks/useSdkQueries";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import {
@@ -50,9 +51,10 @@ const Tournament = () => {
   const [enterDialogOpen, setEnterDialogOpen] = useState(false);
 
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
-  // const tournament = tournaments[Number(id)];
 
-  const { entities: tournamentDetails } = useGetTournamentDetailsQuery(
+  useGetTournamentQuery(addAddressPadding(bigintToHex(id!)));
+
+  const { entities: tournamentPrizes } = useGetTournamentPrizesQuery(
     addAddressPadding(bigintToHex(id!))
   );
 
@@ -61,12 +63,12 @@ const Tournament = () => {
     [id]
   );
 
-  const prizes: Prize[] = (tournamentDetails
+  const prizes: Prize[] = (tournamentPrizes
     ?.filter((detail) => detail.Prize)
     .map((detail) => detail.Prize) ?? []) as unknown as Prize[];
 
   const tournamentModel = state.getEntity(tournamentEntityId)?.models[nameSpace]
-    .Tournament as TournamentModel;
+    ?.Tournament as TournamentModel;
   const tokenModels = state.getEntitiesByModel(nameSpace, "Token");
   const tokens = tokenModels.map(
     (model) => model.models[nameSpace].Token
@@ -93,6 +95,7 @@ const Tournament = () => {
 
   useSubscribeGamesQuery({
     nameSpace: gameNamespace ?? "",
+    gameNamespace: gameNamespace ?? "",
     isSepolia: isSepolia,
   });
 

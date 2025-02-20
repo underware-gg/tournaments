@@ -1,5 +1,4 @@
 import type { SchemaType as ISchemaType } from "@dojoengine/sdk";
-
 import {
   CairoCustomEnum,
   CairoOption,
@@ -7,6 +6,7 @@ import {
   BigNumberish,
   Uint256,
 } from "starknet";
+import { NAMESPACE } from "@/lib/constants";
 
 type WithFieldOrder<T> = T & { fieldOrder: string[] };
 
@@ -357,7 +357,7 @@ export type NFTQualification = {
 };
 
 export interface SchemaType extends ISchemaType {
-  tournaments: {
+  [namespace: string]: {
     GameCounter: WithFieldOrder<GameCounter>;
     GameCounterValue: WithFieldOrder<GameCounterValue>;
     GameMetadata: WithFieldOrder<GameMetadata>;
@@ -402,7 +402,7 @@ export interface SchemaType extends ISchemaType {
   };
 }
 export const schema: SchemaType = {
-  tournaments: {
+  [NAMESPACE]: {
     GameCounter: {
       fieldOrder: ["key", "count"],
       key: 0,
@@ -752,48 +752,48 @@ export const schema: SchemaType = {
   },
 };
 export enum ModelsMapping {
-  GameCounter = "tournaments-GameCounter",
-  GameCounterValue = "tournaments-GameCounterValue",
-  GameMetadata = "tournaments-GameMetadata",
-  GameMetadataValue = "tournaments-GameMetadataValue",
-  Score = "tournaments-Score",
-  ScoreValue = "tournaments-ScoreValue",
-  SettingsDetails = "tournaments-SettingsDetails",
-  SettingsDetailsValue = "tournaments-SettingsDetailsValue",
-  TokenMetadata = "tournaments-TokenMetadata",
-  TokenMetadataValue = "tournaments-TokenMetadataValue",
-  ERC20Data = "tournaments-ERC20Data",
-  ERC721Data = "tournaments-ERC721Data",
-  EntryCount = "tournaments-EntryCount",
-  EntryCountValue = "tournaments-EntryCountValue",
-  EntryFee = "tournaments-EntryFee",
-  EntryRequirement = "tournaments-EntryRequirement",
-  GameConfig = "tournaments-GameConfig",
-  Leaderboard = "tournaments-Leaderboard",
-  LeaderboardValue = "tournaments-LeaderboardValue",
-  Metadata = "tournaments-Metadata",
-  Period = "tournaments-Period",
-  PlatformMetrics = "tournaments-PlatformMetrics",
-  PlatformMetricsValue = "tournaments-PlatformMetricsValue",
-  Prize = "tournaments-Prize",
-  PrizeClaim = "tournaments-PrizeClaim",
-  PrizeClaimValue = "tournaments-PrizeClaimValue",
-  PrizeMetrics = "tournaments-PrizeMetrics",
-  PrizeMetricsValue = "tournaments-PrizeMetricsValue",
-  PrizeType = "tournaments-PrizeType",
-  PrizeValue = "tournaments-PrizeValue",
-  Registration = "tournaments-Registration",
-  RegistrationValue = "tournaments-RegistrationValue",
-  Role = "tournaments-Role",
-  Schedule = "tournaments-Schedule",
-  Token = "tournaments-Token",
-  TokenType = "tournaments-TokenType",
-  TokenValue = "tournaments-TokenValue",
-  Tournament = "tournaments-Tournament",
-  TournamentConfig = "tournaments-TournamentConfig",
-  TournamentConfigValue = "tournaments-TournamentConfigValue",
-  TournamentTokenMetrics = "tournaments-TournamentTokenMetrics",
-  TournamentTokenMetricsValue = "tournaments-TournamentTokenMetricsValue",
-  TournamentType = "tournaments-TournamentType",
-  TournamentValue = "tournaments-TournamentValue",
+  GameCounter = `${NAMESPACE}-GameCounter`,
+  GameCounterValue = `${NAMESPACE}-GameCounterValue`,
+  GameMetadata = `${NAMESPACE}-GameMetadata`,
+  GameMetadataValue = `${NAMESPACE}-GameMetadataValue`,
+  Score = `${NAMESPACE}-Score`,
+  ScoreValue = `${NAMESPACE}-ScoreValue`,
+  SettingsDetails = `${NAMESPACE}-SettingsDetails`,
+  SettingsDetailsValue = `${NAMESPACE}-SettingsDetailsValue`,
+  TokenMetadata = `${NAMESPACE}-TokenMetadata`,
+  TokenMetadataValue = `${NAMESPACE}-TokenMetadataValue`,
+  ERC20Data = `${NAMESPACE}-ERC20Data`,
+  ERC721Data = `${NAMESPACE}-ERC721Data`,
+  EntryCount = `${NAMESPACE}-EntryCount`,
+  EntryCountValue = `${NAMESPACE}-EntryCountValue`,
+  EntryFee = `${NAMESPACE}-EntryFee`,
+  EntryRequirement = `${NAMESPACE}-EntryRequirement`,
+  GameConfig = `${NAMESPACE}-GameConfig`,
+  Leaderboard = `${NAMESPACE}-Leaderboard`,
+  LeaderboardValue = `${NAMESPACE}-LeaderboardValue`,
+  Metadata = `${NAMESPACE}-Metadata`,
+  Period = `${NAMESPACE}-Period`,
+  PlatformMetrics = `${NAMESPACE}-PlatformMetrics`,
+  PlatformMetricsValue = `${NAMESPACE}-PlatformMetricsValue`,
+  Prize = `${NAMESPACE}-Prize`,
+  PrizeClaim = `${NAMESPACE}-PrizeClaim`,
+  PrizeClaimValue = `${NAMESPACE}-PrizeClaimValue`,
+  PrizeMetrics = `${NAMESPACE}-PrizeMetrics`,
+  PrizeMetricsValue = `${NAMESPACE}-PrizeMetricsValue`,
+  PrizeType = `${NAMESPACE}-PrizeType`,
+  PrizeValue = `${NAMESPACE}-PrizeValue`,
+  Registration = `${NAMESPACE}-Registration`,
+  RegistrationValue = `${NAMESPACE}-RegistrationValue`,
+  Role = `${NAMESPACE}-Role`,
+  Schedule = `${NAMESPACE}-Schedule`,
+  Token = `${NAMESPACE}-Token`,
+  TokenType = `${NAMESPACE}-TokenType`,
+  TokenValue = `${NAMESPACE}-TokenValue`,
+  Tournament = `${NAMESPACE}-Tournament`,
+  TournamentConfig = `${NAMESPACE}-TournamentConfig`,
+  TournamentConfigValue = `${NAMESPACE}-TournamentConfigValue`,
+  TournamentTokenMetrics = `${NAMESPACE}-TournamentTokenMetrics`,
+  TournamentTokenMetricsValue = `${NAMESPACE}-TournamentTokenMetricsValue`,
+  TournamentType = `${NAMESPACE}-TournamentType`,
+  TournamentValue = `${NAMESPACE}-TournamentValue`,
 }

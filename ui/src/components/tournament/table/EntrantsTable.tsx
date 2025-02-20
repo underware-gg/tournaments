@@ -33,12 +33,13 @@ const EntrantsTable = ({
 }: EntrantsTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showParticipants, setShowParticipants] = useState(false);
-  const { selectedChainConfig } = useDojo();
+  const { selectedChainConfig, nameSpace } = useDojo();
 
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
 
   const { data: entrants, refetch: refetchEntrants } = useGetTournamentEntrants(
     {
+      namespace: nameSpace,
       tournamentId: tournamentId,
       gameNamespace: gameNamespace,
       isSepolia: isSepolia,

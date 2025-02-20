@@ -1,13 +1,20 @@
 import { useState, useEffect } from "react";
 import { useDojo } from "@/context/dojo";
 
-export function useSqlExecute(query: string) {
+export function useSqlExecute(query: string | null) {
   const { selectedChainConfig } = useDojo();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<any[]>([]);
 
   const fetchData = async () => {
+    if (query === null) {
+      setLoading(false);
+      setError(null);
+      setData([]);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 

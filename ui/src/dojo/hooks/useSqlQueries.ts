@@ -2,51 +2,146 @@ import { useSqlExecute } from "@/lib/dojo/hooks/useSqlExecute";
 import { useMemo } from "react";
 import { addAddressPadding, BigNumberish } from "starknet";
 
-export const useGetUpcomingTournamentsCount = (currentTime: string) => {
+export const useGetTournamentsCount = ({
+  namespace,
+}: {
+  namespace: string;
+}) => {
   const query = useMemo(
     () => `
     SELECT COUNT(*) as count 
-    FROM 'tournaments-Tournament' m
+    FROM '${namespace}-Tournament' m
+  `,
+    [namespace]
+  );
+  const { data, loading, error } = useSqlExecute(query);
+  return { data: data?.[0]?.count, loading, error };
+};
+
+export const useGetUpcomingTournamentsCount = ({
+  namespace,
+  currentTime,
+}: {
+  namespace: string;
+  currentTime: string;
+}) => {
+  const query = useMemo(
+    () => `
+    SELECT COUNT(*) as count 
+    FROM '${namespace}-Tournament' m
     WHERE m.'schedule.game.start' > '${currentTime}'
   `,
-    [currentTime]
+    [namespace, currentTime]
   );
   const { data, loading, error } = useSqlExecute(query);
   return { data: data?.[0]?.count, loading, error };
 };
 
-export const useGetLiveTournamentsCount = (currentTime: string) => {
+export const useGetLiveTournamentsCount = ({
+  namespace,
+  currentTime,
+}: {
+  namespace: string;
+  currentTime: string;
+}) => {
   const query = useMemo(
     () => `
     SELECT COUNT(*) as count 
-    FROM 'tournaments-Tournament' m
+    FROM '${namespace}-Tournament' m
     WHERE (m.'schedule.game.start' <= '${currentTime}' AND m.'schedule.game.end' > '${currentTime}')
   `,
-    [currentTime]
+    [namespace, currentTime]
   );
   const { data, loading, error } = useSqlExecute(query);
   return { data: data?.[0]?.count, loading, error };
 };
 
-export const useGetEndedTournamentsCount = (currentTime: string) => {
+export const useGetEndedTournamentsCount = ({
+  namespace,
+  currentTime,
+}: {
+  namespace: string;
+  currentTime: string;
+}) => {
   const query = useMemo(
     () => `
     SELECT COUNT(*) as count 
-    FROM 'tournaments-Tournament' m
+    FROM '${namespace}-Tournament' m
     WHERE m.'schedule.game.end' <= '${currentTime}'
   `,
-    [currentTime]
+    [namespace, currentTime]
   );
   const { data, loading, error } = useSqlExecute(query);
   return { data: data?.[0]?.count, loading, error };
+};
+
+export const useGetTournaments = ({
+  namespace,
+  gameFilters,
+  offset = 0,
+  limit = 5,
+}: {
+  namespace: string;
+  gameFilters: string[];
+  offset?: number;
+  limit?: number;
+}) => {
+  const query = useMemo(
+    () => `
+    SELECT 
+    t.*,
+    CASE 
+        WHEN COUNT(p.tournament_id) = 0 THEN NULL
+        ELSE GROUP_CONCAT(
+            json_object(
+                'prizeId', p.id,
+                'position', p.payout_position,
+                'tokenType', p.token_type,
+                'tokenAddress', p.token_address,
+                'amount', CASE 
+                    WHEN p.token_type = 'erc20' THEN p."token_type.erc20.amount"
+                    WHEN p.token_type = 'erc721' THEN p."token_type.erc721.id"
+                    ELSE NULL 
+                END,
+                'isValid', CASE 
+                    WHEN p.token_type = 'erc20' AND p."token_type.erc20.amount" IS NOT NULL THEN 1
+                    WHEN p.token_type = 'erc721' AND p."token_type.erc721.id" IS NOT NULL THEN 1
+                    ELSE 0
+                END
+            ),
+            '|'
+        )
+    END as prizes,
+    COALESCE(e.count, 0) as entry_count
+    FROM '${namespace}-Tournament' as t
+    LEFT JOIN '${namespace}-Prize' p ON t.id = p.tournament_id
+    LEFT JOIN '${namespace}-EntryCount' e ON t.id = e.tournament_id
+    ${
+      gameFilters.length > 0
+        ? `WHERE t.'game_config.address' IN (${gameFilters
+            .map((address) => `'${address}'`)
+            .join(",")})`
+        : ""
+    }
+    GROUP BY t.id
+    ORDER BY t.'schedule.game.start' ASC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `,
+    [namespace, gameFilters, offset, limit]
+  );
+  const { data, loading, error, refetch } = useSqlExecute(query);
+  return { data, loading, error, refetch };
 };
 
 export const useGetUpcomingTournaments = ({
+  namespace,
   currentTime,
   gameFilters,
   offset = 0,
   limit = 5,
 }: {
+  namespace: string;
   currentTime: string;
   gameFilters: string[];
   offset?: number;
@@ -79,9 +174,9 @@ export const useGetUpcomingTournaments = ({
         )
     END as prizes,
     COALESCE(e.count, 0) as entry_count
-    FROM "tournaments-Tournament" as t
-    LEFT JOIN "tournaments-Prize" p ON t.id = p.tournament_id
-    LEFT JOIN "tournaments-EntryCount" e ON t.id = e.tournament_id
+    FROM '${namespace}-Tournament' as t
+    LEFT JOIN '${namespace}-Prize' p ON t.id = p.tournament_id
+    LEFT JOIN '${namespace}-EntryCount' e ON t.id = e.tournament_id
     WHERE t.'schedule.game.start' > '${currentTime}'
         ${
           gameFilters.length > 0
@@ -95,18 +190,20 @@ export const useGetUpcomingTournaments = ({
     LIMIT ${limit}
     OFFSET ${offset}
   `,
-    [currentTime, gameFilters, offset, limit]
+    [namespace, currentTime, gameFilters, offset, limit]
   );
   const { data, loading, error, refetch } = useSqlExecute(query);
   return { data, loading, error, refetch };
 };
 
 export const useGetLiveTournaments = ({
+  namespace,
   currentTime,
   gameFilters,
   offset = 0,
   limit = 5,
 }: {
+  namespace: string;
   currentTime: string;
   gameFilters: string[];
   offset?: number;
@@ -139,9 +236,9 @@ export const useGetLiveTournaments = ({
         )
     END as prizes,
     COALESCE(e.count, 0) as entry_count
-    FROM "tournaments-Tournament" as t
-    LEFT JOIN "tournaments-Prize" p ON t.id = p.tournament_id
-    LEFT JOIN "tournaments-EntryCount" e ON t.id = e.tournament_id
+    FROM '${namespace}-Tournament' as t
+    LEFT JOIN '${namespace}-Prize' p ON t.id = p.tournament_id
+    LEFT JOIN '${namespace}-EntryCount' e ON t.id = e.tournament_id
     WHERE t.'schedule.game.start' <= '${currentTime}' AND t.'schedule.game.end' > '${currentTime}'
         ${
           gameFilters.length > 0
@@ -155,18 +252,20 @@ export const useGetLiveTournaments = ({
     LIMIT ${limit}
     OFFSET ${offset}
   `,
-    [currentTime, gameFilters, offset, limit]
+    [namespace, currentTime, gameFilters, offset, limit]
   );
   const { data, loading, error, refetch } = useSqlExecute(query);
   return { data, loading, error, refetch };
 };
 
 export const useGetEndedTournaments = ({
+  namespace,
   currentTime,
   gameFilters,
   offset = 0,
   limit = 5,
 }: {
+  namespace: string;
   currentTime: string;
   gameFilters: string[];
   offset?: number;
@@ -199,9 +298,9 @@ export const useGetEndedTournaments = ({
         )
     END as prizes,
     COALESCE(e.count, 0) as entry_count
-    FROM "tournaments-Tournament" as t
-    LEFT JOIN "tournaments-Prize" p ON t.id = p.tournament_id
-    LEFT JOIN "tournaments-EntryCount" e ON t.id = e.tournament_id
+    FROM '${namespace}-Tournament' as t
+    LEFT JOIN '${namespace}-Prize' p ON t.id = p.tournament_id
+    LEFT JOIN '${namespace}-EntryCount' e ON t.id = e.tournament_id
     WHERE t.'schedule.game.end' <= '${currentTime}'
         ${
           gameFilters.length > 0
@@ -215,7 +314,7 @@ export const useGetEndedTournaments = ({
     LIMIT ${limit}
     OFFSET ${offset}
   `,
-    [currentTime, gameFilters, offset, limit]
+    [namespace, currentTime, gameFilters, offset, limit]
   );
   const { data, loading, error, refetch } = useSqlExecute(query);
   return { data, loading, error, refetch };
@@ -227,16 +326,18 @@ export const useGetTokenOwnerQuery = (
 ) => {
   const tokenIdsKey = useMemo(() => JSON.stringify(tokenIds), [tokenIds]);
   const query = useMemo(
-    () => `
+    () =>
+      tokenIds.length > 0
+        ? `
     SELECT account_address
     FROM [token_balances]
     WHERE token_id IN (
       ${tokenIds.map((id) => `"${tokenAddress}:${id}"`).join(",")}
     )
-  `,
+  `
+        : null,
     [tokenAddress, tokenIdsKey]
   );
-  console.log(query);
   const { data, loading, error } = useSqlExecute(query);
   return { data, loading, error };
 };
@@ -265,12 +366,14 @@ export const useGetAccountTokenIds = (
 };
 
 export const useGetTournamentEntrants = ({
+  namespace,
   tournamentId,
   gameNamespace,
   isSepolia = false,
   offset = 0,
   limit = 5,
 }: {
+  namespace: string;
   tournamentId: BigNumberish;
   gameNamespace: string;
   isSepolia?: boolean;
@@ -286,14 +389,14 @@ export const useGetTournamentEntrants = ({
     r.has_submitted,
     m.player_name,
     m."lifecycle.mint"
-    FROM "tournaments-Registration" r
-    LEFT JOIN "${gameNamespace}-TokenMetadata" m ON r.game_token_id = m.token_id
+    FROM '${namespace}-Registration' r
+    LEFT JOIN '${gameNamespace}-TokenMetadata' m ON r.game_token_id = m.token_id
     WHERE r.tournament_id = "${addAddressPadding(tournamentId)}"
     ORDER BY r.entry_number DESC
     LIMIT ${limit}
     OFFSET ${offset}
   `,
-    [tournamentId, offset, limit, gameNamespace]
+    [namespace, tournamentId, offset, limit, gameNamespace]
   );
   const sepoliaQuery = useMemo(
     () => `
@@ -304,14 +407,14 @@ export const useGetTournamentEntrants = ({
     r.has_submitted,
     m.player_name,
     m."lifecycle.mint"
-    FROM "tournaments-Registration" r
-    LEFT JOIN "ds-TokenMetadata" m ON r.game_token_id = m.token_id
+    FROM '${namespace}-Registration' r
+    LEFT JOIN '${gameNamespace}-TokenMetadata' m ON r.game_token_id = m.token_id
     WHERE r.tournament_id = "${addAddressPadding(tournamentId)}"
     ORDER BY r.entry_number DESC
     LIMIT ${limit}
     OFFSET ${offset}
   `,
-    [tournamentId, offset, limit]
+    [namespace, tournamentId, offset, limit, gameNamespace]
   );
   const { data, loading, error, refetch } = useSqlExecute(
     isSepolia ? sepoliaQuery : query
@@ -320,12 +423,14 @@ export const useGetTournamentEntrants = ({
 };
 
 export const useGetTournamentLeaderboard = ({
+  namespace,
   tournamentId,
   gameNamespace,
   isSepolia = false,
   offset = 0,
   limit = 5,
 }: {
+  namespace: string;
   tournamentId: BigNumberish;
   gameNamespace: string;
   isSepolia?: boolean;
@@ -342,15 +447,15 @@ export const useGetTournamentLeaderboard = ({
     COALESCE(s.score, 0) as score,
     m.player_name,
     m."lifecycle.mint"
-    FROM "tournaments-Registration" r
-    LEFT JOIN "${gameNamespace}-Score" s ON r.game_token_id = s.game_id
-    LEFT JOIN "${gameNamespace}-TokenMetadata" m ON r.game_token_id = m.token_id
+    FROM '${namespace}-Registration' r
+    LEFT JOIN '${gameNamespace}-Score' s ON r.game_token_id = s.game_id
+    LEFT JOIN '${gameNamespace}-TokenMetadata' m ON r.game_token_id = m.token_id
     WHERE r.tournament_id = "${addAddressPadding(tournamentId)}"
     ORDER BY s.score DESC
     LIMIT ${limit}
     OFFSET ${offset}
   `,
-    [tournamentId, offset, limit, gameNamespace]
+    [namespace, tournamentId, offset, limit, gameNamespace]
   );
   const sepoliaQuery = useMemo(
     () => `
@@ -362,15 +467,15 @@ export const useGetTournamentLeaderboard = ({
     COALESCE(s.hero_xp, 0) as score,
     m.player_name,
     m."lifecycle.mint"
-    FROM "tournaments-Registration" r
-    LEFT JOIN "ds-Game" s ON r.game_token_id = s.game_id
-    LEFT JOIN "ds-TokenMetadata" m ON r.game_token_id = m.token_id
+    FROM '${namespace}-Registration' r
+    LEFT JOIN '${gameNamespace}-Game' s ON r.game_token_id = s.game_id
+    LEFT JOIN '${gameNamespace}-TokenMetadata' m ON r.game_token_id = m.token_id
     WHERE r.tournament_id = "${addAddressPadding(tournamentId)}"
     ORDER BY s.hero_xp DESC
     LIMIT ${limit}
     OFFSET ${offset}
   `,
-    [tournamentId, offset, limit]
+    [namespace, tournamentId, offset, limit, gameNamespace]
   );
   const { data, loading, error } = useSqlExecute(
     isSepolia ? sepoliaQuery : query

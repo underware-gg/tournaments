@@ -52,6 +52,8 @@ export const DojoContextProvider = ({
     selectedChainConfig.rpcUrl
   );
 
+  console.log(selectedChainConfig.toriiUrl);
+
   useEffect(() => {
     init<SchemaType>({
       client: {

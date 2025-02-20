@@ -20,6 +20,7 @@ import tournament_manifest_sepolia from "../../../contracts/manifest_sepolia.jso
 import { initializeController } from "@/dojo/setup/controllerSetup";
 import { supportedConnectorIds } from "@/lib/connectors";
 import { stringToFelt, cleanObject } from "@/lib/utils";
+import { NAMESPACE } from "@/lib/constants";
 
 export interface ContractInterfaces {
   [contractName: string]: string[];
@@ -139,8 +140,6 @@ const manifests: Record<ChainId, DojoManifest> = {
   [ChainId.SN_MAIN]: tournament_manifest_mainnet as DojoManifest,
   [ChainId.SN_SEPOLIA]: tournament_manifest_sepolia as DojoManifest,
 };
-
-const NAMESPACE = "tournaments";
 
 let katanaContractInterfaces: ContractInterfaces = {
   tournament_mock: ["ITournamentMock"],

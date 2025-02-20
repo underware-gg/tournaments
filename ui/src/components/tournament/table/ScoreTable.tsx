@@ -33,10 +33,11 @@ const ScoreTable = ({
 }: ScoreTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showParticipants, setShowParticipants] = useState(false);
-  const { selectedChainConfig } = useDojo();
+  const { selectedChainConfig, nameSpace } = useDojo();
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
 
   const { data: leaderboard } = useGetTournamentLeaderboard({
+    namespace: nameSpace,
     tournamentId: tournamentId,
     gameNamespace: gameNamespace,
     isSepolia: isSepolia,
