@@ -15,7 +15,6 @@ import {
   indexAddress,
 } from "@/lib/utils";
 import { useDojo } from "@/context/dojo";
-import { ChainId } from "@/dojo/config";
 import { useGetUsernames } from "@/hooks/useController";
 
 interface EntrantsTableProps {
@@ -33,16 +32,16 @@ const EntrantsTable = ({
 }: EntrantsTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showParticipants, setShowParticipants] = useState(false);
-  const { selectedChainConfig, nameSpace } = useDojo();
+  const { nameSpace } = useDojo();
 
-  const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
+  const isDS = gameNamespace === "ds_v1_1_1";
 
   const { data: entrants, refetch: refetchEntrants } = useGetTournamentEntrants(
     {
       namespace: nameSpace,
       tournamentId: tournamentId,
       gameNamespace: gameNamespace,
-      isSepolia: isSepolia,
+      isDS: isDS,
       limit: 5,
       offset: (currentPage - 1) * 5,
     }

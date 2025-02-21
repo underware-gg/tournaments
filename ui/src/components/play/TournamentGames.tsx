@@ -1,6 +1,5 @@
 import { useGetTournamentLeaderboard } from "@/dojo/hooks/useSqlQueries";
 import { useDojo } from "@/context/dojo";
-import { ChainId } from "@/dojo/config";
 import { Tournament } from "@/generated/models.gen";
 import { useGameNamespace } from "@/dojo/hooks/useGameNamespace";
 import { useState } from "react";
@@ -15,20 +14,20 @@ interface TournamentGamesProps {
 
 const TournamentGames = ({ tournament }: TournamentGamesProps) => {
   const { address } = useAccount();
-  const { nameSpace, selectedChainConfig } = useDojo();
-  const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
+  const { nameSpace } = useDojo();
   const [currentPage, _setCurrentPage] = useState(1);
   const [scores, setScores] = useState<Record<string, number>>({});
   const { endGame } = useSystemCalls();
 
   const tournamentId = tournament.id;
   const { gameNamespace } = useGameNamespace(tournament.game_config.address);
+  const isDS = gameNamespace === "ds_v1_1_1";
 
   const { data: leaderboard } = useGetTournamentLeaderboard({
     namespace: nameSpace,
     tournamentId: tournamentId,
     gameNamespace: gameNamespace ?? "",
-    isSepolia: isSepolia,
+    isDS: isDS,
     limit: 10,
     offset: (currentPage - 1) * 5,
   });

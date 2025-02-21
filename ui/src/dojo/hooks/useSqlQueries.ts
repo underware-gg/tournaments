@@ -2,7 +2,7 @@ import { useSqlExecute } from "@/lib/dojo/hooks/useSqlExecute";
 import { useMemo } from "react";
 import { addAddressPadding, BigNumberish } from "starknet";
 
-export const useGetGameConfigs = () => {
+export const useGetGameNamespaces = () => {
   const query = useMemo(
     () => `
     SELECT namespace 
@@ -351,7 +351,7 @@ export const useGetTokenOwnerQuery = (
         : null,
     [tokenAddress, tokenIdsKey]
   );
-  const { data, loading, error } = useSqlExecute(query, true);
+  const { data, loading, error } = useSqlExecute(query);
   return { data, loading, error };
 };
 
@@ -382,14 +382,14 @@ export const useGetTournamentEntrants = ({
   namespace,
   tournamentId,
   gameNamespace,
-  isSepolia = false,
+  isDS = false,
   offset = 0,
   limit = 5,
 }: {
   namespace: string;
   tournamentId: BigNumberish;
   gameNamespace: string;
-  isSepolia?: boolean;
+  isDS?: boolean;
   offset?: number;
   limit?: number;
 }) => {
@@ -425,7 +425,7 @@ export const useGetTournamentEntrants = ({
     [isValidInput, namespace, tournamentId, offset, limit, gameNamespace]
   );
 
-  const sepoliaQuery = useMemo(
+  const dsQuery = useMemo(
     () =>
       isValidInput
         ? `
@@ -447,7 +447,7 @@ export const useGetTournamentEntrants = ({
     [isValidInput, namespace, tournamentId, offset, limit, gameNamespace]
   );
   const { data, loading, error, refetch } = useSqlExecute(
-    isSepolia ? sepoliaQuery : query
+    isDS ? dsQuery : query
   );
   return { data, loading, error, refetch };
 };
@@ -456,14 +456,14 @@ export const useGetTournamentLeaderboard = ({
   namespace,
   tournamentId,
   gameNamespace,
-  isSepolia = false,
+  isDS = false,
   offset = 0,
   limit = 5,
 }: {
   namespace: string;
   tournamentId: BigNumberish;
   gameNamespace: string;
-  isSepolia?: boolean;
+  isDS?: boolean;
   offset?: number;
   limit?: number;
 }) => {
@@ -500,7 +500,7 @@ export const useGetTournamentLeaderboard = ({
         : null,
     [isValidInput, namespace, tournamentId, offset, limit, gameNamespace]
   );
-  const sepoliaQuery = useMemo(
+  const dsQuery = useMemo(
     () =>
       isValidInput
         ? `
@@ -523,8 +523,6 @@ export const useGetTournamentLeaderboard = ({
         : null,
     [isValidInput, namespace, tournamentId, offset, limit, gameNamespace]
   );
-  const { data, loading, error } = useSqlExecute(
-    isSepolia ? sepoliaQuery : query
-  );
+  const { data, loading, error } = useSqlExecute(isDS ? dsQuery : query);
   return { data, loading, error };
 };

@@ -16,7 +16,6 @@ import {
 } from "@/lib/utils";
 import { useDojo } from "@/context/dojo";
 import { useGetUsernames } from "@/hooks/useController";
-import { ChainId } from "@/dojo/config";
 
 interface ScoreTableProps {
   tournamentId: BigNumberish;
@@ -33,14 +32,14 @@ const ScoreTable = ({
 }: ScoreTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showParticipants, setShowParticipants] = useState(false);
-  const { selectedChainConfig, nameSpace } = useDojo();
-  const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
+  const { nameSpace } = useDojo();
+  const isDS = gameNamespace === "ds_v1_1_1";
 
   const { data: leaderboard } = useGetTournamentLeaderboard({
     namespace: nameSpace,
     tournamentId: tournamentId,
     gameNamespace: gameNamespace,
-    isSepolia: isSepolia,
+    isDS: isDS,
     limit: 5,
     offset: (currentPage - 1) * 5,
   });
@@ -58,7 +57,14 @@ const ScoreTable = ({
     tokenIds ?? []
   );
 
-  console.log(tokenOwners, tokenIds, indexAddress(gameAddress.toString()));
+  console.log(
+    nameSpace,
+    leaderboard,
+    tokenOwners,
+    tokenIds,
+    indexAddress(gameAddress.toString()),
+    gameNamespace
+  );
 
   useEffect(() => {
     setShowParticipants(entryCount > 0);
