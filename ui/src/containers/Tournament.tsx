@@ -11,7 +11,6 @@ import {
   useSubscribeEntriesQuery,
   useGetGameCounterQuery,
   useGetTournamentQuery,
-  useGetTournamentPrizesQuery,
 } from "@/dojo/hooks/useSdkQueries";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import {
@@ -54,21 +53,24 @@ const Tournament = () => {
 
   useGetTournamentQuery(addAddressPadding(bigintToHex(id!)));
 
-  const { entities: tournamentPrizes } = useGetTournamentPrizesQuery(
-    addAddressPadding(bigintToHex(id!))
-  );
-
   const tournamentEntityId = useMemo(
     () => getEntityIdFromKeys([BigInt(id!)]),
     [id]
   );
 
+  const tournamentPrizes = state.getEntitiesByModel(nameSpace, "Prize");
+
   const prizes: Prize[] = (tournamentPrizes
-    ?.filter((detail) => detail.Prize)
-    .map((detail) => detail.Prize) ?? []) as unknown as Prize[];
+    ?.filter(
+      (detail) =>
+        detail.models?.[nameSpace]?.Prize?.tournament_id === Number(id)
+    )
+    .map((detail) => detail.models[nameSpace].Prize) ??
+    []) as unknown as Prize[];
 
   const tournamentModel = state.getEntity(tournamentEntityId)?.models[nameSpace]
     ?.Tournament as TournamentModel;
+
   const tokenModels = state.getEntitiesByModel(nameSpace, "Token");
   const tokens = tokenModels.map(
     (model) => model.models[nameSpace].Token
@@ -120,13 +122,6 @@ const Tournament = () => {
   const groupedByTokensPrizes = groupPrizesByTokens(prizes, tokens);
 
   const erc20TokenSymbols = getErc20TokenSymbols(groupedByTokensPrizes);
-  const { prices } = useEkuboPrices({ tokens: erc20TokenSymbols });
-  const totalPrizesValueUSD = calculateTotalValue(
-    groupedByTokensPrizes,
-    prices
-  );
-
-  const totalPrizeNFTs = countTotalNFTs(groupedByTokensPrizes);
 
   const durationSeconds = Number(
     BigInt(tournamentModel?.schedule?.game?.end ?? 0n) -
@@ -146,8 +141,29 @@ const Tournament = () => {
 
   const hasEntryFee = tournamentModel?.entry_fee.isSome();
 
+  const entryFeeToken = tournamentModel?.entry_fee.Some?.token_address;
+  const entryFeeTokenSymbol = tokens.find(
+    (t) => t.address === entryFeeToken
+  )?.symbol;
+
+  const { prices } = useEkuboPrices({
+    tokens: [...erc20TokenSymbols, entryFeeTokenSymbol ?? ""],
+  });
+
+  const totalPrizesValueUSD = calculateTotalValue(
+    groupedByTokensPrizes,
+    prices
+  );
+
+  const totalPrizeNFTs = countTotalNFTs(groupedByTokensPrizes);
+
+  const entryFeePrice = prices[entryFeeTokenSymbol ?? ""];
+
   const entryFee = tournamentModel?.entry_fee.isSome()
-    ? Number(BigInt(tournamentModel?.entry_fee.Some?.amount!) / 10n ** 18n)
+    ? (
+        Number(BigInt(tournamentModel?.entry_fee.Some?.amount!) / 10n ** 18n) *
+        Number(entryFeePrice)
+      ).toFixed(2)
     : "Free";
 
   const isStarted =
@@ -230,33 +246,8 @@ const Tournament = () => {
             </span>
             <div className="flex flex-row items-center gap-4 text-retro-green-dark">
               <div className="flex flex-row gap-2">
-                <span>Pot:</span>
-                <span className="text-retro-green">
-                  {totalPrizesValueUSD > 0 || totalPrizeNFTs > 0 ? (
-                    <div className="flex flex-row items-center gap-2">
-                      {totalPrizesValueUSD > 0 && (
-                        <span>${totalPrizesValueUSD}</span>
-                      )}
-                      {totalPrizeNFTs > 0 && (
-                        <span>
-                          {totalPrizeNFTs} NFT{totalPrizeNFTs === 1 ? "" : "s"}
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                    <span>No Prizes</span>
-                  )}
-                </span>
-              </div>
-              <div className="flex flex-row gap-2">
                 <span>Winners:</span>
                 <span className="text-retro-green">Top 5</span>
-              </div>
-              <div className="flex flex-row gap-2">
-                <span>Duration:</span>
-                <span className="text-retro-green">
-                  {formatTime(durationSeconds)}
-                </span>
               </div>
               <div className="flex flex-row gap-2">
                 <span>Registration:</span>
@@ -328,6 +319,8 @@ const Tournament = () => {
               prizesExist={prizes.length > 0}
               lowestPrizePosition={lowestPrizePosition}
               groupedPrizes={groupedPrizes}
+              totalPrizesValueUSD={totalPrizesValueUSD}
+              totalPrizeNFTs={totalPrizeNFTs}
             />
           </div>
         </div>

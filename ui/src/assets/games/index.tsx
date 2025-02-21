@@ -41,7 +41,7 @@ export const getGames = (): Record<string, Game> => {
     };
   } else if (isMainnet) {
     return {
-      "0x06f32edb41a707fc6e368b37dd74890b1a518f5fba6b7fef7061ef72afc27336": {
+      "0x02ffe2edea10d1622b9cc65ce18b441755f322253e24e6cd862518ab037009f5": {
         name: "Dark Shuffle",
         Icon: function DarkShuffleIcon(
           props: ImgHTMLAttributes<HTMLImageElement>

@@ -67,33 +67,26 @@ export const useGetTournamentQuery = (tournamentId: BigNumberish) => {
       new ToriiQueryBuilder()
         .withClause(
           AndComposeClause([
-            KeysClause([ModelsMapping.Tournament], []),
+            KeysClause(
+              [
+                ModelsMapping.Tournament,
+                ModelsMapping.EntryCount,
+                ModelsMapping.Prize,
+              ],
+              []
+            ),
             MemberClause(
               ModelsMapping.Tournament,
               "id",
               "Eq",
               addAddressPadding(tournamentId)
             ),
-          ]).build()
-        )
-        .withEntityModels([ModelsMapping.Tournament])
-        .includeHashedKeys(),
-    [tournamentId]
-  );
-
-  const { entities, isLoading, refetch } = useSdkGetEntities({
-    query,
-  });
-  return { entities, isLoading, refetch };
-};
-
-export const useGetTournamentPrizesQuery = (tournamentId: BigNumberish) => {
-  const query = useMemo(
-    () =>
-      new ToriiQueryBuilder()
-        .withClause(
-          AndComposeClause([
-            KeysClause([ModelsMapping.Prize], []),
+            MemberClause(
+              ModelsMapping.EntryCount,
+              "tournament_id",
+              "Eq",
+              addAddressPadding(tournamentId)
+            ),
             MemberClause(
               ModelsMapping.Prize,
               "tournament_id",
@@ -102,7 +95,11 @@ export const useGetTournamentPrizesQuery = (tournamentId: BigNumberish) => {
             ),
           ]).build()
         )
-        .withEntityModels([ModelsMapping.Prize])
+        .withEntityModels([
+          ModelsMapping.Tournament,
+          ModelsMapping.EntryCount,
+          ModelsMapping.Prize,
+        ])
         .includeHashedKeys(),
     [tournamentId]
   );

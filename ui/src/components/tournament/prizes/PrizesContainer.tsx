@@ -19,12 +19,16 @@ interface PrizesContainerProps {
       }
     >
   >;
+  totalPrizesValueUSD: number;
+  totalPrizeNFTs: number;
 }
 
 const PrizesContainer = ({
   prizesExist,
   lowestPrizePosition,
   groupedPrizes,
+  totalPrizesValueUSD,
+  totalPrizeNFTs,
 }: PrizesContainerProps) => {
   const [showPrizes, setShowPrizes] = useState(false);
 
@@ -41,7 +45,19 @@ const PrizesContainer = ({
     >
       <div className="flex flex-col">
         <div className="flex flex-row justify-between h-8">
-          <span className="font-astronaut text-2xl">Prizes</span>
+          <div className="flex flex-row items-center gap-2">
+            <span className="font-astronaut text-2xl">Prizes</span>
+            {totalPrizesValueUSD > 0 && (
+              <span className="font-astronaut text-xl text-retro-green-dark">
+                ${totalPrizesValueUSD}
+              </span>
+            )}
+            {totalPrizeNFTs > 0 && (
+              <span className="font-astronaut text-xl text-retro-green-dark">
+                {totalPrizeNFTs} NFT{totalPrizeNFTs === 1 ? "" : "s"}
+              </span>
+            )}
+          </div>
           <div className="flex flex-row items-center gap-2">
             {prizesExist ? (
               <>

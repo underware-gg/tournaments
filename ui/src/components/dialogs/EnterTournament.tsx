@@ -25,7 +25,7 @@ interface EnterTournamentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   hasEntryFee?: boolean;
-  entryFee?: number | "Free";
+  entryFee?: string;
   tournamentModel: Tournament;
   entryCountModel: EntryCount;
   gameCount: BigNumberish;

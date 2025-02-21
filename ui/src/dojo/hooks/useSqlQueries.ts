@@ -2,6 +2,19 @@ import { useSqlExecute } from "@/lib/dojo/hooks/useSqlExecute";
 import { useMemo } from "react";
 import { addAddressPadding, BigNumberish } from "starknet";
 
+export const useGetGameConfigs = () => {
+  const query = useMemo(
+    () => `
+    SELECT namespace 
+    FROM models 
+    WHERE name = 'GameMetadata'
+  `,
+    []
+  );
+  const { data, loading, error } = useSqlExecute(query);
+  return { data, loading, error };
+};
+
 export const useGetTournamentsCount = ({
   namespace,
 }: {
@@ -338,7 +351,7 @@ export const useGetTokenOwnerQuery = (
         : null,
     [tokenAddress, tokenIdsKey]
   );
-  const { data, loading, error } = useSqlExecute(query);
+  const { data, loading, error } = useSqlExecute(query, true);
   return { data, loading, error };
 };
 
@@ -380,8 +393,20 @@ export const useGetTournamentEntrants = ({
   offset?: number;
   limit?: number;
 }) => {
+  const isValidInput = useMemo(() => {
+    return Boolean(
+      namespace &&
+        tournamentId &&
+        gameNamespace &&
+        typeof offset === "number" &&
+        typeof limit === "number"
+    );
+  }, [namespace, tournamentId, gameNamespace, offset, limit]);
+
   const query = useMemo(
-    () => `
+    () =>
+      isValidInput
+        ? `
     SELECT 
     r.tournament_id,
     r.entry_number,
@@ -395,11 +420,15 @@ export const useGetTournamentEntrants = ({
     ORDER BY r.entry_number DESC
     LIMIT ${limit}
     OFFSET ${offset}
-  `,
-    [namespace, tournamentId, offset, limit, gameNamespace]
+  `
+        : null,
+    [isValidInput, namespace, tournamentId, offset, limit, gameNamespace]
   );
+
   const sepoliaQuery = useMemo(
-    () => `
+    () =>
+      isValidInput
+        ? `
     SELECT 
     r.tournament_id,
     r.entry_number,
@@ -413,8 +442,9 @@ export const useGetTournamentEntrants = ({
     ORDER BY r.entry_number DESC
     LIMIT ${limit}
     OFFSET ${offset}
-  `,
-    [namespace, tournamentId, offset, limit, gameNamespace]
+  `
+        : null,
+    [isValidInput, namespace, tournamentId, offset, limit, gameNamespace]
   );
   const { data, loading, error, refetch } = useSqlExecute(
     isSepolia ? sepoliaQuery : query
@@ -437,8 +467,20 @@ export const useGetTournamentLeaderboard = ({
   offset?: number;
   limit?: number;
 }) => {
+  const isValidInput = useMemo(() => {
+    return Boolean(
+      namespace &&
+        tournamentId &&
+        gameNamespace &&
+        typeof offset === "number" &&
+        typeof limit === "number"
+    );
+  }, [namespace, tournamentId, gameNamespace, offset, limit]);
+
   const query = useMemo(
-    () => `
+    () =>
+      isValidInput
+        ? `
     SELECT 
     r.tournament_id,
     r.entry_number,
@@ -454,11 +496,14 @@ export const useGetTournamentLeaderboard = ({
     ORDER BY s.score DESC
     LIMIT ${limit}
     OFFSET ${offset}
-  `,
-    [namespace, tournamentId, offset, limit, gameNamespace]
+  `
+        : null,
+    [isValidInput, namespace, tournamentId, offset, limit, gameNamespace]
   );
   const sepoliaQuery = useMemo(
-    () => `
+    () =>
+      isValidInput
+        ? `
     SELECT 
     r.tournament_id,
     r.entry_number,
@@ -474,8 +519,9 @@ export const useGetTournamentLeaderboard = ({
     ORDER BY s.hero_xp DESC
     LIMIT ${limit}
     OFFSET ${offset}
-  `,
-    [namespace, tournamentId, offset, limit, gameNamespace]
+  `
+        : null,
+    [isValidInput, namespace, tournamentId, offset, limit, gameNamespace]
   );
   const { data, loading, error } = useSqlExecute(
     isSepolia ? sepoliaQuery : query

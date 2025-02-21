@@ -20,46 +20,64 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { StepProps } from "@/containers/CreateTournament";
 import { TROPHY, USER, X } from "@/components/Icons";
-import { displayAddress } from "@/lib/utils";
-import { tournaments } from "@/lib/constants";
+import { displayAddress, feltToString } from "@/lib/utils";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
 import { Search } from "lucide-react";
 import TokenDialog from "@/components/dialogs/Token";
 import { Token } from "@/generated/models.gen";
 import { useDojo } from "@/context/dojo";
-import { useGetTournaments } from "@/dojo/hooks/useSqlQueries";
+import {
+  useGetTournaments,
+  useGetTournamentsCount,
+} from "@/dojo/hooks/useSqlQueries";
+import { processTournamentFromSql } from "@/lib/utils/formatting";
+import { processPrizesFromSql } from "@/lib/utils/formatting";
+import { getGames } from "@/assets/games";
+import Pagination from "@/components/table/Pagination";
 
 const EntryRequirements = ({ form }: StepProps) => {
   const { nameSpace } = useDojo();
   const [newAddress, setNewAddress] = React.useState("");
   const [tournamentSearchQuery, setTournamentSearchQuery] = useState("");
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+  const [gameFilters, setGameFilters] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: newTournaments } = useGetTournaments({
+  const games = getGames();
+
+  const { data: tournaments } = useGetTournaments({
     namespace: nameSpace,
-    gameFilters: [],
-    offset: 0,
-    limit: 100,
+    gameFilters: gameFilters,
+    limit: 10,
+    offset: (currentPage - 1) * 10,
   });
 
-  console.log(newTournaments);
+  const { data: tournamentsCount } = useGetTournamentsCount({
+    namespace: nameSpace,
+  });
 
-  const filteredTournaments = tournaments.filter((tournament) =>
-    tournament.name.toLowerCase().includes(tournamentSearchQuery.toLowerCase())
-  );
+  const tournamentsData = tournaments.map((tournament) => {
+    const processedTournament = processTournamentFromSql(tournament);
+    const processedPrizes = processPrizesFromSql(
+      tournament.prizes,
+      tournament.id
+    );
+    return {
+      tournament: processedTournament,
+      prizes: processedPrizes,
+      entryCount: Number(tournament.entry_count),
+    };
+  });
 
   const handleGatingTypeChange = (
     type: "token" | "tournament" | "addresses"
   ) => {
     form.setValue("gatingOptions.type", type);
 
-    // Clear all values first
     form.setValue("gatingOptions.token", undefined);
     form.setValue("gatingOptions.tournament.requirement", "participated");
-    form.setValue("gatingOptions.tournament.ids", []);
+    form.setValue("gatingOptions.tournament.tournaments", []);
     form.setValue("gatingOptions.addresses", []);
-
-    // No need to reset the selected type's values since they were just cleared
   };
 
   return (
@@ -208,7 +226,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                       <div className="w-full h-0.5 bg-retro-green/25" />
                       <FormField
                         control={form.control}
-                        name="gatingOptions.tournament.ids"
+                        name="gatingOptions.tournament.tournaments"
                         render={({ field }) => (
                           <FormItem>
                             <div className="flex flex-row items-center gap-5">
@@ -220,33 +238,39 @@ const EntryRequirements = ({ form }: StepProps) => {
                             <FormControl>
                               <div className="flex gap-2">
                                 <div className="flex flex-wrap gap-2">
-                                  {(field.value || []).map((id) => {
-                                    const tournament = tournaments.find(
-                                      (t) => t.id === id
-                                    );
-                                    return tournament ? (
-                                      <div
-                                        key={id}
-                                        className="inline-flex items-center gap-2 p-2 border border-retro-green-dark rounded w-fit"
-                                      >
-                                        <span>
-                                          {tournament.name} - {tournament.id}
-                                        </span>
-                                        <span
-                                          className="h-4 w-4 hover:cursor-pointer"
-                                          onClick={() => {
-                                            field.onChange(
-                                              field.value.filter(
-                                                (v) => v !== id
-                                              )
-                                            );
-                                          }}
+                                  {(field.value || []).map(
+                                    (selectedTournament) => {
+                                      return (
+                                        <div
+                                          key={selectedTournament.id}
+                                          className="inline-flex items-center gap-2 p-2 border border-retro-green-dark rounded w-fit"
                                         >
-                                          <X />
-                                        </span>
-                                      </div>
-                                    ) : null;
-                                  })}
+                                          <span>
+                                            {feltToString(
+                                              selectedTournament.metadata.name
+                                            )}{" "}
+                                            -{" "}
+                                            {Number(
+                                              selectedTournament.id
+                                            ).toString()}
+                                          </span>
+                                          <span
+                                            className="h-4 w-4 hover:cursor-pointer"
+                                            onClick={() => {
+                                              field.onChange(
+                                                field.value.filter(
+                                                  (v) =>
+                                                    v !== selectedTournament
+                                                )
+                                              );
+                                            }}
+                                          >
+                                            <X />
+                                          </span>
+                                        </div>
+                                      );
+                                    }
+                                  )}
                                 </div>
 
                                 <Dialog>
@@ -273,7 +297,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                                         Select Tournament
                                       </DialogTitle>
                                       {/* Search input */}
-                                      <div className="px-4 pb-4">
+                                      <div className="px-4 pb-2 flex flex-col gap-2">
                                         <div className="flex items-center border rounded border-retro-green-dark bg-background">
                                           <Search className="w-4 h-4 ml-3 text-muted-foreground" />
                                           <Input
@@ -287,57 +311,114 @@ const EntryRequirements = ({ form }: StepProps) => {
                                             className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                                           />
                                         </div>
+                                        <div className="flex flex-row gap-2">
+                                          {Object.entries(games).map(
+                                            ([key, game]) => (
+                                              <div
+                                                key={key}
+                                                className={`h-8 ${
+                                                  gameFilters.includes(key)
+                                                    ? "bg-retro-green-dark text-black"
+                                                    : "bg-black"
+                                                } border border-neutral-500 px-2 flex items-center gap-2 cursor-pointer`}
+                                                onClick={() => {
+                                                  if (
+                                                    gameFilters.includes(key)
+                                                  ) {
+                                                    setGameFilters(
+                                                      gameFilters.filter(
+                                                        (g) => g !== key
+                                                      )
+                                                    );
+                                                  } else {
+                                                    setGameFilters([
+                                                      ...gameFilters,
+                                                      key,
+                                                    ]);
+                                                  }
+                                                }}
+                                              >
+                                                {game.name}
+                                                <span className="flex items-center justify-center">
+                                                  <TokenGameIcon
+                                                    size="xs"
+                                                    game={key}
+                                                  />
+                                                </span>
+                                              </div>
+                                            )
+                                          )}
+                                        </div>
                                       </div>
                                     </DialogHeader>
 
                                     {/* Tournament list */}
-                                    <div className="flex-1 overflow-y-auto">
-                                      {filteredTournaments.length > 0 ? (
-                                        filteredTournaments.map(
+                                    <div className="flex-1 overflow-y-auto border-t border-retro-green-dark">
+                                      {tournamentsData?.length > 0 ? (
+                                        tournamentsData.map(
                                           (tournament, index) => (
                                             <DialogClose asChild key={index}>
                                               <div
-                                                className="flex flex-row gap-5 border-b border-retro-green-dark px-4 py-2 hover:bg-retro-green/20 hover:cursor-pointer"
+                                                className="flex flex-row justify-between border-b border-retro-green-dark px-4 py-2 hover:bg-retro-green/20 hover:cursor-pointer"
                                                 onClick={() => {
                                                   if (
                                                     !(
                                                       field.value || []
-                                                    ).includes(tournament.id)
+                                                    ).includes(
+                                                      tournament.tournament
+                                                    )
                                                   ) {
                                                     field.onChange([
                                                       ...(field.value || []),
-                                                      tournament.id,
+                                                      tournament.tournament,
                                                     ]);
                                                   }
                                                 }}
                                               >
                                                 <span className="font-astronaut">
-                                                  {tournament.name}
+                                                  {feltToString(
+                                                    tournament.tournament
+                                                      .metadata.name
+                                                  )}
+                                                </span>
+                                                <span className="font-astronaut">
+                                                  #
+                                                  {Number(
+                                                    tournament.tournament.id
+                                                  ).toString()}
                                                 </span>
                                                 <div className="flex flex-row">
                                                   <span className="w-6 h-6">
                                                     <USER />
                                                   </span>
-                                                  {tournament.players}
+                                                  {tournament.entryCount}
                                                 </div>
-                                                <div className="flex flex-row items-center">
-                                                  {tournament.games.map(
-                                                    (game, index) => (
-                                                      <span key={index}>
-                                                        <TokenGameIcon
-                                                          size="xs"
-                                                          game={game}
-                                                        />
-                                                      </span>
-                                                    )
-                                                  )}
+                                                <div className="relative group flex items-center justify-center">
+                                                  <TokenGameIcon
+                                                    size="xs"
+                                                    game={
+                                                      tournament.tournament
+                                                        .game_config.address
+                                                    }
+                                                  />
+                                                  <span className="pointer-events-none absolute bottom-[calc(100%+2px)] left-1/2 transform -translate-x-1/2 bg-black text-neutral-500 border border-retro-green-dark px-2 py-1 rounded text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity w-fit z-50">
+                                                    {
+                                                      games[
+                                                        tournament.tournament
+                                                          .game_config.address
+                                                      ].name
+                                                    }
+                                                  </span>
                                                 </div>
-                                                <div>${tournament.pot}</div>
+                                                {/* <div>${tournament.pot}</div> */}
                                                 <div className="flex flex-row items-center">
                                                   <span className="w-5 h-5">
                                                     <TROPHY />
                                                   </span>
-                                                  5
+                                                  {Number(
+                                                    tournament.tournament
+                                                      .game_config.prize_spots
+                                                  ).toString()}
                                                 </div>
                                               </div>
                                             </DialogClose>
@@ -348,6 +429,15 @@ const EntryRequirements = ({ form }: StepProps) => {
                                           No tournaments found
                                         </div>
                                       )}
+                                    </div>
+                                    <div className="px-4 pb-2 flex justify-center">
+                                      <Pagination
+                                        totalPages={Math.ceil(
+                                          tournamentsCount / 10
+                                        )}
+                                        currentPage={currentPage}
+                                        setCurrentPage={setCurrentPage}
+                                      />
                                     </div>
                                   </DialogContent>
                                 </Dialog>

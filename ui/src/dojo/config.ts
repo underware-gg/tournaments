@@ -187,6 +187,7 @@ export type DojoChainConfig = {
   name?: string;
   rpcUrl?: string;
   toriiUrl?: string;
+  toriiTokensUrl?: string;
   relayUrl?: string;
   blastRpc?: string;
   blockExplorerUrl?: string;
@@ -209,6 +210,7 @@ const localKatanaConfig: DojoChainConfig = {
   name: "Katana Local",
   rpcUrl: LOCAL_KATANA,
   toriiUrl: "http://localhost:8080", //LOCAL_TORII,
+  toriiTokensUrl: "http://localhost:8080",
   relayUrl: LOCAL_RELAY,
   blastRpc: undefined,
   blockExplorerUrl: undefined,
@@ -233,6 +235,7 @@ const slotKatanaConfig: DojoChainConfig = {
   name: "Katana Slot",
   rpcUrl: "https://api.cartridge.gg/x/tournaments/katana",
   toriiUrl: "https://api.cartridge.gg/x/tournaments/torii",
+  toriiTokensUrl: "",
   relayUrl: undefined,
   blastRpc: undefined,
   blockExplorerUrl: undefined,
@@ -257,6 +260,7 @@ const snSepoliaConfig: DojoChainConfig = {
   name: "Starknet Sepolia",
   rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia",
   toriiUrl: "https://api.cartridge.gg/x/darkshuffle-sepolia/torii",
+  toriiTokensUrl: "",
   relayUrl: undefined,
   blastRpc: undefined,
   blockExplorerUrl: "https://sepolia.voyager.online/",
@@ -275,7 +279,8 @@ const snMainnetConfig: DojoChainConfig = {
   chainId: ChainId.SN_MAIN,
   name: "Mainnet",
   rpcUrl: "https://api.cartridge.gg/x/starknet/mainnet",
-  toriiUrl: "https://api.cartridge.gg/x/pg-mainnet/torii",
+  toriiUrl: "https://api.cartridge.gg/x/budokan-mainnet/torii",
+  toriiTokensUrl: "https://api.cartridge.gg/x/pg-mainnet-tokens/torii",
   relayUrl: undefined,
   blastRpc:
     "https://starknet-mainnet.blastapi.io/5ef61753-e7c1-4593-bc62-97fdf96f8de5",
@@ -295,6 +300,7 @@ export const envChainConfig: DojoChainConfig = {
   name: undefined,
   rpcUrl: import.meta.env.VITE_NODE_URL || undefined,
   toriiUrl: import.meta.env.VITE_TORII || undefined,
+  toriiTokensUrl: import.meta.env.VITE_TORII_TOKENS || undefined,
   relayUrl: import.meta.env.VITE_RELAY_URL || undefined,
   masterAddress: import.meta.env.VITE_MASTER_ADDRESS || undefined,
   masterPrivateKey: import.meta.env.VITE_MASTER_PRIVATE_KEY || undefined,

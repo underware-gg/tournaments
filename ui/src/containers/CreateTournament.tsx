@@ -24,6 +24,7 @@ import {
 } from "@/dojo/hooks/useSdkQueries";
 import { TOURNAMENT_VERSION_KEY } from "@/lib/constants";
 import { addAddressPadding } from "starknet";
+import { Tournament } from "@/generated/models.gen";
 
 export type TournamentFormData = z.infer<typeof formSchema>;
 
@@ -57,7 +58,7 @@ const formSchema = z.object({
       token: z.string().optional(),
       tournament: z
         .object({
-          ids: z.array(z.string()),
+          tournaments: z.array(z.custom<Tournament>()),
           requirement: z.enum(["participated", "won"]),
         })
         .optional(),
@@ -138,7 +139,7 @@ const CreateTournament = () => {
       gatingOptions: {
         addresses: [],
         tournament: {
-          ids: [],
+          tournaments: [],
           requirement: "participated",
         },
       },
@@ -313,8 +314,11 @@ const CreateTournament = () => {
                   case "tournament":
                     return (
                       !!getValue("gatingOptions.tournament.requirement") &&
-                      Array.isArray(getValue("gatingOptions.tournament.ids")) &&
-                      getValue("gatingOptions.tournament.ids").length > 0
+                      Array.isArray(
+                        getValue("gatingOptions.tournament.tournaments")
+                      ) &&
+                      getValue("gatingOptions.tournament.tournaments").length >
+                        0
                     );
                   case "addresses":
                     return (

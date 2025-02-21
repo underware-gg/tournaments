@@ -58,6 +58,8 @@ const ScoreTable = ({
     tokenIds ?? []
   );
 
+  console.log(tokenOwners, tokenIds, indexAddress(gameAddress.toString()));
+
   useEffect(() => {
     setShowParticipants(entryCount > 0);
   }, [entryCount]);

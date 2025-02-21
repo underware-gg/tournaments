@@ -6,7 +6,7 @@ import { bigintToHex, displayAddress } from "@/lib/utils";
 import { addAddressPadding } from "starknet";
 import { ChainId } from "@/dojo/config";
 import { useDojo } from "@/context/dojo";
-import { COIN } from "@/components/Icons";
+import { COIN, CHECK } from "@/components/Icons";
 import {
   HoverCard,
   HoverCardContent,
@@ -56,6 +56,8 @@ const EntryRequirements = ({
 
   const activeVariant = tournamentModel.entry_requirement.Some?.activeVariant();
 
+  const allowlist = tournamentModel.entry_requirement.Some?.variant.allowlist;
+
   const blockExplorerExists =
     selectedChainConfig.blockExplorerUrl !== undefined;
 
@@ -79,21 +81,28 @@ const EntryRequirements = ({
           ) : activeVariant === "tournament" ? (
             "NFT"
           ) : (
-            "NFT"
+            <div className="flex flex-row items-center justify-center gap-1 w-full">
+              <span className="w-8">
+                <CHECK />
+              </span>
+              <span>Allowlist</span>
+            </div>
           )}
         </Card>
       </HoverCardTrigger>
       <HoverCardContent
-        className="w-80 p-4 text-sm z-50"
+        className="w-80 max-h-[150px] p-4 text-sm z-50 overflow-hidden"
         align="start"
         side="bottom"
         sideOffset={5}
       >
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2 h-full">
           <h4 className="font-medium">
             {activeVariant === "token"
               ? "Token Requirements"
-              : "NFT Requirements"}
+              : activeVariant === "tournament"
+              ? "NFT Requirements"
+              : "Allowlist"}
           </h4>
           {activeVariant === "token" ? (
             <>
@@ -121,10 +130,18 @@ const EntryRequirements = ({
               </div>
               {/* Add more token details as needed */}
             </>
-          ) : (
+          ) : activeVariant === "tournament" ? (
             <p className="text-muted-foreground">
               NFT requirement details here
             </p>
+          ) : (
+            <div className="h-[100px] flex flex-col gap-2 overflow-y-auto">
+              {allowlist?.map((item: string, index: number) => (
+                <div key={index}>
+                  <span>{displayAddress(item)}</span>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </HoverCardContent>

@@ -342,7 +342,7 @@ export const useSystemCalls = () => {
   const endGame = async (gameId: BigNumberish, score: BigNumberish) => {
     try {
       const resolvedClient = await client;
-      resolvedClient.game_mock.endGame(
+      await resolvedClient.game_mock.endGame(
         account as unknown as Account | AccountInterface,
         gameId,
         score

@@ -39,10 +39,18 @@ export const TournamentCard = ({
     (model) => model.models[nameSpace].Token
   ) as Token[];
 
+  const entryFeeToken = tournament?.entry_fee.Some?.token_address;
+  const entryFeeTokenSymbol = tokens.find(
+    (t) => t.address === entryFeeToken
+  )?.symbol;
+
   const groupedPrizes = groupPrizesByTokens(prizes ?? [], tokens);
 
   const erc20TokenSymbols = getErc20TokenSymbols(groupedPrizes);
-  const { prices } = useEkuboPrices({ tokens: erc20TokenSymbols });
+  const { prices } = useEkuboPrices({
+    tokens: [...erc20TokenSymbols, entryFeeTokenSymbol ?? ""],
+  });
+
   const totalPrizesValueUSD = calculateTotalValue(groupedPrizes, prices);
 
   const totalPrizeNFTs = countTotalNFTs(groupedPrizes);
@@ -57,17 +65,34 @@ export const TournamentCard = ({
   const startsIn = formatTime(
     (startDate.getTime() - currentDate.getTime()) / 1000
   );
-  const endsIn = formatTime((endDate.getTime() - startDate.getTime()) / 1000);
+  const endsIn = formatTime((endDate.getTime() - currentDate.getTime()) / 1000);
 
   const gameAddress = tournament.game_config.address;
 
   const hasEntryFee = tournament?.entry_fee.isSome();
 
   const entryFee = tournament?.entry_fee.isSome()
-    ? Number(BigInt(tournament?.entry_fee.Some?.amount!) / 10n ** 18n)
+    ? (
+        Number(BigInt(tournament?.entry_fee.Some?.amount!) / 10n ** 18n) *
+        Number(prices[entryFeeTokenSymbol ?? ""])
+      ).toFixed(2)
     : "Free";
 
-  console.log(groupedPrizes);
+  if (
+    tournament.game_config.address ===
+    "0x06f32edb41a707fc6e368b37dd74890b1a518f5fba6b7fef7061ef72afc27336"
+  ) {
+    return (
+      <Card
+        variant="outline"
+        className="animate-in fade-in zoom-in duration-300 ease-out"
+      >
+        <div className="flex flex-col justify-center items-center h-full">
+          <span className="font-astronaut text-2xl">Game not recognized</span>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card

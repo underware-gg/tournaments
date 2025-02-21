@@ -44,11 +44,11 @@ export const processTournamentData = (
           tournament: {
             winners:
               formData.gatingOptions.tournament?.requirement === "won"
-                ? formData.gatingOptions.tournament.ids
+                ? formData.gatingOptions.tournament.tournaments.map((t) => t.id)
                 : [],
             participants:
               formData.gatingOptions.tournament?.requirement === "participated"
-                ? formData.gatingOptions.tournament.ids
+                ? formData.gatingOptions.tournament.tournaments.map((t) => t.id)
                 : [],
           },
           allowlist: undefined,

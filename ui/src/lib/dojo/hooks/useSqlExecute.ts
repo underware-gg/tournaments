@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDojo } from "@/context/dojo";
 
-export function useSqlExecute(query: string | null) {
+export function useSqlExecute(query: string | null, tokens?: boolean) {
   const { selectedChainConfig } = useDojo();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +25,11 @@ export function useSqlExecute(query: string | null) {
 
       const encodedQuery = encodeURIComponent(query);
       const response = await fetch(
-        `${selectedChainConfig.toriiUrl}/sql?query=${encodedQuery}`,
+        `${
+          tokens
+            ? selectedChainConfig.toriiTokensUrl
+            : selectedChainConfig.toriiUrl
+        }/sql?query=${encodedQuery}`,
         {
           method: "GET",
           headers: {

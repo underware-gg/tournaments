@@ -48,6 +48,8 @@ const EntrantsTable = ({
     }
   );
 
+  console.log(entrants);
+
   useEffect(() => {
     refetchEntrants();
   }, [entryCount]);
