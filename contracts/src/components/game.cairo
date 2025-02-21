@@ -29,6 +29,7 @@ pub mod game_component {
 
     #[derive(Drop, starknet::Event)]
     pub struct MetadataUpdateEvent {
+        #[key]
         token_id: u256,
     }
 
