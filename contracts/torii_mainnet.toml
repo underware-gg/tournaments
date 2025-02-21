@@ -1,10 +1,13 @@
-# torii config for profile [mainnet]
-world_address = "0x02b127646258e21186e6c7e6234f42583d0d19bf88a57776a404c2cefeb421f2"
-rpc = "https://api.cartridge.gg/x/ls-tournaments-katana/katana"
+# Realms World
+world_address = "0x06a9e4c6f0799160ea8ddc43ff982a5f83d7f633e9732ce42701de1288ff705f"
+rpc = "https://api.cartridge.gg/x/starknet/mainnet"
+
 [indexing]
 index_pending = true
-index_transactions = false
+world_block = 1165580
 contracts = [
-  "erc20:0x124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49", # lords
-  "erc721:0x04f5e296c805126637552cf3930e857f380e7c078e8f00696de4fc8545356b1d", # golden_token
+  "ERC721:0x06f32edb41a707fc6e368b37dd74890b1a518f5fba6b7fef7061ef72afc27336", # dark shuffle
 ]
+
+[events]
+raw = true
