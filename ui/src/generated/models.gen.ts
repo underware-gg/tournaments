@@ -23,7 +23,8 @@ export interface GameCounterValue {
 
 // Type definition for `tournaments::components::models::game::GameMetadata` struct
 export interface GameMetadata {
-  address: string;
+  contract_address: string;
+  creator_address: string;
   name: BigNumberish;
   description: string;
   developer: BigNumberish;
@@ -34,6 +35,7 @@ export interface GameMetadata {
 
 // Type definition for `tournaments::components::models::game::GameMetadataValue` struct
 export interface GameMetadataValue {
+  creator_address: string;
   name: BigNumberish;
   description: string;
   developer: BigNumberish;
@@ -414,7 +416,8 @@ export const schema: SchemaType = {
     },
     GameMetadata: {
       fieldOrder: [
-        "address",
+        "contract_address",
+        "creator_address",
         "name",
         "description",
         "developer",
@@ -422,7 +425,8 @@ export const schema: SchemaType = {
         "genre",
         "image",
       ],
-      address: "",
+      contract_address: "",
+      creator_address: "",
       name: 0,
       description: "",
       developer: 0,
@@ -432,6 +436,7 @@ export const schema: SchemaType = {
     },
     GameMetadataValue: {
       fieldOrder: [
+        "creator_address",
         "name",
         "description",
         "developer",
@@ -439,6 +444,7 @@ export const schema: SchemaType = {
         "genre",
         "image",
       ],
+      creator_address: "",
       name: 0,
       description: "",
       developer: 0,

@@ -3,19 +3,12 @@ import Pagination from "@/components/table/Pagination";
 import { USER } from "@/components/Icons";
 import { useState, useEffect, useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
-import { addAddressPadding, BigNumberish } from "starknet";
-import {
-  useGetTokenOwnerQuery,
-  useGetTournamentLeaderboard,
-} from "@/dojo/hooks/useSqlQueries";
-import {
-  bigintToHex,
-  displayAddress,
-  feltToString,
-  indexAddress,
-} from "@/lib/utils";
+import { BigNumberish } from "starknet";
+import { useGetTournamentLeaderboard } from "@/dojo/hooks/useSqlQueries";
+import { displayAddress, feltToString, indexAddress } from "@/lib/utils";
 import { useDojo } from "@/context/dojo";
 import { useGetUsernames } from "@/hooks/useController";
+import RowSkeleton from "./RowSkeleton";
 
 interface ScoreTableProps {
   tournamentId: BigNumberish;
@@ -35,47 +28,30 @@ const ScoreTable = ({
   const { nameSpace } = useDojo();
   const isDS = gameNamespace === "ds_v1_1_1";
 
-  const { data: leaderboard } = useGetTournamentLeaderboard({
+  const offset = (currentPage - 1) * 5;
+
+  const { data: leaderboard, loading } = useGetTournamentLeaderboard({
     namespace: nameSpace,
     tournamentId: tournamentId,
     gameNamespace: gameNamespace,
+    gameAddress: indexAddress(gameAddress.toString()),
     isDS: isDS,
     limit: 5,
-    offset: (currentPage - 1) * 5,
+    offset: offset,
   });
 
-  const tokenIds = useMemo(
-    () =>
-      leaderboard?.map((registration) =>
-        addAddressPadding(bigintToHex(registration?.game_token_id!))
-      ),
+  const ownerAddresses = useMemo(
+    () => leaderboard?.map((registration) => registration?.account_address),
     [leaderboard]
-  );
-
-  const { data: tokenOwners } = useGetTokenOwnerQuery(
-    indexAddress(gameAddress.toString()),
-    tokenIds ?? []
-  );
-
-  console.log(
-    nameSpace,
-    leaderboard,
-    tokenOwners,
-    tokenIds,
-    indexAddress(gameAddress.toString()),
-    gameNamespace
   );
 
   useEffect(() => {
     setShowParticipants(entryCount > 0);
   }, [entryCount]);
 
-  const ownerAddresses = useMemo(
-    () => tokenOwners?.map((owner) => owner.account_address),
-    [tokenOwners]
-  );
-
   const { usernames } = useGetUsernames(ownerAddresses ?? []);
+
+  console.log(loading);
 
   return (
     <Card
@@ -120,48 +96,52 @@ const ScoreTable = ({
           } overflow-hidden`}
         >
           <div className="w-full h-0.5 bg-retro-green/25 mt-2" />
-          <div className="flex flex-col py-2">
-            {leaderboard?.map((registration, index) => (
-              <div key={index} className="flex flex-row items-center gap-2">
-                <span className="w-4 flex-none">
-                  {index + 1 + (currentPage - 1) * 5}.
-                </span>
-                <span className="w-6 flex-none">
-                  <USER />
-                </span>
-                <span className="flex-none">
-                  {feltToString(registration?.player_name)}
-                </span>
-                -
-                <div className="relative flex-none">
-                  <span className="text-retro-green-dark">
-                    {usernames?.get(
-                      indexAddress(tokenOwners?.[index]?.account_address ?? "")
-                    ) ||
-                      displayAddress(
-                        tokenOwners?.[index]?.account_address ?? ""
-                      )}
+          {!loading ? (
+            <div className="flex flex-col py-2">
+              {leaderboard?.map((registration, index) => (
+                <div key={index} className="flex flex-row items-center gap-2">
+                  <span className="w-4 flex-none">
+                    {index + 1 + (currentPage - 1) * 5}.
                   </span>
-                  <div className="absolute -top-1 -right-8 flex items-center justify-center rounded-lg bg-retro-green-dark text-black h-4 w-6 text-[10px]">
-                    <span>x</span>
-                    <span>{registration?.entry_number?.toString()}</span>
+                  <span className="w-6 flex-none">
+                    <USER />
+                  </span>
+                  <span className="flex-none">
+                    {feltToString(registration?.player_name)}
+                  </span>
+                  -
+                  <div className="relative flex-none">
+                    <span className="text-retro-green-dark">
+                      {usernames?.get(ownerAddresses?.[index] ?? "") ||
+                        displayAddress(ownerAddresses?.[index] ?? "")}
+                    </span>
+                    <div className="absolute -top-1 -right-8 flex items-center justify-center rounded-lg bg-retro-green-dark text-black h-4 w-6 text-[10px]">
+                      <span>x</span>
+                      <span>{registration?.entry_number?.toString()}</span>
+                    </div>
                   </div>
+                  <p
+                    className="flex-1 h-[2px] bg-repeat-x"
+                    style={{
+                      backgroundImage:
+                        "radial-gradient(circle, currentColor 1px, transparent 1px)",
+                      backgroundSize: "8px 8px",
+                      backgroundPosition: "0 center",
+                    }}
+                  ></p>
+                  <span className="flex-none text-retro-green">
+                    {registration.score ?? 0}
+                  </span>
                 </div>
-                <p
-                  className="flex-1 h-[2px] bg-repeat-x"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(circle, currentColor 1px, transparent 1px)",
-                    backgroundSize: "8px 8px",
-                    backgroundPosition: "0 center",
-                  }}
-                ></p>
-                <span className="flex-none text-retro-green">
-                  {registration.score ?? 0}
-                </span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-1 py-2">
+              {[...Array(entryCount - offset)].map((_, index) => (
+                <RowSkeleton key={index} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </Card>

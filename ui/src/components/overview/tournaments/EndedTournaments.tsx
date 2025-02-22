@@ -9,19 +9,24 @@ import {
   processTournamentFromSql,
 } from "@/lib/utils/formatting";
 import { useDojo } from "@/context/dojo";
+import TournamentSkeletons from "@/components/overview/TournamentSkeletons";
 
 interface EndedTournamentsProps {
   gameFilters: string[];
+  tournamentsCount: number;
 }
 
-const EndedTournaments = ({ gameFilters }: EndedTournamentsProps) => {
+const EndedTournaments = ({
+  gameFilters,
+  tournamentsCount,
+}: EndedTournamentsProps) => {
   const { nameSpace } = useDojo();
   const hexTimestamp = useMemo(
     () => addAddressPadding(bigintToHex(BigInt(new Date().getTime()) / 1000n)),
     []
   );
 
-  const { data: endedTournaments } = useGetEndedTournaments({
+  const { data: endedTournaments, loading } = useGetEndedTournaments({
     namespace: nameSpace,
     currentTime: hexTimestamp,
     gameFilters: gameFilters,
@@ -41,6 +46,10 @@ const EndedTournaments = ({ gameFilters }: EndedTournamentsProps) => {
       entryCount: Number(tournament.entry_count),
     };
   });
+
+  if (loading && tournamentsCount > 0) {
+    return <TournamentSkeletons tournamentsCount={tournamentsCount} />;
+  }
 
   return (
     <>

@@ -8,7 +8,7 @@ import { bigintToHex, feltToString, formatTime } from "@/lib/utils";
 import { addAddressPadding } from "starknet";
 import {
   useSubscribeGamesQuery,
-  useSubscribeEntriesQuery,
+  useSubscribeTournamentEntriesQuery,
   useGetGameCounterQuery,
   useGetTournamentQuery,
 } from "@/dojo/hooks/useSdkQueries";
@@ -93,7 +93,9 @@ const Tournament = () => {
 
   const gameCount = gameCounterEntity?.GameCounter?.count ?? 0;
 
-  useSubscribeEntriesQuery();
+  useSubscribeTournamentEntriesQuery({
+    tournamentId: addAddressPadding(bigintToHex(id!)),
+  });
 
   useSubscribeGamesQuery({
     nameSpace: gameNamespace ?? "",

@@ -3,19 +3,12 @@ import Pagination from "@/components/table/Pagination";
 import { USER } from "@/components/Icons";
 import { useState, useEffect, useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
-import { addAddressPadding, BigNumberish } from "starknet";
-import {
-  useGetTokenOwnerQuery,
-  useGetTournamentEntrants,
-} from "@/dojo/hooks/useSqlQueries";
-import {
-  bigintToHex,
-  displayAddress,
-  feltToString,
-  indexAddress,
-} from "@/lib/utils";
+import { BigNumberish } from "starknet";
+import { useGetTournamentEntrants } from "@/dojo/hooks/useSqlQueries";
+import { displayAddress, feltToString, indexAddress } from "@/lib/utils";
 import { useDojo } from "@/context/dojo";
 import { useGetUsernames } from "@/hooks/useController";
+import RowSkeleton from "./RowSkeleton";
 
 interface EntrantsTableProps {
   tournamentId: BigNumberish;
@@ -36,44 +29,34 @@ const EntrantsTable = ({
 
   const isDS = gameNamespace === "ds_v1_1_1";
 
-  const { data: entrants, refetch: refetchEntrants } = useGetTournamentEntrants(
-    {
-      namespace: nameSpace,
-      tournamentId: tournamentId,
-      gameNamespace: gameNamespace,
-      isDS: isDS,
-      limit: 5,
-      offset: (currentPage - 1) * 5,
-    }
-  );
+  const offset = (currentPage - 1) * 5;
 
-  console.log(entrants);
+  const {
+    data: entrants,
+    refetch: refetchEntrants,
+    loading,
+  } = useGetTournamentEntrants({
+    namespace: nameSpace,
+    tournamentId: tournamentId,
+    gameNamespace: gameNamespace,
+    gameAddress: indexAddress(gameAddress.toString()),
+    isDS: isDS,
+    limit: 5,
+    offset: offset,
+  });
+
+  const ownerAddresses = useMemo(
+    () => entrants?.map((registration) => registration?.account_address),
+    [entrants]
+  );
 
   useEffect(() => {
     refetchEntrants();
   }, [entryCount]);
 
-  const tokenIds = useMemo(
-    () =>
-      entrants?.map((entrant) =>
-        addAddressPadding(bigintToHex(entrant?.game_token_id ?? 0n))
-      ),
-    [entrants]
-  );
-
-  const { data: tokenOwners } = useGetTokenOwnerQuery(
-    indexAddress(gameAddress.toString()),
-    tokenIds ?? []
-  );
-
   useEffect(() => {
     setShowParticipants(entryCount > 0);
   }, [entryCount]);
-
-  const ownerAddresses = useMemo(
-    () => tokenOwners?.map((owner) => owner.account_address),
-    [tokenOwners]
-  );
 
   const { usernames } = useGetUsernames(ownerAddresses ?? []);
 
@@ -121,36 +104,40 @@ const EntrantsTable = ({
           } overflow-hidden`}
         >
           <div className="w-full h-0.5 bg-retro-green/25 mt-2" />
-          <div className="flex flex-col py-2">
-            {entrants?.map((entrant, index) => (
-              <div key={index} className="flex flex-row items-center gap-2">
-                <span className="w-4 flex-none">
-                  {index + 1 + (currentPage - 1) * 5}.
-                </span>
-                <span className="w-6 flex-none">
-                  <USER />
-                </span>
-                <span className="flex-none">
-                  {feltToString(entrant?.player_name)}
-                </span>
-                -
-                <div className="relative flex-none">
-                  <span className="text-retro-green-dark">
-                    {usernames?.get(
-                      indexAddress(tokenOwners?.[index]?.account_address ?? "")
-                    ) ||
-                      displayAddress(
-                        tokenOwners?.[index]?.account_address ?? ""
-                      )}
+          {!loading ? (
+            <div className="flex flex-col py-2">
+              {entrants?.map((entrant, index) => (
+                <div key={index} className="flex flex-row items-center gap-2">
+                  <span className="w-4 flex-none">
+                    {index + 1 + (currentPage - 1) * 5}.
                   </span>
-                  <div className="absolute -top-1 -right-8 flex items-center justify-center rounded-lg bg-retro-green-dark text-black h-4 w-6 text-[10px]">
-                    <span>x</span>
-                    <span>{entrant?.entry_number?.toString()}</span>
+                  <span className="w-6 flex-none">
+                    <USER />
+                  </span>
+                  <span className="flex-none">
+                    {feltToString(entrant?.player_name)}
+                  </span>
+                  -
+                  <div className="relative flex-none">
+                    <span className="text-retro-green-dark">
+                      {usernames?.get(ownerAddresses?.[index] ?? "") ||
+                        displayAddress(ownerAddresses?.[index] ?? "")}
+                    </span>
+                    <div className="absolute -top-1 -right-8 flex items-center justify-center rounded-lg bg-retro-green-dark text-black h-4 w-6 text-[10px]">
+                      <span>x</span>
+                      <span>{entrant?.entry_number?.toString()}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-1 py-2">
+              {[...Array(entryCount - offset)].map((_, index) => (
+                <RowSkeleton key={index} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </Card>

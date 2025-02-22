@@ -32,11 +32,18 @@ const interactiveVariants = {
   outline: "hover:bg-retro-green/10 hover:cursor-pointer",
 } as const;
 
+const disabledVariants = {
+  default: "opacity-50 cursor-not-allowed",
+  destructive: "opacity-50 cursor-not-allowed",
+  outline: "opacity-50 cursor-not-allowed",
+} as const;
+
 export interface CardProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof cardVariants> {
   borderColor?: string;
   interactive?: boolean;
+  disabled?: boolean;
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
@@ -47,12 +54,19 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       size,
       borderColor = "rgba(0, 140, 105, 1)",
       interactive = false,
+      disabled = false,
+      onClick,
       children,
       ...props
     },
     ref
   ) => {
     const [isHovered, setIsHovered] = React.useState(false);
+
+    const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (disabled) return;
+      onClick?.(e);
+    };
 
     // Generate the border image dynamically
     const borderImage = `url("data:image/svg+xml,${BorderImage({
@@ -66,7 +80,8 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <div
         className={cn(
           cardVariants({ variant, size, className }),
-          interactive && variant ? interactiveVariants[variant] : ""
+          interactive && variant ? interactiveVariants[variant] : "",
+          disabled && variant ? disabledVariants[variant] : ""
         )}
         ref={ref}
         style={{
@@ -74,6 +89,8 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         }}
         onMouseEnter={() => interactive && setIsHovered(true)}
         onMouseLeave={() => interactive && setIsHovered(false)}
+        onClick={handleClick}
+        {...(disabled ? { "aria-disabled": true } : {})}
         {...props}
       >
         {children}

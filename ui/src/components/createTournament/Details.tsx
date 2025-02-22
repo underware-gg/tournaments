@@ -23,8 +23,10 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import SettingsSection from "@/components/createTournament/settings/SettingsSection";
+import useUIStore from "@/hooks/useUIStore";
 
 const Details = ({ form }: StepProps) => {
+  const { gameData } = useUIStore();
   const PREDEFINED_SIZES = [1, 3, 10, 20] as const;
 
   React.useEffect(() => {
@@ -70,6 +72,11 @@ const Details = ({ form }: StepProps) => {
                           field.value === key && "bg-retro-green-dark"
                         }`}
                         onClick={() => field.onChange(key)}
+                        disabled={
+                          !gameData.find(
+                            (game) => game.contract_address === key
+                          )
+                        }
                       >
                         <TokenGameIcon size="md" game={key} />
                         <div className="relative group">

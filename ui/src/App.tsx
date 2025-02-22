@@ -6,14 +6,21 @@ import RegisterToken from "@/containers/RegisterToken";
 import Play from "@/containers/Play";
 import { Routes, Route } from "react-router-dom";
 import { useGetTokensQuery } from "@/dojo/hooks/useSdkQueries";
-import { useGetUpcomingTournamentsCount } from "@/dojo/hooks/useSqlQueries";
+import {
+  useGetGameNamespaces,
+  useGetGamesMetadata,
+  useGetUpcomingTournamentsCount,
+} from "@/dojo/hooks/useSqlQueries";
 import { addAddressPadding } from "starknet";
 import { bigintToHex } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toaster";
 import { useDojo } from "@/context/dojo";
+import useUIStore from "@/hooks/useUIStore";
+import { useEffect } from "react";
 
 function App() {
   const { nameSpace } = useDojo();
+  const { setGameData } = useUIStore();
 
   useGetTokensQuery();
 
@@ -24,6 +31,22 @@ function App() {
     namespace: nameSpace,
     currentTime: formattedTime,
   });
+
+  const { data: gameNamespaces } = useGetGameNamespaces();
+
+  const formattedGameNamespaces = gameNamespaces?.map(
+    (namespace) => namespace.namespace
+  );
+
+  const { data: gamesMetadata } = useGetGamesMetadata({
+    gameNamespaces: formattedGameNamespaces || [],
+  });
+
+  useEffect(() => {
+    if (gamesMetadata) {
+      setGameData(gamesMetadata);
+    }
+  }, [gamesMetadata]);
 
   return (
     <div className="min-h-screen flex-col w-full">

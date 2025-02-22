@@ -1,6 +1,6 @@
 import type { FunctionComponent, ImgHTMLAttributes } from "react";
 import lootSurvivor from "./loot-survivor.png";
-import darkShuffle from "./dark-shuffle.png";
+import darkShuffle from "./dark-shuffle.svg";
 import zkube from "./zkube.png";
 import dopeWars from "./dope-wars.png";
 import jokersOfNeon from "./jokers-of-neon.png";
@@ -47,6 +47,22 @@ export const getGames = (): Record<string, Game> => {
           props: ImgHTMLAttributes<HTMLImageElement>
         ) {
           return <img src={darkShuffle} {...props} />;
+        },
+      },
+      "0x075bd3616652ebec162c920492e4d042155fd0d199f1ed44edcb2eec120feb3d": {
+        name: "Dope Wars",
+        Icon: function DopeWarsIcon(
+          props: ImgHTMLAttributes<HTMLImageElement>
+        ) {
+          return <img src={dopeWars} {...props} />;
+        },
+      },
+      "0x075bd3616302ebec162c920492e4d042155fd0d199f1ed44edcb2eec120feb3d": {
+        name: "Jokers of Neon",
+        Icon: function JokersOfNeonIcon(
+          props: ImgHTMLAttributes<HTMLImageElement>
+        ) {
+          return <img src={jokersOfNeon} {...props} />;
         },
       },
     };

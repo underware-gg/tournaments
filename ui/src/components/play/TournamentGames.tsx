@@ -3,10 +3,11 @@ import { useDojo } from "@/context/dojo";
 import { Tournament } from "@/generated/models.gen";
 import { useGameNamespace } from "@/dojo/hooks/useGameNamespace";
 import { useState } from "react";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
 import { useAccount } from "@starknet-react/core";
+import { indexAddress } from "@/lib/utils";
 
 interface TournamentGamesProps {
   tournament: Tournament;
@@ -27,6 +28,7 @@ const TournamentGames = ({ tournament }: TournamentGamesProps) => {
     namespace: nameSpace,
     tournamentId: tournamentId,
     gameNamespace: gameNamespace ?? "",
+    gameAddress: indexAddress(tournament.game_config.address.toString()),
     isDS: isDS,
     limit: 10,
     offset: (currentPage - 1) * 5,

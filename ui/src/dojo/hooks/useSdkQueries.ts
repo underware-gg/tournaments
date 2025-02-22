@@ -296,22 +296,40 @@ export const useSubscribeTokensQuery = () => {
   return { entities, isSubscribed };
 };
 
-export const useSubscribeEntriesQuery = () => {
+export const useSubscribeTournamentEntriesQuery = ({
+  tournamentId,
+}: {
+  tournamentId: BigNumberish;
+}) => {
   const query = useMemo(
     () =>
       new ToriiQueryBuilder()
         .withClause(
-          KeysClause(
-            [ModelsMapping.EntryCount, ModelsMapping.Registration],
-            []
-          ).build()
+          AndComposeClause([
+            KeysClause(
+              [ModelsMapping.EntryCount, ModelsMapping.Registration],
+              []
+            ),
+            MemberClause(
+              ModelsMapping.EntryCount,
+              "tournament_id",
+              "Eq",
+              addAddressPadding(tournamentId)
+            ),
+            MemberClause(
+              ModelsMapping.Registration,
+              "tournament_id",
+              "Eq",
+              addAddressPadding(tournamentId)
+            ),
+          ]).build()
         )
         .withEntityModels([
           ModelsMapping.EntryCount,
           ModelsMapping.Registration,
         ])
         .includeHashedKeys(),
-    []
+    [tournamentId]
   );
 
   const { entities, isSubscribed } = useSdkSubscribeEntities({

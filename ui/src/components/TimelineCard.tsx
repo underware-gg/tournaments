@@ -23,7 +23,6 @@ const TimelineCard = ({
   color = "text-retro-green-dark",
   active = false,
 }: TimelineCardProps) => {
-  console.log(active);
   return (
     <div
       className={`relative flex flex-col gap-2 ${

@@ -40,7 +40,7 @@ const MyEntries = ({
     return indexAddress(gameAddress);
   }, [gameAddress]);
 
-  const { data: ownedTokens } = useGetAccountTokenIds(queryAddress ?? "0x0", [
+  const { data: ownedTokens } = useGetAccountTokenIds(queryAddress, [
     queryGameAddress ?? "0x0",
   ]);
 

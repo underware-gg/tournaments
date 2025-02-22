@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { X, CHEVRON_DOWN } from "@/components/Icons";
 import useUIStore from "@/hooks/useUIStore";
-import { getGames } from "@/assets/games";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +21,7 @@ import {
   useGetLiveTournamentsCount,
   useGetEndedTournamentsCount,
 } from "@/dojo/hooks/useSqlQueries";
-import { bigintToHex } from "@/lib/utils";
+import { bigintToHex, feltToString } from "@/lib/utils";
 import { addAddressPadding } from "starknet";
 import { useDojo } from "@/context/dojo";
 
@@ -31,7 +30,7 @@ const Overview = () => {
   const [selectedTab, setSelectedTab] = useState<
     "all" | "my" | "live" | "ended"
   >("all");
-  const { gameFilters, setGameFilters } = useUIStore();
+  const { gameFilters, setGameFilters, gameData } = useUIStore();
   const [sortBy, setSortBy] = useState<string>("start");
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -61,11 +60,9 @@ const Overview = () => {
     }
   }, [gameFilters]); // Reset scroll when filters change
 
-  const removeGameFilter = (filter: keyof ReturnType<typeof getGames>) => {
+  const removeGameFilter = (filter: string) => {
     setGameFilters(gameFilters.filter((f) => f !== filter));
   };
-
-  const games = getGames();
 
   return (
     <div className="flex flex-row px-20 pt-20 gap-5 h-[calc(100vh-80px)]">
@@ -139,7 +136,11 @@ const Overview = () => {
                   >
                     <GameIcon game={filter} />
                     <span className="text-2xl font-astronaut">
-                      {games[filter].name}
+                      {feltToString(
+                        gameData.find(
+                          (game) => game.contract_address === filter
+                        )?.name!
+                      )}
                     </span>
                     <span
                       className="w-6 h-6 text-retro-green-dark cursor-pointer"
@@ -157,13 +158,22 @@ const Overview = () => {
             className="grid grid-cols-3 gap-4 transition-all duration-300 ease-in-out py-4 overflow-y-auto"
           >
             {selectedTab === "all" ? (
-              <UpcomingTournaments gameFilters={gameFilters} />
+              <UpcomingTournaments
+                gameFilters={gameFilters}
+                tournamentsCount={upcomingTournamentsCount}
+              />
             ) : selectedTab === "live" ? (
-              <LiveTournaments gameFilters={gameFilters} />
+              <LiveTournaments
+                gameFilters={gameFilters}
+                tournamentsCount={liveTournamentsCount}
+              />
             ) : selectedTab === "ended" ? (
-              <EndedTournaments gameFilters={gameFilters} />
+              <EndedTournaments
+                gameFilters={gameFilters}
+                tournamentsCount={endedTournamentsCount}
+              />
             ) : (
-              <MyTournaments />
+              <MyTournaments gameFilters={gameFilters} />
             )}
           </div>
         </div>

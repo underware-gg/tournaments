@@ -1,101 +1,77 @@
-// import { useMemo } from "react";
-// import {
-//   useGetLiveTournamentsQuery,
-//   useGetTournamentDetailsInListQuery,
-// } from "@/dojo/hooks/useSdkQueries";
-// import { bigintToHex, indexAddress } from "@/lib/utils";
-// import { Tournament } from "@/generated/models.gen";
-// import { TournamentCard } from "@/components/overview/TournamanentCard";
-// import { addAddressPadding } from "starknet";
-// import EmptyResults from "@/components/overview/tournaments/EmptyResults";
-// import NoAccount from "@/components/overview/tournaments/NoAccount";
-// import { useAccount } from "@starknet-react/core";
-// import { useGetAccountTokenIds } from "@/dojo/hooks/useSqlQueries";
+import { useMemo } from "react";
+import { indexAddress } from "@/lib/utils";
+import { TournamentCard } from "@/components/overview/TournamanentCard";
+import EmptyResults from "@/components/overview/tournaments/EmptyResults";
+import NoAccount from "@/components/overview/tournaments/NoAccount";
+import { useAccount } from "@starknet-react/core";
+import { useGetMyTournaments } from "@/dojo/hooks/useSqlQueries";
+import useUIStore from "@/hooks/useUIStore";
+import { useDojo } from "@/context/dojo";
+import { processPrizesFromSql } from "@/lib/utils/formatting";
+import { processTournamentFromSql } from "@/lib/utils/formatting";
 
-// interface MyTournamentsProps {
-//   gameFilters: string[];
-// }
+interface MyTournamentsProps {
+  gameFilters: string[];
+}
 
-const MyTournaments = () => {
-  // const { address } = useAccount();
+const MyTournaments = ({ gameFilters }: MyTournamentsProps) => {
+  const { address } = useAccount();
+  const { gameData } = useUIStore();
+  const { nameSpace } = useDojo();
 
-  // const queryAddress = useMemo(() => {
-  //   if (!address || address === "0x0") return null;
-  //   return indexAddress(address);
-  // }, [address]);
+  const queryAddress = useMemo(() => {
+    if (!address || address === "0x0") return null;
+    return indexAddress(address);
+  }, [address]);
 
-  // const { data: ownedTokens } = useGetAccountTokenIds(queryAddress ?? "0x0", [
-  //   "0x32ffff023e926e396e56e3a5cb3ce6ef68cb6f620e95dc38db12781fbc9425f",
-  // ]);
+  const gameAddresses = useMemo(() => {
+    return gameData?.map((game) => indexAddress(game.contract_address));
+  }, [gameData]);
 
-  // const ownedTokenIds = useMemo(() => {
-  //   return ownedTokens
-  //     ?.map((token) => {
-  //       const parts = token.token_id?.split(":");
-  //       return parts?.[1] ?? null;
-  //     })
-  //     .filter(Boolean);
-  // }, [ownedTokens]);
+  const { data: myTournaments } = useGetMyTournaments({
+    namespace: nameSpace,
+    address: queryAddress,
+    gameAddresses: gameAddresses ?? [],
+    gameFilters: gameFilters,
+    limit: 5,
+    offset: 0,
+  });
 
-  // console.log(queryAddress, ownedTokenIds);
-
-  // const hexTimestamp = useMemo(
-  //   () => bigintToHex(BigInt(new Date().getTime()) / 1000n),
-  //   []
-  // );
-
-  // const { entities: tournamentEntities } = useGetLiveTournamentsQuery(
-  //   hexTimestamp,
-  //   12,
-  //   0
-  // );
-
-  // const formattedTournaments = (tournamentEntities ?? []).map(
-  //   (tournament) => tournament?.Tournament! as unknown as Tournament
-  // );
-
-  // const filteredTournaments = useMemo(() => {
-  //   if (gameFilters.length === 0) return formattedTournaments;
-
-  //   return formattedTournaments.filter((tournament) => {
-  //     // Get the game address from the tournament
-  //     const tournamentGameAddress = addAddressPadding(
-  //       tournament.game_config.address
-  //     );
-
-  //     // Check if any of the selected game filters match the tournament's game
-  //     return gameFilters.some((gameAddress) => {
-  //       return gameAddress === tournamentGameAddress;
-  //     });
-  //   });
-  // }, [formattedTournaments, gameFilters]);
-
-  // const prizeTournamentIds = filteredTournaments.map((tournament) =>
-  //   addAddressPadding(bigintToHex(BigInt(tournament.id)))
-  // );
-
-  // useGetTournamentDetailsInListQuery(prizeTournamentIds);
+  const myTournamentsData = myTournaments.map((tournament) => {
+    const processedTournament = processTournamentFromSql(tournament);
+    const processedPrizes = processPrizesFromSql(
+      tournament.prizes,
+      tournament.id
+    );
+    return {
+      tournament: processedTournament,
+      prizes: processedPrizes,
+      entryCount: Number(tournament.entry_count),
+    };
+  });
 
   return (
     <>
-      {/* {address ? (
-        filteredTournaments.length > 0 ? (
-          filteredTournaments.map((tournament, index) => (
-            <TournamentCard
-              key={index}
-              tournament={tournament}
-              index={index}
-              status="live"
-              prizes={[]}
-              entryCount={0}
-            />
-          ))
-        ) : (
-          <EmptyResults gameFilters={gameFilters} />
-        )
+      {address ? (
+        <>
+          {myTournamentsData.length > 0 ? (
+            myTournamentsData.map((tournament, index) => (
+              <TournamentCard
+                key={index}
+                tournament={tournament.tournament}
+                index={index}
+                status="live"
+                prizes={tournament.prizes}
+                entryCount={tournament.entryCount}
+              />
+            ))
+          ) : (
+            <EmptyResults gameFilters={gameFilters} />
+          )}
+        </>
       ) : (
         <NoAccount />
-      )} */}
+      )}
     </>
   );
 };
