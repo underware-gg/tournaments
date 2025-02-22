@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useDojo } from "@/context/dojo";
 import { ChainId } from "@/dojo/config";
-interface TokenPrice {
-  [key: string]: bigint | undefined;
+
+export interface TokenPrices {
+  [key: string]: number | undefined;
 }
 
 interface EkuboPriceProps {
@@ -11,7 +12,7 @@ interface EkuboPriceProps {
 
 export const useEkuboPrices = ({ tokens }: EkuboPriceProps) => {
   const { selectedChainConfig } = useDojo();
-  const [prices, setPrices] = useState<TokenPrice>({});
+  const [prices, setPrices] = useState<TokenPrices>({});
   const [isLoading, setIsLoading] = useState(true);
 
   const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;

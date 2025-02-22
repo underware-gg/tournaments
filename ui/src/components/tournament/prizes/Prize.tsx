@@ -1,8 +1,6 @@
 import { motion } from "framer-motion";
 import { getOrdinalSuffix } from "@/lib/utils";
-import { useEkuboPrices } from "@/hooks/useEkuboPrices";
 import {
-  getErc20TokenSymbols,
   calculatePrizeValue,
   calculateTotalValue,
   countTotalNFTs,
@@ -12,24 +10,16 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { TokenPrices } from "@/hooks/useEkuboPrices";
+import { TokenPrizes } from "@/lib/types";
 
 interface PrizeProps {
   position: number;
-  prizes: Record<
-    string,
-    {
-      type: "erc20" | "erc721";
-      payout_position: string;
-      address: string;
-      value: bigint[] | bigint;
-    }
-  >;
+  prizes: TokenPrizes;
+  prices: TokenPrices;
 }
 
-const Prize = ({ position, prizes }: PrizeProps) => {
-  const erc20Symbols = getErc20TokenSymbols(prizes);
-  const { prices } = useEkuboPrices({ tokens: erc20Symbols });
-
+const Prize = ({ position, prizes, prices }: PrizeProps) => {
   const totalPrizesValueUSD = calculateTotalValue(prizes, prices);
   const totalPrizeNFTs = countTotalNFTs(prizes);
 
@@ -50,7 +40,9 @@ const Prize = ({ position, prizes }: PrizeProps) => {
           </div>
           {totalPrizesValueUSD > 0 || totalPrizeNFTs > 0 ? (
             <div className="flex flex-row items-center gap-2 font-astronaut text-lg">
-              {totalPrizesValueUSD > 0 && <span>${totalPrizesValueUSD}</span>}
+              {totalPrizesValueUSD > 0 && (
+                <span>${totalPrizesValueUSD.toFixed(2)}</span>
+              )}
               {totalPrizesValueUSD > 0 && totalPrizeNFTs > 0 && (
                 <span className="text-retro-green/25">|</span>
               )}
@@ -83,13 +75,15 @@ const Prize = ({ position, prizes }: PrizeProps) => {
                 <div key={symbol} className="flex justify-between items-center">
                   <span className="text-retro-green-dark">
                     {prize.type === "erc20"
-                      ? `${prize.value} ${symbol}`
+                      ? `${Number(prize.value) / 10 ** 18} ${symbol}`
                       : `${(prize.value as bigint[]).length} NFT${
                           (prize.value as bigint[]).length === 1 ? "" : "s"
                         }`}
                   </span>
                   {prize.type === "erc20" && (
-                    <span className="text-neutral-500">~${USDValue}</span>
+                    <span className="text-neutral-500">
+                      ~${USDValue.toFixed(2)}
+                    </span>
                   )}
                 </div>
               );
@@ -98,7 +92,7 @@ const Prize = ({ position, prizes }: PrizeProps) => {
               <div className="pt-2 border-t border-retro-green/20">
                 <div className="flex justify-between items-center">
                   <span className="font-astronaut">Total</span>
-                  <span>${totalPrizesValueUSD}</span>
+                  <span>${totalPrizesValueUSD.toFixed(2)}</span>
                 </div>
               </div>
             )}

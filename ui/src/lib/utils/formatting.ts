@@ -7,7 +7,9 @@ import {
   CairoCustomEnum,
   BigNumberish,
 } from "starknet";
-import { Prize, Tournament, Token } from "@/generated/models.gen";
+import { Prize, Tournament, Token, EntryFee } from "@/generated/models.gen";
+import { PositionPrizes, TokenPrizes } from "@/lib/types";
+import { TokenPrices } from "@/hooks/useEkuboPrices";
 
 const SECONDS_IN_DAY = 86400;
 const SECONDS_IN_HOUR = 3600;
@@ -149,116 +151,200 @@ export const processPrizes = (
   }));
 };
 
-export const groupPrizesByPositions = (prizes: Prize[], tokens: Token[]) =>
-  [...prizes]
-    .sort((a, b) => Number(a.payout_position) - Number(b.payout_position))
-    .reduce(
-      (acc, prize) => {
-        const position = prize.payout_position.toString();
-        const tokenModel = tokens.find(
-          (t) => t.address === prize.token_address
+export const groupPrizesByPositions = (
+  prizes: Prize[],
+  tokens: Token[],
+  entryFee: CairoOption<EntryFee>,
+  entryCount: BigNumberish
+) => {
+  const entryFeePrizes = entryFee?.isSome()
+    ? (() => {
+        const totalFeeAmount =
+          BigInt(entryFee.Some?.amount!) * BigInt(entryCount);
+
+        if (totalFeeAmount === 0n) return {};
+
+        return entryFee.Some?.distribution.reduce(
+          (acc, distribution, index) => {
+            if (distribution === 0) return acc;
+
+            const position = (index + 1).toString();
+            const tokenAddress = entryFee.Some?.token_address!;
+            const tokenModel = tokens.find((t) => t.address === tokenAddress);
+
+            if (!tokenModel?.symbol) return acc;
+
+            if (!acc[position]) acc[position] = {};
+
+            acc[position][tokenModel.symbol] = {
+              type: "erc20",
+              payout_position: position,
+              address: tokenAddress,
+              value: (totalFeeAmount * BigInt(distribution)) / 100n,
+            };
+
+            return acc;
+          },
+          {} as PositionPrizes
         );
+      })()
+    : {};
 
-        // Skip if we can't find the token model
-        if (!tokenModel?.symbol) {
-          console.warn(
-            `No token model found for address ${prize.token_address}`
-          );
-          return acc;
-        }
-
-        const tokenSymbol = tokenModel.symbol;
-
-        if (!acc[position]) {
-          acc[position] = {};
-        }
-
-        if (!acc[position][tokenSymbol]) {
-          acc[position][tokenSymbol] = {
-            type: prize.token_type.variant.erc721 ? "erc721" : "erc20",
-            payout_position: position,
-            address: prize.token_address,
-            value: prize.token_type.variant.erc721 ? [] : 0n,
-          };
-        }
-
-        if (prize.token_type.activeVariant() === "erc721") {
-          (acc[position][tokenSymbol].value as bigint[]).push(
-            BigInt(prize.token_type.variant.erc721.id)
-          );
-        } else if (prize.token_type.activeVariant() === "erc20") {
-          const currentAmount = acc[position][tokenSymbol].value as bigint;
-          const newAmount =
-            BigInt(prize.token_type.variant.erc20.amount) / 10n ** 18n;
-          acc[position][tokenSymbol].value = currentAmount + newAmount;
-        }
-
-        return acc;
-      },
-      {} as Record<
-        string,
-        Record<
-          string,
-          {
-            type: "erc20" | "erc721";
-            payout_position: string;
-            address: string;
-            value: bigint[] | bigint;
-          }
-        >
-      >
-    );
-
-export const groupPrizesByTokens = (prizes: Prize[], tokens: Token[]) =>
-  prizes.reduce(
-    (acc, prize) => {
+  // Calculate regular prizes
+  const regularPrizes = [...prizes]
+    .sort((a, b) => Number(a.payout_position) - Number(b.payout_position))
+    .reduce((acc, prize) => {
+      const position = prize.payout_position.toString();
       const tokenModel = tokens.find((t) => t.address === prize.token_address);
-      const tokenSymbol = tokenModel?.symbol!;
 
-      if (!acc[tokenSymbol]) {
-        acc[tokenSymbol] = {
-          type: prize.token_type.activeVariant() as "erc20" | "erc721",
-          payout_position: prize.payout_position.toString(),
+      if (!tokenModel?.symbol) {
+        console.warn(`No token model found for address ${prize.token_address}`);
+        return acc;
+      }
+
+      const tokenSymbol = tokenModel.symbol;
+
+      if (!acc[position]) {
+        acc[position] = {};
+      }
+
+      if (!acc[position][tokenSymbol]) {
+        acc[position][tokenSymbol] = {
+          type: prize.token_type.variant.erc721 ? "erc721" : "erc20",
+          payout_position: position,
           address: prize.token_address,
-          value: prize.token_type.activeVariant() === "erc721" ? [] : 0n,
+          value: prize.token_type.variant.erc721 ? [] : 0n,
         };
       }
 
       if (prize.token_type.activeVariant() === "erc721") {
-        // For ERC721, push the token ID to the array
-        (acc[tokenSymbol].value as bigint[]).push(
-          BigInt(prize.token_type.variant.erc721.id!)
+        (acc[position][tokenSymbol].value as bigint[]).push(
+          BigInt(prize.token_type.variant.erc721.id)
         );
       } else if (prize.token_type.activeVariant() === "erc20") {
-        // For ERC20, sum up the values
-        const currentAmount = acc[tokenSymbol].value as bigint;
-        const newAmount =
-          BigInt(prize.token_type.variant.erc20.amount) / 10n ** 18n;
-        acc[tokenSymbol].value = currentAmount + newAmount;
+        const currentAmount = acc[position][tokenSymbol].value as bigint;
+        const newAmount = BigInt(prize.token_type.variant.erc20.amount);
+        acc[position][tokenSymbol].value = currentAmount + newAmount;
       }
 
       return acc;
-    },
-    {} as Record<
-      string,
-      {
-        type: "erc20" | "erc721";
-        payout_position: string;
-        address: string;
-        value: bigint[] | bigint;
+    }, {} as PositionPrizes);
+
+  // Merge regular prizes with entry fee prizes
+  return Object.entries(entryFeePrizes || {}).reduce(
+    (acc, [position, tokens]) => {
+      if (!acc[position]) {
+        acc[position] = {};
       }
-    >
+
+      Object.entries(tokens).forEach(([symbol, prize]) => {
+        if (!acc[position][symbol]) {
+          acc[position][symbol] = prize;
+        } else if (acc[position][symbol].type === "erc20") {
+          // Add the entry fee amount to existing prize amount
+          acc[position][symbol].value =
+            (acc[position][symbol].value as bigint) + (prize.value as bigint);
+        }
+      });
+
+      return acc;
+    },
+    regularPrizes
   );
+};
+
+export const groupPrizesByTokens = (
+  prizes: Prize[],
+  tokens: Token[],
+  entryFee: CairoOption<EntryFee>,
+  entryCount: BigNumberish
+) => {
+  const entryFeePrizes = entryFee?.isSome()
+    ? (() => {
+        const totalFeeAmount =
+          BigInt(entryFee.Some?.amount!) * BigInt(entryCount);
+
+        if (totalFeeAmount === 0n) return {};
+
+        const tokenModel = tokens.find(
+          (t) => t.address === entryFee.Some?.token_address
+        );
+        if (!tokenModel?.symbol) return {};
+
+        return entryFee.Some?.distribution.reduce(
+          (acc, distribution, _index) => {
+            if (distribution === 0) return acc;
+
+            const amount = (totalFeeAmount * BigInt(distribution)) / 100n;
+
+            if (!acc[tokenModel.symbol]) {
+              acc[tokenModel.symbol] = {
+                type: "erc20",
+                address: entryFee.Some?.token_address!,
+                value: amount,
+              };
+            } else {
+              // Add to existing entry fee amount
+              acc[tokenModel.symbol].value =
+                (acc[tokenModel.symbol].value as bigint) + amount;
+            }
+
+            return acc;
+          },
+          {} as TokenPrizes
+        );
+      })()
+    : {};
+
+  // Calculate regular prizes
+  const regularPrizes = prizes.reduce((acc, prize) => {
+    const tokenModel = tokens.find((t) => t.address === prize.token_address);
+    const tokenSymbol = tokenModel?.symbol!;
+
+    if (!acc[tokenSymbol]) {
+      acc[tokenSymbol] = {
+        type: prize.token_type.activeVariant() as "erc20" | "erc721",
+        address: prize.token_address,
+        value: prize.token_type.activeVariant() === "erc721" ? [] : 0n,
+      };
+    }
+
+    if (prize.token_type.activeVariant() === "erc721") {
+      // For ERC721, push the token ID to the array
+      (acc[tokenSymbol].value as bigint[]).push(
+        BigInt(prize.token_type.variant.erc721.id!)
+      );
+    } else if (prize.token_type.activeVariant() === "erc20") {
+      // For ERC20, sum up the values
+      const currentAmount = acc[tokenSymbol].value as bigint;
+      const newAmount = BigInt(prize.token_type.variant.erc20.amount);
+      acc[tokenSymbol].value = currentAmount + newAmount;
+    }
+
+    return acc;
+  }, {} as TokenPrizes);
+
+  // Merge regular prizes with entry fee prizes
+  return Object.entries(entryFeePrizes || {}).reduce(
+    (acc, [symbol, entryPrize]) => {
+      if (!acc[symbol]) {
+        acc[symbol] = entryPrize;
+      } else if (acc[symbol].type === "erc20") {
+        acc[symbol] = {
+          ...acc[symbol],
+          value: (acc[symbol].value as bigint) + (entryPrize.value as bigint),
+        };
+      }
+      return acc;
+    },
+    regularPrizes || {}
+  );
+};
 
 export const getErc20TokenSymbols = (
   groupedPrizes: Record<
     string,
-    {
-      type: "erc20" | "erc721";
-      payout_position: string;
-      address: string;
-      value: bigint[] | bigint;
-    }
+    { type: "erc20" | "erc721"; value: bigint | bigint[] }
   >
 ) => {
   return Object.entries(groupedPrizes)
@@ -272,39 +358,29 @@ export const calculatePrizeValue = (
     value: bigint[] | bigint;
   },
   symbol: string,
-  prices: Record<string, bigint | undefined>
+  prices: Record<string, number | undefined>
 ): number => {
   if (prize.type !== "erc20") return 0;
 
-  const price = prices[symbol] || 1n;
-  const amount = prize.value as bigint;
-  return Number(price * amount);
+  const price = prices[symbol] || 1;
+  const amount = Number(prize.value);
+  return Number(price * amount) / 10 ** 18;
 };
 
 export const calculateTotalValue = (
-  groupedPrizes: Record<
-    string,
-    {
-      type: "erc20" | "erc721";
-      payout_position: string;
-      address: string;
-      value: bigint[] | bigint;
-    }
-  >,
-  prices: Record<string, bigint | undefined>
+  groupedPrizes: TokenPrizes,
+  prices: TokenPrices
 ) => {
   return Object.entries(groupedPrizes)
     .filter(([_, prize]) => prize.type === "erc20")
     .reduce((total, [symbol, prize]) => {
-      const price = prices[symbol] || 1n;
-      const amount = prize.value as bigint;
-      return total + Number(price * amount);
+      const price = prices[symbol] || 1;
+      const amount = Number(prize.value);
+      return total + Number(price * amount) / 10 ** 18;
     }, 0);
 };
 
-export const countTotalNFTs = (
-  groupedPrizes: ReturnType<typeof groupPrizesByTokens>
-) => {
+export const countTotalNFTs = (groupedPrizes: TokenPrizes) => {
   return Object.entries(groupedPrizes)
     .filter(([_, prize]) => prize.type === "erc721")
     .reduce((total, [_, prize]) => {

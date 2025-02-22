@@ -116,12 +116,16 @@ const Tournament = () => {
     };
 
     checkOverflow();
-    // Add resize listener to recheck on window resize
     window.addEventListener("resize", checkOverflow);
     return () => window.removeEventListener("resize", checkOverflow);
-  }, [tournamentModel?.metadata.description]); // Recheck when description changes
+  }, [tournamentModel?.metadata.description]);
 
-  const groupedByTokensPrizes = groupPrizesByTokens(prizes, tokens);
+  const groupedByTokensPrizes = groupPrizesByTokens(
+    prizes,
+    tokens,
+    tournamentModel?.entry_fee,
+    entryCountModel?.count ?? 0
+  );
 
   const erc20TokenSymbols = getErc20TokenSymbols(groupedByTokensPrizes);
 
@@ -134,7 +138,12 @@ const Tournament = () => {
     ? "open"
     : "fixed";
 
-  const groupedPrizes = groupPrizesByPositions(prizes, tokens);
+  const groupedPrizes = groupPrizesByPositions(
+    prizes,
+    tokens,
+    tournamentModel?.entry_fee,
+    entryCountModel?.count ?? 0
+  );
 
   const lowestPrizePosition =
     Object.keys(groupedPrizes).length > 0
@@ -188,6 +197,8 @@ const Tournament = () => {
     if (isStarted) return "live";
     return "upcoming";
   }, [isStarted, isEnded]);
+
+  const hasPrizes = Object.keys(groupedPrizes).length > 0;
 
   if (!tournamentModel) {
     return (
@@ -318,11 +329,12 @@ const Tournament = () => {
           </div>
           <div className="w-1/2">
             <PrizesContainer
-              prizesExist={prizes.length > 0}
+              prizesExist={hasPrizes}
               lowestPrizePosition={lowestPrizePosition}
               groupedPrizes={groupedPrizes}
               totalPrizesValueUSD={totalPrizesValueUSD}
               totalPrizeNFTs={totalPrizeNFTs}
+              prices={prices}
             />
           </div>
         </div>

@@ -44,7 +44,12 @@ export const TournamentCard = ({
     (t) => t.address === entryFeeToken
   )?.symbol;
 
-  const groupedPrizes = groupPrizesByTokens(prizes ?? [], tokens);
+  const groupedPrizes = groupPrizesByTokens(
+    prizes ?? [],
+    tokens,
+    tournament?.entry_fee,
+    entryCount
+  );
 
   const erc20TokenSymbols = getErc20TokenSymbols(groupedPrizes);
   const { prices } = useEkuboPrices({
@@ -139,26 +144,6 @@ export const TournamentCard = ({
           </div>
           <div className="flex flex-row -space-x-2 w-1/2 justify-end px-2">
             <TokenGameIcon key={index} game={gameAddress} size={"md"} />
-            {/* {tournament.games.slice(0, 3).map((game, index) => {
-              // If this is the 3rd item and there are more games
-              if (index === 2 && tournament.games.length > 3) {
-                return (
-                  <span
-                    key={index}
-                    className="relative inline-flex items-center justify-center"
-                  >
-                    <span className={"text-retro-green/25 size-10"}>
-                      <TOKEN />
-                    </span>
-                    <div className="absolute inset-0 flex items-center justify-center rounded-full text-retro-green font-astronaut">
-                      +{tournament.games.length - 2}
-                    </div>
-                  </span>
-                );
-              }
-              // Regular token icon for first 2 items
-              return <TokenGameIcon key={index} game={game} size={"md"} />;
-            })} */}
           </div>
         </div>
         <div className="flex flex-row items-center justify-between w-3/4 mx-auto">
@@ -170,7 +155,9 @@ export const TournamentCard = ({
             <span className="text-retro-green-dark">Pot:</span>
             {totalPrizesValueUSD > 0 || totalPrizeNFTs > 0 ? (
               <div className="flex flex-row items-center gap-2">
-                {totalPrizesValueUSD > 0 && <span>${totalPrizesValueUSD}</span>}
+                {totalPrizesValueUSD > 0 && (
+                  <span>${totalPrizesValueUSD.toFixed(2)}</span>
+                )}
                 {totalPrizeNFTs > 0 && (
                   <span>
                     {totalPrizeNFTs} NFT{totalPrizeNFTs === 1 ? "" : "s"}

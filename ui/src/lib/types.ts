@@ -11,3 +11,25 @@ export type Token = {
   token_type: string;
   is_registered: boolean;
 };
+
+export type TokenPrizes = Record<
+  string,
+  {
+    type: "erc20" | "erc721";
+    address: string;
+    value: bigint[] | bigint;
+  }
+>;
+
+export type PositionPrizes = Record<
+  string,
+  Record<
+    string,
+    {
+      type: "erc20" | "erc721";
+      payout_position: string;
+      address: string;
+      value: bigint[] | bigint;
+    }
+  >
+>;

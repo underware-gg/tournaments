@@ -3,24 +3,16 @@ import { Card } from "@/components/ui/card";
 import PrizeDisplay from "@/components/tournament/prizes/Prize";
 import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
+import { TokenPrices } from "@/hooks/useEkuboPrices";
+import { PositionPrizes } from "@/lib/types";
 
 interface PrizesContainerProps {
   prizesExist: boolean;
   lowestPrizePosition: number;
-  groupedPrizes: Record<
-    string,
-    Record<
-      string,
-      {
-        type: "erc20" | "erc721";
-        payout_position: string;
-        address: string;
-        value: bigint[] | bigint;
-      }
-    >
-  >;
+  groupedPrizes: PositionPrizes;
   totalPrizesValueUSD: number;
   totalPrizeNFTs: number;
+  prices: TokenPrices;
 }
 
 const PrizesContainer = ({
@@ -29,6 +21,7 @@ const PrizesContainer = ({
   groupedPrizes,
   totalPrizesValueUSD,
   totalPrizeNFTs,
+  prices,
 }: PrizesContainerProps) => {
   const [showPrizes, setShowPrizes] = useState(false);
 
@@ -49,7 +42,7 @@ const PrizesContainer = ({
             <span className="font-astronaut text-2xl">Prizes</span>
             {totalPrizesValueUSD > 0 && (
               <span className="font-astronaut text-xl text-retro-green-dark">
-                ${totalPrizesValueUSD}
+                ${totalPrizesValueUSD.toFixed(2)}
               </span>
             )}
             {totalPrizeNFTs > 0 && (
@@ -85,7 +78,7 @@ const PrizesContainer = ({
           <div className="w-full h-0.5 bg-retro-green/25 mt-2" />
           <div className="p-4">
             {prizesExist && (
-              <div className="flex flex-row gap-3">
+              <div className="flex flex-row gap-3 overflow-x-auto">
                 {Object.entries(groupedPrizes)
                   .sort(
                     (a, b) =>
@@ -97,6 +90,7 @@ const PrizesContainer = ({
                       key={index}
                       position={Number(position)}
                       prizes={prizes}
+                      prices={prices}
                     />
                   ))}
               </div>
