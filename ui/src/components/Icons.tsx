@@ -56,6 +56,15 @@ export const TOKEN: React.FC = () => (
   </svg>
 );
 
+export const COUNTER: React.FC = () => (
+  <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M10.6622 0V2.66556H5.33111V5.33111H2.66556V10.6622H0V21.3378H2.66556V26.6689H5.33111V29.3344H10.6622V32H21.3378V29.3344H26.6689V26.6689H29.3344V21.3378H32V10.6622H29.3344V5.33111H26.6689V2.66556H21.3378V0H10.6622Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
 export const GLOBE: React.FC = () => (
   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path

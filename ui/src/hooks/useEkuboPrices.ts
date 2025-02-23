@@ -25,7 +25,7 @@ export const useEkuboPrices = ({ tokens }: EkuboPriceProps) => {
           const mockPrices = tokens.reduce(
             (acc, token) => ({
               ...acc,
-              [token]: 1n,
+              [token]: 1,
             }),
             {}
           );

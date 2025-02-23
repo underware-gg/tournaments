@@ -1,7 +1,7 @@
 import { TournamentTab } from "./TournamentTab";
 import { GLOBE, FLAG, MINUS, TROPHY } from "@/components/Icons";
 
-type TabType = "all" | "live" | "ended" | "my";
+export type TabType = "upcoming" | "live" | "ended" | "my";
 
 interface TournamentTabsProps {
   selectedTab: TabType;
@@ -21,10 +21,10 @@ const TournamentTabs = ({
   return (
     <div className="flex flex-row gap-2">
       <TournamentTab
-        selected={selectedTab === "all"}
-        onClick={() => setSelectedTab("all")}
+        selected={selectedTab === "upcoming"}
+        onClick={() => setSelectedTab("upcoming")}
         icon={<GLOBE />}
-        label="All Tournaments"
+        label="Upcoming Tournaments"
         count={upcomingTournamentsCount}
       />
       <TournamentTab

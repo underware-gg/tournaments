@@ -354,6 +354,7 @@ export const useSystemCalls = () => {
   };
 
   const getBalanceGeneral = async (tokenAddress: string) => {
+    console.log(tokenAddress, address);
     const result = await account?.callContract({
       contractAddress: tokenAddress,
       entrypoint: "balance_of",

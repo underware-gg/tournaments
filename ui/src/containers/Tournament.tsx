@@ -248,6 +248,7 @@ const Tournament = () => {
             tournamentModel={tournamentModel}
             entryCountModel={entryCountModel}
             gameCount={gameCount}
+            tokens={tokens}
           />
         </div>
       </div>
@@ -260,7 +261,9 @@ const Tournament = () => {
             <div className="flex flex-row items-center gap-4 text-retro-green-dark">
               <div className="flex flex-row gap-2">
                 <span>Winners:</span>
-                <span className="text-retro-green">Top 5</span>
+                <span className="text-retro-green">
+                  Top {Number(tournamentModel.game_config.prize_spots)}
+                </span>
               </div>
               <div className="flex flex-row gap-2">
                 <span>Registration:</span>

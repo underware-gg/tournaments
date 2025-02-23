@@ -50,6 +50,8 @@ const EntryRequirements = ({ form }: StepProps) => {
     gameFilters: gameFilters,
     limit: 10,
     offset: (currentPage - 1) * 10,
+    status: "all",
+    active: true,
   });
 
   const { data: tournamentsCount } = useGetTournamentsCount({

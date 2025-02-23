@@ -20,6 +20,8 @@ const Play = () => {
     gameFilters: [],
     limit: 100,
     offset: 0,
+    status: "all",
+    active: true,
   });
 
   const tournamentsData = tournaments.map((tournament) => {

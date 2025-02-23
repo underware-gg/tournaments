@@ -11,30 +11,57 @@ import {
 } from "@/components/ui/dropdown-menu";
 import GameFilters from "@/components/overview/GameFilters";
 import GameIcon from "@/components/icons/GameIcon";
-import UpcomingTournaments from "@/components/overview/tournaments/UpcomingTournaments";
-import MyTournaments from "@/components/overview/tournaments/MyTournaments";
-import LiveTournaments from "@/components/overview/tournaments/LiveTournaments";
-import EndedTournaments from "@/components/overview/tournaments/EndedTournaments";
-import TournamentTabs from "@/components/overview/TournamentTabs";
+import TournamentTabs, { TabType } from "@/components/overview/TournamentTabs";
 import {
   useGetUpcomingTournamentsCount,
   useGetLiveTournamentsCount,
   useGetEndedTournamentsCount,
+  useGetTournaments,
+  useGetMyTournaments,
 } from "@/dojo/hooks/useSqlQueries";
-import { bigintToHex, feltToString } from "@/lib/utils";
+import { bigintToHex, feltToString, indexAddress } from "@/lib/utils";
 import { addAddressPadding } from "starknet";
+import { processPrizesFromSql } from "@/lib/utils/formatting";
 import { useDojo } from "@/context/dojo";
+import { processTournamentFromSql } from "@/lib/utils/formatting";
+import EmptyResults from "@/components/overview/tournaments/EmptyResults";
+import { TournamentCard } from "@/components/overview/TournamanentCard";
+import TournamentSkeletons from "@/components/overview/TournamentSkeletons";
+import NoAccount from "@/components/overview/tournaments/NoAccount";
+import { useAccount } from "@starknet-react/core";
+
+const SORT_OPTIONS = {
+  upcoming: [
+    { value: "start_time", label: "Start Time" },
+    { value: "players", label: "Players" },
+  ],
+  live: [
+    { value: "end_time", label: "End Time" },
+    { value: "players", label: "Players" },
+  ],
+  ended: [
+    { value: "end_time", label: "End Time" },
+    { value: "players", label: "Players" },
+    { value: "winners", label: "Winners" },
+  ],
+  my: [
+    { value: "start_time", label: "Start Time" },
+    { value: "status", label: "Status" },
+  ],
+} as const;
 
 const Overview = () => {
   const { nameSpace } = useDojo();
-  const [selectedTab, setSelectedTab] = useState<
-    "all" | "my" | "live" | "ended"
-  >("all");
+  const { address } = useAccount();
+  const [selectedTab, setSelectedTab] = useState<TabType>("upcoming");
+  const [page, setPage] = useState(0);
   const { gameFilters, setGameFilters, gameData } = useUIStore();
-  const [sortBy, setSortBy] = useState<string>("start");
+  const [sortBy, setSortBy] = useState<string>(
+    SORT_OPTIONS[selectedTab][0].value
+  );
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
+  const loadingRef = useRef<HTMLDivElement>(null);
   const currentTime = useMemo(() => {
     return addAddressPadding(bigintToHex(BigInt(Date.now()) / 1000n));
   }, []);
@@ -54,15 +81,107 @@ const Overview = () => {
     currentTime: currentTime,
   });
 
+  const tournamentCounts = useMemo(() => {
+    return {
+      upcoming: upcomingTournamentsCount,
+      live: liveTournamentsCount,
+      ended: endedTournamentsCount,
+      my: 0,
+    };
+  }, [upcomingTournamentsCount, liveTournamentsCount, endedTournamentsCount]);
+
+  useEffect(() => {
+    setSortBy(SORT_OPTIONS[selectedTab][0].value);
+  }, [selectedTab]);
+
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
-  }, [gameFilters]); // Reset scroll when filters change
+  }, [gameFilters]);
 
   const removeGameFilter = (filter: string) => {
     setGameFilters(gameFilters.filter((f) => f !== filter));
   };
+
+  const hexTimestamp = useMemo(
+    () => addAddressPadding(bigintToHex(BigInt(new Date().getTime()) / 1000n)),
+    []
+  );
+
+  const { data: tournaments, loading: tournamentsLoading } = useGetTournaments({
+    namespace: nameSpace,
+    currentTime: hexTimestamp,
+    gameFilters: gameFilters,
+    offset: page * 12,
+    limit: 12,
+    status: selectedTab,
+    sortBy: sortBy,
+    active:
+      selectedTab === "upcoming" ||
+      selectedTab === "live" ||
+      selectedTab === "ended",
+  });
+
+  const queryAddress = useMemo(() => {
+    if (!address || address === "0x0") return null;
+    return indexAddress(address);
+  }, [address]);
+
+  const gameAddresses = useMemo(() => {
+    return gameData?.map((game) => indexAddress(game.contract_address));
+  }, [gameData]);
+
+  const { data: myTournaments, loading: myTournamentsLoading } =
+    useGetMyTournaments({
+      namespace: nameSpace,
+      address: queryAddress,
+      gameAddresses: gameAddresses ?? [],
+      gameFilters: gameFilters,
+      limit: 12,
+      offset: page * 12,
+      active: selectedTab === "my",
+    });
+
+  const tournamentsData = (
+    selectedTab === "my" ? myTournaments : tournaments
+  ).map((tournament) => {
+    const processedTournament = processTournamentFromSql(tournament);
+    const processedPrizes = processPrizesFromSql(
+      tournament.prizes,
+      tournament.id
+    );
+    return {
+      tournament: processedTournament,
+      prizes: processedPrizes,
+      entryCount: Number(tournament.entry_count),
+    };
+  });
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          !(tournamentsLoading || myTournamentsLoading) &&
+          tournamentCounts[selectedTab] > 12
+        ) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadingRef.current) {
+      observer.observe(loadingRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [tournamentsLoading, myTournamentsLoading, tournamentCounts]);
+
+  const LoadingSpinner = () => (
+    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900" />
+  );
 
   return (
     <div className="flex flex-row px-20 pt-20 gap-5 h-[calc(100vh-80px)]">
@@ -81,7 +200,11 @@ const Overview = () => {
             <DropdownMenu>
               <DropdownMenuTrigger className="bg-black border-2 border-retro-grey px-2 min-w-[100px]">
                 <div className="flex flex-row items-center justify-between capitalize w-full gap-2">
-                  {sortBy}
+                  {
+                    SORT_OPTIONS[selectedTab].find(
+                      (option) => option.value === sortBy
+                    )?.label
+                  }
                   <span className="w-6">
                     <CHEVRON_DOWN />
                   </span>
@@ -92,30 +215,15 @@ const Overview = () => {
                   Options
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-retro-green-dark" />
-                <DropdownMenuItem
-                  className="text-retro-green cursor-pointer"
-                  onClick={() => setSortBy("start time")}
-                >
-                  Start Time
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="text-retro-green cursor-pointer"
-                  onClick={() => setSortBy("end time")}
-                >
-                  End Time
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="text-retro-green cursor-pointer"
-                  onClick={() => setSortBy("pot size")}
-                >
-                  Pot Size
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="text-retro-green cursor-pointer"
-                  onClick={() => setSortBy("players")}
-                >
-                  Players
-                </DropdownMenuItem>
+                {SORT_OPTIONS[selectedTab].map((option) => (
+                  <DropdownMenuItem
+                    key={option.value}
+                    className="text-retro-green cursor-pointer"
+                    onClick={() => setSortBy(option.value)}
+                  >
+                    {option.label}
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -157,24 +265,29 @@ const Overview = () => {
             ref={scrollContainerRef}
             className="grid grid-cols-3 gap-4 transition-all duration-300 ease-in-out py-4 overflow-y-auto"
           >
-            {selectedTab === "all" ? (
-              <UpcomingTournaments
-                gameFilters={gameFilters}
-                tournamentsCount={upcomingTournamentsCount}
+            {selectedTab === "my" && !address ? (
+              <NoAccount />
+            ) : tournamentsLoading || myTournamentsLoading ? (
+              <TournamentSkeletons
+                tournamentsCount={tournamentCounts[selectedTab]}
               />
-            ) : selectedTab === "live" ? (
-              <LiveTournaments
-                gameFilters={gameFilters}
-                tournamentsCount={liveTournamentsCount}
-              />
-            ) : selectedTab === "ended" ? (
-              <EndedTournaments
-                gameFilters={gameFilters}
-                tournamentsCount={endedTournamentsCount}
-              />
+            ) : tournamentsData.length > 0 ? (
+              tournamentsData.map((tournament, index) => (
+                <TournamentCard
+                  key={index}
+                  tournament={tournament.tournament}
+                  index={index}
+                  status={selectedTab}
+                  prizes={tournament.prizes}
+                  entryCount={tournament.entryCount}
+                />
+              ))
             ) : (
-              <MyTournaments gameFilters={gameFilters} />
+              <EmptyResults gameFilters={gameFilters} />
             )}
+          </div>
+          <div ref={loadingRef} className="w-full py-4 flex justify-center">
+            {(tournamentsLoading || myTournamentsLoading) && <LoadingSpinner />}
           </div>
         </div>
       </div>

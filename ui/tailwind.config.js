@@ -15,6 +15,7 @@ export default {
   		colors: {
         'retro-green': 'rgba(0, 218, 163, 1)',
         'retro-green-dark': 'rgba(0, 140, 105, 1)',
+        'retro-green-darker': 'rgba(31, 66, 42, 1)',
         'retro-grey': 'rgba(34, 34, 34, 1)',
       },
       fontFamily: {

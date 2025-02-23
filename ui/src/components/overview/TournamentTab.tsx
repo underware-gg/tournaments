@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ReactNode } from "react";
+import { COUNTER } from "@/components/Icons";
 
 interface TournamentTabProps {
   selected: boolean;
@@ -26,9 +27,12 @@ export const TournamentTab = ({
         {icon}
         {label}
       </Button>
-      {count !== undefined && (
-        <span className="absolute top-0 right-0 flex items-center justify-center text-black h-4 w-4 text-xs">
-          {count}
+      {count !== undefined && count > 0 && (
+        <span className="absolute -top-1 -right-1 flex items-center justify-center text-retro-green-darker h-6 w-6 text-xs">
+          <COUNTER />
+          <span className="absolute inset-0 flex items-center justify-center text-retro-green text-center">
+            {count}
+          </span>
         </span>
       )}
     </div>

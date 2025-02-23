@@ -105,80 +105,60 @@ export const useGetEndedTournamentsCount = ({
   return { data: data?.[0]?.count, loading, error };
 };
 
+const getTournamentWhereClause = (status: string, currentTime: string) => {
+  switch (status) {
+    case "upcoming":
+      return `WHERE t.'schedule.game.start' > '${currentTime}'`;
+    case "live":
+      return `WHERE t.'schedule.game.start' <= '${currentTime}' AND t.'schedule.game.end' > '${currentTime}'`;
+    case "ended":
+      return `WHERE t.'schedule.game.end' <= '${currentTime}'`;
+    case "all":
+      return "";
+  }
+};
+
+const getSortClause = (sort: string) => {
+  switch (sort) {
+    case "start_time":
+      return `ORDER BY t.'schedule.game.start' ASC`;
+    case "end_time":
+      return `ORDER BY t.'schedule.game.end' ASC`;
+    case "pot_size":
+      // You might need to adjust this based on your actual prize calculation
+      return `ORDER BY entry_count DESC`;
+    case "players":
+      return `ORDER BY entry_count DESC`;
+    case "winners":
+      return `ORDER BY t.'winners_count' DESC`;
+    default:
+      return `ORDER BY t.'schedule.game.start' ASC`;
+  }
+};
+
 export const useGetTournaments = ({
   namespace,
-  gameFilters,
-  offset = 0,
-  limit = 5,
-}: {
-  namespace: string;
-  gameFilters: string[];
-  offset?: number;
-  limit?: number;
-}) => {
-  const query = useMemo(
-    () => `
-    SELECT 
-    t.*,
-    CASE 
-        WHEN COUNT(p.tournament_id) = 0 THEN NULL
-        ELSE GROUP_CONCAT(
-            json_object(
-                'prizeId', p.id,
-                'position', p.payout_position,
-                'tokenType', p.token_type,
-                'tokenAddress', p.token_address,
-                'amount', CASE 
-                    WHEN p.token_type = 'erc20' THEN p."token_type.erc20.amount"
-                    WHEN p.token_type = 'erc721' THEN p."token_type.erc721.id"
-                    ELSE NULL 
-                END,
-                'isValid', CASE 
-                    WHEN p.token_type = 'erc20' AND p."token_type.erc20.amount" IS NOT NULL THEN 1
-                    WHEN p.token_type = 'erc721' AND p."token_type.erc721.id" IS NOT NULL THEN 1
-                    ELSE 0
-                END
-            ),
-            '|'
-        )
-    END as prizes,
-    COALESCE(e.count, 0) as entry_count
-    FROM '${namespace}-Tournament' as t
-    LEFT JOIN '${namespace}-Prize' p ON t.id = p.tournament_id
-    LEFT JOIN '${namespace}-EntryCount' e ON t.id = e.tournament_id
-    ${
-      gameFilters.length > 0
-        ? `WHERE t.'game_config.address' IN (${gameFilters
-            .map((address) => `'${address}'`)
-            .join(",")})`
-        : ""
-    }
-    GROUP BY t.id
-    ORDER BY t.'schedule.game.start' ASC
-    LIMIT ${limit}
-    OFFSET ${offset}
-  `,
-    [namespace, gameFilters, offset, limit]
-  );
-  const { data, loading, error, refetch } = useSqlExecute(query);
-  return { data, loading, error, refetch };
-};
-
-export const useGetUpcomingTournaments = ({
-  namespace,
   currentTime,
   gameFilters,
+  status,
+  sortBy = "start_time",
   offset = 0,
   limit = 5,
+  active = false,
 }: {
   namespace: string;
-  currentTime: string;
   gameFilters: string[];
+  status: string;
+  currentTime?: string;
+  sortBy?: string;
   offset?: number;
   limit?: number;
+  active?: boolean;
 }) => {
   const query = useMemo(
-    () => `
+    () =>
+      active
+        ? `
     SELECT 
     t.*,
     CASE 
@@ -207,7 +187,7 @@ export const useGetUpcomingTournaments = ({
     FROM '${namespace}-Tournament' as t
     LEFT JOIN '${namespace}-Prize' p ON t.id = p.tournament_id
     LEFT JOIN '${namespace}-EntryCount' e ON t.id = e.tournament_id
-    WHERE t.'schedule.game.start' > '${currentTime}'
+    ${getTournamentWhereClause(status, currentTime ?? "")}
         ${
           gameFilters.length > 0
             ? `AND t.'game_config.address' IN (${gameFilters
@@ -216,197 +196,12 @@ export const useGetUpcomingTournaments = ({
             : ""
         }
     GROUP BY t.id
-    ORDER BY t.'schedule.game.start' ASC
+    ${getSortClause(sortBy)}
     LIMIT ${limit}
     OFFSET ${offset}
-  `,
-    [namespace, currentTime, gameFilters, offset, limit]
-  );
-  const { data, loading, error, refetch } = useSqlExecute(query);
-  return { data, loading, error, refetch };
-};
-
-export const useGetLiveTournaments = ({
-  namespace,
-  currentTime,
-  gameFilters,
-  offset = 0,
-  limit = 5,
-}: {
-  namespace: string;
-  currentTime: string;
-  gameFilters: string[];
-  offset?: number;
-  limit?: number;
-}) => {
-  const query = useMemo(
-    () => `
-    SELECT 
-    t.*,
-    CASE 
-        WHEN COUNT(p.tournament_id) = 0 THEN NULL
-        ELSE GROUP_CONCAT(
-            json_object(
-                'prizeId', p.id,
-                'position', p.payout_position,
-                'tokenType', p.token_type,
-                'tokenAddress', p.token_address,
-                'amount', CASE 
-                    WHEN p.token_type = 'erc20' THEN p."token_type.erc20.amount"
-                    WHEN p.token_type = 'erc721' THEN p."token_type.erc721.id"
-                    ELSE NULL 
-                END,
-                'isValid', CASE 
-                    WHEN p.token_type = 'erc20' AND p."token_type.erc20.amount" IS NOT NULL THEN 1
-                    WHEN p.token_type = 'erc721' AND p."token_type.erc721.id" IS NOT NULL THEN 1
-                    ELSE 0
-                END
-            ),
-            '|'
-        )
-    END as prizes,
-    COALESCE(e.count, 0) as entry_count
-    FROM '${namespace}-Tournament' as t
-    LEFT JOIN '${namespace}-Prize' p ON t.id = p.tournament_id
-    LEFT JOIN '${namespace}-EntryCount' e ON t.id = e.tournament_id
-    WHERE t.'schedule.game.start' <= '${currentTime}' AND t.'schedule.game.end' > '${currentTime}'
-        ${
-          gameFilters.length > 0
-            ? `AND t.'game_config.address' IN (${gameFilters
-                .map((address) => `'${address}'`)
-                .join(",")})`
-            : ""
-        }
-    GROUP BY t.id
-    ORDER BY t.'schedule.game.start' ASC
-    LIMIT ${limit}
-    OFFSET ${offset}
-  `,
-    [namespace, currentTime, gameFilters, offset, limit]
-  );
-  const { data, loading, error, refetch } = useSqlExecute(query);
-  return { data, loading, error, refetch };
-};
-
-export const useGetEndedTournaments = ({
-  namespace,
-  currentTime,
-  gameFilters,
-  offset = 0,
-  limit = 5,
-}: {
-  namespace: string;
-  currentTime: string;
-  gameFilters: string[];
-  offset?: number;
-  limit?: number;
-}) => {
-  const query = useMemo(
-    () => `
-    SELECT 
-    t.*,
-    CASE 
-        WHEN COUNT(p.tournament_id) = 0 THEN NULL
-        ELSE GROUP_CONCAT(
-            json_object(
-                'prizeId', p.id,
-                'position', p.payout_position,
-                'tokenType', p.token_type,
-                'tokenAddress', p.token_address,
-                'amount', CASE 
-                    WHEN p.token_type = 'erc20' THEN p."token_type.erc20.amount"
-                    WHEN p.token_type = 'erc721' THEN p."token_type.erc721.id"
-                    ELSE NULL 
-                END,
-                'isValid', CASE 
-                    WHEN p.token_type = 'erc20' AND p."token_type.erc20.amount" IS NOT NULL THEN 1
-                    WHEN p.token_type = 'erc721' AND p."token_type.erc721.id" IS NOT NULL THEN 1
-                    ELSE 0
-                END
-            ),
-            '|'
-        )
-    END as prizes,
-    COALESCE(e.count, 0) as entry_count
-    FROM '${namespace}-Tournament' as t
-    LEFT JOIN '${namespace}-Prize' p ON t.id = p.tournament_id
-    LEFT JOIN '${namespace}-EntryCount' e ON t.id = e.tournament_id
-    WHERE t.'schedule.game.end' <= '${currentTime}'
-        ${
-          gameFilters.length > 0
-            ? `AND t.'game_config.address' IN (${gameFilters
-                .map((address) => `'${address}'`)
-                .join(",")})`
-            : ""
-        }
-    GROUP BY t.id
-    ORDER BY t.'schedule.game.start' ASC
-    LIMIT ${limit}
-    OFFSET ${offset}
-  `,
-    [namespace, currentTime, gameFilters, offset, limit]
-  );
-  const { data, loading, error, refetch } = useSqlExecute(query);
-  return { data, loading, error, refetch };
-};
-
-export const useGetTournamentsInList = ({
-  namespace,
-  tournamentIds,
-  gameFilters,
-  offset = 0,
-  limit = 5,
-}: {
-  namespace: string;
-  tournamentIds: string[];
-  gameFilters: string[];
-  offset?: number;
-  limit?: number;
-}) => {
-  const query = useMemo(
-    () => `
-    SELECT 
-    t.*,
-    CASE 
-        WHEN COUNT(p.tournament_id) = 0 THEN NULL
-        ELSE GROUP_CONCAT(
-            json_object(
-                'prizeId', p.id,
-                'position', p.payout_position,
-                'tokenType', p.token_type,
-                'tokenAddress', p.token_address,
-                'amount', CASE 
-                    WHEN p.token_type = 'erc20' THEN p."token_type.erc20.amount"
-                    WHEN p.token_type = 'erc721' THEN p."token_type.erc721.id"
-                    ELSE NULL 
-                END,
-                'isValid', CASE 
-                    WHEN p.token_type = 'erc20' AND p."token_type.erc20.amount" IS NOT NULL THEN 1
-                    WHEN p.token_type = 'erc721' AND p."token_type.erc721.id" IS NOT NULL THEN 1
-                    ELSE 0
-                END
-            ),
-            '|'
-        )
-    END as prizes,
-    COALESCE(e.count, 0) as entry_count
-    FROM '${namespace}-Tournament' as t
-    LEFT JOIN '${namespace}-Prize' p ON t.id = p.tournament_id
-    LEFT JOIN '${namespace}-EntryCount' e ON t.id = e.tournament_id
-    WHERE t.id IN (${tournamentIds.map((id) => `"${id}"`).join(",")})
-        ${
-          gameFilters.length > 0
-            ? `AND t.'game_config.address' IN (${gameFilters
-                .map((address) => `'${address}'`)
-                .join(",")})`
-            : ""
-        }
-    GROUP BY t.id
-    ORDER BY t.'schedule.game.start' ASC
-    LIMIT ${limit}
-    OFFSET ${offset}
-  `,
-    [namespace, tournamentIds, gameFilters, offset, limit]
+  `
+        : null,
+    [namespace, currentTime, gameFilters, status, sortBy, offset, limit, active]
   );
   const { data, loading, error, refetch } = useSqlExecute(query);
   return { data, loading, error, refetch };
@@ -417,6 +212,7 @@ export const useGetMyTournaments = ({
   address,
   gameAddresses,
   gameFilters,
+  active = false,
   offset = 0,
   limit = 5,
 }: {
@@ -424,6 +220,7 @@ export const useGetMyTournaments = ({
   address: string | null;
   gameAddresses: string[];
   gameFilters: string[];
+  active?: boolean;
   offset?: number;
   limit?: number;
 }) => {
@@ -437,7 +234,7 @@ export const useGetMyTournaments = ({
   );
   const query = useMemo(
     () =>
-      address
+      address && active
         ? `
     WITH account_tokens AS (
       SELECT 
@@ -499,8 +296,17 @@ export const useGetMyTournaments = ({
     OFFSET ${offset}
     `
         : null,
-    [namespace, address, gameAddressesKey, gameFiltersKey, offset, limit]
+    [
+      namespace,
+      address,
+      gameAddressesKey,
+      gameFiltersKey,
+      offset,
+      limit,
+      active,
+    ]
   );
+  console.log(active);
   const { data, loading, error, refetch } = useSqlExecute(query);
   return { data, loading, error, refetch };
 };

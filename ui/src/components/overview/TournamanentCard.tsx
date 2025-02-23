@@ -13,11 +13,12 @@ import {
   countTotalNFTs,
 } from "@/lib/utils/formatting";
 import { useEkuboPrices } from "@/hooks/useEkuboPrices";
+import { TabType } from "@/components/overview/TournamentTabs";
 
 interface TournamentCardProps {
   tournament: Tournament;
   index: number;
-  status: "live" | "upcoming" | "ended";
+  status: TabType;
   prizes: any[];
   entryCount: number;
 }
