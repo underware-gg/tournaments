@@ -372,7 +372,7 @@ const Tournament = () => {
               gameAddress={tournamentModel?.game_config?.address}
               gameNamespace={gameNamespace ?? ""}
             />
-          ) : isStarted && !isEnded ? (
+          ) : isStarted ? (
             <ScoreTable
               tournamentId={tournamentModel?.id}
               entryCount={entryCountModel ? Number(entryCountModel.count) : 0}
