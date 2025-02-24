@@ -22,6 +22,7 @@ export const useEkuboPrices = ({ tokens }: EkuboPriceProps) => {
       try {
         if (!isMainnet) {
           // For non-mainnet, set all token prices to 1
+          console.log("tokens", tokens);
           const mockPrices = tokens.reduce(
             (acc, token) => ({
               ...acc,
@@ -83,7 +84,7 @@ export const useEkuboPrices = ({ tokens }: EkuboPriceProps) => {
     };
 
     fetchPrices();
-  }, [tokens.join(","), selectedChainConfig.ekuboPriceAPI]); // Using join to create a stable dependency
+  }, [tokens.join(","), selectedChainConfig.ekuboPriceAPI, isMainnet]); // Using join to create a stable dependency
 
   return {
     prices,

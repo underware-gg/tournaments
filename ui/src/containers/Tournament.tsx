@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { ARROW_LEFT, TROPHY } from "@/components/Icons";
+import { ARROW_LEFT, TROPHY, MONEY } from "@/components/Icons";
 import { useNavigate, useParams } from "react-router-dom";
 import EntrantsTable from "@/components/tournament/table/EntrantsTable";
 import TournamentTimeline from "@/components/TournamentTimeline";
@@ -19,12 +19,16 @@ import {
   Token,
   EntryCount,
   ModelsMapping,
+  PrizeClaim,
+  Leaderboard,
 } from "@/generated/models.gen";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { useDojo } from "@/context/dojo";
 import {
   calculateTotalValue,
   countTotalNFTs,
+  extractEntryFeePrizes,
+  getClaimablePrizes,
   getErc20TokenSymbols,
   groupPrizesByPositions,
   groupPrizesByTokens,
@@ -40,6 +44,8 @@ import MyEntries from "@/components/tournament/MyEntries";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
 import EntryRequirements from "@/components/tournament/EntryRequirements";
 import PrizesContainer from "@/components/tournament/prizes/PrizesContainer";
+import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
+import { ClaimPrizesDialog } from "@/components/dialogs/ClaimPrizesDialog";
 
 const Tournament = () => {
   const { id } = useParams<{ id: string }>();
@@ -48,6 +54,8 @@ const Tournament = () => {
   const { nameSpace, selectedChainConfig } = useDojo();
   const state = useDojoStore.getState();
   const [enterDialogOpen, setEnterDialogOpen] = useState(false);
+  const [claimDialogOpen, setClaimDialogOpen] = useState(false);
+  const { submitScores } = useSystemCalls();
 
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
 
@@ -57,6 +65,23 @@ const Tournament = () => {
     () => getEntityIdFromKeys([BigInt(id!)]),
     [id]
   );
+
+  const tournamentModel = state.getEntity(tournamentEntityId)?.models[nameSpace]
+    ?.Tournament as TournamentModel;
+
+  const entryCountModel = useModel(
+    tournamentEntityId,
+    ModelsMapping.EntryCount
+  ) as unknown as EntryCount;
+
+  const leaderboardModel = useModel(
+    tournamentEntityId,
+    ModelsMapping.Leaderboard
+  ) as unknown as Leaderboard;
+
+  const leaderboardSize = Number(tournamentModel?.game_config.prize_spots);
+
+  const totalSubmissions = leaderboardModel?.token_ids.length ?? 0;
 
   const tournamentPrizes = state.getEntitiesByModel(nameSpace, "Prize");
 
@@ -68,19 +93,39 @@ const Tournament = () => {
     .map((detail) => detail.models[nameSpace].Prize) ??
     []) as unknown as Prize[];
 
-  const tournamentModel = state.getEntity(tournamentEntityId)?.models[nameSpace]
-    ?.Tournament as TournamentModel;
+  const entryFeePrizes = extractEntryFeePrizes(
+    tournamentModel?.id,
+    tournamentModel?.entry_fee,
+    entryCountModel?.count ?? 0
+  );
+
+  const allPrizes = [...entryFeePrizes, ...prizes];
+
+  const tournamentClaimedPrizes = state.getEntitiesByModel(
+    nameSpace,
+    "PrizeClaim"
+  );
+
+  const claimedPrizes: PrizeClaim[] = (tournamentClaimedPrizes
+    ?.filter(
+      (detail) =>
+        detail.models?.[nameSpace]?.PrizeClaim?.tournament_id === Number(id)
+    )
+    .map((detail) => detail.models[nameSpace].PrizeClaim) ??
+    []) as unknown as PrizeClaim[];
+
+  const { claimablePrizes, claimablePrizeTypes } = getClaimablePrizes(
+    allPrizes,
+    claimedPrizes,
+    totalSubmissions
+  );
+
+  const allClaimed = claimablePrizes.length === 0;
 
   const tokenModels = state.getEntitiesByModel(nameSpace, "Token");
   const tokens = tokenModels.map(
     (model) => model.models[nameSpace].Token
   ) as Token[];
-
-  // entry count model
-  const entryCountModel = useModel(
-    tournamentEntityId,
-    ModelsMapping.EntryCount
-  ) as unknown as EntryCount;
 
   const { gameNamespace } = useGameNamespace(
     tournamentModel?.game_config?.address
@@ -120,12 +165,7 @@ const Tournament = () => {
     return () => window.removeEventListener("resize", checkOverflow);
   }, [tournamentModel?.metadata.description]);
 
-  const groupedByTokensPrizes = groupPrizesByTokens(
-    prizes,
-    tokens,
-    tournamentModel?.entry_fee,
-    entryCountModel?.count ?? 0
-  );
+  const groupedByTokensPrizes = groupPrizesByTokens(allPrizes, tokens);
 
   const erc20TokenSymbols = getErc20TokenSymbols(groupedByTokensPrizes);
 
@@ -138,12 +178,7 @@ const Tournament = () => {
     ? "open"
     : "fixed";
 
-  const groupedPrizes = groupPrizesByPositions(
-    prizes,
-    tokens,
-    tournamentModel?.entry_fee,
-    entryCountModel?.count ?? 0
-  );
+  const groupedPrizes = groupPrizesByPositions(allPrizes, tokens);
 
   const lowestPrizePosition =
     Object.keys(groupedPrizes).length > 0
@@ -190,6 +225,8 @@ const Tournament = () => {
       BigInt(tournamentModel?.schedule.game.end ?? 0n) +
         BigInt(tournamentModel?.schedule.submission_duration ?? 0n)
     ) < Number(BigInt(Date.now()) / 1000n);
+
+  // const isSubmitted = false;
 
   const startsIn =
     Number(tournamentModel?.schedule.game.start) -
@@ -238,8 +275,8 @@ const Tournament = () => {
             <PLUS /> Add Prizes
           </Button> */}
           <EntryRequirements tournamentModel={tournamentModel} />
-          {((registrationType === "fixed" && !isStarted) ||
-            (registrationType === "open" && !isEnded)) && (
+          {(registrationType === "fixed" && !isStarted) ||
+          (registrationType === "open" && !isEnded) ? (
             <Button
               className="uppercase"
               onClick={() => setEnterDialogOpen(true)}
@@ -250,6 +287,39 @@ const Tournament = () => {
                 {hasEntryFee ? `$${entryFee}` : "Free"}
               </span>
             </Button>
+          ) : isEnded && !isSubmitted ? (
+            <Button
+              className="uppercase"
+              onClick={() =>
+                submitScores(
+                  tournamentModel?.id,
+                  feltToString(tournamentModel?.metadata.name),
+                  [1, 2, 3]
+                )
+              }
+            >
+              <TROPHY />
+              {` Submit Scores | `}
+              <span className="font-bold">5</span>
+            </Button>
+          ) : isSubmitted ? (
+            <Button
+              className="uppercase"
+              onClick={() => setClaimDialogOpen(true)}
+              disabled={allClaimed}
+            >
+              <MONEY />
+              {allClaimed ? (
+                "Prizes Claimed"
+              ) : (
+                <>
+                  Send Prizes |
+                  <span className="font-bold">{claimablePrizes.length}</span>
+                </>
+              )}
+            </Button>
+          ) : (
+            <></>
           )}
           <EnterTournamentDialog
             open={enterDialogOpen}
@@ -260,6 +330,14 @@ const Tournament = () => {
             entryCountModel={entryCountModel}
             gameCount={gameCount}
             tokens={tokens}
+          />
+          <ClaimPrizesDialog
+            open={claimDialogOpen}
+            onOpenChange={setClaimDialogOpen}
+            tournamentModel={tournamentModel}
+            claimablePrizes={claimablePrizes}
+            claimablePrizeTypes={claimablePrizeTypes}
+            prices={prices}
           />
         </div>
       </div>
@@ -272,9 +350,7 @@ const Tournament = () => {
             <div className="flex flex-row items-center gap-4 text-retro-green-dark">
               <div className="flex flex-row gap-2">
                 <span>Winners:</span>
-                <span className="text-retro-green">
-                  Top {Number(tournamentModel.game_config.prize_spots)}
-                </span>
+                <span className="text-retro-green">Top {leaderboardSize}</span>
               </div>
               <div className="flex flex-row gap-2">
                 <span>Registration:</span>
@@ -378,6 +454,7 @@ const Tournament = () => {
               entryCount={entryCountModel ? Number(entryCountModel.count) : 0}
               gameAddress={tournamentModel?.game_config?.address}
               gameNamespace={gameNamespace ?? ""}
+              isEnded={isEnded}
             />
           ) : (
             <></>

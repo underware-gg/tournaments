@@ -3,7 +3,7 @@ import { feltToString, formatTime } from "@/lib/utils";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
 import { USER } from "@/components/Icons";
 import { useNavigate } from "react-router-dom";
-import { Tournament, Token } from "@/generated/models.gen";
+import { Tournament, Token, Prize } from "@/generated/models.gen";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { useDojo } from "@/context/dojo";
 import {
@@ -11,6 +11,7 @@ import {
   getErc20TokenSymbols,
   calculateTotalValue,
   countTotalNFTs,
+  extractEntryFeePrizes,
 } from "@/lib/utils/formatting";
 import { useEkuboPrices } from "@/hooks/useEkuboPrices";
 import { TabType } from "@/components/overview/TournamentTabs";
@@ -20,7 +21,7 @@ interface TournamentCardProps {
   tournament: Tournament;
   index: number;
   status: TabType;
-  prizes: any[];
+  prizes: Prize[] | null;
   entryCount: number;
 }
 
@@ -46,12 +47,15 @@ export const TournamentCard = ({
     (t) => t.address === entryFeeToken
   )?.symbol;
 
-  const groupedPrizes = groupPrizesByTokens(
-    prizes ?? [],
-    tokens,
+  const entryFeePrizes = extractEntryFeePrizes(
+    tournament?.id,
     tournament?.entry_fee,
     entryCount
   );
+
+  const allPrizes = [...entryFeePrizes, ...(prizes ?? [])];
+
+  const groupedPrizes = groupPrizesByTokens(allPrizes, tokens);
 
   const erc20TokenSymbols = getErc20TokenSymbols(groupedPrizes);
   const { prices, isLoading: pricesLoading } = useEkuboPrices({

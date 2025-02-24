@@ -8,6 +8,7 @@ import {
   Token,
   EntryFee,
   QualificationProof,
+  PrizeTypeEnum,
 } from "@/generated/models.gen";
 import {
   Account,
@@ -277,8 +278,6 @@ export const useSystemCalls = () => {
         calls.push(addPrizesCall);
       }
 
-      console.log(calls);
-
       const tx = isMainnet
         ? await account?.execute(calls)
         : account?.execute(calls);
@@ -300,27 +299,26 @@ export const useSystemCalls = () => {
     }
   };
 
-  const distributePrizes = async (
+  const claimPrizes = async (
     tournamentId: BigNumberish,
     tournamentName: string,
-    prizeKeys: Array<BigNumberish>
+    prizes: Array<PrizeTypeEnum>
   ) => {
     const transactionId = uuidv4();
 
     try {
-      const resolvedClient = await client;
-      const tournamentContract = selectTournament(resolvedClient, isMainnet);
+      let calls = [];
+      for (const prize of prizes) {
+        calls.push({
+          contractAddress: tournamentAddress,
+          entrypoint: "claim_prize",
+          calldata: CallData.compile([tournamentId, prize]),
+        });
+      }
+
       const tx = isMainnet
-        ? await tournamentContract.distributePrizes(
-            account!,
-            tournamentId,
-            prizeKeys
-          )
-        : tournamentContract.distributePrizes(
-            account!,
-            tournamentId,
-            prizeKeys
-          );
+        ? await account?.execute(calls)
+        : account?.execute(calls);
 
       if (tx) {
         toast({
@@ -453,7 +451,7 @@ export const useSystemCalls = () => {
     submitScores,
     approveAndAddPrize,
     createTournamentAndApproveAndAddPrizes,
-    distributePrizes,
+    claimPrizes,
     endGame,
     getBalanceGeneral,
     approveERC20Multiple,

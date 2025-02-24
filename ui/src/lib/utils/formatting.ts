@@ -7,7 +7,13 @@ import {
   CairoCustomEnum,
   BigNumberish,
 } from "starknet";
-import { Prize, Tournament, Token, EntryFee } from "@/generated/models.gen";
+import {
+  Prize,
+  Tournament,
+  Token,
+  EntryFee,
+  PrizeClaim,
+} from "@/generated/models.gen";
 import { PositionPrizes, TokenPrizes } from "@/lib/types";
 import { TokenPrices } from "@/hooks/useEkuboPrices";
 
@@ -151,47 +157,188 @@ export const processPrizes = (
   }));
 };
 
-export const groupPrizesByPositions = (
-  prizes: Prize[],
-  tokens: Token[],
+export const getSubmittableScores = (leaderboardSize: number) => {
+  return Array.from({ length: leaderboardSize }, (_, index) => index + 1);
+};
+
+export const extractEntryFeePrizes = (
+  tournamentId: BigNumberish,
   entryFee: CairoOption<EntryFee>,
   entryCount: BigNumberish
-) => {
-  const entryFeePrizes = entryFee?.isSome()
-    ? (() => {
-        const totalFeeAmount =
-          BigInt(entryFee.Some?.amount!) * BigInt(entryCount);
+): Prize[] => {
+  if (!entryFee?.isSome()) {
+    return [];
+  }
 
-        if (totalFeeAmount === 0n) return {};
+  const totalFeeAmount = BigInt(entryFee.Some?.amount!) * BigInt(entryCount);
 
-        return entryFee.Some?.distribution.reduce(
-          (acc, distribution, index) => {
-            if (distribution === 0) return acc;
+  if (totalFeeAmount === 0n) {
+    return [];
+  }
 
-            const position = (index + 1).toString();
-            const tokenAddress = entryFee.Some?.token_address!;
-            const tokenModel = tokens.find((t) => t.address === tokenAddress);
+  const gameCreatorShare = entryFee.Some?.game_creator_share?.isSome()
+    ? [
+        {
+          id: 0,
+          tournament_id: tournamentId,
+          payout_position: 0,
+          token_address: entryFee.Some?.token_address!,
+          token_type: new CairoCustomEnum({
+            erc20: {
+              amount: addAddressPadding(
+                bigintToHex(
+                  (totalFeeAmount *
+                    BigInt(entryFee?.Some.game_creator_share?.Some!)) /
+                    100n
+                )
+              ),
+            },
+            erc721: undefined,
+          }),
+          type: "entry_fee_game_creator",
+        } as Prize,
+      ]
+    : [];
 
-            if (!tokenModel?.symbol) return acc;
+  const tournamentCreatorShare =
+    entryFee.Some?.tournament_creator_share?.isSome()
+      ? [
+          {
+            id: 0,
+            tournament_id: tournamentId,
+            payout_position: 0,
+            token_address: entryFee.Some?.token_address!,
+            token_type: new CairoCustomEnum({
+              erc20: {
+                amount: addAddressPadding(
+                  bigintToHex(
+                    (totalFeeAmount *
+                      BigInt(entryFee?.Some.tournament_creator_share?.Some!)) /
+                      100n
+                  )
+                ),
+              },
+              erc721: undefined,
+            }),
+            type: "entry_fee_tournament_creator",
+          } as Prize,
+        ]
+      : [];
 
-            if (!acc[position]) acc[position] = {};
+  const distrbutionPrizes =
+    entryFee.Some?.distribution?.map((distribution, index) => {
+      const amount = (totalFeeAmount * BigInt(distribution)) / 100n;
 
-            acc[position][tokenModel.symbol] = {
-              type: "erc20",
-              payout_position: position,
-              address: tokenAddress,
-              value: (totalFeeAmount * BigInt(distribution)) / 100n,
-            };
-
-            return acc;
+      return {
+        id: 0,
+        tournament_id: tournamentId,
+        payout_position: index + 1,
+        token_address: entryFee.Some?.token_address!,
+        token_type: new CairoCustomEnum({
+          erc20: {
+            amount: addAddressPadding(bigintToHex(amount)),
           },
-          {} as PositionPrizes
-        );
-      })()
-    : {};
+          erc721: undefined,
+        }),
+        type: "entry_fee",
+      } as Prize;
+    }) || [];
 
-  // Calculate regular prizes
-  const regularPrizes = [...prizes]
+  return [...gameCreatorShare, ...tournamentCreatorShare, ...distrbutionPrizes];
+};
+
+export const getClaimablePrizes = (
+  prizes: any[],
+  claimedPrizes: PrizeClaim[],
+  totalSubmissions: number
+) => {
+  const creatorPrizeTypes = new Set([
+    "entry_fee_game_creator",
+    "entry_fee_tournament_creator",
+  ]);
+
+  const creatorPrizes = prizes.filter((prize) =>
+    creatorPrizeTypes.has(prize.type)
+  );
+  const prizesFromSubmissions = prizes.filter(
+    (prize) =>
+      !creatorPrizeTypes.has(prize.type) &&
+      prize.payout_position <= totalSubmissions
+  );
+  const claimedEntryFeePositions = claimedPrizes.map((prize) =>
+    prize.prize_type?.activeVariant() === "EntryFees"
+      ? prize.prize_type.variant.EntryFees.Position
+      : null
+  );
+  const claimedSponsoredPrizeKeys = claimedPrizes.map((prize) =>
+    prize.prize_type?.activeVariant() === "Sponsored"
+      ? prize.prize_type.variant.Sponsored
+      : null
+  );
+  const allPrizes = [...creatorPrizes, ...prizesFromSubmissions];
+  const unclaimedPrizes = allPrizes.filter((prize) => {
+    if (prize.type === "entry_fee_game_creator") {
+      return !claimedPrizes.some(
+        (claimedPrize) =>
+          claimedPrize.prize_type?.activeVariant() === "EntryFees" &&
+          claimedPrize.prize_type?.variant.EntryFees.GameCreator
+      );
+    } else if (prize.type === "entry_fee_tournament_creator") {
+      return !claimedPrizes.some(
+        (claimedPrize) =>
+          claimedPrize.prize_type?.activeVariant() === "EntryFees" &&
+          claimedPrize.prize_type?.variant.EntryFees.TournamentCreator
+      );
+    } else if (prize.type === "entry_fee") {
+      return !claimedEntryFeePositions.includes(prize.payout_position);
+    } else {
+      return !claimedSponsoredPrizeKeys.includes(prize.id);
+    }
+  });
+  const unclaimedPrizeTypes = unclaimedPrizes.map((prize) => {
+    if (prize.type === "entry_fee_game_creator") {
+      return new CairoCustomEnum({
+        EntryFees: new CairoCustomEnum({
+          TournamentCreator: undefined,
+          GameCreator: {},
+          Position: undefined,
+        }),
+        Sponsored: undefined,
+      });
+    } else if (prize.type === "entry_fee_tournament_creator") {
+      return new CairoCustomEnum({
+        EntryFees: new CairoCustomEnum({
+          TournamentCreator: {},
+          GameCreator: undefined,
+          Position: undefined,
+        }),
+        Sponsored: undefined,
+      });
+    } else if (prize.type === "entry_fee") {
+      return new CairoCustomEnum({
+        EntryFees: new CairoCustomEnum({
+          TournamentCreator: undefined,
+          GameCreator: undefined,
+          Position: prize.payout_position,
+        }),
+        Sponsored: undefined,
+      });
+    } else {
+      return new CairoCustomEnum({
+        EntryFees: undefined,
+        Sponsored: prize.id,
+      });
+    }
+  });
+  return {
+    claimablePrizes: unclaimedPrizes,
+    claimablePrizeTypes: unclaimedPrizeTypes,
+  };
+};
+
+export const groupPrizesByPositions = (prizes: Prize[], tokens: Token[]) => {
+  return prizes
+    .filter((prize) => prize.payout_position !== 0)
     .sort((a, b) => Number(a.payout_position) - Number(b.payout_position))
     .reduce((acc, prize) => {
       const position = prize.payout_position.toString();
@@ -210,16 +357,16 @@ export const groupPrizesByPositions = (
 
       if (!acc[position][tokenSymbol]) {
         acc[position][tokenSymbol] = {
-          type: prize.token_type.variant.erc721 ? "erc721" : "erc20",
+          type: prize.token_type.activeVariant() as "erc20" | "erc721",
           payout_position: position,
           address: prize.token_address,
-          value: prize.token_type.variant.erc721 ? [] : 0n,
+          value: prize.token_type.activeVariant() === "erc721" ? [] : 0n,
         };
       }
 
       if (prize.token_type.activeVariant() === "erc721") {
         (acc[position][tokenSymbol].value as bigint[]).push(
-          BigInt(prize.token_type.variant.erc721.id)
+          BigInt(prize.token_type.variant.erc721.id!)
         );
       } else if (prize.token_type.activeVariant() === "erc20") {
         const currentAmount = acc[position][tokenSymbol].value as bigint;
@@ -229,77 +376,17 @@ export const groupPrizesByPositions = (
 
       return acc;
     }, {} as PositionPrizes);
-
-  // Merge regular prizes with entry fee prizes
-  return Object.entries(entryFeePrizes || {}).reduce(
-    (acc, [position, tokens]) => {
-      if (!acc[position]) {
-        acc[position] = {};
-      }
-
-      Object.entries(tokens).forEach(([symbol, prize]) => {
-        if (!acc[position][symbol]) {
-          acc[position][symbol] = prize;
-        } else if (acc[position][symbol].type === "erc20") {
-          // Add the entry fee amount to existing prize amount
-          acc[position][symbol].value =
-            (acc[position][symbol].value as bigint) + (prize.value as bigint);
-        }
-      });
-
-      return acc;
-    },
-    regularPrizes
-  );
 };
 
-export const groupPrizesByTokens = (
-  prizes: Prize[],
-  tokens: Token[],
-  entryFee: CairoOption<EntryFee>,
-  entryCount: BigNumberish
-) => {
-  const entryFeePrizes = entryFee?.isSome()
-    ? (() => {
-        const totalFeeAmount =
-          BigInt(entryFee.Some?.amount!) * BigInt(entryCount);
-
-        if (totalFeeAmount === 0n) return {};
-
-        const tokenModel = tokens.find(
-          (t) => t.address === entryFee.Some?.token_address
-        );
-        if (!tokenModel?.symbol) return {};
-
-        return entryFee.Some?.distribution.reduce(
-          (acc, distribution, _index) => {
-            if (distribution === 0) return acc;
-
-            const amount = (totalFeeAmount * BigInt(distribution)) / 100n;
-
-            if (!acc[tokenModel.symbol]) {
-              acc[tokenModel.symbol] = {
-                type: "erc20",
-                address: entryFee.Some?.token_address!,
-                value: amount,
-              };
-            } else {
-              // Add to existing entry fee amount
-              acc[tokenModel.symbol].value =
-                (acc[tokenModel.symbol].value as bigint) + amount;
-            }
-
-            return acc;
-          },
-          {} as TokenPrizes
-        );
-      })()
-    : {};
-
-  // Calculate regular prizes
-  const regularPrizes = prizes.reduce((acc, prize) => {
+export const groupPrizesByTokens = (prizes: Prize[], tokens: Token[]) => {
+  return prizes.reduce((acc, prize) => {
     const tokenModel = tokens.find((t) => t.address === prize.token_address);
-    const tokenSymbol = tokenModel?.symbol!;
+    const tokenSymbol = tokenModel?.symbol;
+
+    if (!tokenSymbol) {
+      console.warn(`No token model found for address ${prize.token_address}`);
+      return acc;
+    }
 
     if (!acc[tokenSymbol]) {
       acc[tokenSymbol] = {
@@ -323,22 +410,6 @@ export const groupPrizesByTokens = (
 
     return acc;
   }, {} as TokenPrizes);
-
-  // Merge regular prizes with entry fee prizes
-  return Object.entries(entryFeePrizes || {}).reduce(
-    (acc, [symbol, entryPrize]) => {
-      if (!acc[symbol]) {
-        acc[symbol] = entryPrize;
-      } else if (acc[symbol].type === "erc20") {
-        acc[symbol] = {
-          ...acc[symbol],
-          value: (acc[symbol].value as bigint) + (entryPrize.value as bigint),
-        };
-      }
-      return acc;
-    },
-    regularPrizes || {}
-  );
 };
 
 export const getErc20TokenSymbols = (

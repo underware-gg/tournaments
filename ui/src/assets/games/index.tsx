@@ -49,12 +49,12 @@ export const getGames = (): Record<string, Game> => {
           return <img src={darkShuffle} {...props} />;
         },
       },
-      "0x075bd3616652ebec162c920492e4d042155fd0d199f1ed44edcb2eec120feb3d": {
-        name: "Dope Wars",
-        Icon: function DopeWarsIcon(
+      "0x072e1affe9a2d0a1852238073bc2f81e059ad7ab500e788046ac2f0b89b0c94a": {
+        name: "Loot Survivor",
+        Icon: function LootSurvivorIcon(
           props: ImgHTMLAttributes<HTMLImageElement>
         ) {
-          return <img src={dopeWars} {...props} />;
+          return <img src={lootSurvivor} {...props} />;
         },
       },
       "0x075bd3616302ebec162c920492e4d042155fd0d199f1ed44edcb2eec120feb3d": {

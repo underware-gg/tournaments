@@ -24,6 +24,11 @@ import {
 } from "@/components/ui/hover-card";
 import SettingsSection from "@/components/createTournament/settings/SettingsSection";
 import useUIStore from "@/hooks/useUIStore";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const Details = ({ form }: StepProps) => {
   const { gameData } = useUIStore();
@@ -79,14 +84,16 @@ const Details = ({ form }: StepProps) => {
                         }
                       >
                         <TokenGameIcon size="md" game={key} />
-                        <div className="relative group">
-                          <p className="font-astronaut text-center truncate w-full">
+                        <Tooltip delayDuration={50}>
+                          <TooltipTrigger asChild>
+                            <p className="font-astronaut text-center truncate w-full">
+                              {game.name}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent className="border-retro-green bg-black text-neutral-500">
                             {game.name}
-                          </p>
-                          <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 bg-black text-neutral-500 border border-retro-green-dark px-2 py-1 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                            {game.name}
-                          </span>
-                        </div>
+                          </TooltipContent>
+                        </Tooltip>
                       </Card>
                     ))}
                   </div>

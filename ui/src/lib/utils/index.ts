@@ -85,9 +85,9 @@ export const formatTime = (seconds: number): string => {
   } else if (hours > 0) {
     return `${hours} Hour${hours > 1 ? "s" : ""}`;
   } else if (minutes > 0) {
-    return `${minutes} Minute${minutes > 1 ? "s" : ""}`;
+    return `${minutes} Min${minutes > 1 ? "s" : ""}`;
   } else {
-    return `${seconds} Second${seconds > 1 ? "s" : ""}`;
+    return `${seconds} Sec${seconds > 1 ? "s" : ""}`;
   }
 };
 

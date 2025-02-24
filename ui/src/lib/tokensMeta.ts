@@ -6,6 +6,14 @@ export function getTokenLogoUrl(l2TokenAddress: string): string | undefined {
   return token?.logo_url;
 }
 
+export const getTokenSymbol = (l2TokenAddress: string): string | undefined => {
+  const token = tokens.find(
+    (token) =>
+      token.l2_token_address.toLowerCase() === l2TokenAddress.toLowerCase()
+  );
+  return token?.symbol;
+};
+
 export const tokens = [
   {
     name: "Wrapped BTC",

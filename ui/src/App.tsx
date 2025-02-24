@@ -17,7 +17,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { useDojo } from "@/context/dojo";
 import useUIStore from "@/hooks/useUIStore";
 import { useEffect } from "react";
-
+import { TooltipProvider } from "@/components/ui/tooltip";
 function App() {
   const { nameSpace } = useDojo();
   const { setGameData } = useUIStore();
@@ -49,19 +49,21 @@ function App() {
   }, [gamesMetadata]);
 
   return (
-    <div className="min-h-screen flex-col w-full">
-      <Header />
-      <Routes>
-        <Route path="/" element={<Overview />} />
-        <Route path="/tournament">
-          <Route path=":id" element={<Tournament />} />
-        </Route>
-        <Route path="/create-tournament" element={<CreateTournament />} />
-        <Route path="/register-token" element={<RegisterToken />} />
-        <Route path="/play" element={<Play />} />
-      </Routes>
-      <Toaster />
-    </div>
+    <TooltipProvider>
+      <div className="min-h-screen flex-col w-full">
+        <Header />
+        <Routes>
+          <Route path="/" element={<Overview />} />
+          <Route path="/tournament">
+            <Route path=":id" element={<Tournament />} />
+          </Route>
+          <Route path="/create-tournament" element={<CreateTournament />} />
+          <Route path="/register-token" element={<RegisterToken />} />
+          <Route path="/play" element={<Play />} />
+        </Routes>
+        <Toaster />
+      </div>
+    </TooltipProvider>
   );
 }
 

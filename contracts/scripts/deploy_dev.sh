@@ -29,10 +29,10 @@ get_contract_address () {
   echo $RESULT
 }
 
-export TOURNAMENTS_ADDRESS=$(get_contract_address "tournaments-tournament_mock")
-export GAME_ADDRESS=$(get_contract_address "tournaments-game_mock")
-export TEST_ERC20=$(get_contract_address "tournaments-erc20_mock")
-export TEST_ERC721=$(get_contract_address "tournaments-erc721_mock")
+export TOURNAMENTS_ADDRESS=$(get_contract_address "budokan-tournament_mock")
+export GAME_ADDRESS=$(get_contract_address "budokan-game_mock")
+export TEST_ERC20=$(get_contract_address "budokan-erc20_mock")
+export TEST_ERC721=$(get_contract_address "budokan-erc721_mock")
 
 #-----------------
 # initialize tournament

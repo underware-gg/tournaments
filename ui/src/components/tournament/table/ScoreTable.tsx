@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import Pagination from "@/components/table/Pagination";
-import { USER } from "@/components/Icons";
+import { USER, CHECK, X } from "@/components/Icons";
 import { useState, useEffect, useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
 import { BigNumberish } from "starknet";
@@ -9,12 +9,21 @@ import { displayAddress, feltToString, indexAddress } from "@/lib/utils";
 import { useDojo } from "@/context/dojo";
 import { useGetUsernames } from "@/hooks/useController";
 import RowSkeleton from "./RowSkeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { HoverCardContent } from "@/components/ui/hover-card";
+import { HoverCard } from "@/components/ui/hover-card";
+import { HoverCardTrigger } from "@/components/ui/hover-card";
 
 interface ScoreTableProps {
   tournamentId: BigNumberish;
   entryCount: number;
   gameAddress: BigNumberish;
   gameNamespace: string;
+  isEnded: boolean;
 }
 
 const ScoreTable = ({
@@ -22,6 +31,7 @@ const ScoreTable = ({
   entryCount,
   gameAddress,
   gameNamespace,
+  isEnded,
 }: ScoreTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showParticipants, setShowParticipants] = useState(false);
@@ -50,8 +60,6 @@ const ScoreTable = ({
   }, [entryCount]);
 
   const { usernames } = useGetUsernames(ownerAddresses ?? []);
-
-  console.log(loading);
 
   return (
     <Card
@@ -97,48 +105,106 @@ const ScoreTable = ({
         >
           <div className="w-full h-0.5 bg-retro-green/25 mt-2" />
           {!loading ? (
-            <div className="flex flex-col py-2">
-              {leaderboard?.map((registration, index) => (
-                <div key={index} className="flex flex-row items-center gap-2">
-                  <span className="w-4 flex-none">
-                    {index + 1 + (currentPage - 1) * 5}.
-                  </span>
-                  <span className="w-6 flex-none">
-                    <USER />
-                  </span>
-                  <span className="flex-none">
-                    {feltToString(registration?.player_name)}
-                  </span>
-                  -
-                  <div className="relative flex-none">
-                    <span className="text-retro-green-dark">
-                      {usernames?.get(ownerAddresses?.[index] ?? "") ||
-                        displayAddress(ownerAddresses?.[index] ?? "")}
-                    </span>
-                    <div className="absolute -top-1 -right-8 flex items-center justify-center rounded-lg bg-retro-green-dark text-black h-4 w-6 text-[10px]">
-                      <span>x</span>
-                      <span>{registration?.entry_number?.toString()}</span>
-                    </div>
-                  </div>
-                  <p
-                    className="flex-1 h-[2px] bg-repeat-x"
-                    style={{
-                      backgroundImage:
-                        "radial-gradient(circle, currentColor 1px, transparent 1px)",
-                      backgroundSize: "8px 8px",
-                      backgroundPosition: "0 center",
-                    }}
-                  ></p>
-                  <span className="flex-none text-retro-green">
-                    {registration.score ?? 0}
-                  </span>
+            <div className="flex flex-row py-2">
+              {[0, 1].map((colIndex) => (
+                <div key={colIndex} className="flex flex-col w-1/2">
+                  {leaderboard
+                    ?.slice(colIndex * 5, colIndex * 5 + 5)
+                    .map((registration, index) => (
+                      <div
+                        key={index}
+                        className="flex flex-row items-center gap-2 pr-2"
+                      >
+                        <span className="w-4 flex-none font-astronaut">
+                          {index + 1 + colIndex * 5 + (currentPage - 1) * 10}.
+                        </span>
+                        <span className="w-6 flex-none">
+                          <USER />
+                        </span>
+                        <HoverCard openDelay={50} closeDelay={0}>
+                          <HoverCardTrigger asChild>
+                            <span className="flex-none hover:cursor-pointer max-w-20">
+                              {feltToString(registration?.player_name)}
+                            </span>
+                          </HoverCardTrigger>
+                          <HoverCardContent
+                            className="w-48 p-4 text-sm z-50"
+                            align="start"
+                            side="top"
+                            sideOffset={5}
+                          >
+                            <div className="flex flex-col gap-2">
+                              <div className="flex flex-row gap-2">
+                                <span className="text-retro-green-dark">
+                                  Player Name:
+                                </span>
+                                <span>
+                                  {feltToString(registration?.player_name)}
+                                </span>
+                              </div>
+                              <div className="flex flex-row gap-2">
+                                <span className="text-retro-green-dark">
+                                  Owner:
+                                </span>
+                                <span>
+                                  {usernames?.get(
+                                    ownerAddresses?.[index] ?? ""
+                                  ) ||
+                                    displayAddress(
+                                      ownerAddresses?.[index] ?? ""
+                                    )}
+                                </span>
+                              </div>
+                            </div>
+                          </HoverCardContent>
+                        </HoverCard>
+                        <p
+                          className="flex-1 h-[2px] bg-repeat-x"
+                          style={{
+                            backgroundImage:
+                              "radial-gradient(circle, currentColor 1px, transparent 1px)",
+                            backgroundSize: "8px 8px",
+                            backgroundPosition: "0 center",
+                          }}
+                        ></p>
+                        <div className="flex flex-row items-center gap-2">
+                          <span className="flex-none text-retro-green font-astronaut">
+                            {registration.score ?? 0}
+                          </span>
+                          {isEnded && (
+                            <Tooltip delayDuration={50}>
+                              <TooltipTrigger asChild>
+                                <div className="w-4 text-retro-green hover:cursor-pointer">
+                                  {registration.has_submitted ? (
+                                    <CHECK />
+                                  ) : (
+                                    <X />
+                                  )}
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent className="border-retro-green-dark bg-black text-neutral-500">
+                                {registration.has_submitted
+                                  ? "Score has been submitted"
+                                  : "Score has not been submitted"}
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                 </div>
               ))}
             </div>
           ) : (
-            <div className="flex flex-col gap-1 py-2">
-              {[...Array(entryCount - offset)].map((_, index) => (
-                <RowSkeleton key={index} />
+            <div className="flex flex-row">
+              {[0, 1].map((colIndex) => (
+                <div key={colIndex} className="flex flex-col gap-1 py-2 w-1/2">
+                  {[...Array(Math.min(entryCount - offset, 5))].map(
+                    (_, index) => (
+                      <RowSkeleton key={index} />
+                    )
+                  )}
+                </div>
               ))}
             </div>
           )}

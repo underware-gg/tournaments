@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/hover-card";
 import { TokenPrices } from "@/hooks/useEkuboPrices";
 import { TokenPrizes } from "@/lib/types";
+import { getTokenLogoUrl } from "@/lib/tokensMeta";
 
 interface PrizeProps {
   position: number;
@@ -73,13 +74,19 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
               const USDValue = calculatePrizeValue(prize, symbol, prices);
               return (
                 <div key={symbol} className="flex justify-between items-center">
-                  <span className="text-retro-green-dark">
-                    {prize.type === "erc20"
-                      ? `${Number(prize.value) / 10 ** 18} ${symbol}`
-                      : `${(prize.value as bigint[]).length} NFT${
-                          (prize.value as bigint[]).length === 1 ? "" : "s"
-                        }`}
-                  </span>
+                  {prize.type === "erc20" ? (
+                    <div className="flex flex-row gap-1 items-center">
+                      <span>{`${Number(prize.value) / 10 ** 18}`}</span>
+                      <img
+                        src={getTokenLogoUrl(prize.address)}
+                        className="w-6 h-6"
+                      />
+                    </div>
+                  ) : (
+                    `${(prize.value as bigint[]).length} NFT${
+                      (prize.value as bigint[]).length === 1 ? "" : "s"
+                    }`
+                  )}
                   {prize.type === "erc20" && (
                     <span className="text-neutral-500">
                       ~${USDValue.toFixed(2)}

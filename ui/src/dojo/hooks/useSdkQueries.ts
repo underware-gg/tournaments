@@ -72,6 +72,8 @@ export const useGetTournamentQuery = (tournamentId: BigNumberish) => {
                 ModelsMapping.Tournament,
                 ModelsMapping.EntryCount,
                 ModelsMapping.Prize,
+                ModelsMapping.PrizeClaim,
+                ModelsMapping.Leaderboard,
               ],
               []
             ),
@@ -93,12 +95,26 @@ export const useGetTournamentQuery = (tournamentId: BigNumberish) => {
               "Eq",
               addAddressPadding(tournamentId)
             ),
+            MemberClause(
+              ModelsMapping.PrizeClaim,
+              "tournament_id",
+              "Eq",
+              addAddressPadding(tournamentId)
+            ),
+            MemberClause(
+              ModelsMapping.Leaderboard,
+              "tournament_id",
+              "Eq",
+              addAddressPadding(tournamentId)
+            ),
           ]).build()
         )
         .withEntityModels([
           ModelsMapping.Tournament,
           ModelsMapping.EntryCount,
           ModelsMapping.Prize,
+          ModelsMapping.PrizeClaim,
+          ModelsMapping.Leaderboard,
         ])
         .includeHashedKeys(),
     [tournamentId]
