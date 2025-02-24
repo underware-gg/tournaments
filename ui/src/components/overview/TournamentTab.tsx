@@ -28,7 +28,7 @@ export const TournamentTab = ({
         {label}
       </Button>
       {count !== undefined && count > 0 && (
-        <span className="absolute -top-1 -right-1 flex items-center justify-center text-retro-green-darker h-6 w-6 text-xs">
+        <span className="absolute -top-2 -right-1 flex items-center justify-center text-retro-green-darker h-6 w-6 text-xs">
           <COUNTER />
           <span className="absolute inset-0 flex items-center justify-center text-retro-green text-center">
             {count}

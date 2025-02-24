@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 import { TokenPrices } from "@/hooks/useEkuboPrices";
 import { PositionPrizes } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface PrizesContainerProps {
   prizesExist: boolean;
@@ -13,6 +14,7 @@ interface PrizesContainerProps {
   totalPrizesValueUSD: number;
   totalPrizeNFTs: number;
   prices: TokenPrices;
+  pricesLoading: boolean;
 }
 
 const PrizesContainer = ({
@@ -22,6 +24,7 @@ const PrizesContainer = ({
   totalPrizesValueUSD,
   totalPrizeNFTs,
   prices,
+  pricesLoading,
 }: PrizesContainerProps) => {
   const [showPrizes, setShowPrizes] = useState(false);
 
@@ -40,15 +43,21 @@ const PrizesContainer = ({
         <div className="flex flex-row justify-between h-8">
           <div className="flex flex-row items-center gap-2">
             <span className="font-astronaut text-2xl">Prizes</span>
-            {totalPrizesValueUSD > 0 && (
-              <span className="font-astronaut text-xl text-retro-green-dark">
-                ${totalPrizesValueUSD.toFixed(2)}
-              </span>
-            )}
-            {totalPrizeNFTs > 0 && (
-              <span className="font-astronaut text-xl text-retro-green-dark">
-                {totalPrizeNFTs} NFT{totalPrizeNFTs === 1 ? "" : "s"}
-              </span>
+            {pricesLoading ? (
+              <Skeleton className="h-6 w-24 bg-retro-green/10" />
+            ) : (
+              <>
+                {totalPrizesValueUSD > 0 && (
+                  <span className="font-astronaut text-xl text-retro-green-dark">
+                    ${totalPrizesValueUSD.toFixed(2)}
+                  </span>
+                )}
+                {totalPrizeNFTs > 0 && (
+                  <span className="font-astronaut text-xl text-retro-green-dark">
+                    {totalPrizeNFTs} NFT{totalPrizeNFTs === 1 ? "" : "s"}
+                  </span>
+                )}
+              </>
             )}
           </div>
           <div className="flex flex-row items-center gap-2">
@@ -79,20 +88,34 @@ const PrizesContainer = ({
           <div className="p-4">
             {prizesExist && (
               <div className="flex flex-row gap-3 overflow-x-auto">
-                {Object.entries(groupedPrizes)
-                  .sort(
-                    (a, b) =>
-                      Number(a[1].payout_position) -
-                      Number(b[1].payout_position)
-                  )
-                  .map(([position, prizes], index) => (
-                    <PrizeDisplay
+                {pricesLoading ? (
+                  Array.from({ length: 5 }).map((_, index) => (
+                    <div
                       key={index}
-                      position={Number(position)}
-                      prizes={prizes}
-                      prices={prices}
-                    />
-                  ))}
+                      className="flex items-center gap-4 p-3 rounded-lg border border-retro-green/20 w-fit hover:cursor-pointer"
+                    >
+                      <Skeleton className="h-12 w-12 rounded-full" />
+                      <Skeleton className="h-6 w-full bg-retro-green/10" />
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    {Object.entries(groupedPrizes)
+                      .sort(
+                        (a, b) =>
+                          Number(a[1].payout_position) -
+                          Number(b[1].payout_position)
+                      )
+                      .map(([position, prizes], index) => (
+                        <PrizeDisplay
+                          key={index}
+                          position={Number(position)}
+                          prizes={prizes}
+                          prices={prices}
+                        />
+                      ))}
+                  </>
+                )}
               </div>
             )}
           </div>

@@ -12,6 +12,7 @@ interface TimelineCardProps {
   showConnector?: boolean;
   color?: string;
   active?: boolean;
+  completed?: boolean;
 }
 
 const TimelineCard = ({
@@ -20,8 +21,8 @@ const TimelineCard = ({
   duraton,
   label,
   showConnector = false,
-  color = "text-retro-green-dark",
   active = false,
+  completed = false,
 }: TimelineCardProps) => {
   return (
     <div
@@ -30,10 +31,15 @@ const TimelineCard = ({
       }`}
     >
       <Card
-        variant="outline"
-        className={`p-2 ${color} border-2 border-retro-green-dark h-14 w-14 flex items-center justify-center z-20`}
+        variant={completed ? "default" : "outline"}
+        className={`p-2 ${
+          completed ? "text-black bg-retro-green-dark" : "text-retro-green-dark"
+        } h-14 w-14 flex items-center justify-center z-20`}
+        borderColor={
+          completed ? "rgba(0, 218, 163, 1)" : "rgba(0, 140, 105, 1)"
+        }
       >
-        <span className="w-10">{icon}</span>
+        {icon}
       </Card>
       {date && (
         <div className="flex flex-col items-center font-astronaut">

@@ -1,4 +1,9 @@
-import { FLAG, LEADERBOARD, REGISTER } from "@/components/Icons";
+import {
+  START_FLAG,
+  END_FLAG,
+  LEADERBOARD,
+  REGISTER,
+} from "@/components/Icons";
 import TimelineCard from "@/components/TimelineCard";
 
 interface TournamentTimelineProps {
@@ -44,30 +49,39 @@ const TournamentTimeline = ({
           label="Registration"
           showConnector
           active={pulse ? !isStarted : false}
+          completed={isStarted}
         />
       )}
       <TimelineCard
-        icon={<FLAG />}
+        icon={
+          <span className="w-6">
+            <START_FLAG />
+          </span>
+        }
         date={startDate}
         duraton={duration}
         label="Duration"
         showConnector
-        color="text-green-700"
-        active={pulse ? isStarted : false}
+        active={pulse ? isStarted && !isEnded : false}
+        completed={isEnded}
       />
       <TimelineCard
-        icon={<FLAG />}
+        icon={
+          <span className="w-6">
+            <END_FLAG />
+          </span>
+        }
         date={endDate}
         duraton={submissionPeriod}
         label="Submission"
         showConnector
-        color="text-red-700"
-        active={pulse ? isSubmissionEnded : false}
+        active={pulse ? isEnded && !isSubmissionEnded : false}
+        completed={isSubmissionEnded}
       />
       <TimelineCard
         icon={<LEADERBOARD />}
         date={submissionEndDate}
-        active={pulse ? isEnded : false}
+        completed={isSubmissionEnded}
       />
     </div>
   );

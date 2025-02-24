@@ -58,7 +58,7 @@ const TokenDialog = ({ selectedToken, onSelect }: TokenDialogProps) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" type="button">
+        <Button variant="outline" type="button" className="h-14">
           {selectedToken ? (
             <div className="flex items-center gap-2">
               <img

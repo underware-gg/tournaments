@@ -14,6 +14,7 @@ import {
 } from "@/lib/utils/formatting";
 import { useEkuboPrices } from "@/hooks/useEkuboPrices";
 import { TabType } from "@/components/overview/TournamentTabs";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface TournamentCardProps {
   tournament: Tournament;
@@ -53,7 +54,7 @@ export const TournamentCard = ({
   );
 
   const erc20TokenSymbols = getErc20TokenSymbols(groupedPrizes);
-  const { prices } = useEkuboPrices({
+  const { prices, isLoading: pricesLoading } = useEkuboPrices({
     tokens: [...erc20TokenSymbols, entryFeeTokenSymbol ?? ""],
   });
 
@@ -71,7 +72,8 @@ export const TournamentCard = ({
   const startsIn = formatTime(
     (startDate.getTime() - currentDate.getTime()) / 1000
   );
-  const endsIn = formatTime((endDate.getTime() - currentDate.getTime()) / 1000);
+  const endsInSeconds = (endDate.getTime() - currentDate.getTime()) / 1000;
+  const endsIn = endsInSeconds > 0 ? formatTime(endsInSeconds) : "Ended ";
 
   const gameAddress = tournament.game_config.address;
 
@@ -150,11 +152,17 @@ export const TournamentCard = ({
         <div className="flex flex-row items-center justify-between w-3/4 mx-auto">
           <div className="flex flex-row items-center gap-2">
             <span className="text-retro-green-dark">Fee:</span>
-            <span>{hasEntryFee ? `$${entryFee}` : "FREE"}</span>
+            {pricesLoading ? (
+              <Skeleton className="h-6 w-16 bg-retro-green/20" />
+            ) : (
+              <span>{hasEntryFee ? `$${entryFee}` : "FREE"}</span>
+            )}
           </div>
           <div className="flex flex-row items-center gap-2">
             <span className="text-retro-green-dark">Pot:</span>
-            {totalPrizesValueUSD > 0 || totalPrizeNFTs > 0 ? (
+            {pricesLoading ? (
+              <Skeleton className="h-6 w-16 bg-retro-green/20" />
+            ) : totalPrizesValueUSD > 0 || totalPrizeNFTs > 0 ? (
               <div className="flex flex-row items-center gap-2">
                 {totalPrizesValueUSD > 0 && (
                   <span>${totalPrizesValueUSD.toFixed(2)}</span>

@@ -157,7 +157,7 @@ const Tournament = () => {
     (t) => t.address === entryFeeToken
   )?.symbol;
 
-  const { prices } = useEkuboPrices({
+  const { prices, isLoading: pricesLoading } = useEkuboPrices({
     tokens: [...erc20TokenSymbols, entryFeeTokenSymbol ?? ""],
   });
 
@@ -185,12 +185,23 @@ const Tournament = () => {
     Number(tournamentModel?.schedule.game.end) <
     Number(BigInt(Date.now()) / 1000n);
 
+  const isSubmitted =
+    Number(
+      BigInt(tournamentModel?.schedule.game.end ?? 0n) +
+        BigInt(tournamentModel?.schedule.submission_duration ?? 0n)
+    ) < Number(BigInt(Date.now()) / 1000n);
+
   const startsIn =
     Number(tournamentModel?.schedule.game.start) -
     Number(BigInt(Date.now()) / 1000n);
   const endsIn =
     Number(tournamentModel?.schedule.game.end) -
     Number(BigInt(Date.now()) / 1000n);
+  const submissionEndsIn =
+    Number(
+      BigInt(tournamentModel?.schedule.game.end ?? 0n) +
+        BigInt(tournamentModel?.schedule.submission_duration ?? 0n)
+    ) - Number(BigInt(Date.now()) / 1000n);
 
   const status = useMemo(() => {
     if (isEnded) return "ended";
@@ -275,16 +286,27 @@ const Tournament = () => {
             </div>
           </div>
           <div className="flex flex-row">
-            {isStarted ? (
-              <div>
-                <span className="text-retro-green-dark">Ends In: </span>
-                <span className="text-retro-green">{formatTime(endsIn)}</span>
-              </div>
-            ) : (
+            {!isStarted ? (
               <div>
                 <span className="text-retro-green-dark">Starts In: </span>
                 <span className="text-retro-green">{formatTime(startsIn)}</span>
               </div>
+            ) : !isEnded ? (
+              <div>
+                <span className="text-retro-green-dark">Ends In: </span>
+                <span className="text-retro-green">{formatTime(endsIn)}</span>
+              </div>
+            ) : !isSubmitted ? (
+              <div>
+                <span className="text-retro-green-dark">
+                  Submission Ends In:{" "}
+                </span>
+                <span className="text-retro-green">
+                  {formatTime(submissionEndsIn)}
+                </span>
+              </div>
+            ) : (
+              <></>
             )}
           </div>
         </div>
@@ -338,6 +360,7 @@ const Tournament = () => {
               totalPrizesValueUSD={totalPrizesValueUSD}
               totalPrizeNFTs={totalPrizeNFTs}
               prices={prices}
+              pricesLoading={pricesLoading}
             />
           </div>
         </div>
