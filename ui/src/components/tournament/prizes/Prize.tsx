@@ -31,7 +31,7 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: position * 0.1 }}
-          className="flex items-center gap-4 p-3 rounded-lg border border-retro-green/20 w-fit hover:cursor-pointer"
+          className="flex items-center gap-4 p-3 rounded-lg border border-retro-green/20 w-fit hover:cursor-pointer hover:bg-retro-green/25 hover:border-retro-green/30 border border-transparent rounded transition-all duration-200"
         >
           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-retro-green/20">
             <span className="font-astronaut text-lg text-retro-green">

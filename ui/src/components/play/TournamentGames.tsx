@@ -1,7 +1,7 @@
 import { useGetTournamentLeaderboard } from "@/dojo/hooks/useSqlQueries";
 import { useDojo } from "@/context/dojo";
 import { Tournament } from "@/generated/models.gen";
-import { useGameNamespace } from "@/dojo/hooks/useGameNamespace";
+import { useGameEndpoints } from "@/dojo/hooks/useGameEndpoints";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,15 +21,16 @@ const TournamentGames = ({ tournament }: TournamentGamesProps) => {
   const { endGame } = useSystemCalls();
 
   const tournamentId = tournament.id;
-  const { gameNamespace } = useGameNamespace(tournament.game_config.address);
-  const isDS = gameNamespace === "ds_v1_1_1";
+  const { gameNamespace, gameScoreModel, gameScoreAttribute } =
+    useGameEndpoints(tournament.game_config.address);
 
   const { data: leaderboard } = useGetTournamentLeaderboard({
     namespace: nameSpace,
     tournamentId: tournamentId,
     gameNamespace: gameNamespace ?? "",
+    gameScoreModel: gameScoreModel ?? "",
+    gameScoreAttribute: gameScoreAttribute ?? "",
     gameAddress: indexAddress(tournament.game_config.address.toString()),
-    isDS: isDS,
     limit: 10,
     offset: (currentPage - 1) * 5,
   });

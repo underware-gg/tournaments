@@ -2468,8 +2468,8 @@
       ]
     },
     {
-      "address": "0x41b0784267253be4e6dad45a6bc7a4f406c4234be97af39f4f7e722108709f8",
-      "class_hash": "0x70105e0edd03c555b26a67bfc09b63078f3cbf6285aeb2b523d4d950badcb88",
+      "address": "0x63ff13e3394a65590dfae8f7fd736624a0c4f10c10cf88d1b912edb2d1404f3",
+      "class_hash": "0x524cb6582d317838fa26f75604f849698013b57593c1405b56657a86bf0f15a",
       "abi": [
         {
           "type": "impl",
@@ -2649,6 +2649,17 @@
               ],
               "outputs": [],
               "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "score_model_and_attribute",
+              "inputs": [],
+              "outputs": [
+                {
+                  "type": "(core::felt252, core::felt252)"
+                }
+              ],
+              "state_mutability": "view"
             }
           ]
         },

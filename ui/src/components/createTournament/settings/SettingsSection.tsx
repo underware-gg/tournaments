@@ -16,11 +16,12 @@ import {
 import SettingsCarousel from "./SettingsCarousel";
 import SmallSettingsTable from "./SmallSettingsTable";
 import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
-import { useGameNamespace } from "@/dojo/hooks/useGameNamespace";
+import { useGameEndpoints } from "@/dojo/hooks/useGameEndpoints";
 import { useGetGameSettingsQuery } from "@/dojo/hooks/useSdkQueries";
 import { feltToString } from "@/lib/utils";
 import { Settings, SettingsDetails } from "@/generated/models.gen";
 import { useMemo } from "react";
+import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 
 interface GameSettingsFieldProps {
   form: UseFormReturn<any>;
@@ -28,19 +29,26 @@ interface GameSettingsFieldProps {
 }
 
 const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
-  // const gameSettings = getGameSettings();
-  const { gameNamespace } = useGameNamespace(form.watch("game"));
-  const { entities: gameSettingsEntities } = useGetGameSettingsQuery(
-    gameNamespace ?? ""
-  );
+  const { gameNamespace } = useGameEndpoints(form.watch("game"));
+  useGetGameSettingsQuery(gameNamespace ?? "");
+  const settingsDetails = useDojoStore
+    .getState()
+    .getEntitiesByModel(gameNamespace ?? "", "SettingsDetails");
+  const settings = useDojoStore
+    .getState()
+    .getEntitiesByModel(gameNamespace ?? "", "Settings");
+
+  const settingsEntities = [...settingsDetails, ...settings];
 
   const mergedGameSettings = useMemo(() => {
-    if (!gameSettingsEntities) return {};
+    if (!settingsEntities) return {};
 
-    return gameSettingsEntities.reduce(
+    return settingsEntities.reduce(
       (acc, entity) => {
-        const details = entity.SettingsDetails as SettingsDetails;
-        const settings = entity.Settings as Settings;
+        const details = entity.models[gameNamespace ?? ""]
+          .SettingsDetails as SettingsDetails;
+        const settings = entity.models[gameNamespace ?? ""]
+          .Settings as Settings;
         const detailsId = details.id.toString();
 
         // If this details ID doesn't exist yet, create it
@@ -68,7 +76,7 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
         }
       >
     );
-  }, [gameSettingsEntities, form.watch("game")]);
+  }, [settingsEntities, form.watch("game")]);
 
   return (
     <FormItem>

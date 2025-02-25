@@ -26,7 +26,14 @@ const Header = () => {
 
   return (
     <div className="flex flex-row items-center justify-between py-5 px-10 h-[80px]">
-      <div className="flex text-4xl font-astronaut">Budokan</div>
+      <div
+        className="flex text-4xl font-astronaut hover:cursor-pointer hover:text-retro-green-dark transition-colors duration-200"
+        onClick={() => {
+          navigate("/");
+        }}
+      >
+        Budokan
+      </div>
       <div className="flex flex-row items-center gap-2">
         {!isMainnet && location.pathname !== "/play" && (
           <Button

@@ -13,21 +13,25 @@ import { bigintToHex } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import EntryCard from "@/components/tournament/myEntries/EntryCard";
 import { TokenMetadata } from "@/generated/models.gen";
+import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 
 interface MyEntriesProps {
   tournamentId: BigNumberish;
   gameAddress: string;
   gameNamespace: string;
-  isSepolia: boolean;
+  gameScoreModel: string;
+  gameScoreAttribute: string;
 }
 
 const MyEntries = ({
   tournamentId,
   gameAddress,
   gameNamespace,
-  isSepolia,
+  gameScoreModel,
+  gameScoreAttribute,
 }: MyEntriesProps) => {
   const { address } = useAccount();
+  const state = useDojoStore.getState();
   const [showMyEntries, setShowMyEntries] = useState(false);
 
   const queryAddress = useMemo(() => {
@@ -43,6 +47,8 @@ const MyEntries = ({
   const { data: ownedTokens } = useGetAccountTokenIds(queryAddress, [
     queryGameAddress ?? "0x0",
   ]);
+
+  console.log(ownedTokens);
 
   const ownedTokenIds = useMemo(() => {
     return ownedTokens
@@ -78,8 +84,13 @@ const MyEntries = ({
   const { entities: metadata } = useGetGameMetadataInListQuery({
     gameNamespace: gameNamespace ?? "",
     gameIds: tokenIds ?? [],
-    isSepolia: isSepolia,
   });
+
+  const entities = state.getEntities();
+
+  const scoreEntities = entities.filter(
+    (entity) => (entity.models as any)?.[gameNamespace]?.[gameScoreModel]
+  );
 
   const mergedEntries = useMemo(() => {
     if (!myRegistrations || !metadata) return [];
@@ -88,13 +99,34 @@ const MyEntries = ({
       const gameTokenId = registration?.Registration?.game_token_id ?? 0n;
 
       // Find matching metadata for this token
-      const tokenMetadata = metadata.find(
+      const gameMetadata = metadata.find(
         (m) => m?.TokenMetadata?.token_id === gameTokenId
       );
 
+      // Find matching score for this token
+      const score = scoreEntities.find(
+        (s) =>
+          (s?.models as any)?.[gameNamespace]?.[gameScoreModel]?.game_id ===
+          gameTokenId
+      );
+
+      // Find token metadata for this token
+      const tokenMetadata = ownedTokens?.find(
+        (t) =>
+          t.token_id ===
+          `${indexAddress(gameAddress)}:${addAddressPadding(
+            bigintToHex(gameTokenId)
+          )}`
+      )?.metadata;
+
       return {
         ...registration.Registration,
-        metadata: tokenMetadata?.TokenMetadata as TokenMetadata | null,
+        gameMetadata: gameMetadata?.TokenMetadata as TokenMetadata | null,
+        tokenMetadata: tokenMetadata as string | null,
+        score:
+          (score?.models as any)?.[gameNamespace]?.[gameScoreModel]?.[
+            gameScoreAttribute
+          ] ?? 0,
       };
     });
   }, [myRegistrations, metadata, address]);

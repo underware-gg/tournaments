@@ -306,7 +306,6 @@ export const useGetMyTournaments = ({
       active,
     ]
   );
-  console.log(active);
   const { data, loading, error, refetch } = useSqlExecute(query);
   return { data, loading, error, refetch };
 };
@@ -345,9 +344,10 @@ export const useGetAccountTokenIds = (
     () =>
       address
         ? `
-    SELECT *
-    FROM [token_balances]
-    WHERE (account_address = "${address}" AND contract_address IN (${gameAddresses
+    SELECT tb.*, t.metadata
+    FROM token_balances tb
+    LEFT JOIN tokens t ON tb.token_id = t.id
+    WHERE (tb.account_address = "${address}" AND tb.contract_address IN (${gameAddresses
             .map((address) => `"${address}"`)
             .join(",")}));
   `
@@ -363,7 +363,6 @@ export const useGetTournamentEntrants = ({
   tournamentId,
   gameNamespace,
   gameAddress,
-  isDS = false,
   offset = 0,
   limit = 5,
 }: {
@@ -371,7 +370,6 @@ export const useGetTournamentEntrants = ({
   tournamentId: BigNumberish;
   gameNamespace: string;
   gameAddress: string;
-  isDS?: boolean;
   offset?: number;
   limit?: number;
 }) => {
@@ -410,36 +408,7 @@ export const useGetTournamentEntrants = ({
         : null,
     [isValidInput, namespace, tournamentId, offset, limit, gameNamespace]
   );
-
-  const dsQuery = useMemo(
-    () =>
-      isValidInput
-        ? `
-    SELECT 
-    r.tournament_id,
-    r.entry_number,
-    r.game_token_id,
-    r.has_submitted,
-    m.player_name,
-    m."lifecycle.mint",
-    '${gameAddress}' || ':' || r.game_token_id as token_balance_id,
-    t.account_address
-    FROM '${namespace}-Registration' r
-    LEFT JOIN '${gameNamespace}-TokenMetadata' m 
-      ON r.game_token_id = m.token_id
-    LEFT JOIN token_balances t 
-      ON token_balance_id = t.token_id
-    WHERE r.tournament_id = "${addAddressPadding(tournamentId)}"
-    ORDER BY r.entry_number DESC
-    LIMIT ${limit}
-    OFFSET ${offset}
-  `
-        : null,
-    [isValidInput, namespace, tournamentId, offset, limit, gameNamespace]
-  );
-  const { data, loading, error, refetch } = useSqlExecute(
-    isDS ? dsQuery : query
-  );
+  const { data, loading, error, refetch } = useSqlExecute(query);
   return { data, loading, error, refetch };
 };
 
@@ -447,16 +416,18 @@ export const useGetTournamentLeaderboard = ({
   namespace,
   tournamentId,
   gameNamespace,
+  gameScoreModel,
+  gameScoreAttribute,
   gameAddress,
-  isDS = false,
   offset = 0,
   limit = 5,
 }: {
   namespace: string;
   tournamentId: BigNumberish;
   gameNamespace: string;
+  gameScoreModel: string;
+  gameScoreAttribute: string;
   gameAddress: string;
-  isDS?: boolean;
   offset?: number;
   limit?: number;
 }) => {
@@ -465,10 +436,20 @@ export const useGetTournamentLeaderboard = ({
       namespace &&
         tournamentId &&
         gameNamespace &&
+        gameScoreModel &&
+        gameScoreAttribute &&
         typeof offset === "number" &&
         typeof limit === "number"
     );
-  }, [namespace, tournamentId, gameNamespace, offset, limit]);
+  }, [
+    namespace,
+    tournamentId,
+    gameNamespace,
+    gameScoreModel,
+    gameScoreAttribute,
+    offset,
+    limit,
+  ]);
 
   const query = useMemo(
     () =>
@@ -479,55 +460,37 @@ export const useGetTournamentLeaderboard = ({
     r.entry_number,
     r.game_token_id,
     r.has_submitted,
-    COALESCE(s.score, 0) as score,
+    COALESCE(s.${gameScoreAttribute}, 0) as score,
     m.player_name,
     m."lifecycle.mint",
+    t2.metadata,
     '${gameAddress}' || ':' || r.game_token_id as token_balance_id,
     t.account_address
     FROM '${namespace}-Registration' r
-    LEFT JOIN '${gameNamespace}-Score' s 
+    LEFT JOIN '${gameNamespace}-${gameScoreModel}' s 
       ON r.game_token_id = s.game_id
     LEFT JOIN '${gameNamespace}-TokenMetadata' m 
       ON r.game_token_id = m.token_id
     LEFT JOIN token_balances t 
       ON token_balance_id = t.token_id
+    LEFT JOIN tokens t2 ON t.token_id = t2.id
     WHERE r.tournament_id = "${addAddressPadding(tournamentId)}"
-    ORDER BY s.score DESC, r.entry_number ASC
+    ORDER BY s.${gameScoreAttribute} DESC, r.entry_number ASC
     LIMIT ${limit}
     OFFSET ${offset}
   `
         : null,
-    [isValidInput, namespace, tournamentId, offset, limit, gameNamespace]
+    [
+      isValidInput,
+      namespace,
+      tournamentId,
+      offset,
+      limit,
+      gameNamespace,
+      gameScoreModel,
+      gameScoreAttribute,
+    ]
   );
-  const dsQuery = useMemo(
-    () =>
-      isValidInput
-        ? `
-    SELECT 
-    r.tournament_id,
-    r.entry_number,
-    r.game_token_id,
-    r.has_submitted,
-    COALESCE(s.hero_xp, 0) as score,
-    m.player_name,
-    m."lifecycle.mint",
-    '${gameAddress}' || ':' || r.game_token_id as token_balance_id,
-    t.account_address
-    FROM '${namespace}-Registration' r
-    LEFT JOIN '${gameNamespace}-Game' s 
-      ON r.game_token_id = s.game_id
-    LEFT JOIN '${gameNamespace}-TokenMetadata' m 
-      ON r.game_token_id = m.token_id
-    LEFT JOIN token_balances t 
-      ON token_balance_id = t.token_id
-    WHERE r.tournament_id = "${addAddressPadding(tournamentId)}"
-    ORDER BY s.hero_xp DESC
-    LIMIT ${limit}
-    OFFSET ${offset}
-  `
-        : null,
-    [isValidInput, namespace, tournamentId, offset, limit, gameNamespace]
-  );
-  const { data, loading, error } = useSqlExecute(isDS ? dsQuery : query);
+  const { data, loading, error } = useSqlExecute(query);
   return { data, loading, error };
 };

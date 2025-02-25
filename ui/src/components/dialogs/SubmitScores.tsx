@@ -20,6 +20,8 @@ interface SubmitScoresDialogProps {
   tournamentModel: Tournament;
   nameSpace: string;
   gameNamespace: string;
+  gameScoreModel: string;
+  gameScoreAttribute: string;
   gameAddress: string;
   leaderboard: Leaderboard;
 }
@@ -30,13 +32,14 @@ export function SubmitScoresDialog({
   tournamentModel,
   nameSpace,
   gameNamespace,
+  gameScoreModel,
+  gameScoreAttribute,
   gameAddress,
   leaderboard,
 }: SubmitScoresDialogProps) {
   const { address } = useAccount();
   const { connect } = useConnectToSelectedChain();
   const { submitScores } = useSystemCalls();
-  const isDS = gameNamespace === "ds_v1_1_1";
 
   const leaderboardSize = Number(tournamentModel?.game_config.prize_spots);
 
@@ -44,8 +47,9 @@ export function SubmitScoresDialog({
     namespace: nameSpace,
     tournamentId: tournamentModel?.id,
     gameNamespace: gameNamespace,
+    gameScoreModel: gameScoreModel,
+    gameScoreAttribute: gameScoreAttribute,
     gameAddress: indexAddress(gameAddress.toString()),
-    isDS: isDS,
     limit: leaderboardSize,
     offset: 0,
   });

@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
 import { useProvider } from "@starknet-react/core";
 import { ByteArray, byteArray } from "starknet";
+import { feltToString } from "@/lib/utils";
 
-export const useGameNamespace = (gameAddress: string) => {
+export const useGameEndpoints = (gameAddress: string) => {
   const { provider } = useProvider();
   const [gameNamespace, setGameNamespace] = useState<string | null>(null);
+  const [gameScoreModel, setGameScoreModel] = useState<string | null>(null);
+  const [gameScoreAttribute, setGameScoreAttribute] = useState<string | null>(
+    null
+  );
 
   const getGameNamespace = async () => {
     const gameNamespace = await provider.callContract({
@@ -20,11 +25,24 @@ export const useGameNamespace = (gameAddress: string) => {
     setGameNamespace(byteArray.stringFromByteArray(gameNamespaceByteArray));
   };
 
+  const getGameScoreData = async () => {
+    const gameScoreData = await provider.callContract({
+      contractAddress: gameAddress,
+      entrypoint: "score_model_and_attribute",
+      calldata: [],
+    });
+    const gameScoreModel = feltToString(gameScoreData[0]);
+    const gameScoreAttribute = feltToString(gameScoreData[1]);
+    setGameScoreModel(gameScoreModel);
+    setGameScoreAttribute(gameScoreAttribute);
+  };
+
   useEffect(() => {
     if (gameAddress) {
       getGameNamespace();
+      getGameScoreData();
     }
   }, [provider, gameAddress]);
 
-  return { gameNamespace };
+  return { gameNamespace, gameScoreModel, gameScoreAttribute };
 };

@@ -2,25 +2,33 @@ import { HoverCardContent } from "@/components/ui/hover-card";
 
 interface EntryInfoProps {
   entryNumber: string;
+  tokenMetadata: string;
 }
 
-const EntryInfo = ({ entryNumber }: EntryInfoProps) => {
+const EntryInfo = ({ entryNumber, tokenMetadata }: EntryInfoProps) => {
   return (
     <HoverCardContent
-      className="w-80 p-4 text-sm z-50"
+      className="w-80 py-4 px-0 text-sm z-50"
       align="start"
       side="top"
       sideOffset={5}
       alignOffset={-80}
     >
-      <div className="space-y-2">
-        <h4 className="font-medium">Entry #{entryNumber}</h4>
-        <p className="text-muted-foreground">Game Settings</p>
-        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-          <li>Entry Number: {entryNumber}</li>
-          <li>More details can be added here</li>
-          <li>And here</li>
-        </ul>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2 px-4">
+          <h4 className="font-medium">Entry #{entryNumber}</h4>
+          <p className="text-muted-foreground">Game Settings</p>
+        </div>
+        <div className="w-full h-0.5 bg-retro-green/50" />
+        {tokenMetadata !== "" ? (
+          <img
+            src={JSON.parse(tokenMetadata)?.image}
+            alt="metadata"
+            className="w-full h-auto px-4"
+          />
+        ) : (
+          <span className="text-center text-neutral-500">No Token URI</span>
+        )}
       </div>
     </HoverCardContent>
   );

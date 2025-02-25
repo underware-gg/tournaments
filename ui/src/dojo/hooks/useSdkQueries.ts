@@ -182,11 +182,9 @@ export const useGetRegistrationsForTournamentInTokenListQuery = ({
 export const useGetGameMetadataInListQuery = ({
   gameNamespace,
   gameIds,
-  isSepolia,
 }: {
   gameNamespace: string;
   gameIds: BigNumberish[];
-  isSepolia: boolean;
 }) => {
   const query = useMemo(
     () =>
@@ -200,22 +198,8 @@ export const useGetGameMetadataInListQuery = ({
         .includeHashedKeys(),
     [gameNamespace, gameIds]
   );
-
-  const sepoliaQuery = useMemo(
-    () =>
-      new ToriiQueryBuilder()
-        .withClause(
-          KeysClause([`${gameNamespace}-TokenMetadata`], [])
-            .where(`${gameNamespace}-TokenMetadata`, "token_id", "In", gameIds)
-            .build()
-        )
-        .withEntityModels([`${gameNamespace}-TokenMetadata`])
-        .includeHashedKeys(),
-    [gameNamespace, gameIds]
-  );
-
   const { entities, isLoading, refetch } = useSdkGetEntities({
-    query: isSepolia ? sepoliaQuery : query,
+    query,
   });
   return { entities, isLoading, refetch };
 };
@@ -269,11 +253,25 @@ export const useGetGameSettingsQuery = (namespace: string) => {
           `${namespace}-SettingsDetails`,
           `${namespace}-Settings`,
         ])
-        .addOrderBy(`${namespace}-SettingsDetails`, "id", "Asc")
         .includeHashedKeys(),
     [namespace]
   );
 
+  const { entities, isLoading, refetch } = useSdkGetEntities({
+    query,
+  });
+  return { entities, isLoading, refetch };
+};
+
+export const useGetScoresQuery = (namespace: string, model: string) => {
+  const query = useMemo(
+    () =>
+      new ToriiQueryBuilder()
+        .withClause(KeysClause([`${namespace}-${model}`], []).build())
+        .withEntityModels([`${namespace}-${model}`])
+        .includeHashedKeys(),
+    [namespace, model]
+  );
   const { entities, isLoading, refetch } = useSdkGetEntities({
     query,
   });
@@ -430,11 +428,9 @@ export const useSubscribeTournamentEntriesQuery = ({
 export const useSubscribeGamesQuery = ({
   nameSpace,
   gameNamespace,
-  isSepolia,
 }: {
   nameSpace: string;
   gameNamespace: string;
-  isSepolia: boolean;
 }) => {
   const query = useMemo(
     () =>
@@ -447,26 +443,25 @@ export const useSubscribeGamesQuery = ({
         )
         .withEntityModels([`${nameSpace}-Game`, `${nameSpace}-TokenMetadata`])
         .includeHashedKeys(),
-    [nameSpace, gameNamespace, isSepolia]
-  );
-  const sepoliaQuery = useMemo(
-    () =>
-      new ToriiQueryBuilder()
-        .withClause(
-          KeysClause(
-            [`${gameNamespace}-Game`, `${gameNamespace}-TokenMetadata`],
-            [undefined]
-          ).build()
-        )
-        .withEntityModels([
-          `${gameNamespace}-Game`,
-          `${gameNamespace}-TokenMetadata`,
-        ])
-        .includeHashedKeys(),
-    [gameNamespace, isSepolia]
+    [nameSpace, gameNamespace]
   );
   const { entities, isSubscribed } = useSdkSubscribeEntities({
-    query: isSepolia ? sepoliaQuery : query,
+    query,
+  });
+  return { entities, isSubscribed };
+};
+
+export const useSubscribeScoresQuery = (namespace: string, model: string) => {
+  const query = useMemo(
+    () =>
+      new ToriiQueryBuilder()
+        .withClause(KeysClause([`${namespace}-${model}`], []).build())
+        .withEntityModels([`${namespace}-${model}`])
+        .includeHashedKeys(),
+    [namespace, model]
+  );
+  const { entities, isSubscribed } = useSdkSubscribeEntities({
+    query,
   });
   return { entities, isSubscribed };
 };

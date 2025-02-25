@@ -766,6 +766,8 @@ export enum ModelsMapping {
   ScoreValue = `${NAMESPACE}-ScoreValue`,
   SettingsDetails = `${NAMESPACE}-SettingsDetails`,
   SettingsDetailsValue = `${NAMESPACE}-SettingsDetailsValue`,
+  Settings = `${NAMESPACE}-Settings`,
+  SettingsValue = `${NAMESPACE}-SettingsValue`,
   TokenMetadata = `${NAMESPACE}-TokenMetadata`,
   TokenMetadataValue = `${NAMESPACE}-TokenMetadataValue`,
   ERC20Data = `${NAMESPACE}-ERC20Data`,

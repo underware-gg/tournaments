@@ -12,6 +12,8 @@ import {
   useGetGameCounterQuery,
   useGetTournamentQuery,
   useSubscribeTournamentQuery,
+  useSubscribeScoresQuery,
+  useGetScoresQuery,
 } from "@/dojo/hooks/useSdkQueries";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import {
@@ -35,10 +37,9 @@ import {
   groupPrizesByTokens,
 } from "@/lib/utils/formatting";
 import useModel from "@/dojo/hooks/useModel";
-import { useGameNamespace } from "@/dojo/hooks/useGameNamespace";
+import { useGameEndpoints } from "@/dojo/hooks/useGameEndpoints";
 import { EnterTournamentDialog } from "@/components/dialogs/EnterTournament";
 import ScoreTable from "@/components/tournament/table/ScoreTable";
-import { ChainId } from "@/dojo/config";
 import { TOURNAMENT_VERSION_KEY } from "@/lib/constants";
 import { useEkuboPrices } from "@/hooks/useEkuboPrices";
 import MyEntries from "@/components/tournament/MyEntries";
@@ -52,14 +53,13 @@ const Tournament = () => {
   const { id } = useParams<{ id: string }>();
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
-  const { nameSpace, selectedChainConfig } = useDojo();
+  const { nameSpace } = useDojo();
   const state = useDojoStore.getState();
   const [enterDialogOpen, setEnterDialogOpen] = useState(false);
   const [claimDialogOpen, setClaimDialogOpen] = useState(false);
   const [submitScoresDialogOpen, setSubmitScoresDialogOpen] = useState(false);
 
-  const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
-
+  useGetTournamentQuery(addAddressPadding(bigintToHex(id!)));
   useGetTournamentQuery(addAddressPadding(bigintToHex(id!)));
   useSubscribeTournamentQuery(addAddressPadding(bigintToHex(id!)));
 
@@ -129,9 +129,12 @@ const Tournament = () => {
     (model) => model.models[nameSpace].Token
   ) as Token[];
 
-  const { gameNamespace } = useGameNamespace(
-    tournamentModel?.game_config?.address
-  );
+  const { gameNamespace, gameScoreModel, gameScoreAttribute } =
+    useGameEndpoints(tournamentModel?.game_config?.address);
+
+  // subscribe and fetch game scores
+  useSubscribeScoresQuery(gameNamespace ?? "", gameScoreModel ?? "");
+  useGetScoresQuery(gameNamespace ?? "", gameScoreModel ?? "");
 
   const { entity: gameCounterEntity } = useGetGameCounterQuery({
     key: addAddressPadding(BigInt(TOURNAMENT_VERSION_KEY)),
@@ -147,7 +150,6 @@ const Tournament = () => {
   useSubscribeGamesQuery({
     nameSpace: gameNamespace ?? "",
     gameNamespace: gameNamespace ?? "",
-    isSepolia: isSepolia,
   });
 
   const [isOverflowing, setIsOverflowing] = useState(false);
@@ -332,6 +334,8 @@ const Tournament = () => {
             tournamentModel={tournamentModel}
             nameSpace={nameSpace}
             gameNamespace={gameNamespace ?? ""}
+            gameScoreModel={gameScoreModel ?? ""}
+            gameScoreAttribute={gameScoreAttribute ?? ""}
             gameAddress={tournamentModel?.game_config?.address}
             leaderboard={leaderboardModel}
           />
@@ -458,6 +462,8 @@ const Tournament = () => {
               entryCount={entryCountModel ? Number(entryCountModel.count) : 0}
               gameAddress={tournamentModel?.game_config?.address}
               gameNamespace={gameNamespace ?? ""}
+              gameScoreModel={gameScoreModel ?? ""}
+              gameScoreAttribute={gameScoreAttribute ?? ""}
               isEnded={isEnded}
             />
           ) : (
@@ -467,7 +473,8 @@ const Tournament = () => {
             tournamentId={tournamentModel?.id}
             gameAddress={tournamentModel?.game_config?.address}
             gameNamespace={gameNamespace ?? ""}
-            isSepolia={isSepolia}
+            gameScoreModel={gameScoreModel ?? ""}
+            gameScoreAttribute={gameScoreAttribute ?? ""}
           />
         </div>
       </div>

@@ -19,7 +19,7 @@ export const getGames = (): Record<string, Game> => {
   const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
   if (isLocalKatana) {
     return {
-      "0x072e1affe9a2d0a1852238073bc2f81e059ad7ab500e788046ac2f0b89b0c94a": {
+      "0x063ff13e3394a65590dfae8f7fd736624a0c4f10c10cf88d1b912edb2d1404f3": {
         name: "Loot Survivor",
         Icon: function LootSurvivorIcon(
           props: ImgHTMLAttributes<HTMLImageElement>

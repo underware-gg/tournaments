@@ -12,20 +12,22 @@ import { Button } from "@/components/ui/button";
 interface EntryCardProps {
   gameAddress: string;
   mergedEntry: {
-    metadata: TokenMetadata | null;
+    gameMetadata: TokenMetadata | null;
     tournament_id?: BigNumberish | undefined;
     game_token_id?: BigNumberish | undefined;
     entry_number?: BigNumberish | undefined;
     has_submitted?: boolean | undefined;
     fieldOrder?: string[] | undefined;
+    score?: string | undefined;
+    tokenMetadata?: string | null;
   };
 }
 
 const EntryCard = ({ gameAddress, mergedEntry }: EntryCardProps) => {
   const currentDate = BigInt(new Date().getTime()) / 1000n;
   const isActive =
-    !!mergedEntry.metadata?.lifecycle.start.Some &&
-    BigInt(mergedEntry.metadata?.lifecycle.start.Some) < currentDate;
+    !!mergedEntry.gameMetadata?.lifecycle.start.Some &&
+    BigInt(mergedEntry.gameMetadata?.lifecycle.start.Some) < currentDate;
 
   return (
     <Card
@@ -42,10 +44,13 @@ const EntryCard = ({ gameAddress, mergedEntry }: EntryCardProps) => {
             <INFO />
           </div>
         </HoverCardTrigger>
-        <EntryInfo entryNumber={mergedEntry.entry_number?.toString() ?? ""} />
+        <EntryInfo
+          entryNumber={mergedEntry.entry_number?.toString() ?? ""}
+          tokenMetadata={mergedEntry.tokenMetadata ?? ""}
+        />
       </HoverCard>
       <p className="text-xs overflow-x-hidden text-ellipsis whitespace-nowrap text-retro-green-dark">
-        {feltToString(mergedEntry.metadata?.player_name ?? "")}
+        {feltToString(mergedEntry.gameMetadata?.player_name ?? "")}
       </p>
       {isActive && (
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/60 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -63,7 +68,7 @@ const EntryCard = ({ gameAddress, mergedEntry }: EntryCardProps) => {
         {isActive ? (
           <>
             <p className="text-[10px] text-neutral-500">Score:</p>
-            <p className="text-xs text-retro-green">100</p>
+            <p className="text-xs text-retro-green">{mergedEntry.score}</p>
           </>
         ) : (
           <>

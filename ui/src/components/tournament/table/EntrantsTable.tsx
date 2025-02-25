@@ -27,8 +27,6 @@ const EntrantsTable = ({
   const [showParticipants, setShowParticipants] = useState(false);
   const { nameSpace } = useDojo();
 
-  const isDS = gameNamespace === "ds_v1_1_1";
-
   const offset = (currentPage - 1) * 5;
 
   const {
@@ -40,7 +38,6 @@ const EntrantsTable = ({
     tournamentId: tournamentId,
     gameNamespace: gameNamespace,
     gameAddress: indexAddress(gameAddress.toString()),
-    isDS: isDS,
     limit: 5,
     offset: offset,
   });

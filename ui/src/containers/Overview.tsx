@@ -179,6 +179,16 @@ const Overview = () => {
     return () => observer.disconnect();
   }, [tournamentsLoading, myTournamentsLoading, tournamentCounts]);
 
+  useEffect(() => {
+    if (upcomingTournamentsCount > 0) {
+      setSelectedTab("upcoming");
+    } else if (liveTournamentsCount > 0) {
+      setSelectedTab("live");
+    } else if (endedTournamentsCount > 0) {
+      setSelectedTab("ended");
+    }
+  }, [upcomingTournamentsCount, liveTournamentsCount, endedTournamentsCount]);
+
   const LoadingSpinner = () => (
     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900" />
   );
