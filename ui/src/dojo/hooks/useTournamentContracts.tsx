@@ -11,7 +11,7 @@ export function useTournamentContracts(): ContractAddresses {
 
   const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
 
-  const TOURNAMENT_SYSTEM_NAME = isMainnet ? "Tournament" : "tournament_mock";
+  const TOURNAMENT_SYSTEM_NAME = isMainnet ? "Budokan" : "tournament_mock";
 
   const tournamentAddress = useDojoSystem(
     TOURNAMENT_SYSTEM_NAME

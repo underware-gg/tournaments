@@ -3,7 +3,7 @@ import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { v4 as uuidv4 } from "uuid";
 import { useDojo } from "@/context/dojo";
-import { Tournament, Prize } from "@/generated/models.gen";
+import { Tournament, Prize, PrizeType } from "@/generated/models.gen";
 
 const applyModelUpdate = <T extends { [key: string]: any }>(
   draft: any,
@@ -105,38 +105,6 @@ export const useOptimisticUpdates = () => {
     };
   };
 
-  const applyTournamentSubmitScoresUpdate = (
-    tournamentId: BigNumberish,
-    gameIds: BigNumberish[]
-  ) => {
-    const entityId = getEntityIdFromKeys([BigInt(tournamentId)]);
-    const transactionId = uuidv4();
-
-    state.applyOptimisticUpdate(transactionId, (draft) => {
-      applyModelUpdate(draft, entityId, nameSpace, "TournamentScores", {
-        tournament_id: tournamentId,
-        top_score_ids: gameIds,
-      });
-    });
-
-    const waitForPrizeEntityChange = async () => {
-      return await state.waitForEntityChange(entityId, (_) => {
-        // return (
-        //   entity?.models?.[nameSpace]?.TournamentScores?.top_score_ids ==
-        //   gameIds
-        // );
-        return true;
-      });
-    };
-
-    return {
-      transactionId,
-      wait: () => waitForPrizeEntityChange(),
-      revert: () => state.revertOptimisticUpdate(transactionId),
-      confirm: () => state.confirmTransaction(transactionId),
-    };
-  };
-
   const applyTournamentPrizeUpdate = (
     tournamentId: BigNumberish,
     prize: Prize
@@ -215,10 +183,41 @@ export const useOptimisticUpdates = () => {
     };
   };
 
+  const applyTournamentClaimPrizesUpdate = (
+    tournamentId: BigNumberish,
+    prizes: PrizeType[]
+  ) => {
+    const entityId = getEntityIdFromKeys([BigInt(tournamentId)]);
+    const transactionId = uuidv4();
+
+    state.applyOptimisticUpdate(transactionId, (draft) => {
+      for (const prize of prizes) {
+        applyModelUpdate(draft, entityId, nameSpace, "PrizeClaim", {
+          tournament_id: tournamentId,
+          prize_type: prize,
+          claimed: true,
+        });
+      }
+    });
+
+    const waitForEntityChanges = async () => {
+      return await state.waitForEntityChange(entityId, (_entity) => {
+        return true;
+      });
+    };
+
+    return {
+      transactionId,
+      wait: () => waitForEntityChanges(),
+      revert: () => state.revertOptimisticUpdate(transactionId),
+      confirm: () => state.confirmTransaction(transactionId),
+    };
+  };
+
   return {
     applyTournamentEntryUpdate,
-    applyTournamentSubmitScoresUpdate,
     applyTournamentPrizeUpdate,
+    applyTournamentClaimPrizesUpdate,
     applyTournamentCreateAndAddPrizesUpdate,
   };
 };

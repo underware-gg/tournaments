@@ -280,6 +280,79 @@ export const useGetGameSettingsQuery = (namespace: string) => {
   return { entities, isLoading, refetch };
 };
 
+export const useSubscribeTournamentQuery = (tournamentId: BigNumberish) => {
+  const query = useMemo(
+    () =>
+      new ToriiQueryBuilder()
+        .withClause(
+          AndComposeClause([
+            KeysClause(
+              [
+                ModelsMapping.Tournament,
+                ModelsMapping.EntryCount,
+                ModelsMapping.Prize,
+                ModelsMapping.PrizeClaim,
+                ModelsMapping.Leaderboard,
+                ModelsMapping.Registration,
+              ],
+              []
+            ),
+            MemberClause(
+              ModelsMapping.Tournament,
+              "id",
+              "Eq",
+              addAddressPadding(tournamentId)
+            ),
+            MemberClause(
+              ModelsMapping.EntryCount,
+              "tournament_id",
+              "Eq",
+              addAddressPadding(tournamentId)
+            ),
+            MemberClause(
+              ModelsMapping.Prize,
+              "tournament_id",
+              "Eq",
+              addAddressPadding(tournamentId)
+            ),
+            MemberClause(
+              ModelsMapping.PrizeClaim,
+              "tournament_id",
+              "Eq",
+              addAddressPadding(tournamentId)
+            ),
+            MemberClause(
+              ModelsMapping.Leaderboard,
+              "tournament_id",
+              "Eq",
+              addAddressPadding(tournamentId)
+            ),
+            MemberClause(
+              ModelsMapping.Registration,
+              "tournament_id",
+              "Eq",
+              addAddressPadding(tournamentId)
+            ),
+          ]).build()
+        )
+        .withEntityModels([
+          ModelsMapping.Tournament,
+          ModelsMapping.EntryCount,
+          ModelsMapping.Prize,
+          ModelsMapping.PrizeClaim,
+          ModelsMapping.Leaderboard,
+          ModelsMapping.Registration,
+        ])
+        .includeHashedKeys(),
+    [tournamentId]
+  );
+
+  const { entities, isSubscribed } = useSdkSubscribeEntities({
+    query,
+  });
+  return { entities, isSubscribed };
+};
+
 export const useSubscribeTournamentsQuery = () => {
   const query = useMemo(
     () =>

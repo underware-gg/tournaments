@@ -1,7 +1,5 @@
 import { useAccount } from "@starknet-react/core";
-import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { useDojo } from "@/context/dojo";
-import { v4 as uuidv4 } from "uuid";
 import {
   Tournament,
   Prize,
@@ -51,14 +49,11 @@ export function selectTournament(client: any, isMainnet: boolean): any {
 }
 
 export const useSystemCalls = () => {
-  const state = useDojoStore.getState();
-
   const { client, selectedChainConfig } = useDojo();
   const { account, address } = useAccount();
   const { toast } = useToast();
   const {
     applyTournamentEntryUpdate,
-    applyTournamentSubmitScoresUpdate,
     applyTournamentPrizeUpdate,
     applyTournamentCreateAndAddPrizesUpdate,
   } = useOptimisticUpdates();
@@ -108,8 +103,6 @@ export const useSystemCalls = () => {
         ]),
       });
 
-      console.log(calls);
-
       const tx = isMainnet
         ? await account?.execute(calls)
         : account?.execute(calls);
@@ -134,21 +127,28 @@ export const useSystemCalls = () => {
   const submitScores = async (
     tournamentId: BigNumberish,
     tournamentName: string,
-    gameIds: Array<BigNumberish>
+    submissions: Array<{
+      tokenId: BigNumberish;
+      position: BigNumberish;
+    }>
   ) => {
-    const { wait, revert, confirm } = applyTournamentSubmitScoresUpdate(
-      tournamentId,
-      gameIds
-    );
-
     try {
-      const resolvedClient = await client;
-      const tournamentContract = selectTournament(resolvedClient, isMainnet);
-      const tx = isMainnet
-        ? await tournamentContract.submitScores(account!, tournamentId, gameIds)
-        : tournamentContract.submitScores(account!, tournamentId, gameIds);
+      let calls = [];
+      for (const submission of submissions) {
+        calls.push({
+          contractAddress: tournamentAddress,
+          entrypoint: "submit_score",
+          calldata: CallData.compile([
+            tournamentId,
+            submission.tokenId,
+            submission.position,
+          ]),
+        });
+      }
 
-      await wait();
+      const tx = isMainnet
+        ? await account?.execute(calls)
+        : account?.execute(calls);
 
       if (tx) {
         toast({
@@ -157,11 +157,11 @@ export const useSystemCalls = () => {
         });
       }
     } catch (error) {
-      revert();
-      console.error("Error executing create tournament:", error);
+      // revert();
+      console.error("Error executing submit scores:", error);
       throw error;
     } finally {
-      confirm();
+      // confirm();
     }
   };
 
@@ -304,8 +304,6 @@ export const useSystemCalls = () => {
     tournamentName: string,
     prizes: Array<PrizeTypeEnum>
   ) => {
-    const transactionId = uuidv4();
-
     try {
       let calls = [];
       for (const prize of prizes) {
@@ -327,11 +325,8 @@ export const useSystemCalls = () => {
         });
       }
     } catch (error) {
-      state.revertOptimisticUpdate(transactionId);
       console.error("Error executing distribute prizes:", error);
       throw error;
-    } finally {
-      state.confirmTransaction(transactionId);
     }
   };
 
@@ -352,13 +347,11 @@ export const useSystemCalls = () => {
   };
 
   const getBalanceGeneral = async (tokenAddress: string) => {
-    console.log(tokenAddress, address);
     const result = await account?.callContract({
       contractAddress: tokenAddress,
       entrypoint: "balance_of",
       calldata: [address!],
     });
-    console.log(result);
     return BigInt(result?.[0]!);
   };
 
@@ -398,7 +391,6 @@ export const useSystemCalls = () => {
       entrypoint,
       calldata,
     }));
-    console.log(summedCalls);
     await account?.execute(summedCalls);
   };
 

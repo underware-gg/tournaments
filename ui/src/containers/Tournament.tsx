@@ -11,6 +11,7 @@ import {
   useSubscribeTournamentEntriesQuery,
   useGetGameCounterQuery,
   useGetTournamentQuery,
+  useSubscribeTournamentQuery,
 } from "@/dojo/hooks/useSdkQueries";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import {
@@ -44,8 +45,8 @@ import MyEntries from "@/components/tournament/MyEntries";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
 import EntryRequirements from "@/components/tournament/EntryRequirements";
 import PrizesContainer from "@/components/tournament/prizes/PrizesContainer";
-import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
-import { ClaimPrizesDialog } from "@/components/dialogs/ClaimPrizesDialog";
+import { ClaimPrizesDialog } from "@/components/dialogs/ClaimPrizes";
+import { SubmitScoresDialog } from "@/components/dialogs/SubmitScores";
 
 const Tournament = () => {
   const { id } = useParams<{ id: string }>();
@@ -55,11 +56,12 @@ const Tournament = () => {
   const state = useDojoStore.getState();
   const [enterDialogOpen, setEnterDialogOpen] = useState(false);
   const [claimDialogOpen, setClaimDialogOpen] = useState(false);
-  const { submitScores } = useSystemCalls();
+  const [submitScoresDialogOpen, setSubmitScoresDialogOpen] = useState(false);
 
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
 
   useGetTournamentQuery(addAddressPadding(bigintToHex(id!)));
+  useSubscribeTournamentQuery(addAddressPadding(bigintToHex(id!)));
 
   const tournamentEntityId = useMemo(
     () => getEntityIdFromKeys([BigInt(id!)]),
@@ -290,17 +292,10 @@ const Tournament = () => {
           ) : isEnded && !isSubmitted ? (
             <Button
               className="uppercase"
-              onClick={() =>
-                submitScores(
-                  tournamentModel?.id,
-                  feltToString(tournamentModel?.metadata.name),
-                  [1, 2, 3]
-                )
-              }
+              onClick={() => setSubmitScoresDialogOpen(true)}
             >
               <TROPHY />
-              {` Submit Scores | `}
-              <span className="font-bold">5</span>
+              {` Submit Scores`}
             </Button>
           ) : isSubmitted ? (
             <Button
@@ -330,6 +325,15 @@ const Tournament = () => {
             entryCountModel={entryCountModel}
             gameCount={gameCount}
             tokens={tokens}
+          />
+          <SubmitScoresDialog
+            open={submitScoresDialogOpen}
+            onOpenChange={setSubmitScoresDialogOpen}
+            tournamentModel={tournamentModel}
+            nameSpace={nameSpace}
+            gameNamespace={gameNamespace ?? ""}
+            gameAddress={tournamentModel?.game_config?.address}
+            leaderboard={leaderboardModel}
           />
           <ClaimPrizesDialog
             open={claimDialogOpen}

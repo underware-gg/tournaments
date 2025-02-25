@@ -492,7 +492,7 @@ export const useGetTournamentLeaderboard = ({
     LEFT JOIN token_balances t 
       ON token_balance_id = t.token_id
     WHERE r.tournament_id = "${addAddressPadding(tournamentId)}"
-    ORDER BY s.score DESC
+    ORDER BY s.score DESC, r.entry_number ASC
     LIMIT ${limit}
     OFFSET ${offset}
   `

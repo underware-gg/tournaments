@@ -13,6 +13,7 @@ import {
   Token,
   EntryFee,
   PrizeClaim,
+  Leaderboard,
 } from "@/generated/models.gen";
 import { PositionPrizes, TokenPrizes } from "@/lib/types";
 import { TokenPrices } from "@/hooks/useEkuboPrices";
@@ -157,8 +158,45 @@ export const processPrizes = (
   }));
 };
 
-export const getSubmittableScores = (leaderboardSize: number) => {
-  return Array.from({ length: leaderboardSize }, (_, index) => index + 1);
+export const getSubmittableScores = (
+  currentLeaderboard: any[],
+  leaderboard: Leaderboard
+) => {
+  const submittedTokenIds = leaderboard?.token_ids ?? [];
+  const leaderboardWithPositions = currentLeaderboard.map((score, index) => ({
+    ...score,
+    position: index + 1,
+  }));
+  // if no scores have been submitted then we can submit the whole leaderboard in reverse order
+  const newSubmissions = leaderboardWithPositions
+    .sort((a, b) => {
+      const scoreComparison = Number(a.score) - Number(b.score);
+
+      if (scoreComparison === 0) {
+        return Number(b.entry_number) - Number(a.entry_number);
+      }
+
+      return scoreComparison;
+    })
+    .map((score) => ({
+      tokenId: score.game_token_id,
+      position: score.position,
+    }));
+  if (submittedTokenIds.length === 0) {
+    return newSubmissions;
+  } else {
+    // TODO: Handle the case where some scores have been submitted
+    // const submittedScores = submittedTokenIds.map((tokenId, index) => ({
+    //   tokenId: tokenId,
+    //   position: index + 1,
+    // }));
+    // const correctlySubmittedScores = submittedScores.filter((score) =>
+    //   leaderboardWithPositions.some(
+    //     (position) => position.tokenId === score.tokenId
+    //   )
+    // );
+    return [];
+  }
 };
 
 export const extractEntryFeePrizes = (
@@ -280,14 +318,12 @@ export const getClaimablePrizes = (
     if (prize.type === "entry_fee_game_creator") {
       return !claimedPrizes.some(
         (claimedPrize) =>
-          claimedPrize.prize_type?.activeVariant() === "EntryFees" &&
-          claimedPrize.prize_type?.variant.EntryFees.GameCreator
+          claimedPrize.prize_type?.variant.EntryFees === "GameCreator"
       );
     } else if (prize.type === "entry_fee_tournament_creator") {
       return !claimedPrizes.some(
         (claimedPrize) =>
-          claimedPrize.prize_type?.activeVariant() === "EntryFees" &&
-          claimedPrize.prize_type?.variant.EntryFees.TournamentCreator
+          claimedPrize.prize_type?.variant.EntryFees === "TournamentCreator"
       );
     } else if (prize.type === "entry_fee") {
       return !claimedEntryFeePositions.includes(prize.payout_position);
