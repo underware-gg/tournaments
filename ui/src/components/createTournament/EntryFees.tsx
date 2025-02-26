@@ -1,3 +1,4 @@
+import { useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { StepProps } from "@/containers/CreateTournament";
 import {
@@ -14,6 +15,7 @@ import TokenDialog from "@/components/dialogs/Token";
 import { Slider } from "@/components/ui/slider";
 import React from "react";
 import { Token } from "@/generated/models.gen";
+import { calculateDistribution } from "@/lib/utils";
 
 const EntryFees = ({ form }: StepProps) => {
   const [selectedToken, setSelectedToken] = React.useState<Token | null>(null);
@@ -25,68 +27,34 @@ const EntryFees = ({ form }: StepProps) => {
     { value: 10, label: "10%" },
   ];
 
-  // Add local state for distribution weight
   const [distributionWeight, setDistributionWeight] = React.useState(1);
 
-  // Helper function to calculate weighted distribution with whole number rounding
-  const calculateDistribution = (
-    positions: number,
-    weight: number,
-    creatorFee: number,
-    gameFee: number
-  ) => {
-    const availablePercentage = 100 - creatorFee - gameFee;
+  const creatorFee = form.watch("entryFees.creatorFeePercentage") || 0;
+  const gameFee = form.watch("entryFees.gameFeePercentage") || 0;
+  const prizeDistribution =
+    form
+      .watch("entryFees.prizeDistribution")
+      ?.reduce((sum, pos) => sum + (pos.percentage || 0), 0) || 0;
 
-    // First calculate raw percentages
-    const rawDistributions: number[] = [];
-    for (let i = 0; i < positions; i++) {
-      const share = availablePercentage * Math.pow(1 - i / positions, weight);
-      rawDistributions.push(share);
-    }
-
-    // Normalize to get percentages
-    const total = rawDistributions.reduce((a, b) => a + b, 0);
-    const normalizedDistributions = rawDistributions.map(
-      (d) => (d * availablePercentage) / total
-    );
-
-    // Round down to whole numbers
-    const roundedDistributions = normalizedDistributions.map((d) =>
-      Math.floor(d)
-    );
-
-    // Calculate the remaining points to distribute (should be less than positions)
-    const remainingPoints =
-      availablePercentage - roundedDistributions.reduce((a, b) => a + b, 0);
-
-    // Distribute remaining points based on decimal parts
-    const decimalParts = normalizedDistributions.map((d, i) => ({
-      index: i,
-      decimal: d - Math.floor(d),
-    }));
-
-    // Sort by decimal part descending
-    decimalParts.sort((a, b) => b.decimal - a.decimal);
-
-    // Add one point to each position with highest decimal until we reach 100%
-    for (let i = 0; i < remainingPoints; i++) {
-      roundedDistributions[decimalParts[i].index]++;
-    }
-
-    return roundedDistributions;
-  };
-
-  // Update the total calculation display
-  const getTotalDistribution = () => {
-    const creatorFee = form.watch("entryFees.creatorFeePercentage") || 0;
-    const gameFee = form.watch("entryFees.gameFeePercentage") || 0;
-    const prizeDistribution =
-      form
-        .watch("entryFees.prizeDistribution")
-        ?.reduce((sum, pos) => sum + (pos.percentage || 0), 0) || 0;
-
+  const totalDistributionPercentage = useMemo(() => {
     return creatorFee + gameFee + prizeDistribution;
-  };
+  }, [creatorFee, gameFee, prizeDistribution]);
+
+  useEffect(() => {
+    const distributions = calculateDistribution(
+      form.watch("leaderboardSize"),
+      distributionWeight,
+      creatorFee,
+      gameFee
+    );
+    form.setValue(
+      "entryFees.prizeDistribution",
+      distributions.map((percentage, index) => ({
+        position: index + 1,
+        percentage,
+      }))
+    );
+  }, [creatorFee, gameFee, distributionWeight]);
 
   return (
     <FormField
@@ -131,6 +99,7 @@ const EntryFees = ({ form }: StepProps) => {
                               setSelectedToken(token);
                               tokenField.onChange(token.address);
                             }}
+                            type="erc20"
                           />
                         </FormControl>
                       </FormItem>
@@ -298,8 +267,8 @@ const EntryFees = ({ form }: StepProps) => {
                         {distributionWeight.toFixed(1)}
                       </span>
                       <div className="flex flex-row gap-2 items-center justify-between text-sm text-muted-foreground">
-                        <span>Total: {getTotalDistribution()}%</span>
-                        {getTotalDistribution() !== 100 && (
+                        <span>Total: {totalDistributionPercentage}%</span>
+                        {totalDistributionPercentage !== 100 && (
                           <span className="text-destructive">
                             Total must equal 100%
                           </span>

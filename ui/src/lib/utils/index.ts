@@ -387,3 +387,50 @@ export const adjustColorOpacity = (color: string, opacity: number): string => {
   console.warn(`Color format not recognized for: ${color}`);
   return color;
 };
+
+export const calculateDistribution = (
+  positions: number,
+  weight: number,
+  creatorFee?: number,
+  gameFee?: number
+): number[] => {
+  const availablePercentage = 100 - (creatorFee ?? 0) - (gameFee ?? 0);
+
+  // First calculate raw percentages
+  const rawDistributions: number[] = [];
+  for (let i = 0; i < positions; i++) {
+    const share = availablePercentage * Math.pow(1 - i / positions, weight);
+    rawDistributions.push(share);
+  }
+
+  // Normalize to get percentages
+  const total = rawDistributions.reduce((a, b) => a + b, 0);
+  const normalizedDistributions = rawDistributions.map(
+    (d) => (d * availablePercentage) / total
+  );
+
+  // Round down to whole numbers
+  const roundedDistributions = normalizedDistributions.map((d) =>
+    Math.floor(d)
+  );
+
+  // Calculate the remaining points to distribute (should be less than positions)
+  const remainingPoints =
+    availablePercentage - roundedDistributions.reduce((a, b) => a + b, 0);
+
+  // Distribute remaining points based on decimal parts
+  const decimalParts = normalizedDistributions.map((d, i) => ({
+    index: i,
+    decimal: d - Math.floor(d),
+  }));
+
+  // Sort by decimal part descending
+  decimalParts.sort((a, b) => b.decimal - a.decimal);
+
+  // Add one point to each position with highest decimal until we reach 100%
+  for (let i = 0; i < remainingPoints; i++) {
+    roundedDistributions[decimalParts[i].index]++;
+  }
+
+  return roundedDistributions;
+};

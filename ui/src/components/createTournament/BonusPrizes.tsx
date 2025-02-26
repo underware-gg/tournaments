@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { StepProps } from "@/containers/CreateTournament";
 import {
@@ -15,6 +15,8 @@ import TokenDialog from "@/components/dialogs/Token";
 import { getTokenLogoUrl } from "@/lib/tokensMeta";
 import { Token } from "@/generated/models.gen";
 import { X } from "@/components/Icons";
+import { Slider } from "@/components/ui/slider";
+import { calculateDistribution } from "@/lib/utils";
 
 interface NewPrize {
   tokenAddress: string;
@@ -30,20 +32,46 @@ const BonusPrizes = ({ form }: StepProps) => {
     tokenAddress: "",
     tokenType: "",
   });
+  const [distributionWeight, setDistributionWeight] = React.useState(1);
+  const [prizeDistributions, setPrizeDistributions] = React.useState<
+    { position: number; percentage: number }[]
+  >([]);
+
+  const totalDistributionPercentage = useMemo(() => {
+    return (
+      prizeDistributions.reduce((sum, pos) => sum + (pos.percentage || 0), 0) ||
+      0
+    );
+  }, [prizeDistributions]);
 
   const isValidPrize = () => {
-    if (!newPrize.tokenAddress || !newPrize.position) return false;
+    if (!newPrize.tokenAddress) return false;
 
     if (newPrize.tokenType === "ERC20") {
-      return !!newPrize.amount && newPrize.amount > 0;
+      return !!newPrize.amount && totalDistributionPercentage === 100;
     }
 
     if (newPrize.tokenType === "ERC721") {
-      return !!newPrize.tokenId;
+      return !!newPrize.tokenId && !!newPrize.position;
     }
 
     return false;
   };
+
+  const isERC20 = newPrize.tokenType === "ERC20";
+
+  useEffect(() => {
+    const distributions = calculateDistribution(
+      form.watch("leaderboardSize"),
+      distributionWeight
+    );
+    setPrizeDistributions(
+      distributions.map((percentage, index) => ({
+        position: index + 1,
+        percentage,
+      }))
+    );
+  }, []);
 
   return (
     <FormField
@@ -124,20 +152,22 @@ const BonusPrizes = ({ form }: StepProps) => {
                               className="w-[150px]"
                             />
                           )}
-                          <Input
-                            type="number"
-                            placeholder="Position"
-                            min={1}
-                            max={form.watch("leaderboardSize")}
-                            value={newPrize.position || ""}
-                            onChange={(e) =>
-                              setNewPrize((prev) => ({
-                                ...prev,
-                                position: Number(e.target.value),
-                              }))
-                            }
-                            className="w-[100px]"
-                          />
+                          {!isERC20 && (
+                            <Input
+                              type="number"
+                              placeholder="Position"
+                              min={1}
+                              max={form.watch("leaderboardSize")}
+                              value={newPrize.position || ""}
+                              onChange={(e) =>
+                                setNewPrize((prev) => ({
+                                  ...prev,
+                                  position: Number(e.target.value),
+                                }))
+                              }
+                              className="w-[100px]"
+                            />
+                          )}
                         </div>
                       </>
                     )}
@@ -151,16 +181,17 @@ const BonusPrizes = ({ form }: StepProps) => {
                       if (
                         newPrize.tokenType === "ERC20" &&
                         newPrize.amount &&
-                        newPrize.position
+                        totalDistributionPercentage === 100
                       ) {
                         form.setValue("bonusPrizes", [
                           ...currentPrizes,
-                          {
-                            type: "ERC20",
+                          ...prizeDistributions.map((prize) => ({
+                            type: "ERC20" as const,
                             tokenAddress: newPrize.tokenAddress,
-                            amount: newPrize.amount,
-                            position: newPrize.position,
-                          },
+                            amount:
+                              ((newPrize.amount ?? 0) * prize.percentage) / 100,
+                            position: prize.position,
+                          })),
                         ]);
                       } else if (
                         newPrize.tokenType === "ERC721" &&
@@ -177,7 +208,6 @@ const BonusPrizes = ({ form }: StepProps) => {
                           },
                         ]);
                       }
-                      // Reset new prize inputs and selected token
                       setNewPrize({ tokenAddress: "", tokenType: "" });
                       setSelectedToken(null);
                     }}
@@ -186,6 +216,76 @@ const BonusPrizes = ({ form }: StepProps) => {
                   </Button>
                 </div>
 
+                {isERC20 && (
+                  <div className="flex flex-col gap-4">
+                    <div className="space-y-2">
+                      <FormLabel>Distribution Weight</FormLabel>
+                      <div className="flex flex-row items-center gap-4">
+                        <Slider
+                          min={0}
+                          max={5}
+                          step={0.1}
+                          value={[distributionWeight]}
+                          onValueChange={([value]) => {
+                            setDistributionWeight(value);
+                            const distributions = calculateDistribution(
+                              form.watch("leaderboardSize"),
+                              value
+                            );
+                            console.log(form.watch("leaderboardSize"));
+                            setPrizeDistributions(
+                              distributions.map((percentage, index) => ({
+                                position: index + 1,
+                                percentage,
+                              }))
+                            );
+                          }}
+                          className="w-[200px] h-10"
+                        />
+                        <span className="w-12 text-center">
+                          {distributionWeight.toFixed(1)}
+                        </span>
+                        <div className="flex flex-row gap-2 items-center justify-between text-sm text-muted-foreground">
+                          <span>Total: {totalDistributionPercentage}%</span>
+                          {totalDistributionPercentage !== 100 && (
+                            <span className="text-destructive">
+                              Total must equal 100%
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-row gap-4 overflow-x-auto">
+                      {Array.from({
+                        length: form.watch("leaderboardSize"),
+                      }).map((_, index) => (
+                        <div key={index} className="flex flex-col gap-2">
+                          <span>Position {index + 1}</span>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              min="0"
+                              max="100"
+                              className="w-[80px]"
+                              onChange={(e) => {
+                                const value = Number(e.target.value);
+                                setPrizeDistributions((prev) => [
+                                  ...prev,
+                                  { position: index + 1, percentage: value },
+                                ]);
+                              }}
+                              value={
+                                prizeDistributions[index]?.percentage || ""
+                              }
+                            />
+                            <span>%</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {(form.watch("bonusPrizes") || []).length > 0 && (
                   <>
                     <div className="w-full h-0.5 bg-retro-green/25" />
@@ -193,7 +293,7 @@ const BonusPrizes = ({ form }: StepProps) => {
                       <FormLabel className="font-astronaut text-2xl">
                         Added Prizes
                       </FormLabel>
-                      <div className="flex flex-row items-center gap-2">
+                      <div className="flex flex-row items-center gap-2 overflow-x-auto">
                         {(form.watch("bonusPrizes") || []).map(
                           (prize, index) => (
                             <div

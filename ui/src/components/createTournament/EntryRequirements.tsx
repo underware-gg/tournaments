@@ -191,6 +191,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                                     setSelectedToken(token);
                                     field.onChange(token.address);
                                   }}
+                                  type="erc721"
                                 />
                               </div>
                             </FormControl>

@@ -60,6 +60,7 @@ const Tournament = () => {
   const [enterDialogOpen, setEnterDialogOpen] = useState(false);
   const [claimDialogOpen, setClaimDialogOpen] = useState(false);
   const [submitScoresDialogOpen, setSubmitScoresDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [tournamentExists, setTournamentExists] = useState(false);
 
   const { data: tournamentsCount } = useGetTournamentsCount({
@@ -67,11 +68,30 @@ const Tournament = () => {
   });
 
   useEffect(() => {
+    let timeoutId: number;
+
     const checkTournament = async () => {
       const tournamentId = Number(id || 0);
-      setTournamentExists(tournamentId <= tournamentsCount);
+
+      // If we have the tournament count, we can check immediately
+      if (tournamentsCount !== undefined) {
+        setTournamentExists(tournamentId <= tournamentsCount);
+        setLoading(false);
+      } else {
+        // Set a timeout to consider the tournament as "not found" if data doesn't load within 5 seconds
+        timeoutId = window.setTimeout(() => {
+          setTournamentExists(false);
+          setLoading(false);
+        }, 5000);
+      }
     };
+
     checkTournament();
+
+    // Clean up the timeout if the component unmounts or dependencies change
+    return () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
   }, [id, tournamentsCount]);
 
   useGetTournamentQuery(addAddressPadding(bigintToHex(id!)));
@@ -266,16 +286,22 @@ const Tournament = () => {
 
   const hasPrizes = Object.keys(groupedPrizes).length > 0;
 
-  if (!tournamentExists) {
-    return <NotFound message={`Tournament not found: ${id}`} />;
-  }
-
-  if (!tournamentModel) {
+  if (loading) {
     return (
-      <div className="w-3/4 h-full m-auto flex items-center justify-center">
-        <span className="font-astronaut text-2xl">Loading tournament...</span>
+      <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 bg-black/20 backdrop-blur-sm z-50">
+        <div className="relative w-16 h-16">
+          <div className="absolute w-full h-full border-4 border-retro-green rounded-full animate-ping opacity-75"></div>
+          <div className="absolute w-full h-full border-4 border-retro-green-dark rounded-full animate-pulse"></div>
+        </div>
+        <span className="font-astronaut text-2xl text-retro-green-dark animate-pulse">
+          Loading tournament...
+        </span>
       </div>
     );
+  }
+
+  if (!tournamentExists) {
+    return <NotFound message={`Tournament not found: ${id}`} />;
   }
 
   return (
