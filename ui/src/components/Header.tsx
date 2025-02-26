@@ -10,10 +10,20 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useDojo } from "@/context/dojo";
 import { ChainId } from "@/dojo/config";
 import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
-
+import { Menu } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
+import useUIStore from "@/hooks/useUIStore";
+import { getGames } from "@/assets/games";
+import TokenGameIcon from "./icons/TokenGameIcon";
 const Header = () => {
   const { account } = useAccount();
   const { connect } = useConnectToSelectedChain();
+  const { gameFilters, setGameFilters, gameData } = useUIStore();
 
   const { disconnect } = useDisconnect();
   const { openProfile } = useControllerProfile();
@@ -25,52 +35,135 @@ const Header = () => {
   const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
 
   return (
-    <div className="flex flex-row items-center justify-between py-5 px-10 h-[80px]">
+    <div className="flex flex-row items-center justify-between px-5 sm:py-5 sm:px-10 h-[80px]">
+      {/* Hamburger menu for small screens */}
+      <div className="sm:hidden">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="p-0 flex items-center justify-center"
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[250px] sm:w-[300px]">
+            <div className="flex flex-col gap-4 py-4">
+              <SheetClose asChild>
+                <div
+                  className="text-3xl font-astronaut hover:cursor-pointer hover:text-retro-green-dark transition-colors duration-200"
+                  onClick={() => navigate("/")}
+                >
+                  Budokan
+                </div>
+              </SheetClose>
+              {Object.entries(getGames()).map(([key, game]) => {
+                const isDisabled = !gameData.find(
+                  (game) => game.contract_address === key
+                );
+
+                // Create the button element
+                const buttonElement = (
+                  <div className="relative w-full">
+                    <Button
+                      size={"xl"}
+                      variant="outline"
+                      className="justify-start w-full"
+                      onClick={() => {
+                        if (gameFilters.includes(key)) {
+                          // Remove the key if it exists
+                          setGameFilters(
+                            gameFilters.filter((filter) => filter !== key)
+                          );
+                        } else {
+                          // Add the key if it doesn't exist
+                          setGameFilters([...gameFilters, key]);
+                        }
+                      }}
+                      disabled={isDisabled}
+                    >
+                      <span className="flex flex-row items-center gap-2 font-astronaut">
+                        <TokenGameIcon game={key} />
+                        {game.name}
+                      </span>
+                    </Button>
+                    {isDisabled && (
+                      <div className="absolute top-1 right-2 flex items-center justify-center rounded-md">
+                        <span className="text-xs font-astronaut uppercase">
+                          Coming Soon
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+
+                // Only wrap with SheetClose if the button is not disabled
+                return isDisabled ? (
+                  <div key={key}>{buttonElement}</div>
+                ) : (
+                  <SheetClose asChild key={key}>
+                    {buttonElement}
+                  </SheetClose>
+                );
+              })}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* Logo - hidden on small screens */}
       <div
-        className="flex text-4xl font-astronaut hover:cursor-pointer hover:text-retro-green-dark transition-colors duration-200"
+        className="hidden sm:flex text-4xl font-astronaut hover:cursor-pointer hover:text-retro-green-dark transition-colors duration-200"
         onClick={() => {
           navigate("/");
         }}
       >
         Budokan
       </div>
+
       <div className="flex flex-row items-center gap-2">
-        {!isMainnet && location.pathname !== "/play" && (
-          <Button
-            onClick={() => {
-              navigate("/play");
-            }}
-          >
-            <span className="flex flex-row items-center gap-2">
-              <PLAY />
-              Play
-            </span>
-          </Button>
-        )}
-        {!isMainnet && location.pathname !== "/register-token" && (
-          <Button
-            onClick={() => {
-              navigate("/register-token");
-            }}
-          >
-            <span className="flex flex-row items-center gap-2">
-              <PLUS />
-              Register Token
-            </span>
-          </Button>
-        )}
-        {location.pathname !== "/create-tournament" && (
-          <Button
-            onClick={() => {
-              navigate("/create-tournament");
-            }}
-          >
-            <span className="flex flex-row items-center gap-2">
-              <PLUS />
-              Create Tournament
-            </span>
-          </Button>
-        )}
+        {/* Navigation buttons - only visible on larger screens */}
+        <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-2">
+          {!isMainnet && location.pathname !== "/play" && (
+            <Button
+              onClick={() => {
+                navigate("/play");
+              }}
+            >
+              <span className="flex flex-row items-center gap-2">
+                <PLAY />
+                Play
+              </span>
+            </Button>
+          )}
+          {!isMainnet && location.pathname !== "/register-token" && (
+            <Button
+              onClick={() => {
+                navigate("/register-token");
+              }}
+            >
+              <span className="flex flex-row items-center gap-2">
+                <PLUS />
+                Register Token
+              </span>
+            </Button>
+          )}
+          {location.pathname !== "/create-tournament" && (
+            <Button
+              onClick={() => {
+                navigate("/create-tournament");
+              }}
+            >
+              <span className="flex flex-row items-center gap-2">
+                <PLUS />
+                Create Tournament
+              </span>
+            </Button>
+          )}
+        </div>
+
+        {/* Connect button - visible on all screen sizes */}
         <Button
           onClick={() => {
             if (!account) {

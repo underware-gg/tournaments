@@ -19,7 +19,7 @@ const EntryRequirements = ({
 }: {
   tournamentModel: TournamentModel;
 }) => {
-  if (!tournamentModel.entry_requirement.isSome()) {
+  if (!tournamentModel?.entry_requirement?.isSome()) {
     return null;
   }
 

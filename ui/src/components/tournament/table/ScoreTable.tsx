@@ -47,7 +47,7 @@ const ScoreTable = ({
     namespace: nameSpace,
     tournamentId: tournamentId,
     gameNamespace: gameNamespace,
-    gameAddress: indexAddress(gameAddress.toString()),
+    gameAddress: indexAddress(gameAddress?.toString() ?? "0x0"),
     gameScoreModel: gameScoreModel,
     gameScoreAttribute: gameScoreAttribute,
     limit: 5,

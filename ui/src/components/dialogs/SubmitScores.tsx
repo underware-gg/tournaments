@@ -49,7 +49,7 @@ export function SubmitScoresDialog({
     gameNamespace: gameNamespace,
     gameScoreModel: gameScoreModel,
     gameScoreAttribute: gameScoreAttribute,
-    gameAddress: indexAddress(gameAddress.toString()),
+    gameAddress: indexAddress(gameAddress?.toString() ?? "0x0"),
     limit: leaderboardSize,
     offset: 0,
   });

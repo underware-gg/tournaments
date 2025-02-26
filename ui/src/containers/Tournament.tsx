@@ -397,7 +397,7 @@ const Tournament = () => {
         <div className="flex flex-row items-center h-12 justify-between">
           <div className="flex flex-row gap-5">
             <span className="font-astronaut text-4xl">
-              {feltToString(tournamentModel.metadata.name)}
+              {feltToString(tournamentModel?.metadata?.name ?? "")}
             </span>
             <div className="flex flex-row items-center gap-4 text-retro-green-dark">
               <div className="flex flex-row gap-2">
@@ -471,11 +471,11 @@ const Tournament = () => {
           <div className="w-1/2 flex justify-center items-center">
             <TournamentTimeline
               type={registrationType}
-              createdTime={Number(tournamentModel?.created_at)}
-              startTime={Number(tournamentModel?.schedule.game.start)}
-              duration={durationSeconds}
+              createdTime={Number(tournamentModel?.created_at ?? 0)}
+              startTime={Number(tournamentModel?.schedule.game.start ?? 0)}
+              duration={durationSeconds ?? 0}
               submissionPeriod={Number(
-                tournamentModel?.schedule.submission_duration
+                tournamentModel?.schedule.submission_duration ?? 0
               )}
               pulse={true}
             />
