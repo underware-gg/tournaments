@@ -30,10 +30,24 @@ import {
   useGetTournaments,
   useGetTournamentsCount,
 } from "@/dojo/hooks/useSqlQueries";
-import { processTournamentFromSql } from "@/lib/utils/formatting";
+import {
+  // calculateTotalValue,
+  // extractEntryFeePrizes,
+  // getErc20TokenSymbols,
+  // groupPrizesByTokens,
+  processTournamentFromSql,
+} from "@/lib/utils/formatting";
 import { processPrizesFromSql } from "@/lib/utils/formatting";
-import { getGames } from "@/assets/games";
+// import { getGames } from "@/assets/games";
 import Pagination from "@/components/table/Pagination";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import useUIStore from "@/hooks/useUIStore";
+// import { useEkuboPrices } from "@/hooks/useEkuboPrices";
+// import { tokens } from "@/lib/tokensMeta";
 
 const EntryRequirements = ({ form }: StepProps) => {
   const { nameSpace } = useDojo();
@@ -42,8 +56,7 @@ const EntryRequirements = ({ form }: StepProps) => {
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
   const [gameFilters, setGameFilters] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-
-  const games = getGames();
+  const { gameData } = useUIStore();
 
   const { data: tournaments } = useGetTournaments({
     namespace: nameSpace,
@@ -81,6 +94,17 @@ const EntryRequirements = ({ form }: StepProps) => {
     form.setValue("gatingOptions.tournament.tournaments", []);
     form.setValue("gatingOptions.addresses", []);
   };
+
+  const getTournamentStatus = (isStarted: boolean, isEnded: boolean) => {
+    if (isEnded) return "Ended";
+    if (isStarted) return "Live";
+    return "Upcoming";
+  };
+
+  // const erc20TokenSymbols = getErc20TokenSymbols(groupedPrizes);
+  // const { prices, isLoading: pricesLoading } = useEkuboPrices({
+  //   tokens: [...erc20TokenSymbols, entryFeeTokenSymbol ?? ""],
+  // });
 
   return (
     <FormField
@@ -314,42 +338,46 @@ const EntryRequirements = ({ form }: StepProps) => {
                                           />
                                         </div>
                                         <div className="flex flex-row gap-2">
-                                          {Object.entries(games).map(
-                                            ([key, game]) => (
-                                              <div
-                                                key={key}
-                                                className={`h-8 ${
-                                                  gameFilters.includes(key)
-                                                    ? "bg-retro-green-dark text-black"
-                                                    : "bg-black"
-                                                } border border-neutral-500 px-2 flex items-center gap-2 cursor-pointer`}
-                                                onClick={() => {
-                                                  if (
-                                                    gameFilters.includes(key)
-                                                  ) {
-                                                    setGameFilters(
-                                                      gameFilters.filter(
-                                                        (g) => g !== key
-                                                      )
-                                                    );
-                                                  } else {
-                                                    setGameFilters([
-                                                      ...gameFilters,
-                                                      key,
-                                                    ]);
-                                                  }
-                                                }}
-                                              >
-                                                {game.name}
-                                                <span className="flex items-center justify-center">
-                                                  <TokenGameIcon
-                                                    size="xs"
-                                                    game={key}
-                                                  />
-                                                </span>
-                                              </div>
-                                            )
-                                          )}
+                                          {gameData.map((game) => (
+                                            <div
+                                              key={game.contract_address}
+                                              className={`h-8 ${
+                                                gameFilters.includes(
+                                                  game.contract_address
+                                                )
+                                                  ? "bg-retro-green-dark text-black"
+                                                  : "bg-black"
+                                              } border border-neutral-500 px-2 flex items-center gap-2 cursor-pointer`}
+                                              onClick={() => {
+                                                if (
+                                                  gameFilters.includes(
+                                                    game.contract_address
+                                                  )
+                                                ) {
+                                                  setGameFilters(
+                                                    gameFilters.filter(
+                                                      (g) =>
+                                                        g !==
+                                                        game.contract_address
+                                                    )
+                                                  );
+                                                } else {
+                                                  setGameFilters([
+                                                    ...gameFilters,
+                                                    game.contract_address,
+                                                  ]);
+                                                }
+                                              }}
+                                            >
+                                              {feltToString(game.name)}
+                                              <span className="flex items-center justify-center">
+                                                <TokenGameIcon
+                                                  size="xs"
+                                                  game={game.contract_address}
+                                                />
+                                              </span>
+                                            </div>
+                                          ))}
                                         </div>
                                       </div>
                                     </DialogHeader>
@@ -358,73 +386,137 @@ const EntryRequirements = ({ form }: StepProps) => {
                                     <div className="flex-1 overflow-y-auto border-t border-retro-green-dark">
                                       {tournamentsData?.length > 0 ? (
                                         tournamentsData.map(
-                                          (tournament, index) => (
-                                            <DialogClose asChild key={index}>
-                                              <div
-                                                className="flex flex-row justify-between border-b border-retro-green-dark px-4 py-2 hover:bg-retro-green/20 hover:cursor-pointer"
-                                                onClick={() => {
-                                                  if (
-                                                    !(
-                                                      field.value || []
-                                                    ).includes(
-                                                      tournament.tournament
-                                                    )
-                                                  ) {
-                                                    field.onChange([
-                                                      ...(field.value || []),
-                                                      tournament.tournament,
-                                                    ]);
-                                                  }
-                                                }}
-                                              >
-                                                <span className="font-astronaut">
-                                                  {feltToString(
-                                                    tournament.tournament
-                                                      .metadata.name
-                                                  )}
-                                                </span>
-                                                <span className="font-astronaut">
-                                                  #
-                                                  {Number(
-                                                    tournament.tournament.id
-                                                  ).toString()}
-                                                </span>
-                                                <div className="flex flex-row">
-                                                  <span className="w-6 h-6">
-                                                    <USER />
-                                                  </span>
-                                                  {tournament.entryCount}
-                                                </div>
-                                                <div className="relative group flex items-center justify-center">
-                                                  <TokenGameIcon
-                                                    size="xs"
-                                                    game={
-                                                      tournament.tournament
-                                                        .game_config.address
-                                                    }
-                                                  />
-                                                  <span className="pointer-events-none absolute bottom-[calc(100%+2px)] left-1/2 transform -translate-x-1/2 bg-black text-neutral-500 border border-retro-green-dark px-2 py-1 rounded text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity w-fit z-50">
-                                                    {
-                                                      games[
+                                          (tournament, index) => {
+                                            const isStarted =
+                                              Number(
+                                                tournament?.tournament.schedule
+                                                  .game.start
+                                              ) <
+                                              Number(
+                                                BigInt(Date.now()) / 1000n
+                                              );
+
+                                            const isEnded =
+                                              Number(
+                                                tournament.tournament.schedule
+                                                  .game.end
+                                              ) <
+                                              Number(
+                                                BigInt(Date.now()) / 1000n
+                                              );
+                                            const status = getTournamentStatus(
+                                              isStarted,
+                                              isEnded
+                                            );
+                                            const name = gameData.find(
+                                              (game) =>
+                                                game.contract_address ===
+                                                tournament.tournament
+                                                  .game_config.address
+                                            )?.name;
+                                            // const processedPrizes =
+                                            //   processPrizesFromSql(
+                                            //     tournament.prizes,
+                                            //     tournament.tournament.id
+                                            //   );
+                                            // const entryFeePrizes =
+                                            //   extractEntryFeePrizes(
+                                            //     tournament?.tournament.id,
+                                            //     tournament?.tournament
+                                            //       .entry_fee,
+                                            //     tournament?.entryCount
+                                            //   );
+
+                                            // const allPrizes = [
+                                            //   ...entryFeePrizes,
+                                            //   ...(processedPrizes ?? []),
+                                            // ];
+
+                                            // const groupedPrizes = groupPrizesByTokens(allPrizes, tokens);
+
+                                            // const totalPrizesValueUSD = calculateTotalValue(groupedPrizes, prices);
+                                            return (
+                                              <DialogClose asChild key={index}>
+                                                <div
+                                                  className="flex flex-row items-center justify-between border-b border-retro-green-dark px-4 py-2 hover:bg-retro-green/20 hover:cursor-pointer"
+                                                  onClick={() => {
+                                                    if (
+                                                      !(
+                                                        field.value || []
+                                                      ).includes(
                                                         tournament.tournament
-                                                          .game_config.address
-                                                      ].name
+                                                      )
+                                                    ) {
+                                                      field.onChange([
+                                                        ...(field.value || []),
+                                                        tournament.tournament,
+                                                      ]);
                                                     }
+                                                  }}
+                                                >
+                                                  <div className="flex flex-row items-center gap-2">
+                                                    <span className="font-astronaut">
+                                                      {feltToString(
+                                                        tournament.tournament
+                                                          .metadata.name
+                                                      )}
+                                                    </span>
+                                                    -
+                                                    <span className="font-astronaut">
+                                                      #
+                                                      {Number(
+                                                        tournament.tournament.id
+                                                      ).toString()}
+                                                    </span>
+                                                  </div>
+                                                  <span className="font-astronaut">
+                                                    {status}
                                                   </span>
+                                                  <div className="flex flex-row">
+                                                    <span className="w-6 h-6">
+                                                      <USER />
+                                                    </span>
+                                                    {tournament.entryCount}
+                                                  </div>
+                                                  <div className="relative group flex items-center justify-center">
+                                                    <Tooltip delayDuration={50}>
+                                                      <TooltipTrigger asChild>
+                                                        <div className="flex items-center justify-center">
+                                                          <TokenGameIcon
+                                                            size="sm"
+                                                            game={
+                                                              tournament
+                                                                .tournament
+                                                                .game_config
+                                                                .address
+                                                            }
+                                                          />
+                                                        </div>
+                                                      </TooltipTrigger>
+                                                      <TooltipContent
+                                                        side="top"
+                                                        className="bg-black text-neutral-500 border border-retro-green-dark px-2 py-1 rounded text-sm"
+                                                      >
+                                                        {name
+                                                          ? feltToString(name)
+                                                          : "Unknown"}
+                                                      </TooltipContent>
+                                                    </Tooltip>
+                                                  </div>
+                                                  {/* <div>${tournament.pot}</div> */}
+                                                  <div className="flex flex-row items-center">
+                                                    <span className="w-5 h-5">
+                                                      <TROPHY />
+                                                    </span>
+                                                    {Number(
+                                                      tournament.tournament
+                                                        .game_config.prize_spots
+                                                    ).toString()}
+                                                  </div>
                                                 </div>
-                                                {/* <div>${tournament.pot}</div> */}
-                                                <div className="flex flex-row items-center">
-                                                  <span className="w-5 h-5">
-                                                    <TROPHY />
-                                                  </span>
-                                                  {Number(
-                                                    tournament.tournament
-                                                      .game_config.prize_spots
-                                                  ).toString()}
-                                                </div>
-                                              </div>
-                                            </DialogClose>
-                                          )
+                                              </DialogClose>
+                                            );
+                                          }
                                         )
                                       ) : (
                                         <div className="flex items-center justify-center h-32 text-muted-foreground">

@@ -1,5 +1,5 @@
 import { getGames } from "@/assets/games";
-import { TOKEN } from "@/components/Icons";
+import { TOKEN, QUESTION } from "@/components/Icons";
 
 interface TokenGameIconProps {
   game: keyof ReturnType<typeof getGames>;
@@ -13,7 +13,7 @@ const TokenGameIcon = ({
   tokenColor = "text-retro-green/25",
 }: TokenGameIconProps) => {
   const games = getGames();
-  const Icon = games[game].Icon;
+  const Icon = games[game]?.Icon;
   const sizeClasses = {
     xs: "size-5",
     sm: "size-8",
@@ -26,7 +26,13 @@ const TokenGameIcon = ({
         <TOKEN />
       </span>
       <span className="absolute inset-0 flex items-center justify-center">
-        {Icon && <Icon className={`h-[50%] w-auto`} />}
+        {Icon ? (
+          <Icon className={`h-[50%] w-auto`} />
+        ) : (
+          <span className="w-full h-full">
+            <QUESTION />
+          </span>
+        )}
       </span>
     </span>
   );
