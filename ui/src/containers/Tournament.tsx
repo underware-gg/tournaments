@@ -48,6 +48,8 @@ import EntryRequirements from "@/components/tournament/EntryRequirements";
 import PrizesContainer from "@/components/tournament/prizes/PrizesContainer";
 import { ClaimPrizesDialog } from "@/components/dialogs/ClaimPrizes";
 import { SubmitScoresDialog } from "@/components/dialogs/SubmitScores";
+import { useGetTournamentsCount } from "@/dojo/hooks/useSqlQueries";
+import NotFound from "@/containers/NotFound";
 
 const Tournament = () => {
   const { id } = useParams<{ id: string }>();
@@ -58,8 +60,20 @@ const Tournament = () => {
   const [enterDialogOpen, setEnterDialogOpen] = useState(false);
   const [claimDialogOpen, setClaimDialogOpen] = useState(false);
   const [submitScoresDialogOpen, setSubmitScoresDialogOpen] = useState(false);
+  const [tournamentExists, setTournamentExists] = useState(false);
 
-  useGetTournamentQuery(addAddressPadding(bigintToHex(id!)));
+  const { data: tournamentsCount } = useGetTournamentsCount({
+    namespace: nameSpace,
+  });
+
+  useEffect(() => {
+    const checkTournament = async () => {
+      const tournamentId = Number(id || 0);
+      setTournamentExists(tournamentId <= tournamentsCount);
+    };
+    checkTournament();
+  }, [id, tournamentsCount]);
+
   useGetTournamentQuery(addAddressPadding(bigintToHex(id!)));
   useSubscribeTournamentQuery(addAddressPadding(bigintToHex(id!)));
 
@@ -251,6 +265,10 @@ const Tournament = () => {
   }, [isStarted, isEnded]);
 
   const hasPrizes = Object.keys(groupedPrizes).length > 0;
+
+  if (!tournamentExists) {
+    return <NotFound message={`Tournament not found: ${id}`} />;
+  }
 
   if (!tournamentModel) {
     return (
