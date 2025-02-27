@@ -16,6 +16,12 @@ import {
 import { useEkuboPrices } from "@/hooks/useEkuboPrices";
 import { TabType } from "@/components/overview/TournamentTabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import useUIStore from "@/hooks/useUIStore";
 
 interface TournamentCardProps {
   tournament: Tournament;
@@ -35,6 +41,7 @@ export const TournamentCard = ({
   const { nameSpace } = useDojo();
   const navigate = useNavigate();
   const state = useDojoStore.getState();
+  const { gameData } = useUIStore();
 
   // token entities
   const tokenModels = state.getEntitiesByModel(nameSpace, "Token");
@@ -80,6 +87,9 @@ export const TournamentCard = ({
   const endsIn = endsInSeconds > 0 ? formatTime(endsInSeconds) : "Ended ";
 
   const gameAddress = tournament.game_config.address;
+  const gameName = gameData.find(
+    (game) => game.contract_address === gameAddress
+  )?.name;
 
   const hasEntryFee = tournament?.entry_fee.isSome();
 
@@ -89,22 +99,6 @@ export const TournamentCard = ({
         Number(prices[entryFeeTokenSymbol ?? ""])
       ).toFixed(2)
     : "Free";
-
-  if (
-    tournament.game_config.address ===
-    "0x06f32edb41a707fc6e368b37dd74890b1a518f5fba6b7fef7061ef72afc27336"
-  ) {
-    return (
-      <Card
-        variant="outline"
-        className="animate-in fade-in zoom-in duration-300 ease-out"
-      >
-        <div className="flex flex-col justify-center items-center h-full">
-          <span className="font-astronaut text-2xl">Game not recognized</span>
-        </div>
-      </Card>
-    );
-  }
 
   return (
     <Card
@@ -150,7 +144,21 @@ export const TournamentCard = ({
             </div>
           </div>
           <div className="flex flex-row -space-x-2 w-1/2 justify-end px-2">
-            <TokenGameIcon key={index} game={gameAddress} size={"md"} />
+            <Tooltip delayDuration={50}>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center cursor-pointer">
+                  <TokenGameIcon key={index} game={gameAddress} size={"md"} />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                align="center"
+                sideOffset={5}
+                className="bg-black text-neutral-500 border border-retro-green-dark px-2 py-1 rounded text-sm z-50"
+              >
+                {gameName ? feltToString(gameName) : "Unknown"}
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
         <div className="flex flex-row items-center justify-between w-3/4 mx-auto">

@@ -50,6 +50,12 @@ import { ClaimPrizesDialog } from "@/components/dialogs/ClaimPrizes";
 import { SubmitScoresDialog } from "@/components/dialogs/SubmitScores";
 import { useGetTournamentsCount } from "@/dojo/hooks/useSqlQueries";
 import NotFound from "@/containers/NotFound";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import useUIStore from "@/hooks/useUIStore";
 
 const Tournament = () => {
   const { id } = useParams<{ id: string }>();
@@ -57,6 +63,7 @@ const Tournament = () => {
   const navigate = useNavigate();
   const { nameSpace } = useDojo();
   const state = useDojoStore.getState();
+  const { gameData } = useUIStore();
   const [enterDialogOpen, setEnterDialogOpen] = useState(false);
   const [claimDialogOpen, setClaimDialogOpen] = useState(false);
   const [submitScoresDialogOpen, setSubmitScoresDialogOpen] = useState(false);
@@ -165,6 +172,11 @@ const Tournament = () => {
 
   const { gameNamespace, gameScoreModel, gameScoreAttribute } =
     useGameEndpoints(tournamentModel?.game_config?.address);
+
+  const gameAddress = tournamentModel?.game_config?.address;
+  const gameName = gameData.find(
+    (game) => game.contract_address === gameAddress
+  )?.name;
 
   // subscribe and fetch game scores
   useSubscribeScoresQuery(gameNamespace ?? "", gameScoreModel ?? "");
@@ -319,10 +331,21 @@ const Tournament = () => {
           <span className="text-retro-green uppercase font-astronaut text-lg sm:text-2xl">
             {status}
           </span>
-          <TokenGameIcon
-            game={tournamentModel?.game_config?.address}
-            size={"md"}
-          />
+          <Tooltip delayDuration={50}>
+            <TooltipTrigger asChild>
+              <div className="flex items-center justify-center cursor-pointer">
+                <TokenGameIcon game={gameAddress} size={"md"} />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              align="center"
+              sideOffset={5}
+              className="bg-black text-neutral-500 border border-retro-green-dark px-2 py-1 rounded text-sm z-50"
+            >
+              {gameName ? feltToString(gameName) : "Unknown"}
+            </TooltipContent>
+          </Tooltip>
           {/* <Button variant="outline">
             <PLUS /> Add Prizes
           </Button> */}
