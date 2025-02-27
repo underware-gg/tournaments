@@ -9,14 +9,10 @@ import { displayAddress, feltToString, indexAddress } from "@/lib/utils";
 import { useDojo } from "@/context/dojo";
 import { useGetUsernames } from "@/hooks/useController";
 import RowSkeleton from "./RowSkeleton";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { HoverCardContent } from "@/components/ui/hover-card";
 import { HoverCard } from "@/components/ui/hover-card";
 import { HoverCardTrigger } from "@/components/ui/hover-card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface ScoreTableProps {
   tournamentId: BigNumberish;
@@ -39,6 +35,8 @@ const ScoreTable = ({
 }: ScoreTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showParticipants, setShowParticipants] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
+  const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
   const { nameSpace } = useDojo();
 
   const offset = (currentPage - 1) * 5;
@@ -65,18 +63,55 @@ const ScoreTable = ({
 
   const { usernames } = useGetUsernames(ownerAddresses ?? []);
 
-  console.log(isEnded);
+  // Function to render player details content
+  const renderPlayerDetails = (registration: any, index: number) => (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2 px-4">
+        <div className="flex flex-row gap-2">
+          <span className="text-retro-green-dark">Player Name:</span>
+          <span>{feltToString(registration?.player_name)}</span>
+        </div>
+        <div className="flex flex-row gap-2">
+          <span className="text-retro-green-dark">Owner:</span>
+          <span>
+            {usernames?.get(ownerAddresses?.[index] ?? "") ||
+              displayAddress(ownerAddresses?.[index] ?? "")}
+          </span>
+        </div>
+      </div>
+      <div className="w-full h-0.5 bg-retro-green/50" />
+      {registration?.metadata !== "" ? (
+        <img
+          src={JSON.parse(registration?.metadata)?.image}
+          alt="metadata"
+          className="w-full h-auto px-4"
+        />
+      ) : (
+        <span className="text-center text-neutral-500">No Token URI</span>
+      )}
+      {isEnded && (
+        <div className="flex items-center gap-2 justify-center mt-2">
+          <span className="text-retro-green">
+            {registration.has_submitted ? <VERIFIED /> : <QUESTION />}
+          </span>
+          <span>
+            {registration.has_submitted ? "Submitted" : "Not submitted"}
+          </span>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <Card
       variant="outline"
-      className={`w-1/2 transition-all duration-300 ease-in-out ${
-        showParticipants ? "h-[200px]" : "h-[60px]"
+      className={`sm:w-1/2 transition-all duration-300 ease-in-out ${
+        showParticipants ? "h-[200px]" : "h-[45px] sm:h-[60px]"
       }`}
     >
       <div className="flex flex-col justify-between">
-        <div className="flex flex-row justify-between h-8">
-          <span className="font-astronaut text-2xl">Scores</span>
+        <div className="flex flex-row justify-between h-6 sm:h-8">
+          <span className="font-astronaut text-lg sm:text-2xl">Scores</span>
           {showParticipants && entryCount > 5 && (
             <Pagination
               totalPages={Math.ceil(entryCount / 5)}
@@ -93,11 +128,12 @@ const ScoreTable = ({
                 <Switch
                   checked={showParticipants}
                   onCheckedChange={setShowParticipants}
+                  className="h-4 sm:h-6"
                 />
               </>
             )}
-            <div className="flex flex-row items-center font-astronaut text-2xl">
-              <span className="w-10">
+            <div className="flex flex-row items-center font-astronaut text-lg sm:text-2xl">
+              <span className="w-8 sm:w-10">
                 <USER />
               </span>
               : {entryCount}
@@ -117,102 +153,84 @@ const ScoreTable = ({
                   {leaderboard
                     ?.slice(colIndex * 5, colIndex * 5 + 5)
                     .map((registration, index) => (
-                      <HoverCard key={index} openDelay={50} closeDelay={0}>
-                        <HoverCardTrigger asChild>
-                          <div className="flex flex-row items-center gap-2 pr-2 hover:cursor-pointer hover:bg-retro-green/25 hover:border-retro-green/30 border border-transparent rounded transition-all duration-200">
-                            <span className="w-4 flex-none font-astronaut">
-                              {index +
-                                1 +
-                                colIndex * 5 +
-                                (currentPage - 1) * 10}
-                              .
-                            </span>
-                            <span className="w-6 flex-none">
-                              <USER />
-                            </span>
-                            <span className="flex-none max-w-20 group-hover:text-retro-green transition-colors duration-200">
-                              {feltToString(registration?.player_name)}
-                            </span>
-                            <p
-                              className="flex-1 h-[2px] bg-repeat-x"
-                              style={{
-                                backgroundImage:
-                                  "radial-gradient(circle, currentColor 1px, transparent 1px)",
-                                backgroundSize: "8px 8px",
-                                backgroundPosition: "0 center",
-                              }}
-                            ></p>
-                            <div className="flex flex-row items-center gap-2">
-                              <span className="flex-none text-retro-green font-astronaut">
-                                {registration.score ?? 0}
-                              </span>
-                            </div>
-                          </div>
-                        </HoverCardTrigger>
-                        <HoverCardContent
-                          className="w-60 py-4 px-0 text-sm z-50"
-                          align="start"
-                          alignOffset={-75}
-                          side="top"
-                          sideOffset={10}
-                        >
-                          <div className="flex flex-col gap-4">
-                            <div className="flex flex-col gap-2 px-4">
-                              <div className="flex flex-row gap-2">
-                                <span className="text-retro-green-dark">
-                                  Player Name:
+                      <div key={index}>
+                        {/* Desktop hover card (hidden on mobile) */}
+                        <div className="hidden sm:block">
+                          <HoverCard openDelay={50} closeDelay={0}>
+                            <HoverCardTrigger asChild>
+                              <div className="flex flex-row items-center sm:gap-2 pr-2 hover:cursor-pointer hover:bg-retro-green/25 hover:border-retro-green/30 border border-transparent rounded transition-all duration-200">
+                                <span className="w-4 flex-none font-astronaut">
+                                  {index +
+                                    1 +
+                                    colIndex * 5 +
+                                    (currentPage - 1) * 10}
+                                  .
                                 </span>
-                                <span>
+                                <span className="w-6 flex-none">
+                                  <USER />
+                                </span>
+                                <span className="flex-none max-w-20 group-hover:text-retro-green transition-colors duration-200">
                                   {feltToString(registration?.player_name)}
                                 </span>
+                                <p
+                                  className="flex-1 h-[2px] bg-repeat-x"
+                                  style={{
+                                    backgroundImage:
+                                      "radial-gradient(circle, currentColor 1px, transparent 1px)",
+                                    backgroundSize: "8px 8px",
+                                    backgroundPosition: "0 center",
+                                  }}
+                                ></p>
+                                <div className="flex flex-row items-center gap-2">
+                                  <span className="flex-none text-retro-green font-astronaut">
+                                    {registration.score ?? 0}
+                                  </span>
+                                </div>
                               </div>
-                              <div className="flex flex-row gap-2">
-                                <span className="text-retro-green-dark">
-                                  Owner:
-                                </span>
-                                <span>
-                                  {usernames?.get(
-                                    ownerAddresses?.[index] ?? ""
-                                  ) ||
-                                    displayAddress(
-                                      ownerAddresses?.[index] ?? ""
-                                    )}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="w-full h-0.5 bg-retro-green/50" />
-                            {registration?.metadata !== "" ? (
-                              <img
-                                src={JSON.parse(registration?.metadata)?.image}
-                                alt="metadata"
-                                className="w-full h-auto px-4"
-                              />
-                            ) : (
-                              <span className="text-center text-neutral-500">
-                                No Token URI
-                              </span>
-                            )}
-                            {isEnded && (
-                              <Tooltip delayDuration={50}>
-                                <TooltipTrigger asChild>
-                                  <div className="absolute top-2 right-2 w-8 text-retro-green hover:cursor-pointer">
-                                    {registration.has_submitted ? (
-                                      <VERIFIED />
-                                    ) : (
-                                      <QUESTION />
-                                    )}
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent className="border-retro-green-dark bg-black text-neutral-500">
-                                  {registration.has_submitted
-                                    ? "Submitted"
-                                    : "Not submitted"}
-                                </TooltipContent>
-                              </Tooltip>
-                            )}
+                            </HoverCardTrigger>
+                            <HoverCardContent
+                              className="py-4 px-0 text-sm z-50"
+                              align="center"
+                              side="top"
+                            >
+                              {renderPlayerDetails(registration, index)}
+                            </HoverCardContent>
+                          </HoverCard>
+                        </div>
+
+                        {/* Mobile clickable row (hidden on desktop) */}
+                        <div
+                          className="sm:hidden flex flex-row items-center sm:gap-2 pr-2 hover:cursor-pointer hover:bg-retro-green/25 hover:border-retro-green/30 border border-transparent rounded transition-all duration-200"
+                          onClick={() => {
+                            setSelectedPlayer({ registration, index });
+                            setIsMobileDialogOpen(true);
+                          }}
+                        >
+                          <span className="w-4 flex-none font-astronaut">
+                            {index + 1 + colIndex * 5 + (currentPage - 1) * 10}.
+                          </span>
+                          <span className="w-6 flex-none">
+                            <USER />
+                          </span>
+                          <span className="flex-none max-w-20 group-hover:text-retro-green transition-colors duration-200">
+                            {feltToString(registration?.player_name)}
+                          </span>
+                          <p
+                            className="flex-1 h-[2px] bg-repeat-x"
+                            style={{
+                              backgroundImage:
+                                "radial-gradient(circle, currentColor 1px, transparent 1px)",
+                              backgroundSize: "8px 8px",
+                              backgroundPosition: "0 center",
+                            }}
+                          ></p>
+                          <div className="flex flex-row items-center gap-2">
+                            <span className="flex-none text-retro-green font-astronaut">
+                              {registration.score ?? 0}
+                            </span>
                           </div>
-                        </HoverCardContent>
-                      </HoverCard>
+                        </div>
+                      </div>
                     ))}
                 </div>
               ))}
@@ -232,6 +250,23 @@ const ScoreTable = ({
           )}
         </div>
       </div>
+
+      {/* Mobile dialog for player details */}
+      <Dialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen}>
+        <DialogContent className="sm:hidden bg-black border border-retro-green p-4 rounded-lg max-w-[90vw] mx-auto">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-astronaut text-lg text-retro-green">
+              Player Details
+            </h3>
+          </div>
+
+          {selectedPlayer &&
+            renderPlayerDetails(
+              selectedPlayer.registration,
+              selectedPlayer.index
+            )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

@@ -6,7 +6,7 @@ import TokenGameIcon from "@/components/icons/TokenGameIcon";
 const GameFilters = () => {
   const { gameFilters, setGameFilters, gameData } = useUIStore();
   return (
-    <div className="flex flex-col gap-4 w-1/5">
+    <div className="hidden sm:flex flex-col gap-4 w-1/5">
       {Object.entries(getGames()).map(([key, game]) => {
         const isDisabled = !gameData.find(
           (game) => game.contract_address === key

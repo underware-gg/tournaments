@@ -77,6 +77,13 @@
   -moz-osx-font-smoothing: grayscale;
 
   --pixel-border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2333FF33'%3E%3Cpath d='M2,2h2v2H2V2ZM4,0h2V2h-2V0Zm6,4h2v2h-2v-2ZM0,4H2v2H0v-2ZM6,0h2V2h-2V0Zm2,2h2v2h-2V2Zm0,6h2v2h-2v-2Zm-2,2h2v2h-2v-2ZM0,6H2v2H0v-2Zm10,0h2v2h-2v-2Zm-6,4h2v2h-2v-2Zm-2-2h2v2H2v-2Zm6-2h2v2h-2v-2Zm-2,2h2v2h-2v-2Zm2-4h2v2h-2v-2Zm-4,4h2v2h-2v-2Zm2-2h2v2h-2v-2Z'/%3E%3C/svg%3E");
+  --timeline-extension: 10px;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --timeline-extension: 20px;
+  }
 }
 
 a {
@@ -93,4 +100,58 @@ a:hover {
   :root {
     --radius: 0.5rem;
   }
+}
+
+/* Custom scrollbar styling */
+* {
+  scrollbar-width: thin;
+  /* Firefox */
+  scrollbar-color: rgba(0, 218, 163, 0.5) rgba(0, 0, 0, 0.1);
+  /* Firefox */
+}
+
+/* WebKit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width : 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background   : rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background   : rgba(0, 218, 163, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 218, 163, 0.8);
+}
+
+/* For touch devices, ensure scrolling feels natural */
+@media (pointer: coarse) {
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Make scrollbars thinner on touch devices */
+  ::-webkit-scrollbar {
+    width : 4px;
+    height: 4px;
+  }
+}
+
+/* Hide scrollbars but keep functionality for specific elements if needed */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width   : none;
+  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Opera */
 }

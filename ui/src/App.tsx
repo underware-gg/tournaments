@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import MobileFooter from "@/components/MobileFooter";
 import Overview from "@/containers/Overview";
 import Tournament from "@/containers/Tournament";
 import CreateTournament from "@/containers/CreateTournament";
@@ -40,30 +41,32 @@ function App() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen flex-col w-full">
+      <div className="flex flex-col min-h-screen h-screen overflow-hidden">
         <Header />
-        <Routes>
-          <Route path="/" element={<Overview />} />
-          <Route path="/tournament">
-            <Route
-              path=":id"
-              element={
-                <ErrorBoundary
-                  fallback={
-                    <NotFound message="Something went wrong rendering the tournament" />
-                  }
-                >
-                  <TournamentWrapper />
-                </ErrorBoundary>
-              }
-            />
-          </Route>
-          <Route path="/create-tournament" element={<CreateTournament />} />
-          <Route path="/register-token" element={<RegisterToken />} />
-          <Route path="/play" element={<Play />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-
+        <main className="flex-1 overflow-auto px-4 sm:px-20 sm:pt-20">
+          <Routes>
+            <Route path="/" element={<Overview />} />
+            <Route path="/tournament">
+              <Route
+                path=":id"
+                element={
+                  <ErrorBoundary
+                    fallback={
+                      <NotFound message="Something went wrong rendering the tournament" />
+                    }
+                  >
+                    <TournamentWrapper />
+                  </ErrorBoundary>
+                }
+              />
+            </Route>
+            <Route path="/create-tournament" element={<CreateTournament />} />
+            <Route path="/register-token" element={<RegisterToken />} />
+            <Route path="/play" element={<Play />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+        <MobileFooter />
         <Toaster />
       </div>
     </TooltipProvider>

@@ -142,13 +142,13 @@ const MyEntries = ({
   return (
     <Card
       variant="outline"
-      className={`w-1/2 transition-all duration-300 ease-in-out ${
-        showMyEntries ? "h-[200px]" : "h-[60px]"
+      className={`sm:w-1/2 transition-all duration-300 ease-in-out ${
+        showMyEntries ? "h-[200px]" : "h-[45px] sm:h-[60px]"
       }`}
     >
       <div className="flex flex-col justify-between">
-        <div className="flex flex-row justify-between h-8">
-          <span className="font-astronaut text-2xl">My Entries</span>
+        <div className="flex flex-row justify-between h-6 sm:h-8">
+          <span className="font-astronaut text-lg sm:text-2xl">My Entries</span>
           <div className="flex flex-row items-center gap-2">
             {address ? (
               myEntriesCount > 0 ? (
@@ -159,6 +159,7 @@ const MyEntries = ({
                   <Switch
                     checked={showMyEntries}
                     onCheckedChange={setShowMyEntries}
+                    className="h-4 sm:h-6"
                   />
                 </>
               ) : (
@@ -167,7 +168,7 @@ const MyEntries = ({
             ) : (
               <span className="text-neutral-500">No Account Connected</span>
             )}
-            <div className="flex flex-row items-center font-astronaut text-2xl">
+            <div className="flex flex-row items-center font-astronaut text-lg sm:text-2xl">
               <span className="w-8">
                 <DOLLAR />
               </span>

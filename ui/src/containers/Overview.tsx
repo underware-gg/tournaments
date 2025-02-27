@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import GameFilters from "@/components/overview/GameFilters";
 import GameIcon from "@/components/icons/GameIcon";
-import TournamentTabs, { TabType } from "@/components/overview/TournamentTabs";
+import TournamentTabs from "@/components/overview/TournamentTabs";
 import {
   useGetUpcomingTournamentsCount,
   useGetLiveTournamentsCount,
@@ -53,7 +53,7 @@ const SORT_OPTIONS = {
 const Overview = () => {
   const { nameSpace } = useDojo();
   const { address } = useAccount();
-  const [selectedTab, setSelectedTab] = useState<TabType>("upcoming");
+  const { selectedTab, setSelectedTab } = useUIStore();
   const [page, setPage] = useState(0);
   const { gameFilters, setGameFilters, gameData } = useUIStore();
   const [sortBy, setSortBy] = useState<string>(
@@ -194,22 +194,32 @@ const Overview = () => {
   );
 
   return (
-    <div className="flex flex-row px-20 pt-20 gap-5 h-[calc(100vh-80px)]">
+    <div className="flex flex-row gap-5">
       <GameFilters />
-      <div className="flex flex-col w-4/5 p-2">
-        <div className="flex flex-row justify-between w-full border-b-4 border-retro-green">
-          <TournamentTabs
-            selectedTab={selectedTab}
-            setSelectedTab={setSelectedTab}
-            upcomingTournamentsCount={upcomingTournamentsCount}
-            liveTournamentsCount={liveTournamentsCount}
-            endedTournamentsCount={endedTournamentsCount}
-          />
+      <div className="flex flex-col gap-2 sm:gap-0 w-full sm:w-4/5 p-1 sm:p-2">
+        <div className="flex flex-row justify-between w-full sm:border-b-4 border-retro-green">
+          {/* Hide TournamentTabs on mobile when selectedTab is "my" */}
+          <div className={selectedTab === "my" ? "hidden sm:block" : "block"}>
+            <TournamentTabs
+              selectedTab={selectedTab}
+              setSelectedTab={setSelectedTab}
+              upcomingTournamentsCount={upcomingTournamentsCount}
+              liveTournamentsCount={liveTournamentsCount}
+              endedTournamentsCount={endedTournamentsCount}
+            />
+          </div>
+
+          {/* Show a title when on "my" tab on mobile */}
+          {selectedTab === "my" && (
+            <div className="sm:hidden font-astronaut text-xl">
+              My Tournaments
+            </div>
+          )}
           <div className="flex flex-row gap-4 items-center">
-            Sort By:
+            <span className="hidden sm:block">Sort By:</span>
             <DropdownMenu>
-              <DropdownMenuTrigger className="bg-black border-2 border-retro-grey px-2 min-w-[100px]">
-                <div className="flex flex-row items-center justify-between capitalize w-full gap-2">
+              <DropdownMenuTrigger className="bg-black border-2 border-retro-grey px-2 min-w-[100px] h-full">
+                <div className="flex flex-row items-center justify-between capitalize text-sm sm:text-base w-full sm:gap-2">
                   {
                     SORT_OPTIONS[selectedTab].find(
                       (option) => option.value === sortBy
@@ -242,18 +252,18 @@ const Overview = () => {
           <div
             className={`
             transition-[height] duration-300 ease-in-out
-            ${gameFilters.length > 0 ? "h-[72px] py-2" : "h-0"}
+            ${gameFilters.length > 0 ? "h-[60px] sm:h-[72px] sm:py-2" : "h-0"}
           `}
           >
             {gameFilters.length > 0 && (
-              <div className="flex flex-row items-center gap-4 p-4 h-[72px] overflow-x-auto w-full">
+              <div className="flex flex-row items-center gap-2 sm:gap-4 px-2 sm:p-4 h-[60px] sm:h-[72px] overflow-x-auto w-full">
                 {gameFilters.map((filter) => (
                   <div
                     key={filter}
-                    className="flex flex-row items-center gap-4 bg-black border-2 border-retro-grey py-2 px-4 shrink-0"
+                    className="flex flex-row items-center gap-2 sm:gap-4 bg-black border-2 border-retro-grey py-2 px-4 shrink-0"
                   >
                     <GameIcon game={filter} />
-                    <span className="text-2xl font-astronaut">
+                    <span className="sm:text-2xl font-astronaut">
                       {feltToString(
                         gameData.find(
                           (game) => game.contract_address === filter
@@ -261,7 +271,7 @@ const Overview = () => {
                       )}
                     </span>
                     <span
-                      className="w-6 h-6 text-retro-green-dark cursor-pointer"
+                      className="w-4 h-4 sm:w-6 sm:h-6 text-retro-green-dark cursor-pointer"
                       onClick={() => removeGameFilter(filter)}
                     >
                       <X />
@@ -273,7 +283,7 @@ const Overview = () => {
           </div>
           <div
             ref={scrollContainerRef}
-            className="grid grid-cols-3 gap-4 transition-all duration-300 ease-in-out py-4 overflow-y-auto"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-4 transition-all duration-300 ease-in-out sm:py-2 overflow-y-auto"
           >
             {selectedTab === "my" && !address ? (
               <NoAccount />

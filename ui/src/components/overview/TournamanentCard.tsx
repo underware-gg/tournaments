@@ -114,7 +114,7 @@ export const TournamentCard = ({
       onClick={() => {
         navigate(`/tournament/${Number(tournament.id).toString()}`);
       }}
-      className="animate-in fade-in zoom-in duration-300 ease-out"
+      className="h-24 sm:h-48 animate-in fade-in zoom-in duration-300 ease-out"
     >
       <div className="flex flex-col justify-between h-full">
         <div className="flex flex-col gap-2">
@@ -127,9 +127,9 @@ export const TournamentCard = ({
               : {entryCount}
             </div>
           </div>
-          <div className="w-full h-0.5 bg-retro-green/25" />
+          <div className="hidden sm:block w-full h-0.5 bg-retro-green/25" />
         </div>
-        <div className="flex flex-row">
+        <div className="hidden sm:flex flex-row">
           <div className="flex flex-col w-1/2">
             <div className="flex flex-row gap-2">
               <span className="text-retro-green-dark">Registration:</span>
@@ -154,6 +154,9 @@ export const TournamentCard = ({
           </div>
         </div>
         <div className="flex flex-row items-center justify-between w-3/4 mx-auto">
+          <div className="flex sm:hidden flex-row">
+            <TokenGameIcon key={index} game={gameAddress} size={"md"} />
+          </div>
           <div className="flex flex-row items-center gap-2">
             <span className="text-retro-green-dark">Fee:</span>
             {pricesLoading ? (

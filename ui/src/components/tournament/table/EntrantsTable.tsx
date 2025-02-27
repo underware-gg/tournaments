@@ -61,7 +61,7 @@ const EntrantsTable = ({
     <Card
       variant="outline"
       borderColor="rgba(0, 218, 163, 1)"
-      className={`w-1/2 transition-all duration-300 ease-in-out ${
+      className={`sm:w-1/2 transition-all duration-300 ease-in-out ${
         showParticipants ? "h-[200px]" : "h-[60px]"
       }`}
     >

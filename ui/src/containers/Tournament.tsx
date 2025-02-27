@@ -305,14 +305,18 @@ const Tournament = () => {
   }
 
   return (
-    <div className="w-3/4 px-20 pt-20 mx-auto flex flex-col gap-5">
+    <div className="sm:w-3/4 sm:mx-auto flex flex-col gap-5">
       <div className="flex flex-row justify-between">
-        <Button variant="outline" onClick={() => navigate("/")}>
+        <Button
+          variant="outline"
+          className="px-2"
+          onClick={() => navigate("/")}
+        >
           <ARROW_LEFT />
-          Back
+          <span className="hidden sm:block">Back</span>
         </Button>
         <div className="flex flex-row items-center gap-5">
-          <span className="text-retro-green uppercase font-astronaut text-2xl">
+          <span className="text-retro-green uppercase font-astronaut text-lg sm:text-2xl">
             {status}
           </span>
           <TokenGameIcon
@@ -351,10 +355,10 @@ const Tournament = () => {
             >
               <MONEY />
               {allClaimed ? (
-                "Prizes Claimed"
+                <span className="hidden sm:block">Prizes Claimed</span>
               ) : (
                 <>
-                  Send Prizes |
+                  <span className="hidden sm:block">Send Prizes |</span>
                   <span className="font-bold">{claimablePrizes.length}</span>
                 </>
               )}
@@ -393,19 +397,19 @@ const Tournament = () => {
           />
         </div>
       </div>
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-row items-center h-12 justify-between">
+      <div className="flex flex-col gap-1 sm:gap-2">
+        <div className="flex flex-row items-center h-8 sm:h-12 justify-between">
           <div className="flex flex-row gap-5">
-            <span className="font-astronaut text-4xl">
+            <span className="font-astronaut text-xl sm:text-4xl">
               {feltToString(tournamentModel?.metadata?.name ?? "")}
             </span>
             <div className="flex flex-row items-center gap-4 text-retro-green-dark">
               <div className="flex flex-row gap-2">
-                <span>Winners:</span>
+                <span className="hidden sm:block">Winners:</span>
                 <span className="text-retro-green">Top {leaderboardSize}</span>
               </div>
               <div className="flex flex-row gap-2">
-                <span>Registration:</span>
+                <span className="hidden sm:block">Registration:</span>
                 <span className="text-retro-green">
                   {registrationType.charAt(0).toUpperCase() +
                     registrationType.slice(1)}
@@ -413,7 +417,7 @@ const Tournament = () => {
               </div>
             </div>
           </div>
-          <div className="flex flex-row">
+          <div className="hidden sm:flex flex-row">
             {!isStarted ? (
               <div>
                 <span className="text-retro-green-dark">Starts In: </span>
@@ -466,9 +470,9 @@ const Tournament = () => {
           )}
         </div>
       </div>
-      <div className="flex flex-col gap-10">
-        <div className="flex flex-row h-[150px] gap-5">
-          <div className="w-1/2 flex justify-center items-center">
+      <div className="flex flex-col gap-5 sm:gap-10">
+        <div className="flex flex-col sm:flex-row sm:h-[150px] gap-5">
+          <div className="sm:w-1/2 flex justify-center items-center">
             <TournamentTimeline
               type={registrationType}
               createdTime={Number(tournamentModel?.created_at ?? 0)}
@@ -480,7 +484,7 @@ const Tournament = () => {
               pulse={true}
             />
           </div>
-          <div className="w-1/2">
+          <div className="sm:w-1/2">
             <PrizesContainer
               prizesExist={hasPrizes}
               lowestPrizePosition={lowestPrizePosition}
@@ -492,7 +496,7 @@ const Tournament = () => {
             />
           </div>
         </div>
-        <div className="flex flex-row gap-5">
+        <div className="flex flex-col sm:flex-row gap-5">
           {registrationType === "fixed" && !isStarted ? (
             <EntrantsTable
               tournamentId={tournamentModel?.id}

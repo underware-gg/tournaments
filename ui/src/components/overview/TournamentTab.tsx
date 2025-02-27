@@ -7,6 +7,7 @@ interface TournamentTabProps {
   onClick: () => void;
   icon: ReactNode;
   label: string;
+  mobileLabel?: string;
   count?: number;
 }
 
@@ -15,6 +16,7 @@ export const TournamentTab = ({
   onClick,
   icon,
   label,
+  mobileLabel,
   count,
 }: TournamentTabProps) => {
   return (
@@ -22,10 +24,20 @@ export const TournamentTab = ({
       <Button
         variant={selected ? "default" : "outline"}
         borderColor="rgba(0, 218, 163, 1)"
-        className="[border-image-width:4px_4px_0_4px] rounded-b-none"
+        className={`
+          sm:[border-image-width:4px_4px_0_4px] 
+          sm:rounded-b-none
+          rounded-md
+          px-2
+          sm:px-4
+          py-2
+          sm:py-4
+          sm:rounded-md
+        `}
       >
-        {icon}
-        {label}
+        <span className="hidden sm:inline">{icon}</span>
+        <span className="hidden sm:inline">{label}</span>
+        <span className="sm:hidden">{mobileLabel || label}</span>
       </Button>
       {count !== undefined && count > 0 && (
         <span className="absolute -top-2 -right-1 flex items-center justify-center text-retro-green-darker h-6 w-6 text-xs">

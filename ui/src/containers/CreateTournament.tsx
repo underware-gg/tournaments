@@ -417,7 +417,7 @@ const CreateTournament = () => {
   };
 
   return (
-    <div className="flex flex-col gap-5 h-[calc(100vh-80px)] w-3/4 mx-auto px-20 pt-20">
+    <div className="flex flex-col gap-5 w-3/4 mx-auto">
       <div className="space-y-5">
         <div className="flex flex-row justify-between items-center">
           <Button variant="outline" onClick={() => navigate("/")}>

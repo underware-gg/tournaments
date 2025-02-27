@@ -13,7 +13,7 @@ const cardVariants = cva(
         outline: `bg-black text-retro-green border-2 border-retro-green`,
       },
       size: {
-        default: "h-48 p-4",
+        default: "h-48 p-2 sm:p-4",
         sm: "p-3",
         lg: "p-8",
         xl: "p-10",
