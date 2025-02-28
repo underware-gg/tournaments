@@ -86,7 +86,7 @@ export const useSystemCalls = () => {
           contractAddress: entryFeeToken.Some?.token_address!,
           entrypoint: "approve",
           calldata: CallData.compile([
-            tournamentId,
+            tournamentAddress,
             entryFeeToken.Some?.amount!,
             "0",
           ]),
