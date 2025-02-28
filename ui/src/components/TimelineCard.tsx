@@ -61,7 +61,7 @@ const TimelineCard = ({
         <motion.div
           className="absolute top-5 sm:top-7 left-[calc(100%_-_0px)] w-[calc(100%_+_10px)] sm:w-[calc(100%_+_20px)] h-0.5 border-t-4 border-dotted border-retro-green-dark z-10"
           initial={{ width: 0 }}
-          animate={{ width: "calc(100% + var(--line-extension, 10px))" }}
+          animate={{ width: "calc(100% + var(--timeline-extension, 10px))" }}
           transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
         />
       )}

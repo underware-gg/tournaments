@@ -13,7 +13,7 @@ import {
   useGetTournamentQuery,
   useSubscribeTournamentQuery,
   useSubscribeScoresQuery,
-  // useGetScoresQuery,
+  useGetScoresQuery,
 } from "@/dojo/hooks/useSdkQueries";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import {
@@ -189,7 +189,7 @@ const Tournament = () => {
 
   // subscribe and fetch game scores
   useSubscribeScoresQuery(gameNamespace ?? "", gameScoreModel ?? "");
-  // useGetScoresQuery(gameNamespace ?? "", gameScoreModel ?? "");
+  useGetScoresQuery(gameNamespace ?? "", gameScoreModel ?? "");
 
   const { entity: gameCounterEntity } = useGetGameCounterQuery({
     key: addAddressPadding(BigInt(TOURNAMENT_VERSION_KEY)),

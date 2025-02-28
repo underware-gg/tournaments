@@ -35,7 +35,7 @@ export const useSdkGetEntities = ({
 
   const [isLoading, setIsLoading] = useState(false);
   const [entities, setEntities] = useState<EntityResult[] | null>(null);
-  const { setEntities: setStoreEntities } = useDojoStore.getState();
+  const state = useDojoStore.getState();
 
   const memoizedQuery = useMemo(() => query, [JSON.stringify(query)]);
 
@@ -47,8 +47,9 @@ export const useSdkGetEntities = ({
       const entities = await sdk.getEntities({
         query: memoizedQuery,
       });
-      console.log("entities", entities);
-      setStoreEntities(entities as ParsedEntity<SchemaType>[]);
+      entities.forEach((entity) => {
+        state.updateEntity(entity as Partial<ParsedEntity<SchemaType>>);
+      });
       setEntities(
         entities.map(
           (e: any) =>
