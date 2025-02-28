@@ -47,6 +47,6 @@ export const initializeController = (
     colorMode: "dark",
     policies,
     slot:
-      defaultChainId == ChainId.SN_MAIN ? "tournament-tokens" : "tournaments",
+      defaultChainId == ChainId.SN_MAIN ? "pg-mainnet-tokens" : "tournaments",
   }) as never as Connector;
 };
