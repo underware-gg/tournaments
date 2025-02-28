@@ -112,6 +112,15 @@ const Tournament = () => {
   const tournamentModel = state.getEntity(tournamentEntityId)?.models[nameSpace]
     ?.Tournament as TournamentModel;
 
+  console.log(
+    tournamentsCount,
+    Number(id || 0),
+    tournamentModel,
+    tournamentExists,
+    tournamentEntityId,
+    state.entities
+  );
+
   const entryCountModel = useModel(
     tournamentEntityId,
     ModelsMapping.EntryCount
@@ -180,7 +189,7 @@ const Tournament = () => {
 
   // subscribe and fetch game scores
   useSubscribeScoresQuery(gameNamespace ?? "", gameScoreModel ?? "");
-  useGetScoresQuery(gameNamespace ?? "", gameScoreModel ?? "");
+  // useGetScoresQuery(gameNamespace ?? "", gameScoreModel ?? "");
 
   const { entity: gameCounterEntity } = useGetGameCounterQuery({
     key: addAddressPadding(BigInt(TOURNAMENT_VERSION_KEY)),
@@ -194,7 +203,6 @@ const Tournament = () => {
   });
 
   useSubscribeGamesQuery({
-    nameSpace: gameNamespace ?? "",
     gameNamespace: gameNamespace ?? "",
   });
 

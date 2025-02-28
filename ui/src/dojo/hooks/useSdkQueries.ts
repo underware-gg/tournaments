@@ -426,10 +426,8 @@ export const useSubscribeTournamentEntriesQuery = ({
 };
 
 export const useSubscribeGamesQuery = ({
-  nameSpace,
   gameNamespace,
 }: {
-  nameSpace: string;
   gameNamespace: string;
 }) => {
   const query = useMemo(
@@ -437,13 +435,16 @@ export const useSubscribeGamesQuery = ({
       new ToriiQueryBuilder()
         .withClause(
           KeysClause(
-            [`${nameSpace}-Game`, `${nameSpace}-TokenMetadata`],
+            [`${gameNamespace}-Game`, `${gameNamespace}-TokenMetadata`],
             []
           ).build()
         )
-        .withEntityModels([`${nameSpace}-Game`, `${nameSpace}-TokenMetadata`])
+        .withEntityModels([
+          `${gameNamespace}-Game`,
+          `${gameNamespace}-TokenMetadata`,
+        ])
         .includeHashedKeys(),
-    [nameSpace, gameNamespace]
+    [gameNamespace]
   );
   const { entities, isSubscribed } = useSdkSubscribeEntities({
     query,
