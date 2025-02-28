@@ -13,7 +13,7 @@ import {
   useGetTournamentQuery,
   useSubscribeTournamentQuery,
   useSubscribeScoresQuery,
-  useGetScoresQuery,
+  // useGetScoresQuery,
 } from "@/dojo/hooks/useSdkQueries";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import {
