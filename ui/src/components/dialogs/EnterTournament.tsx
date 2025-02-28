@@ -86,16 +86,16 @@ export function EnterTournamentDialog({
   const entryToken = tournamentModel?.entry_fee?.Some?.token_address;
   const entryAmount = tournamentModel?.entry_fee?.Some?.amount;
 
-  const getBalance = useCallback(async () => {
+  const getBalance = async () => {
     const balance = await getBalanceGeneral(entryToken ?? "");
     setBalance(balance);
-  }, [entryToken, address]);
+  };
 
   useEffect(() => {
     if (entryToken && address) {
       getBalance();
     }
-  }, [entryToken, address]);
+  }, [entryToken, address, getBalance]);
 
   const hasBalance = BigInt(balance) >= BigInt(entryAmount ?? 0n);
 
