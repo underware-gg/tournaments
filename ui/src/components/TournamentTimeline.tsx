@@ -43,7 +43,11 @@ const TournamentTimeline = ({
     <div className="flex flex-row items-center justify-center gap-10 sm:gap-20 mt-4">
       {type === "fixed" && (
         <TimelineCard
-          icon={<REGISTER />}
+          icon={
+            <span className="w-6 sm:w-8">
+              <REGISTER />
+            </span>
+          }
           date={createdDate}
           duraton={registrationPeriod}
           label="Registration"

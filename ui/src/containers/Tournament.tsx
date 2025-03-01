@@ -361,12 +361,12 @@ const Tournament = () => {
           {(registrationType === "fixed" && !isStarted) ||
           (registrationType === "open" && !isEnded) ? (
             <Button
-              className="uppercase"
+              className="uppercase p-2 sm:p-4"
               onClick={() => setEnterDialogOpen(true)}
             >
               <TROPHY />
-              {` Enter | `}
-              <span className="font-bold">
+              <span className="hidden sm:block">Enter | </span>
+              <span className="font-bold text-xs sm:text-base">
                 {hasEntryFee ? `$${entryFee}` : "Free"}
               </span>
             </Button>
@@ -473,7 +473,11 @@ const Tournament = () => {
             )}
           </div>
         </div>
-        <div className={`flex ${isExpanded ? "flex-col" : "flex-row"}`}>
+        <div
+          className={`flex ${
+            isExpanded ? "flex-col" : "flex-row items-center"
+          }`}
+        >
           <div
             className={`
           relative overflow-hidden transition-[height] duration-300
@@ -484,8 +488,8 @@ const Tournament = () => {
               ref={textRef}
               className={`${
                 isExpanded
-                  ? "whitespace-pre-wrap"
-                  : "overflow-hidden text-ellipsis whitespace-nowrap"
+                  ? "whitespace-pre-wrap text-xs sm:text-base"
+                  : "overflow-hidden text-ellipsis whitespace-nowrap text-xs sm:text-base"
               }`}
             >
               {tournamentModel?.metadata?.description}
@@ -494,7 +498,7 @@ const Tournament = () => {
           {isOverflowing && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="self-start text-retro-green hover:text-retro-green-dark font-bold"
+              className="self-start text-retro-green hover:text-retro-green-dark font-bold text-sm sm:text-base"
             >
               {isExpanded ? "See Less" : "See More"}
             </button>
@@ -503,7 +507,7 @@ const Tournament = () => {
       </div>
       <div className="flex flex-col gap-5 sm:gap-10">
         <div className="flex flex-col sm:flex-row sm:h-[150px] gap-5">
-          <div className="sm:w-1/2 flex justify-center items-center">
+          <div className="sm:w-1/2 flex justify-center items-center pt-4 sm:pt-0">
             <TournamentTimeline
               type={registrationType}
               createdTime={Number(tournamentModel?.created_at ?? 0)}

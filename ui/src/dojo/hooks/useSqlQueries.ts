@@ -399,7 +399,7 @@ export const useGetTournamentEntrants = ({
     LEFT JOIN '${gameNamespace}-TokenMetadata' m 
       ON r.game_token_id = m.token_id
     LEFT JOIN token_balances t 
-      ON (${gameAddress} || ':' || r.game_token_id) = t.token_id
+      ON ('${gameAddress}' || ':' || r.game_token_id) = t.token_id
     WHERE r.tournament_id = "${addAddressPadding(tournamentId)}"
     ORDER BY r.entry_number DESC
     LIMIT ${limit}

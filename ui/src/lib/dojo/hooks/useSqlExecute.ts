@@ -39,9 +39,18 @@ export function useSqlExecute(query: string | null, tokens?: boolean) {
       );
 
       const result = await response.json();
-
       if (!response.ok) {
-        throw new Error(result.error || "Failed to execute query");
+        let errorMessage = "Failed to execute query";
+
+        if (result.error) {
+          if (typeof result.error === "string") {
+            errorMessage = result.error;
+          } else if (typeof result.error === "object") {
+            errorMessage = result.error.message || JSON.stringify(result.error);
+          }
+        }
+
+        throw new Error(errorMessage);
       }
 
       setData(result);
