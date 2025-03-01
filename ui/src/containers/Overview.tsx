@@ -18,6 +18,7 @@ import {
   useGetEndedTournamentsCount,
   useGetTournaments,
   useGetMyTournaments,
+  useGetMyTournamentsCount,
 } from "@/dojo/hooks/useSqlQueries";
 import { bigintToHex, feltToString, indexAddress } from "@/lib/utils";
 import { addAddressPadding } from "starknet";
@@ -81,14 +82,34 @@ const Overview = () => {
     currentTime: currentTime,
   });
 
+  const queryAddress = useMemo(() => {
+    if (!address || address === "0x0") return null;
+    return indexAddress(address);
+  }, [address]);
+
+  const gameAddresses = useMemo(() => {
+    return gameData?.map((game) => indexAddress(game.contract_address));
+  }, [gameData]);
+
+  const { data: myTournamentsCount } = useGetMyTournamentsCount({
+    namespace: nameSpace,
+    address: queryAddress ?? "",
+    gameAddresses: gameAddresses ?? [],
+  });
+
   const tournamentCounts = useMemo(() => {
     return {
       upcoming: upcomingTournamentsCount,
       live: liveTournamentsCount,
       ended: endedTournamentsCount,
-      my: 0,
+      my: myTournamentsCount,
     };
-  }, [upcomingTournamentsCount, liveTournamentsCount, endedTournamentsCount]);
+  }, [
+    upcomingTournamentsCount,
+    liveTournamentsCount,
+    endedTournamentsCount,
+    myTournamentsCount,
+  ]);
 
   useEffect(() => {
     setSortBy(SORT_OPTIONS[selectedTab][0].value);
@@ -123,15 +144,6 @@ const Overview = () => {
       selectedTab === "ended",
   });
 
-  const queryAddress = useMemo(() => {
-    if (!address || address === "0x0") return null;
-    return indexAddress(address);
-  }, [address]);
-
-  const gameAddresses = useMemo(() => {
-    return gameData?.map((game) => indexAddress(game.contract_address));
-  }, [gameData]);
-
   const { data: myTournaments, loading: myTournamentsLoading } =
     useGetMyTournaments({
       namespace: nameSpace,
@@ -142,6 +154,8 @@ const Overview = () => {
       offset: page * 12,
       active: selectedTab === "my",
     });
+
+  console.log(myTournaments);
 
   const tournamentsData = (
     selectedTab === "my" ? myTournaments : tournaments
@@ -180,14 +194,21 @@ const Overview = () => {
   }, [tournamentsLoading, myTournamentsLoading, tournamentCounts]);
 
   useEffect(() => {
-    if (upcomingTournamentsCount > 0) {
+    if (myTournamentsCount > 0) {
+      setSelectedTab("my");
+    } else if (upcomingTournamentsCount > 0) {
       setSelectedTab("upcoming");
     } else if (liveTournamentsCount > 0) {
       setSelectedTab("live");
     } else if (endedTournamentsCount > 0) {
       setSelectedTab("ended");
     }
-  }, [upcomingTournamentsCount, liveTournamentsCount, endedTournamentsCount]);
+  }, [
+    upcomingTournamentsCount,
+    liveTournamentsCount,
+    endedTournamentsCount,
+    myTournamentsCount,
+  ]);
 
   const LoadingSpinner = () => (
     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900" />
@@ -206,6 +227,7 @@ const Overview = () => {
               upcomingTournamentsCount={upcomingTournamentsCount}
               liveTournamentsCount={liveTournamentsCount}
               endedTournamentsCount={endedTournamentsCount}
+              myTournamentsCount={myTournamentsCount}
             />
           </div>
 

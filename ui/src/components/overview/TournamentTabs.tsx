@@ -9,6 +9,7 @@ interface TournamentTabsProps {
   upcomingTournamentsCount?: number;
   liveTournamentsCount?: number;
   endedTournamentsCount?: number;
+  myTournamentsCount?: number;
 }
 
 const TournamentTabs = ({
@@ -17,6 +18,7 @@ const TournamentTabs = ({
   upcomingTournamentsCount,
   liveTournamentsCount,
   endedTournamentsCount,
+  myTournamentsCount,
 }: TournamentTabsProps) => {
   return (
     <div className="flex flex-row gap-2">
@@ -51,6 +53,7 @@ const TournamentTabs = ({
           icon={<TROPHY />}
           label="My Tournaments"
           mobileLabel="My"
+          count={myTournamentsCount}
         />
       </div>
     </div>

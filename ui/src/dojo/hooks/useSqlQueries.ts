@@ -105,6 +105,49 @@ export const useGetEndedTournamentsCount = ({
   return { data: data?.[0]?.count, loading, error };
 };
 
+export const useGetMyTournamentsCount = ({
+  namespace,
+  address,
+  gameAddresses,
+}: {
+  namespace: string;
+  address: string;
+  gameAddresses: string[];
+}) => {
+  const query = useMemo(
+    () => `
+    WITH account_tokens AS (
+      SELECT 
+        token_id,
+        '0x' || substr('000000000000000000000000' || substr(substr(token_id, 1, instr(token_id, ':') - 1), 3), -64) as parsed_game_address,
+        substr(token_id, instr(token_id, ':') + 1) as parsed_token_id
+      FROM token_balances
+      WHERE account_address = "${address}" 
+        AND contract_address IN (${gameAddresses
+          .map((addr) => `"${addr}"`)
+          .join(",")})
+    ),
+    registered_tournaments AS (
+      SELECT DISTINCT r.tournament_id, a.parsed_game_address
+      FROM '${namespace}-Registration' r
+      JOIN account_tokens a ON r.game_token_id = a.parsed_token_id
+    ),
+    filtered_tournaments AS (
+      SELECT rt.tournament_id
+      FROM registered_tournaments rt
+      JOIN '${namespace}-Tournament' t 
+        ON rt.tournament_id = t.id
+          AND rt.parsed_game_address = t.'game_config.address'
+    )
+    SELECT COUNT(DISTINCT tournament_id) as count
+    FROM filtered_tournaments
+  `,
+    [namespace, address, gameAddresses]
+  );
+  const { data, loading, error } = useSqlExecute(query);
+  return { data: data?.[0]?.count, loading, error };
+};
+
 const getTournamentWhereClause = (status: string, currentTime: string) => {
   switch (status) {
     case "upcoming":
