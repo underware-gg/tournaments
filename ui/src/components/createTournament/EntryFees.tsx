@@ -84,7 +84,7 @@ const EntryFees = ({ form }: StepProps) => {
 
           {field.value && (
             <>
-              <div className="w-full h-0.5 bg-retro-green/25" />
+              <div className="w-full h-0.5 bg-primary/25" />
               <div className="space-y-4 pt-4">
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
@@ -120,7 +120,7 @@ const EntryFees = ({ form }: StepProps) => {
                     )}
                   />
                 </div>
-                <div className="w-full h-0.5 bg-retro-green/25" />
+                <div className="w-full h-0.5 bg-primary/25" />
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -222,7 +222,7 @@ const EntryFees = ({ form }: StepProps) => {
                     )}
                   />
                 </div>
-                <div className="w-full h-0.5 bg-retro-green/25" />
+                <div className="w-full h-0.5 bg-primary/25" />
                 <div className="space-y-4">
                   <div className="flex flex-row items-center gap-5">
                     <FormLabel className="font-astronaut text-2xl">

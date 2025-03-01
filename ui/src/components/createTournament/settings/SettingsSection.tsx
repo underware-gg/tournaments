@@ -92,7 +92,7 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
                 <h3 className="font-astronaut text-lg">
                   {feltToString(mergedGameSettings[field.value]?.name ?? "")}
                 </h3>
-                <p className="text-sm text-retro-green-dark">
+                <p className="text-sm text-primary-dark">
                   {mergedGameSettings[field.value]?.description}
                 </p>
               </div>

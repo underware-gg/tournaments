@@ -68,18 +68,18 @@ const ScoreTable = ({
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2 px-4">
         <div className="flex flex-row gap-2">
-          <span className="text-retro-green-dark">Player Name:</span>
+          <span className="text-primary-dark">Player Name:</span>
           <span>{feltToString(registration?.player_name)}</span>
         </div>
         <div className="flex flex-row gap-2">
-          <span className="text-retro-green-dark">Owner:</span>
+          <span className="text-primary-dark">Owner:</span>
           <span>
             {usernames?.get(ownerAddresses?.[index] ?? "") ||
               displayAddress(ownerAddresses?.[index] ?? "")}
           </span>
         </div>
       </div>
-      <div className="w-full h-0.5 bg-retro-green/50" />
+      <div className="w-full h-0.5 bg-primary/50" />
       {registration?.metadata !== "" ? (
         <img
           src={JSON.parse(registration?.metadata)?.image}
@@ -91,7 +91,7 @@ const ScoreTable = ({
       )}
       {isEnded && (
         <div className="flex items-center gap-2 justify-center mt-2">
-          <span className="text-retro-green">
+          <span className="text-primary">
             {registration.has_submitted ? <VERIFIED /> : <QUESTION />}
           </span>
           <span>
@@ -145,7 +145,7 @@ const ScoreTable = ({
             showParticipants ? "h-auto opacity-100" : "h-0 opacity-0"
           } overflow-hidden`}
         >
-          <div className="w-full h-0.5 bg-retro-green/25 mt-2" />
+          <div className="w-full h-0.5 bg-primary/25 mt-2" />
           {!loading ? (
             <div className="flex flex-row py-2">
               {[0, 1].map((colIndex) => (
@@ -158,7 +158,7 @@ const ScoreTable = ({
                         <div className="hidden sm:block">
                           <HoverCard openDelay={50} closeDelay={0}>
                             <HoverCardTrigger asChild>
-                              <div className="flex flex-row items-center sm:gap-2 pr-2 hover:cursor-pointer hover:bg-retro-green/25 hover:border-retro-green/30 border border-transparent rounded transition-all duration-200">
+                              <div className="flex flex-row items-center sm:gap-2 pr-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200">
                                 <span className="w-4 flex-none font-astronaut">
                                   {index +
                                     1 +
@@ -169,7 +169,7 @@ const ScoreTable = ({
                                 <span className="w-6 flex-none">
                                   <USER />
                                 </span>
-                                <span className="flex-none max-w-20 group-hover:text-retro-green transition-colors duration-200">
+                                <span className="flex-none max-w-20 group-hover:text-primary transition-colors duration-200">
                                   {feltToString(registration?.player_name)}
                                 </span>
                                 <p
@@ -182,7 +182,7 @@ const ScoreTable = ({
                                   }}
                                 ></p>
                                 <div className="flex flex-row items-center gap-2">
-                                  <span className="flex-none text-retro-green font-astronaut">
+                                  <span className="flex-none text-primary font-astronaut">
                                     {registration.score ?? 0}
                                   </span>
                                 </div>
@@ -200,7 +200,7 @@ const ScoreTable = ({
 
                         {/* Mobile clickable row (hidden on desktop) */}
                         <div
-                          className="sm:hidden flex flex-row items-center sm:gap-2 pr-2 hover:cursor-pointer hover:bg-retro-green/25 hover:border-retro-green/30 border border-transparent rounded transition-all duration-200"
+                          className="sm:hidden flex flex-row items-center sm:gap-2 pr-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200"
                           onClick={() => {
                             setSelectedPlayer({ registration, index });
                             setIsMobileDialogOpen(true);
@@ -212,7 +212,7 @@ const ScoreTable = ({
                           <span className="w-6 flex-none">
                             <USER />
                           </span>
-                          <span className="flex-none max-w-20 group-hover:text-retro-green transition-colors duration-200">
+                          <span className="flex-none max-w-20 group-hover:text-primary transition-colors duration-200">
                             {feltToString(registration?.player_name)}
                           </span>
                           <p
@@ -225,7 +225,7 @@ const ScoreTable = ({
                             }}
                           ></p>
                           <div className="flex flex-row items-center gap-2">
-                            <span className="flex-none text-retro-green font-astronaut">
+                            <span className="flex-none text-primary font-astronaut">
                               {registration.score ?? 0}
                             </span>
                           </div>
@@ -253,9 +253,9 @@ const ScoreTable = ({
 
       {/* Mobile dialog for player details */}
       <Dialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen}>
-        <DialogContent className="sm:hidden bg-black border border-retro-green p-4 rounded-lg max-w-[90vw] mx-auto">
+        <DialogContent className="sm:hidden bg-black border border-primary p-4 rounded-lg max-w-[90vw] mx-auto">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-astronaut text-lg text-retro-green">
+            <h3 className="font-astronaut text-lg text-primary">
               Player Details
             </h3>
           </div>

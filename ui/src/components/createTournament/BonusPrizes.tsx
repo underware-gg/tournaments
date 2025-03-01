@@ -101,7 +101,7 @@ const BonusPrizes = ({ form }: StepProps) => {
 
           {field.value && (
             <>
-              <div className="w-full h-0.5 bg-retro-green/25" />
+              <div className="w-full h-0.5 bg-primary/25" />
               <div className="flex flex-col gap-5 px-4">
                 <div className="flex flex-row justify-between items-center pt-4 px-4">
                   {/* New Prize Input Section */}
@@ -288,7 +288,7 @@ const BonusPrizes = ({ form }: StepProps) => {
 
                 {(form.watch("bonusPrizes") || []).length > 0 && (
                   <>
-                    <div className="w-full h-0.5 bg-retro-green/25" />
+                    <div className="w-full h-0.5 bg-primary/25" />
                     <div className="space-y-2">
                       <FormLabel className="font-astronaut text-2xl">
                         Added Prizes
@@ -298,7 +298,7 @@ const BonusPrizes = ({ form }: StepProps) => {
                           (prize, index) => (
                             <div
                               key={index}
-                              className="flex items-center gap-4 p-4 bg-background/50 border border-retro-green-dark/50 rounded"
+                              className="flex items-center gap-4 p-4 bg-background/50 border border-primary-dark/50 rounded"
                             >
                               <div className="flex items-center gap-2">
                                 <img
@@ -323,7 +323,7 @@ const BonusPrizes = ({ form }: StepProps) => {
                                 </span>
                               )}
                               <span
-                                className="w-6 h-6 text-retro-green-dark cursor-pointer"
+                                className="w-6 h-6 text-primary-dark cursor-pointer"
                                 onClick={() => {
                                   const newPrizes = [
                                     ...(form.watch("bonusPrizes") || []),

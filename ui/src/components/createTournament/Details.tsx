@@ -50,7 +50,7 @@ const Details = ({ form }: StepProps) => {
     <div className="flex flex-col p-4 gap-5">
       <div className="flex flex-col">
         <span className="font-astronaut text-3xl font-bold">Details</span>
-        <div className="w-full h-0.5 bg-retro-green/25" />
+        <div className="w-full h-0.5 bg-primary/25" />
       </div>
       <div className="flex flex-row gap-5 px-4">
         <div className="flex flex-col gap-5 w-3/5">
@@ -74,7 +74,7 @@ const Details = ({ form }: StepProps) => {
                         key={key}
                         variant={field.value === key ? "default" : "outline"}
                         className={`flex flex-col justify-between h-[100px] w-[100px] flex-shrink-0 p-2 hover:cursor-pointer ${
-                          field.value === key && "bg-retro-green-dark"
+                          field.value === key && "bg-primary-dark"
                         }`}
                         onClick={() => field.onChange(key)}
                         disabled={
@@ -90,7 +90,7 @@ const Details = ({ form }: StepProps) => {
                               {game.name}
                             </p>
                           </TooltipTrigger>
-                          <TooltipContent className="border-retro-green bg-black text-neutral-500">
+                          <TooltipContent className="border-primary bg-black text-neutral-500">
                             {game.name}
                           </TooltipContent>
                         </Tooltip>
@@ -102,7 +102,7 @@ const Details = ({ form }: StepProps) => {
               </FormItem>
             )}
           />
-          <div className="w-full h-0.5 bg-retro-green/25" />
+          <div className="w-full h-0.5 bg-primary/25" />
           <FormField
             control={form.control}
             name="settings"
@@ -150,7 +150,7 @@ const Details = ({ form }: StepProps) => {
               </FormItem>
             )}
           />
-          <div className="w-full h-0.5 bg-retro-green/25" />
+          <div className="w-full h-0.5 bg-primary/25" />
           <FormField
             control={form.control}
             name="leaderboardSize"
@@ -199,7 +199,7 @@ const Details = ({ form }: StepProps) => {
                               field.value === size ? "default" : "outline"
                             }
                             className={cn(
-                              field.value === size && "bg-retro-green-dark"
+                              field.value === size && "bg-primary-dark"
                             )}
                             type="button"
                             onClick={() => field.onChange(size)}

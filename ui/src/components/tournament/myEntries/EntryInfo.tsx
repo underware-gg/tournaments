@@ -19,7 +19,7 @@ const EntryInfo = ({ entryNumber, tokenMetadata }: EntryInfoProps) => {
           <h4 className="font-medium">Entry #{entryNumber}</h4>
           <p className="text-muted-foreground">Game Settings</p>
         </div>
-        <div className="w-full h-0.5 bg-retro-green/50" />
+        <div className="w-full h-0.5 bg-primary/50" />
         {tokenMetadata !== "" ? (
           <img
             src={JSON.parse(tokenMetadata)?.image}

@@ -61,7 +61,7 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
           );
         })}
         {totalPrizesValueUSD > 0 && (
-          <div className="pt-2 border-t border-retro-green/20">
+          <div className="pt-2 border-t border-primary/20">
             <div className="flex justify-between items-center">
               <span className="font-astronaut">Total</span>
               <span>${totalPrizesValueUSD.toFixed(2)}</span>
@@ -82,10 +82,10 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: position * 0.1 }}
-              className="flex items-center gap-4 p-2 sm:p-3 rounded-lg border border-retro-green/20 w-fit hover:cursor-pointer hover:bg-retro-green/25 hover:border-retro-green/30 transition-all duration-200"
+              className="flex items-center gap-4 p-2 sm:p-3 rounded-lg border border-primary/20 w-fit hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 transition-all duration-200"
             >
-              <div className="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-retro-green/20">
-                <span className="font-astronaut sm:text-lg text-retro-green">
+              <div className="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary/20">
+                <span className="font-astronaut sm:text-lg text-primary">
                   {position}
                   <sup>{getOrdinalSuffix(position)}</sup>
                 </span>
@@ -96,7 +96,7 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
                     <span>${totalPrizesValueUSD.toFixed(2)}</span>
                   )}
                   {totalPrizesValueUSD > 0 && totalPrizeNFTs > 0 && (
-                    <span className="text-retro-green/25">|</span>
+                    <span className="text-primary/25">|</span>
                   )}
                   {totalPrizeNFTs > 0 && (
                     <span>
@@ -122,14 +122,14 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
 
       {/* Mobile clickable element (hidden on desktop) */}
       <motion.div
-        className="sm:hidden flex items-center gap-4 p-2 rounded-lg border border-retro-green/20 w-fit hover:cursor-pointer hover:bg-retro-green/25 hover:border-retro-green/30 transition-all duration-200"
+        className="sm:hidden flex items-center gap-4 p-2 rounded-lg border border-primary/20 w-fit hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 transition-all duration-200"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: position * 0.1 }}
         onClick={() => setIsMobileDialogOpen(true)}
       >
-        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-retro-green/20">
-          <span className="font-astronaut text-retro-green">
+        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20">
+          <span className="font-astronaut text-primary">
             {position}
             <sup>{getOrdinalSuffix(position)}</sup>
           </span>
@@ -140,7 +140,7 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
               <span>${totalPrizesValueUSD.toFixed(2)}</span>
             )}
             {totalPrizesValueUSD > 0 && totalPrizeNFTs > 0 && (
-              <span className="text-retro-green/25">|</span>
+              <span className="text-primary/25">|</span>
             )}
             {totalPrizeNFTs > 0 && (
               <span>
@@ -155,7 +155,7 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
 
       {/* Mobile dialog for prize details */}
       <Dialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen}>
-        <DialogContent className="sm:hidden bg-black border border-retro-green p-4 rounded-lg max-w-[90vw] mx-auto">
+        <DialogContent className="sm:hidden bg-black border border-primary p-4 rounded-lg max-w-[90vw] mx-auto">
           {renderPrizeDetails()}
         </DialogContent>
       </Dialog>

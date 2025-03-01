@@ -310,10 +310,10 @@ const Tournament = () => {
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 bg-black/20 backdrop-blur-sm z-50">
         <div className="relative w-16 h-16">
-          <div className="absolute w-full h-full border-4 border-retro-green rounded-full animate-ping opacity-75"></div>
-          <div className="absolute w-full h-full border-4 border-retro-green-dark rounded-full animate-pulse"></div>
+          <div className="absolute w-full h-full border-4 border-primary rounded-full animate-ping opacity-75"></div>
+          <div className="absolute w-full h-full border-4 border-primary-dark rounded-full animate-pulse"></div>
         </div>
-        <span className="font-astronaut text-2xl text-retro-green-dark animate-pulse">
+        <span className="font-astronaut text-2xl text-primary-dark animate-pulse">
           Loading tournament...
         </span>
       </div>
@@ -336,7 +336,7 @@ const Tournament = () => {
           <span className="hidden sm:block">Back</span>
         </Button>
         <div className="flex flex-row items-center gap-5">
-          <span className="text-retro-green uppercase font-astronaut text-lg sm:text-2xl">
+          <span className="text-primary uppercase font-astronaut text-lg sm:text-2xl">
             {status}
           </span>
           <Tooltip delayDuration={50}>
@@ -349,7 +349,7 @@ const Tournament = () => {
               side="top"
               align="center"
               sideOffset={5}
-              className="bg-black text-neutral-500 border border-retro-green-dark px-2 py-1 rounded text-sm z-50"
+              className="bg-black text-neutral-500 border border-primary-dark px-2 py-1 rounded text-sm z-50"
             >
               {gameName ? feltToString(gameName) : "Unknown"}
             </TooltipContent>
@@ -434,14 +434,14 @@ const Tournament = () => {
             <span className="font-astronaut text-xl sm:text-4xl">
               {feltToString(tournamentModel?.metadata?.name ?? "")}
             </span>
-            <div className="flex flex-row items-center gap-4 text-retro-green-dark">
+            <div className="flex flex-row items-center gap-4 text-primary-dark">
               <div className="flex flex-row gap-2">
                 <span className="hidden sm:block">Winners:</span>
-                <span className="text-retro-green">Top {leaderboardSize}</span>
+                <span className="text-primary">Top {leaderboardSize}</span>
               </div>
               <div className="flex flex-row gap-2">
                 <span className="hidden sm:block">Registration:</span>
-                <span className="text-retro-green">
+                <span className="text-primary">
                   {registrationType.charAt(0).toUpperCase() +
                     registrationType.slice(1)}
                 </span>
@@ -451,20 +451,18 @@ const Tournament = () => {
           <div className="hidden sm:flex flex-row">
             {!isStarted ? (
               <div>
-                <span className="text-retro-green-dark">Starts In: </span>
-                <span className="text-retro-green">{formatTime(startsIn)}</span>
+                <span className="text-primary-dark">Starts In: </span>
+                <span className="text-primary">{formatTime(startsIn)}</span>
               </div>
             ) : !isEnded ? (
               <div>
-                <span className="text-retro-green-dark">Ends In: </span>
-                <span className="text-retro-green">{formatTime(endsIn)}</span>
+                <span className="text-primary-dark">Ends In: </span>
+                <span className="text-primary">{formatTime(endsIn)}</span>
               </div>
             ) : !isSubmitted ? (
               <div>
-                <span className="text-retro-green-dark">
-                  Submission Ends In:{" "}
-                </span>
-                <span className="text-retro-green">
+                <span className="text-primary-dark">Submission Ends In: </span>
+                <span className="text-primary">
                   {formatTime(submissionEndsIn)}
                 </span>
               </div>
@@ -498,7 +496,7 @@ const Tournament = () => {
           {isOverflowing && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="self-start text-retro-green hover:text-retro-green-dark font-bold text-sm sm:text-base"
+              className="self-start text-primary hover:text-primary-dark font-bold text-sm sm:text-base"
             >
               {isExpanded ? "See Less" : "See More"}
             </button>

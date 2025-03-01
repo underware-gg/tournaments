@@ -68,11 +68,11 @@ const EntrantsTable = ({
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2 px-4">
         <div className="flex flex-row gap-2">
-          <span className="text-retro-green-dark">Player Name:</span>
+          <span className="text-primary-dark">Player Name:</span>
           <span>{feltToString(registration?.player_name)}</span>
         </div>
         <div className="flex flex-row gap-2">
-          <span className="text-retro-green-dark">Owner:</span>
+          <span className="text-primary-dark">Owner:</span>
           <span>
             {usernames?.get(ownerAddresses?.[index] ?? "") ||
               displayAddress(ownerAddresses?.[index] ?? "")}
@@ -85,7 +85,6 @@ const EntrantsTable = ({
   return (
     <Card
       variant="outline"
-      borderColor="rgba(0, 218, 163, 1)"
       className={`sm:w-1/2 transition-all duration-300 ease-in-out ${
         showParticipants ? "h-[200px]" : "h-[45px] sm:h-[60px]"
       }`}
@@ -126,7 +125,7 @@ const EntrantsTable = ({
             showParticipants ? "h-auto opacity-100" : "h-0 opacity-0"
           } overflow-hidden`}
         >
-          <div className="w-full h-0.5 bg-retro-green/25 mt-2" />
+          <div className="w-full h-0.5 bg-primary/25 mt-2" />
           {!loading ? (
             <div className="flex flex-col py-2">
               {[0, 1].map((colIndex) => (
@@ -138,7 +137,7 @@ const EntrantsTable = ({
                         <div className="hidden sm:block">
                           <HoverCard openDelay={50} closeDelay={0}>
                             <HoverCardTrigger asChild>
-                              <div className="flex flex-row items-center sm:gap-2 pr-2 hover:cursor-pointer hover:bg-retro-green/25 hover:border-retro-green/30 border border-transparent rounded transition-all duration-200">
+                              <div className="flex flex-row items-center sm:gap-2 pr-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200">
                                 <span className="w-4 flex-none font-astronaut">
                                   {index +
                                     1 +
@@ -149,7 +148,7 @@ const EntrantsTable = ({
                                 <span className="w-6 flex-none">
                                   <USER />
                                 </span>
-                                <span className="flex-none max-w-20 group-hover:text-retro-green transition-colors duration-200">
+                                <span className="flex-none max-w-20 group-hover:text-primary transition-colors duration-200">
                                   {feltToString(registration?.player_name)}
                                 </span>
                               </div>
@@ -166,7 +165,7 @@ const EntrantsTable = ({
 
                         {/* Mobile clickable row (hidden on desktop) */}
                         <div
-                          className="sm:hidden flex flex-row items-center sm:gap-2 pr-2 hover:cursor-pointer hover:bg-retro-green/25 hover:border-retro-green/30 border border-transparent rounded transition-all duration-200"
+                          className="sm:hidden flex flex-row items-center sm:gap-2 pr-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200"
                           onClick={() => {
                             setSelectedPlayer({ registration, index });
                             setIsMobileDialogOpen(true);
@@ -178,7 +177,7 @@ const EntrantsTable = ({
                           <span className="w-6 flex-none">
                             <USER />
                           </span>
-                          <span className="flex-none max-w-20 group-hover:text-retro-green transition-colors duration-200">
+                          <span className="flex-none max-w-20 group-hover:text-primary transition-colors duration-200">
                             {feltToString(registration?.player_name)}
                           </span>
                         </div>
@@ -205,9 +204,9 @@ const EntrantsTable = ({
 
       {/* Mobile dialog for player details */}
       <Dialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen}>
-        <DialogContent className="sm:hidden bg-black border border-retro-green p-4 rounded-lg max-w-[90vw] mx-auto">
+        <DialogContent className="sm:hidden bg-black border border-primary p-4 rounded-lg max-w-[90vw] mx-auto">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-astronaut text-lg text-retro-green">
+            <h3 className="font-astronaut text-lg text-primary">
               Player Details
             </h3>
           </div>

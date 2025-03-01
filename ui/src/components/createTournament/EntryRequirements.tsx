@@ -136,7 +136,7 @@ const EntryRequirements = ({ form }: StepProps) => {
 
           {field.value && (
             <>
-              <div className="w-full h-0.5 bg-retro-green/25" />
+              <div className="w-full h-0.5 bg-primary/25" />
               <div className="space-y-4 p-4">
                 <div className="flex gap-4">
                   <Button
@@ -176,7 +176,7 @@ const EntryRequirements = ({ form }: StepProps) => {
 
                 {form.watch("gatingOptions.type") === "token" && (
                   <>
-                    <div className="w-full h-0.5 bg-retro-green/25" />
+                    <div className="w-full h-0.5 bg-primary/25" />
                     <div className="flex flex-row items-center gap-5">
                       <FormField
                         control={form.control}
@@ -205,7 +205,7 @@ const EntryRequirements = ({ form }: StepProps) => {
 
                 {form.watch("gatingOptions.type") === "tournament" && (
                   <>
-                    <div className="w-full h-0.5 bg-retro-green/25" />
+                    <div className="w-full h-0.5 bg-primary/25" />
                     <div className="space-y-4">
                       <FormField
                         control={form.control}
@@ -250,7 +250,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                           </FormItem>
                         )}
                       />
-                      <div className="w-full h-0.5 bg-retro-green/25" />
+                      <div className="w-full h-0.5 bg-primary/25" />
                       <FormField
                         control={form.control}
                         name="gatingOptions.tournament.tournaments"
@@ -270,7 +270,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                                       return (
                                         <div
                                           key={selectedTournament.id}
-                                          className="inline-flex items-center gap-2 p-2 border border-retro-green-dark rounded w-fit"
+                                          className="inline-flex items-center gap-2 p-2 border border-primary-dark rounded w-fit"
                                         >
                                           <span>
                                             {feltToString(
@@ -325,7 +325,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                                       </DialogTitle>
                                       {/* Search input */}
                                       <div className="px-4 pb-2 flex flex-col gap-2">
-                                        <div className="flex items-center border rounded border-retro-green-dark bg-background">
+                                        <div className="flex items-center border rounded border-primary-dark bg-background">
                                           <Search className="w-4 h-4 ml-3 text-muted-foreground" />
                                           <Input
                                             placeholder="Search tournaments..."
@@ -346,7 +346,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                                                 gameFilters.includes(
                                                   game.contract_address
                                                 )
-                                                  ? "bg-retro-green-dark text-black"
+                                                  ? "bg-primary-dark text-black"
                                                   : "bg-black"
                                               } border border-neutral-500 px-2 flex items-center gap-2 cursor-pointer`}
                                               onClick={() => {
@@ -384,7 +384,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                                     </DialogHeader>
 
                                     {/* Tournament list */}
-                                    <div className="flex-1 overflow-y-auto border-t border-retro-green-dark">
+                                    <div className="flex-1 overflow-y-auto border-t border-primary-dark">
                                       {tournamentsData?.length > 0 ? (
                                         tournamentsData.map(
                                           (tournament, index) => {
@@ -439,7 +439,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                                             return (
                                               <DialogClose asChild key={index}>
                                                 <div
-                                                  className="flex flex-row items-center justify-between border-b border-retro-green-dark px-4 py-2 hover:bg-retro-green/20 hover:cursor-pointer"
+                                                  className="flex flex-row items-center justify-between border-b border-primary-dark px-4 py-2 hover:bg-primary/20 hover:cursor-pointer"
                                                   onClick={() => {
                                                     if (
                                                       !(
@@ -496,7 +496,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                                                       </TooltipTrigger>
                                                       <TooltipContent
                                                         side="top"
-                                                        className="bg-black text-neutral-500 border border-retro-green-dark px-2 py-1 rounded text-sm"
+                                                        className="bg-black text-neutral-500 border border-primary-dark px-2 py-1 rounded text-sm"
                                                       >
                                                         {name
                                                           ? feltToString(name)
@@ -547,7 +547,7 @@ const EntryRequirements = ({ form }: StepProps) => {
 
                 {form.watch("gatingOptions.type") === "addresses" && (
                   <>
-                    <div className="w-full h-0.5 bg-retro-green/25" />
+                    <div className="w-full h-0.5 bg-primary/25" />
                     <div className="space-y-4">
                       <FormField
                         control={form.control}
@@ -590,7 +590,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                                 </div>
                                 {field.value.length > 0 && (
                                   <>
-                                    <div className="w-full h-0.5 bg-retro-green/25" />
+                                    <div className="w-full h-0.5 bg-primary/25" />
                                     <div className="flex flex-row gap-2 overflow-x-auto">
                                       {field.value.map((address, index) => (
                                         <div

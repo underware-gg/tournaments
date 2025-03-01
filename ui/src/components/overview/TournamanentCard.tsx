@@ -104,7 +104,6 @@ export const TournamentCard = ({
     <Card
       variant="outline"
       interactive={true}
-      borderColor="rgba(0, 218, 163, 1)"
       onClick={() => {
         navigate(`/tournament/${Number(tournament.id).toString()}`);
       }}
@@ -121,23 +120,23 @@ export const TournamentCard = ({
               : {entryCount}
             </div>
           </div>
-          <div className="hidden sm:block w-full h-0.5 bg-retro-green/25" />
+          <div className="hidden sm:block w-full h-0.5 bg-primary/25" />
         </div>
         <div className="hidden sm:flex flex-row">
           <div className="flex flex-col w-1/2">
             <div className="flex flex-row gap-2">
-              <span className="text-retro-green-dark">Registration:</span>
+              <span className="text-primary-dark">Registration:</span>
               <span>{registrationType}</span>
             </div>
             <div className="flex flex-row gap-2">
               {status === "upcoming" ? (
                 <>
-                  <span className="text-retro-green-dark">Starts In:</span>
+                  <span className="text-primary-dark">Starts In:</span>
                   <span>{startsIn}</span>
                 </>
               ) : (
                 <>
-                  <span className="text-retro-green-dark">Ends In:</span>
+                  <span className="text-primary-dark">Ends In:</span>
                   <span>{endsIn}</span>
                 </>
               )}
@@ -154,7 +153,7 @@ export const TournamentCard = ({
                 side="top"
                 align="center"
                 sideOffset={5}
-                className="bg-black text-neutral-500 border border-retro-green-dark px-2 py-1 rounded text-sm z-50"
+                className="bg-black text-neutral-500 border border-primary-dark px-2 py-1 rounded text-sm z-50"
               >
                 {gameName ? feltToString(gameName) : "Unknown"}
               </TooltipContent>
@@ -166,17 +165,17 @@ export const TournamentCard = ({
             <TokenGameIcon key={index} game={gameAddress} size={"md"} />
           </div>
           <div className="flex flex-row items-center gap-2">
-            <span className="text-retro-green-dark">Fee:</span>
+            <span className="text-primary-dark">Fee:</span>
             {pricesLoading ? (
-              <Skeleton className="h-6 w-16 bg-retro-green/20" />
+              <Skeleton className="h-6 w-16 bg-primary/20" />
             ) : (
               <span>{hasEntryFee ? `$${entryFee}` : "FREE"}</span>
             )}
           </div>
           <div className="flex flex-row items-center gap-2">
-            <span className="text-retro-green-dark">Pot:</span>
+            <span className="text-primary-dark">Pot:</span>
             {pricesLoading ? (
-              <Skeleton className="h-6 w-16 bg-retro-green/20" />
+              <Skeleton className="h-6 w-16 bg-primary/20" />
             ) : totalPrizesValueUSD > 0 || totalPrizeNFTs > 0 ? (
               <div className="flex flex-row items-center gap-2">
                 {totalPrizesValueUSD > 0 && (

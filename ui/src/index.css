@@ -78,6 +78,29 @@
 
   --pixel-border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2333FF33'%3E%3Cpath d='M2,2h2v2H2V2ZM4,0h2V2h-2V0Zm6,4h2v2h-2v-2ZM0,4H2v2H0v-2ZM6,0h2V2h-2V0Zm2,2h2v2h-2V2Zm0,6h2v2h-2v-2Zm-2,2h2v2h-2v-2ZM0,6H2v2H0v-2Zm10,0h2v2h-2v-2Zm-6,4h2v2h-2v-2Zm-2-2h2v2H2v-2Zm6-2h2v2h-2v-2Zm-2,2h2v2h-2v-2Zm2-4h2v2h-2v-2Zm-4,4h2v2h-2v-2Zm2-2h2v2h-2v-2Z'/%3E%3C/svg%3E");
   --timeline-extension: 10px;
+
+  /* Primary colors */
+  --color-primary       : 0, 218, 163;
+  --color-primary-dark  : 0, 140, 105;
+  --color-primary-darker: 31, 66, 42;
+
+  /* Neutral colors */
+  --color-neutral: 128, 128, 128;
+
+  /* Semantic colors */
+  --color-destructive: 255, 76, 76;
+  --color-warning    : 255, 193, 7;
+  --color-success    : 0, 200, 83;
+
+  /* Border colors for different button variants */
+  --border-default    : var(--color-primary-dark);
+  --border-destructive: var(--color-destructive);
+  --border-outline    : var(--color-primary);
+  --border-tab        : var(--color-primary-dark);
+
+  /* Background and text colors */
+  --color-background: 0, 0, 0;
+  --color-foreground: 255, 255, 255;
 }
 
 @media (min-width: 640px) {

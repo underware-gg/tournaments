@@ -197,7 +197,7 @@ const Overview = () => {
     <div className="flex flex-row gap-5">
       <GameFilters />
       <div className="flex flex-col gap-2 sm:gap-0 w-full sm:w-4/5 p-1 sm:p-2">
-        <div className="flex flex-row justify-between w-full sm:border-b-4 border-retro-green">
+        <div className="flex flex-row justify-between w-full sm:border-b-4 border-primary">
           {/* Hide TournamentTabs on mobile when selectedTab is "my" */}
           <div className={selectedTab === "my" ? "hidden sm:block" : "block"}>
             <TournamentTabs
@@ -231,14 +231,14 @@ const Overview = () => {
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-black border-2 border-retro-grey">
-                <DropdownMenuLabel className="text-retro-green">
+                <DropdownMenuLabel className="text-primary">
                   Options
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-retro-green-dark" />
+                <DropdownMenuSeparator className="bg-primary-dark" />
                 {SORT_OPTIONS[selectedTab].map((option) => (
                   <DropdownMenuItem
                     key={option.value}
-                    className="text-retro-green cursor-pointer"
+                    className="text-primary cursor-pointer"
                     onClick={() => setSortBy(option.value)}
                   >
                     {option.label}
@@ -271,7 +271,7 @@ const Overview = () => {
                       )}
                     </span>
                     <span
-                      className="w-4 h-4 sm:w-6 sm:h-6 text-retro-green-dark cursor-pointer"
+                      className="w-4 h-4 sm:w-6 sm:h-6 text-primary-dark cursor-pointer"
                       onClick={() => removeGameFilter(filter)}
                     >
                       <X />

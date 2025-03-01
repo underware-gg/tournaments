@@ -16,9 +16,8 @@ const GameFilters = () => {
             <Button
               size={"xl"}
               variant="outline"
-              borderColor="rgba(0, 218, 163, 1)"
               className={`text-2xl font-astronaut w-full ${
-                gameFilters.includes(key) ? "bg-retro-green/25" : ""
+                gameFilters.includes(key) ? "bg-primary/25" : ""
               }`}
               onClick={() => {
                 if (gameFilters.includes(key)) {

@@ -23,16 +23,13 @@ export const TournamentTab = ({
     <div className="relative hover:cursor-pointer" onClick={onClick}>
       <Button
         variant={selected ? "default" : "outline"}
-        borderColor="rgba(0, 218, 163, 1)"
         className={`
           sm:[border-image-width:4px_4px_0_4px] 
           sm:rounded-b-none
-          rounded-md
           px-2
           sm:px-4
           py-2
           sm:py-4
-          sm:rounded-md
         `}
       >
         <span className="hidden sm:inline">{icon}</span>
@@ -40,9 +37,9 @@ export const TournamentTab = ({
         <span className="sm:hidden">{mobileLabel || label}</span>
       </Button>
       {count !== undefined && count > 0 && (
-        <span className="absolute -top-2 -right-1 flex items-center justify-center text-retro-green-darker h-6 w-6 text-xs">
+        <span className="absolute -top-2 -right-1 flex items-center justify-center text-primary-darker h-6 w-6 text-xs">
           <COUNTER />
-          <span className="absolute inset-0 flex items-center justify-center text-retro-green text-center">
+          <span className="absolute inset-0 flex items-center justify-center text-primary text-center">
             {count}
           </span>
         </span>

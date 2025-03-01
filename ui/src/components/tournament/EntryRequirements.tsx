@@ -68,11 +68,11 @@ const EntryRequirements = ({
           variant="outline"
           className="relative flex flex-row items-center justify-between w-36 h-full p-1 hover:cursor-pointer"
         >
-          <span className="absolute left-0 -top-5 text-xs whitespace-nowrap uppercase text-retro-green-dark font-bold">
+          <span className="absolute left-0 -top-5 text-xs whitespace-nowrap uppercase text-primary-dark font-bold">
             Entry Requirement:
           </span>
           {activeVariant === "token" ? (
-            <div className="text-retro-green flex flex-row items-center justify-center gap-1 w-full">
+            <div className="text-primary flex flex-row items-center justify-center gap-1 w-full">
               <span className="w-8">
                 <COIN />
               </span>
@@ -115,7 +115,7 @@ const EntryRequirements = ({
                 </span>
                 <span>{token?.name}</span>
                 <span
-                  className="text-retro-green-dark hover:cursor-pointer"
+                  className="text-primary-dark hover:cursor-pointer"
                   onClick={() => {
                     if (blockExplorerExists) {
                       window.open(

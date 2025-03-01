@@ -141,8 +141,8 @@ export function EnterTournamentDialog({
             <div className="flex flex-col gap-4">
               {accountUsername && (
                 <div className="flex flex-row justify-center gap-2">
-                  <span className="text-retro-green-dark">Default:</span>
-                  <span className="text-retro-green">{accountUsername}</span>
+                  <span className="text-primary-dark">Default:</span>
+                  <span className="text-primary">{accountUsername}</span>
                 </div>
               )}
               <Input

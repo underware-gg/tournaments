@@ -12,7 +12,7 @@ const TournamentSkeletons = ({
       {[...Array(tournamentsCount)].map((_, index) => (
         <div
           key={index}
-          className="w-full p-4 space-y-4 border border-retro-green-dark rounded-lg bg-background"
+          className="w-full p-4 space-y-4 border border-primary-dark rounded-lg bg-background"
         >
           <div className="flex items-center justify-between">
             <div className="space-y-2">

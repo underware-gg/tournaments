@@ -57,7 +57,7 @@ const Header = () => {
               <div className="flex flex-col gap-4 py-4">
                 <SheetClose asChild>
                   <div
-                    className="text-3xl font-astronaut hover:cursor-pointer hover:text-retro-green-dark transition-colors duration-200"
+                    className="text-3xl font-astronaut hover:cursor-pointer hover:text-primary-dark transition-colors duration-200"
                     onClick={() => navigate("/")}
                   >
                     Games
@@ -120,7 +120,7 @@ const Header = () => {
 
       {/* Logo - hidden on small screens */}
       <div
-        className="hidden sm:flex text-4xl font-astronaut hover:cursor-pointer hover:text-retro-green-dark transition-colors duration-200"
+        className="hidden sm:flex text-4xl font-astronaut hover:cursor-pointer hover:text-primary-dark transition-colors duration-200"
         onClick={() => {
           navigate("/");
         }}
@@ -201,7 +201,7 @@ const Header = () => {
             </span>
             {account && (
               <span
-                className="hidden sm:block hover:bg-retro-green-dark p-1"
+                className="hidden sm:block hover:bg-primary-dark p-1"
                 onClick={() => {
                   disconnect();
                 }}

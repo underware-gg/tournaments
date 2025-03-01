@@ -44,16 +44,16 @@ const PrizesContainer = ({
           <div className="flex flex-row items-center gap-2">
             <span className="font-astronaut text-lg sm:text-2xl">Prizes</span>
             {pricesLoading ? (
-              <Skeleton className="h-6 w-24 bg-retro-green/10" />
+              <Skeleton className="h-6 w-24 bg-primary/10" />
             ) : (
               <>
                 {totalPrizesValueUSD > 0 && (
-                  <span className="font-astronaut text-md sm:text-xl text-retro-green-dark">
+                  <span className="font-astronaut text-md sm:text-xl text-primary-dark">
                     ${totalPrizesValueUSD.toFixed(2)}
                   </span>
                 )}
                 {totalPrizeNFTs > 0 && (
-                  <span className="font-astronaut text-xl text-retro-green-dark">
+                  <span className="font-astronaut text-xl text-primary-dark">
                     {totalPrizeNFTs} NFT{totalPrizeNFTs === 1 ? "" : "s"}
                   </span>
                 )}
@@ -88,7 +88,7 @@ const PrizesContainer = ({
             showPrizes ? "h-auto opacity-100" : "h-0 opacity-0"
           } overflow-hidden`}
         >
-          <div className="w-full h-0.5 bg-retro-green/25 mt-2" />
+          <div className="w-full h-0.5 bg-primary/25 mt-2" />
           <div className="p-2 sm:p-4">
             {prizesExist && (
               <div className="flex flex-row gap-3 overflow-x-auto">
@@ -96,10 +96,10 @@ const PrizesContainer = ({
                   Array.from({ length: 5 }).map((_, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-4 p-3 rounded-lg border border-retro-green/20 w-fit hover:cursor-pointer"
+                      className="flex items-center gap-4 p-3 rounded-lg border border-primary/20 w-fit hover:cursor-pointer"
                     >
                       <Skeleton className="h-12 w-12 rounded-full" />
-                      <Skeleton className="h-6 w-full bg-retro-green/10" />
+                      <Skeleton className="h-6 w-full bg-primary/10" />
                     </div>
                   ))
                 ) : (

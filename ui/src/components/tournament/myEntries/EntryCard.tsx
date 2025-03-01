@@ -40,7 +40,7 @@ const EntryCard = ({ gameAddress, mergedEntry }: EntryCardProps) => {
       </div>
       <HoverCard openDelay={50} closeDelay={0}>
         <HoverCardTrigger asChild>
-          <div className="absolute top-0 right-0 text-retro-green-dark hover:cursor-pointer w-5 h-5 z-20">
+          <div className="absolute top-0 right-0 text-primary-dark hover:cursor-pointer w-5 h-5 z-20">
             <INFO />
           </div>
         </HoverCardTrigger>
@@ -49,7 +49,7 @@ const EntryCard = ({ gameAddress, mergedEntry }: EntryCardProps) => {
           tokenMetadata={mergedEntry.tokenMetadata ?? ""}
         />
       </HoverCard>
-      <p className="text-xs overflow-x-hidden text-ellipsis whitespace-nowrap text-retro-green-dark">
+      <p className="text-xs overflow-x-hidden text-ellipsis whitespace-nowrap text-primary-dark">
         {feltToString(mergedEntry.gameMetadata?.player_name ?? "")}
       </p>
       {isActive && (
@@ -68,7 +68,7 @@ const EntryCard = ({ gameAddress, mergedEntry }: EntryCardProps) => {
         {isActive ? (
           <>
             <p className="text-[10px] text-neutral-500">Score:</p>
-            <p className="text-xs text-retro-green">{mergedEntry.score}</p>
+            <p className="text-xs text-primary">{mergedEntry.score}</p>
           </>
         ) : (
           <>

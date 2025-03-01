@@ -86,7 +86,7 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
         <DialogHeader className="flex-shrink-0 pb-4">
           <DialogTitle className="p-4">Select Token</DialogTitle>
           <div className="px-4 pb-4">
-            <div className="flex items-center border rounded border-retro-green-dark bg-background">
+            <div className="flex items-center border rounded border-primary-dark bg-background">
               <Search className="w-4 h-4 ml-3 text-muted-foreground" />
               <Input
                 placeholder="Search tokens..."
@@ -103,7 +103,7 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
             return (
               <DialogClose asChild key={index}>
                 <div
-                  className={`w-full flex flex-row items-center justify-between hover:bg-retro-green/20 hover:cursor-pointer px-5 py-2 ${
+                  className={`w-full flex flex-row items-center justify-between hover:bg-primary/20 hover:cursor-pointer px-5 py-2 ${
                     selectedToken?.address === token.address
                       ? "bg-terminal-green/75 text-terminal-black"
                       : ""

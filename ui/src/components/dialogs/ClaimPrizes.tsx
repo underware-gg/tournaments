@@ -60,7 +60,7 @@ export function ClaimPrizesDialog({
                 className="flex flex-row items-center justify-between"
                 key={index}
               >
-                <span className="text-retro-green-dark">
+                <span className="text-primary-dark">
                   {prize.type === "entry_fee_game_creator"
                     ? "Game Creator Share"
                     : prize.type === "entry_fee_tournament_creator"

@@ -466,7 +466,7 @@ const CreateTournament = () => {
                     visitedSections.has(section) || section === currentStep
                       ? "cursor-pointer"
                       : "cursor-not-allowed opacity-50",
-                    currentStep === section && "border-b-2 border-retro-green"
+                    currentStep === section && "border-b-2 border-primary"
                   )}
                   onClick={() => handleSectionClick(section)}
                 >

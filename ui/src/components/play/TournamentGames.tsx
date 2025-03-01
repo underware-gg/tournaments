@@ -47,7 +47,7 @@ const TournamentGames = ({ tournament }: TournamentGamesProps) => {
       {leaderboard?.map((entry, index) => (
         <div key={index} className="flex flex-row items-center gap-10">
           <div className="flex flex-row items-center gap-2">
-            <p className="text-retro-green-dark">Game</p>
+            <p className="text-primary-dark">Game</p>
             <p>{Number(entry?.game_token_id).toString()}</p>
           </div>
           <div className="flex flex-row items-center gap-2">

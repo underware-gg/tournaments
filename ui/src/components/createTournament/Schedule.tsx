@@ -41,7 +41,7 @@ const Schedule = ({ form }: StepProps) => {
     <div className="flex flex-col gap-5 p-4">
       <div className="flex flex-col">
         <span className="font-astronaut text-3xl font-bold">Schedule</span>
-        <div className="w-full h-0.5 bg-retro-green/25" />
+        <div className="w-full h-0.5 bg-primary/25" />
       </div>
       <div className="flex flex-row justify-between px-4">
         <div className="w-2/5">
@@ -79,7 +79,7 @@ const Schedule = ({ form }: StepProps) => {
                     }}
                     disabled={disablePastDates}
                     initialFocus
-                    className="rounded-md border-4 border-retro-green-dark w-auto"
+                    className="rounded-md border-4 border-primary-dark w-auto"
                   />
                 </div>
                 <FormMessage />
@@ -201,7 +201,7 @@ const Schedule = ({ form }: StepProps) => {
               </FormItem>
             )}
           />
-          <div className="w-full h-0.5 bg-retro-green/25" />
+          <div className="w-full h-0.5 bg-primary/25" />
           <FormField
             control={form.control}
             name="type"
@@ -263,7 +263,7 @@ const Schedule = ({ form }: StepProps) => {
               </FormItem>
             )}
           />
-          <div className="w-full h-0.5 bg-retro-green/25" />
+          <div className="w-full h-0.5 bg-primary/25" />
           <TournamentTimeline
             type={form.watch("type")}
             createdTime={Math.floor(new Date().getTime() / 1000)} // Convert to Unix timestamp

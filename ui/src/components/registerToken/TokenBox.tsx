@@ -31,7 +31,7 @@ const TokenBox = ({
   const [tokenId, setTokenId] = useState(0);
   const { mintErc721 } = useSystemCalls();
   return (
-    <div className="flex flex-col gap-2 items-center justify-center border border-retro-green bg-black p-2">
+    <div className="flex flex-col gap-2 items-center justify-center border border-primary bg-black p-2">
       <p className="text-lg">{title}</p>
       <div className="relative flex flex-row items-center gap-2">
         <p className="text-lg">Address: {displayAddress(contractAddress)}</p>

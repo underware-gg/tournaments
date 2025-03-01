@@ -33,11 +33,8 @@ const TimelineCard = ({
       <Card
         variant={completed ? "default" : "outline"}
         className={`p-2 ${
-          completed ? "text-black bg-retro-green-dark" : "text-retro-green-dark"
+          completed ? "text-black bg-primary-dark" : "text-primary-dark"
         } h-10 w-10 sm:h-14 sm:w-14 flex items-center justify-center z-20`}
-        borderColor={
-          completed ? "rgba(0, 218, 163, 1)" : "rgba(0, 140, 105, 1)"
-        }
       >
         {icon}
       </Card>
@@ -48,7 +45,7 @@ const TimelineCard = ({
         </div>
       )}
       {label && (
-        <span className="absolute -top-10 sm:-top-6 left-[calc(100%_-_0px)] w-[calc(100%_+_10px)] sm:w-[calc(100%_+_20px)] text-[10px] sm:text-[14px] text-center font-astronaut whitespace-nowrap text-retro-green-dark">
+        <span className="absolute -top-10 sm:-top-6 left-[calc(100%_-_0px)] w-[calc(100%_+_10px)] sm:w-[calc(100%_+_20px)] text-[10px] sm:text-[14px] text-center font-astronaut whitespace-nowrap text-primary-dark">
           {label}
         </span>
       )}
@@ -59,7 +56,7 @@ const TimelineCard = ({
       )}
       {showConnector && (
         <motion.div
-          className="absolute top-5 sm:top-7 left-[calc(100%_-_0px)] w-[calc(100%_+_10px)] sm:w-[calc(100%_+_20px)] h-0.5 border-t-4 border-dotted border-retro-green-dark z-10"
+          className="absolute top-5 sm:top-7 left-[calc(100%_-_0px)] w-[calc(100%_+_10px)] sm:w-[calc(100%_+_20px)] h-0.5 border-t-4 border-dotted border-primary-dark z-10"
           initial={{ width: 0 }}
           animate={{ width: "calc(100% + var(--timeline-extension, 10px))" }}
           transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}

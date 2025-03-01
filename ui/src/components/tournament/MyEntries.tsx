@@ -181,7 +181,7 @@ const MyEntries = ({
             showMyEntries ? "h-auto opacity-100" : "h-0 opacity-0"
           } overflow-hidden`}
         >
-          <div className="w-full h-0.5 bg-retro-green/25 mt-2" />
+          <div className="w-full h-0.5 bg-primary/25 mt-2" />
           <div className="p-2 h-auto">
             <div className="flex flex-row gap-5 overflow-x-auto">
               {mergedEntries?.map((mergedEntry, index) => (

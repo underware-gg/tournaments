@@ -22,7 +22,7 @@ const NotFound: React.FC<NotFoundProps> = ({ message = "Page not found" }) => {
         <span className="font-astronaut text-3xl text-retro-red">
           Oops! {message}
         </span>
-        <p className="text-retro-green-dark">
+        <p className="text-primary-dark">
           The page you're looking for doesn't exist or has been removed.
         </p>
       </div>

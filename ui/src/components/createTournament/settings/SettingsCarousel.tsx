@@ -97,7 +97,7 @@ const SettingsCarousel = ({
               key={i}
               className={cn(
                 "w-2 h-2 rounded-full",
-                i === currentIndex ? "bg-retro-green" : "bg-muted"
+                i === currentIndex ? "bg-primary" : "bg-muted"
               )}
             />
           ))}
