@@ -33,7 +33,7 @@ const EntrantsTable = ({
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
   const { nameSpace } = useDojo();
 
-  const offset = (currentPage - 1) * 5;
+  const offset = (currentPage - 1) * 10;
 
   const {
     data: entrants,
@@ -44,7 +44,7 @@ const EntrantsTable = ({
     tournamentId: tournamentId,
     gameNamespace: gameNamespace,
     gameAddress: indexAddress(gameAddress?.toString() ?? "0x0"),
-    limit: 5,
+    limit: 10,
     offset: offset,
   });
 
@@ -53,9 +53,21 @@ const EntrantsTable = ({
     [entrants]
   );
 
+  const [prevEntryCount, setPrevEntryCount] = useState<number | null>(null);
+
   useEffect(() => {
-    refetchEntrants();
-  }, [entryCount]);
+    if (prevEntryCount !== null && prevEntryCount !== entryCount) {
+      const timer = setTimeout(() => {
+        refetchEntrants();
+        console.log("refetching entrants");
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+
+    // Update the previous entry count
+    setPrevEntryCount(entryCount);
+  }, [entryCount, prevEntryCount]);
 
   useEffect(() => {
     setShowParticipants(entryCount > 0);
@@ -92,9 +104,9 @@ const EntrantsTable = ({
       <div className="flex flex-col justify-between">
         <div className="flex flex-row justify-between h-8">
           <span className="font-astronaut text-lg sm:text-2xl">Entrants</span>
-          {showParticipants && entryCount > 5 && (
+          {showParticipants && entryCount > 10 && (
             <Pagination
-              totalPages={Math.ceil(entryCount / 5)}
+              totalPages={Math.ceil(entryCount / 10)}
               currentPage={currentPage}
               setCurrentPage={setCurrentPage}
             />
@@ -127,7 +139,7 @@ const EntrantsTable = ({
         >
           <div className="w-full h-0.5 bg-primary/25 mt-2" />
           {!loading ? (
-            <div className="flex flex-col py-2">
+            <div className="flex flex-row py-2">
               {[0, 1].map((colIndex) => (
                 <div key={colIndex} className="flex flex-col w-1/2">
                   {entrants
@@ -137,7 +149,7 @@ const EntrantsTable = ({
                         <div className="hidden sm:block">
                           <HoverCard openDelay={50} closeDelay={0}>
                             <HoverCardTrigger asChild>
-                              <div className="flex flex-row items-center sm:gap-2 pr-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200">
+                              <div className="flex flex-row items-center sm:gap-2 px-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200">
                                 <span className="w-4 flex-none font-astronaut">
                                   {index +
                                     1 +
@@ -172,7 +184,7 @@ const EntrantsTable = ({
                           }}
                         >
                           <span className="w-4 flex-none font-astronaut">
-                            {index + 1 + colIndex * 5 + (currentPage - 1) * 10}.
+                            {index + 1 + colIndex * 5 + (currentPage - 1) * 5}.
                           </span>
                           <span className="w-6 flex-none">
                             <USER />

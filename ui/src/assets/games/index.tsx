@@ -19,7 +19,7 @@ export const getGames = (): Record<string, Game> => {
   const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
   if (isLocalKatana) {
     return {
-      "0x063ff13e3394a65590dfae8f7fd736624a0c4f10c10cf88d1b912edb2d1404f3": {
+      "0x0258fe2bce59251748d82ab91f461f8045f8b80b554e867ec70e2b3cb71449a9": {
         name: "Loot Survivor",
         Icon: function LootSurvivorIcon(
           props: ImgHTMLAttributes<HTMLImageElement>
@@ -41,7 +41,7 @@ export const getGames = (): Record<string, Game> => {
     };
   } else if (isMainnet) {
     return {
-      "0x0303d542dda5c55e8da6f3c4f7b4d0c9b6a6051dc4d97e62a75b3a92457e2ca1": {
+      "0x020fc3c9efd0dde5f53642dac7f53638aeaae98ff9af5f1642546f389ce9dec5": {
         name: "Dark Shuffle",
         Icon: function DarkShuffleIcon(
           props: ImgHTMLAttributes<HTMLImageElement>

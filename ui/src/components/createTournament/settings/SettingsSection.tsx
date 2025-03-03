@@ -29,8 +29,10 @@ interface GameSettingsFieldProps {
 }
 
 const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
-  const { gameNamespace } = useGameEndpoints(form.watch("game"));
-  useGetGameSettingsQuery(gameNamespace ?? "");
+  const { gameNamespace, gameSettingsModel } = useGameEndpoints(
+    form.watch("game")
+  );
+  useGetGameSettingsQuery(gameNamespace ?? "", gameSettingsModel ?? "");
   const settingsDetails = useDojoStore
     .getState()
     .getEntitiesByModel(gameNamespace ?? "", "SettingsDetails");

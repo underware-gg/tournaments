@@ -13,7 +13,7 @@ github = "https://github.com/dojoengine/dojo-starter"
 telegram = "https://t.me/dojoengine"
 
 [namespace]
-default = "budokan"
+default = "budokan_v_1_0_1"
 
 [env]
 chain_id = "KATANA_LOCAL"
@@ -24,27 +24,27 @@ private_key = "0xc5b2fcab997346f3ea1c00b002ecf6f382c5f9c9659a3894eb783c5320f912"
 
 [writers]
 # Tournament
-"budokan-Tournament" = ["budokan-tournament_mock"]
-"budokan-Registration" = ["budokan-tournament_mock"]
-"budokan-Leaderboard" = ["budokan-tournament_mock"]
-"budokan-PlatformMetrics" = ["budokan-tournament_mock"]
-"budokan-TournamentTokenMetrics" = ["budokan-tournament_mock"]
-"budokan-PrizeMetrics" = ["budokan-tournament_mock"]
-"budokan-EntryCount" = ["budokan-tournament_mock"]
-"budokan-Prize" = ["budokan-tournament_mock"]
-"budokan-Token" = ["budokan-tournament_mock"]
-"budokan-TournamentConfig" = ["budokan-tournament_mock"]
-"budokan-PrizeClaim" = ["budokan-tournament_mock"]
+"budokan_v_1_0_1-Tournament" = ["budokan_v_1_0_1-tournament_mock"]
+"budokan_v_1_0_1-Registration" = ["budokan_v_1_0_1-tournament_mock"]
+"budokan_v_1_0_1-Leaderboard" = ["budokan_v_1_0_1-tournament_mock"]
+"budokan_v_1_0_1-PlatformMetrics" = ["budokan_v_1_0_1-tournament_mock"]
+"budokan_v_1_0_1-TournamentTokenMetrics" = ["budokan_v_1_0_1-tournament_mock"]
+"budokan_v_1_0_1-PrizeMetrics" = ["budokan_v_1_0_1-tournament_mock"]
+"budokan_v_1_0_1-EntryCount" = ["budokan_v_1_0_1-tournament_mock"]
+"budokan_v_1_0_1-Prize" = ["budokan_v_1_0_1-tournament_mock"]
+"budokan_v_1_0_1-Token" = ["budokan_v_1_0_1-tournament_mock"]
+"budokan_v_1_0_1-TournamentConfig" = ["budokan_v_1_0_1-tournament_mock"]
+"budokan_v_1_0_1-PrizeClaim" = ["budokan_v_1_0_1-tournament_mock"]
 # Game
-"budokan-GameMetadata" = ["budokan-game_mock"]
-"budokan-GameCounter" = ["budokan-game_mock"]
-"budokan-SettingsDetails" = ["budokan-game_mock"]
-"budokan-SettingsCounter" = ["budokan-game_mock"]
-"budokan-Settings" = ["budokan-game_mock"]
-"budokan-TokenMetadata" = ["budokan-game_mock"]
-"budokan-Score" = ["budokan-game_mock"]
+"budokan_v_1_0_1-GameMetadata" = ["budokan_v_1_0_1-game_mock"]
+"budokan_v_1_0_1-GameCounter" = ["budokan_v_1_0_1-game_mock"]
+"budokan_v_1_0_1-SettingsDetails" = ["budokan_v_1_0_1-game_mock"]
+"budokan_v_1_0_1-SettingsCounter" = ["budokan_v_1_0_1-game_mock"]
+"budokan_v_1_0_1-Settings" = ["budokan_v_1_0_1-game_mock"]
+"budokan_v_1_0_1-TokenMetadata" = ["budokan_v_1_0_1-game_mock"]
+"budokan_v_1_0_1-Score" = ["budokan_v_1_0_1-game_mock"]
 
 
 [migration]
 order_inits = []
-skip_contracts = ["budokan-Budokan"]
+skip_contracts = ["budokan_v_1_0_1-Budokan"]

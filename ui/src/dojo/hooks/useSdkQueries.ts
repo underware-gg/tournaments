@@ -239,22 +239,25 @@ export const useGetGameCounterQuery = ({
   return { entity, isLoading, refetch };
 };
 
-export const useGetGameSettingsQuery = (namespace: string) => {
+export const useGetGameSettingsQuery = (
+  namespace: string,
+  settingsModel: string
+) => {
   const query = useMemo(
     () =>
       new ToriiQueryBuilder()
         .withClause(
           KeysClause(
-            [`${namespace}-SettingsDetails`, `${namespace}-Settings`],
+            [`${namespace}-SettingsDetails`, `${namespace}-${settingsModel}`],
             []
           ).build()
         )
         .withEntityModels([
           `${namespace}-SettingsDetails`,
-          `${namespace}-Settings`,
+          `${namespace}-${settingsModel}`,
         ])
         .includeHashedKeys(),
-    [namespace]
+    [namespace, settingsModel]
   );
 
   const { entities, isLoading, refetch } = useSdkGetEntities({

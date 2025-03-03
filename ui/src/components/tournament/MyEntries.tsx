@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import EntryCard from "@/components/tournament/myEntries/EntryCard";
 import { TokenMetadata } from "@/generated/models.gen";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
+import { useDojo } from "@/context/dojo";
 
 interface MyEntriesProps {
   tournamentId: BigNumberish;
@@ -32,6 +33,7 @@ const MyEntries = ({
 }: MyEntriesProps) => {
   const { address } = useAccount();
   const state = useDojoStore.getState();
+  const { nameSpace } = useDojo();
   const [showMyEntries, setShowMyEntries] = useState(false);
 
   const queryAddress = useMemo(() => {
@@ -48,8 +50,6 @@ const MyEntries = ({
     queryGameAddress ?? "0x0",
   ]);
 
-  console.log(ownedTokens);
-
   const ownedTokenIds = useMemo(() => {
     return ownedTokens
       ?.map((token) => {
@@ -59,13 +59,20 @@ const MyEntries = ({
       .filter(Boolean);
   }, [ownedTokens]);
 
-  const { entities: myRegistrations } =
-    useGetRegistrationsForTournamentInTokenListQuery({
-      tournamentId: addAddressPadding(bigintToHex(tournamentId)),
-      tokenIds: ownedTokenIds ?? [],
-      limit: 1000,
-      offset: 0,
-    });
+  useGetRegistrationsForTournamentInTokenListQuery({
+    tournamentId: addAddressPadding(bigintToHex(tournamentId)),
+    tokenIds: ownedTokenIds ?? [],
+    limit: 1000,
+    offset: 0,
+  });
+
+  const myRegistrations = state
+    .getEntitiesByModel(nameSpace ?? "", "Registration")
+    .filter(
+      (entity) =>
+        entity.models[nameSpace ?? ""].Registration?.tournament_id ===
+        tournamentId
+    );
 
   const myEntriesCount = useMemo(() => {
     return myRegistrations?.length ?? 0;
@@ -75,7 +82,10 @@ const MyEntries = ({
     () =>
       myRegistrations?.map((registration) =>
         addAddressPadding(
-          bigintToHex(registration?.Registration?.game_token_id ?? 0n)
+          bigintToHex(
+            registration?.models[nameSpace ?? ""].Registration?.game_token_id ??
+              0n
+          )
         )
       ),
     [myRegistrations]
@@ -96,7 +106,8 @@ const MyEntries = ({
     if (!myRegistrations || !metadata) return [];
 
     return myRegistrations.map((registration) => {
-      const gameTokenId = registration?.Registration?.game_token_id ?? 0n;
+      const gameTokenId =
+        registration?.models[nameSpace ?? ""].Registration?.game_token_id ?? 0n;
 
       // Find matching metadata for this token
       const gameMetadata = metadata.find(
@@ -120,7 +131,7 @@ const MyEntries = ({
       )?.metadata;
 
       return {
-        ...registration.Registration,
+        ...registration.models[nameSpace ?? ""].Registration,
         gameMetadata: gameMetadata?.TokenMetadata as TokenMetadata | null,
         tokenMetadata: tokenMetadata as string | null,
         score:
