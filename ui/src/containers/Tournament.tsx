@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { ARROW_LEFT, TROPHY, MONEY } from "@/components/Icons";
+import { ARROW_LEFT, TROPHY, MONEY, PLUS } from "@/components/Icons";
 import { useNavigate, useParams } from "react-router-dom";
 import EntrantsTable from "@/components/tournament/table/EntrantsTable";
 import TournamentTimeline from "@/components/TournamentTimeline";
 import { bigintToHex, feltToString, formatTime } from "@/lib/utils";
 import { addAddressPadding } from "starknet";
+// import { useAccount } from "@starknet-react/core";
 import {
   useSubscribeGamesQuery,
   useSubscribeTournamentEntriesQuery,
@@ -56,9 +57,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import useUIStore from "@/hooks/useUIStore";
+import { AddPrizesDialog } from "@/components/dialogs/AddPrizes";
 
 const Tournament = () => {
   const { id } = useParams<{ id: string }>();
+  // const { address } = useAccount();
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
   const { nameSpace } = useDojo();
@@ -67,8 +70,10 @@ const Tournament = () => {
   const [enterDialogOpen, setEnterDialogOpen] = useState(false);
   const [claimDialogOpen, setClaimDialogOpen] = useState(false);
   const [submitScoresDialogOpen, setSubmitScoresDialogOpen] = useState(false);
+  const [addPrizesDialogOpen, setAddPrizesDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [tournamentExists, setTournamentExists] = useState(false);
+  // const isAdmin = address === ADMIN_ADDRESS;
 
   const { data: tournamentsCount } = useGetTournamentsCount({
     namespace: nameSpace,
@@ -172,8 +177,6 @@ const Tournament = () => {
 
   const { gameNamespace, gameScoreModel, gameScoreAttribute } =
     useGameEndpoints(tournamentModel?.game_config?.address);
-
-  console.log(gameScoreModel, gameScoreAttribute);
 
   const gameAddress = tournamentModel?.game_config?.address;
   const gameName = gameData.find(
@@ -347,9 +350,14 @@ const Tournament = () => {
               {gameName ? feltToString(gameName) : "Unknown"}
             </TooltipContent>
           </Tooltip>
-          {/* <Button variant="outline">
+          {/* {isAdmin && ( */}
+          <Button
+            variant="outline"
+            onClick={() => setAddPrizesDialogOpen(true)}
+          >
             <PLUS /> Add Prizes
-          </Button> */}
+          </Button>
+          {/* )} */}
           <EntryRequirements tournamentModel={tournamentModel} />
           {(registrationType === "fixed" && !isStarted) ||
           (registrationType === "open" && !isEnded) ? (
@@ -418,6 +426,13 @@ const Tournament = () => {
             claimablePrizes={claimablePrizes}
             claimablePrizeTypes={claimablePrizeTypes}
             prices={prices}
+          />
+          <AddPrizesDialog
+            open={addPrizesDialogOpen}
+            onOpenChange={setAddPrizesDialogOpen}
+            tournamentId={tournamentModel?.id}
+            tournamentName={feltToString(tournamentModel?.metadata?.name ?? "")}
+            leaderboardSize={leaderboardSize}
           />
         </div>
       </div>

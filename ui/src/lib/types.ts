@@ -33,3 +33,11 @@ export type PositionPrizes = Record<
     }
   >
 >;
+
+export interface NewPrize {
+  tokenAddress: string;
+  tokenType: "ERC20" | "ERC721" | "";
+  amount?: number;
+  tokenId?: number;
+  position?: number;
+}

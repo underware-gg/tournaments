@@ -54,7 +54,7 @@ export const useSystemCalls = () => {
   const { toast } = useToast();
   const {
     applyTournamentEntryUpdate,
-    applyTournamentPrizeUpdate,
+    applyTournamentPrizesUpdate,
     applyTournamentCreateAndAddPrizesUpdate,
   } = useOptimisticUpdates();
   const { tournamentAddress } = useTournamentContracts();
@@ -165,10 +165,10 @@ export const useSystemCalls = () => {
     }
   };
 
-  const approveAndAddPrize = async (
+  const approveAndAddPrizes = async (
     tournamentId: BigNumberish,
     tournamentName: string,
-    prize: Prize,
+    prizes: Prize[],
     showToast: boolean
   ) => {
     toast({
@@ -176,34 +176,33 @@ export const useSystemCalls = () => {
       description: `Adding prize for tournament ${tournamentName}`,
     });
 
-    const { wait, revert, confirm } = applyTournamentPrizeUpdate(
-      tournamentId,
-      prize
-    );
+    const { wait, revert, confirm } = applyTournamentPrizesUpdate(prizes);
 
     try {
       let calls = [];
-      calls.push({
-        contractAddress: prize.token_address,
-        entrypoint: "approve",
-        calldata: CallData.compile([
-          tournamentAddress,
-          prize.token_type.activeVariant() === "erc20"
-            ? prize.token_type.variant.erc20?.token_amount!
-            : prize.token_type.variant.erc721?.token_id!,
-          "0",
-        ]),
-      });
-      calls.push({
-        contractAddress: tournamentAddress,
-        entrypoint: "add_prize",
-        calldata: CallData.compile([
-          tournamentId,
-          prize.token_address,
-          prize.token_type,
-          prize.payout_position,
-        ]),
-      });
+      for (const prize of prizes) {
+        calls.push({
+          contractAddress: prize.token_address,
+          entrypoint: "approve",
+          calldata: CallData.compile([
+            tournamentAddress,
+            prize.token_type.activeVariant() === "erc20"
+              ? prize.token_type.variant.erc20?.token_amount!
+              : prize.token_type.variant.erc721?.token_id!,
+            "0",
+          ]),
+        });
+        calls.push({
+          contractAddress: tournamentAddress,
+          entrypoint: "add_prize",
+          calldata: CallData.compile([
+            tournamentId,
+            prize.token_address,
+            prize.token_type,
+            prize.payout_position,
+          ]),
+        });
+      }
 
       const tx = isMainnet
         ? await account?.execute(calls)
@@ -441,7 +440,7 @@ export const useSystemCalls = () => {
   return {
     approveAndEnterTournament,
     submitScores,
-    approveAndAddPrize,
+    approveAndAddPrizes,
     createTournamentAndApproveAndAddPrizes,
     claimPrizes,
     endGame,
