@@ -112,15 +112,6 @@ const Tournament = () => {
   const tournamentModel = state.getEntity(tournamentEntityId)?.models[nameSpace]
     ?.Tournament as TournamentModel;
 
-  console.log(
-    tournamentsCount,
-    Number(id || 0),
-    tournamentModel,
-    tournamentExists,
-    tournamentEntityId,
-    state.entities
-  );
-
   const entryCountModel = useModel(
     tournamentEntityId,
     ModelsMapping.EntryCount
@@ -181,6 +172,8 @@ const Tournament = () => {
 
   const { gameNamespace, gameScoreModel, gameScoreAttribute } =
     useGameEndpoints(tournamentModel?.game_config?.address);
+
+  console.log(gameScoreModel, gameScoreAttribute);
 
   const gameAddress = tournamentModel?.game_config?.address;
   const gameName = gameData.find(

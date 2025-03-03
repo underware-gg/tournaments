@@ -26,13 +26,19 @@ export const useGameEndpoints = (gameAddress: string) => {
   };
 
   const getGameScoreData = async () => {
-    const gameScoreData = await provider.callContract({
+    const gameScoreModelData = await provider.callContract({
       contractAddress: gameAddress,
-      entrypoint: "score_model_and_attribute",
+      entrypoint: "score_model",
       calldata: [],
     });
-    const gameScoreModel = feltToString(gameScoreData[0]);
-    const gameScoreAttribute = feltToString(gameScoreData[1]);
+    const gameScoreAttributeData = await provider.callContract({
+      contractAddress: gameAddress,
+      entrypoint: "score_attribute",
+      calldata: [],
+    });
+    console.log(gameScoreModelData, gameScoreAttributeData);
+    const gameScoreModel = feltToString(gameScoreModelData[0]);
+    const gameScoreAttribute = feltToString(gameScoreAttributeData[0]);
     setGameScoreModel(gameScoreModel);
     setGameScoreAttribute(gameScoreAttribute);
   };
