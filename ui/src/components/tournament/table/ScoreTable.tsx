@@ -39,7 +39,7 @@ const ScoreTable = ({
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
   const { nameSpace } = useDojo();
 
-  const offset = (currentPage - 1) * 5;
+  const offset = (currentPage - 1) * 10;
 
   const { data: leaderboard, loading } = useGetTournamentLeaderboard({
     namespace: nameSpace,
@@ -48,7 +48,7 @@ const ScoreTable = ({
     gameAddress: indexAddress(gameAddress?.toString() ?? "0x0"),
     gameScoreModel: gameScoreModel,
     gameScoreAttribute: gameScoreAttribute,
-    limit: 5,
+    limit: 10,
     offset: offset,
   });
 
@@ -112,9 +112,9 @@ const ScoreTable = ({
       <div className="flex flex-col justify-between">
         <div className="flex flex-row justify-between h-6 sm:h-8">
           <span className="font-astronaut text-lg sm:text-2xl">Scores</span>
-          {showParticipants && entryCount > 5 && (
+          {showParticipants && entryCount > 10 && (
             <Pagination
-              totalPages={Math.ceil(entryCount / 5)}
+              totalPages={Math.ceil(entryCount / 10)}
               currentPage={currentPage}
               setCurrentPage={setCurrentPage}
             />
