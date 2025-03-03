@@ -184,7 +184,7 @@ const EntrantsTable = ({
                           }}
                         >
                           <span className="w-4 flex-none font-astronaut">
-                            {index + 1 + colIndex * 5 + (currentPage - 1) * 5}.
+                            {index + 1 + colIndex * 5 + (currentPage - 1) * 10}.
                           </span>
                           <span className="w-6 flex-none">
                             <USER />
