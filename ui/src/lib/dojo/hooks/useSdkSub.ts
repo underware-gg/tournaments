@@ -4,12 +4,13 @@ import { SubscriptionQueryType, ParsedEntity } from "@dojoengine/sdk";
 import { useDojo } from "@/context/dojo";
 import { SchemaType } from "@/generated/models.gen";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
+import { NAMESPACE } from "@/lib/constants";
 
 export type TournamentSubQuery = SubscriptionQueryType<SchemaType>;
 
 export type EntityResult = {
   entityId: BigNumberish;
-} & Partial<SchemaType["tournaments"]>;
+} & Partial<SchemaType[typeof NAMESPACE]>;
 
 export type UseSdkSubEntitiesResult = {
   entities: EntityResult[] | null;

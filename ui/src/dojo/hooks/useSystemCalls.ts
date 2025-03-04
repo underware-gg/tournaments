@@ -176,7 +176,7 @@ export const useSystemCalls = () => {
       description: `Adding prize for tournament ${tournamentName}`,
     });
 
-    const { wait, revert, confirm } = applyTournamentPrizesUpdate(prizes);
+    const { revert, confirm } = applyTournamentPrizesUpdate(prizes);
 
     try {
       let calls = [];
@@ -187,7 +187,7 @@ export const useSystemCalls = () => {
           calldata: CallData.compile([
             tournamentAddress,
             prize.token_type.activeVariant() === "erc20"
-              ? prize.token_type.variant.erc20?.token_amount!
+              ? prize.token_type.variant.erc20?.amount!
               : prize.token_type.variant.erc721?.token_id!,
             "0",
           ]),
@@ -204,11 +204,13 @@ export const useSystemCalls = () => {
         });
       }
 
+      console.log("calls", calls);
+
       const tx = isMainnet
         ? await account?.execute(calls)
         : account?.execute(calls);
 
-      await wait();
+      // await wait();
 
       if (showToast && tx) {
         toast({
@@ -409,22 +411,28 @@ export const useSystemCalls = () => {
     await account?.execute(calls);
   };
 
-  const mintErc20 = async (recipient: string, amount: Uint256) => {
-    const resolvedClient = await client;
-    await resolvedClient.erc20_mock.mint(
-      account as unknown as Account | AccountInterface,
-      recipient,
-      amount
-    );
+  const mintErc20 = async (
+    tokenAddress: string,
+    recipient: string,
+    amount: Uint256
+  ) => {
+    await account?.execute({
+      contractAddress: tokenAddress,
+      entrypoint: "mint",
+      calldata: [recipient, amount],
+    });
   };
 
-  const mintErc721 = async (recipient: string, tokenId: Uint256) => {
-    const resolvedClient = await client;
-    await resolvedClient.erc721_mock.mint(
-      account as unknown as Account | AccountInterface,
-      recipient,
-      tokenId
-    );
+  const mintErc721 = async (
+    tokenAddress: string,
+    recipient: string,
+    tokenId: Uint256
+  ) => {
+    await account?.execute({
+      contractAddress: tokenAddress,
+      entrypoint: "mint",
+      calldata: [recipient, tokenId],
+    });
   };
 
   const getErc20Balance = async (address: string) => {

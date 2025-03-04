@@ -291,9 +291,6 @@ export const useSubscribeTournamentQuery = (tournamentId: BigNumberish) => {
               [
                 ModelsMapping.Tournament,
                 ModelsMapping.EntryCount,
-                ModelsMapping.Prize,
-                ModelsMapping.PrizeClaim,
-                ModelsMapping.Leaderboard,
                 ModelsMapping.Registration,
               ],
               []
@@ -311,25 +308,13 @@ export const useSubscribeTournamentQuery = (tournamentId: BigNumberish) => {
               addAddressPadding(tournamentId)
             ),
             MemberClause(
-              ModelsMapping.Prize,
-              "tournament_id",
-              "Eq",
-              addAddressPadding(tournamentId)
-            ),
-            MemberClause(
-              ModelsMapping.PrizeClaim,
-              "tournament_id",
-              "Eq",
-              addAddressPadding(tournamentId)
-            ),
-            MemberClause(
-              ModelsMapping.Leaderboard,
-              "tournament_id",
-              "Eq",
-              addAddressPadding(tournamentId)
-            ),
-            MemberClause(
               ModelsMapping.Registration,
+              "tournament_id",
+              "Eq",
+              addAddressPadding(tournamentId)
+            ),
+            MemberClause(
+              ModelsMapping.Prize,
               "tournament_id",
               "Eq",
               addAddressPadding(tournamentId)
@@ -339,13 +324,27 @@ export const useSubscribeTournamentQuery = (tournamentId: BigNumberish) => {
         .withEntityModels([
           ModelsMapping.Tournament,
           ModelsMapping.EntryCount,
-          ModelsMapping.Prize,
-          ModelsMapping.PrizeClaim,
-          ModelsMapping.Leaderboard,
           ModelsMapping.Registration,
+          ModelsMapping.Prize,
         ])
         .includeHashedKeys(),
     [tournamentId]
+  );
+
+  const { entities, isSubscribed } = useSdkSubscribeEntities({
+    query,
+  });
+  return { entities, isSubscribed };
+};
+
+export const useSubscribePrizesQuery = () => {
+  const query = useMemo(
+    () =>
+      new ToriiQueryBuilder()
+        .withClause(KeysClause([ModelsMapping.Prize], []).build())
+        .withEntityModels([ModelsMapping.Prize])
+        .includeHashedKeys(),
+    []
   );
 
   const { entities, isSubscribed } = useSdkSubscribeEntities({
@@ -378,48 +377,6 @@ export const useSubscribeTokensQuery = () => {
         .withEntityModels([ModelsMapping.Token])
         .includeHashedKeys(),
     []
-  );
-
-  const { entities, isSubscribed } = useSdkSubscribeEntities({
-    query,
-  });
-  return { entities, isSubscribed };
-};
-
-export const useSubscribeTournamentEntriesQuery = ({
-  tournamentId,
-}: {
-  tournamentId: BigNumberish;
-}) => {
-  const query = useMemo(
-    () =>
-      new ToriiQueryBuilder()
-        .withClause(
-          AndComposeClause([
-            KeysClause(
-              [ModelsMapping.EntryCount, ModelsMapping.Registration],
-              []
-            ),
-            MemberClause(
-              ModelsMapping.EntryCount,
-              "tournament_id",
-              "Eq",
-              addAddressPadding(tournamentId)
-            ),
-            MemberClause(
-              ModelsMapping.Registration,
-              "tournament_id",
-              "Eq",
-              addAddressPadding(tournamentId)
-            ),
-          ]).build()
-        )
-        .withEntityModels([
-          ModelsMapping.EntryCount,
-          ModelsMapping.Registration,
-        ])
-        .includeHashedKeys(),
-    [tournamentId]
   );
 
   const { entities, isSubscribed } = useSdkSubscribeEntities({

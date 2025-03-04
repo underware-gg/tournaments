@@ -41,7 +41,9 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
             <div key={symbol} className="flex justify-between items-center">
               {prize.type === "erc20" ? (
                 <div className="flex flex-row gap-1 items-center">
-                  <span>{`${Number(prize.value) / 10 ** 18}`}</span>
+                  <span>{`${(Number(prize.value) / 10 ** 18).toFixed(
+                    2
+                  )}`}</span>
                   <img
                     src={getTokenLogoUrl(prize.address)}
                     className="w-6 h-6"

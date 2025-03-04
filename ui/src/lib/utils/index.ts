@@ -3,7 +3,7 @@ import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { BigNumberish, shortString } from "starknet";
 import { Prize } from "@/generated/models.gen";
-import { TOKEN_ADDRESSES, TOKEN_ICONS, ITEMS } from "@/lib/constants";
+import { TOKEN_ADDRESSES, TOKEN_ICONS } from "@/lib/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -169,22 +169,11 @@ export const getRandomInt = (min: number, max: number): number => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-export function getItemKeyFromValue(searchValue: string): string | null {
-  const entry = Object.entries(ITEMS).find(
-    ([_key, value]) => value === searchValue
-  );
-  return entry ? entry[0] : null;
-}
-
 export function getTokenKeyFromValue(searchValue: string): string | null {
   const entry = Object.entries(TOKEN_ADDRESSES).find(
     ([_key, value]) => value === searchValue
   );
   return entry ? entry[0] : null;
-}
-
-export function getItemValueFromKey(key: number): string | null {
-  return ITEMS[key];
 }
 
 export const getPrizesByToken = (prizes: Prize[]) => {

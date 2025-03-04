@@ -9,12 +9,12 @@ import { addAddressPadding } from "starknet";
 // import { useAccount } from "@starknet-react/core";
 import {
   useSubscribeGamesQuery,
-  useSubscribeTournamentEntriesQuery,
   useGetGameCounterQuery,
   useGetTournamentQuery,
   useSubscribeTournamentQuery,
   useSubscribeScoresQuery,
   useGetScoresQuery,
+  useSubscribePrizesQuery,
 } from "@/dojo/hooks/useSdkQueries";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import {
@@ -108,6 +108,7 @@ const Tournament = () => {
 
   useGetTournamentQuery(addAddressPadding(bigintToHex(id!)));
   useSubscribeTournamentQuery(addAddressPadding(bigintToHex(id!)));
+  useSubscribePrizesQuery();
 
   const tournamentEntityId = useMemo(
     () => getEntityIdFromKeys([BigInt(id!)]),
@@ -193,10 +194,6 @@ const Tournament = () => {
   });
 
   const gameCount = gameCounterEntity?.GameCounter?.count ?? 0;
-
-  useSubscribeTournamentEntriesQuery({
-    tournamentId: addAddressPadding(bigintToHex(id!)),
-  });
 
   useSubscribeGamesQuery({
     gameNamespace: gameNamespace ?? "",

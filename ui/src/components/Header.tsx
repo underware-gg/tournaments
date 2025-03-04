@@ -26,14 +26,13 @@ const Header = () => {
   const { account } = useAccount();
   const { connect } = useConnectToSelectedChain();
   const { gameFilters, setGameFilters, gameData } = useUIStore();
-  // const isAdmin = address === ADMIN_ADDRESS;
-
   const { disconnect } = useDisconnect();
   const { openProfile } = useControllerProfile();
   const { username } = useControllerUsername();
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedChainConfig } = useDojo();
+  // const isAdmin = address === ADMIN_ADDRESS;
 
   const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
   const isHomeScreen = location.pathname === "/";

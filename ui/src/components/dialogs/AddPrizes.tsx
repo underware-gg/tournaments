@@ -11,7 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import TokenDialog from "@/components/dialogs/Token";
 import AmountInput from "@/components/createTournament/inputs/Amount";
-import { bigintToHex, calculateDistribution } from "@/lib/utils";
+import {
+  bigintToHex,
+  calculateDistribution,
+  getOrdinalSuffix,
+} from "@/lib/utils";
 import { NewPrize } from "@/lib/types";
 import { Prize, Token } from "@/generated/models.gen";
 import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
@@ -21,6 +25,9 @@ import { CairoCustomEnum } from "starknet";
 import { useGetMetricsQuery } from "@/dojo/hooks/useSdkQueries";
 import { getTokenLogoUrl } from "@/lib/tokensMeta";
 import { X } from "@/components/Icons";
+import { useAccount } from "@starknet-react/core";
+import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
+
 export function AddPrizesDialog({
   open,
   onOpenChange,
@@ -34,6 +41,8 @@ export function AddPrizesDialog({
   tournamentName: string;
   leaderboardSize: number;
 }) {
+  const { address } = useAccount();
+  const { connect } = useConnectToSelectedChain();
   const { approveAndAddPrizes } = useSystemCalls();
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
   const [newPrize, setNewPrize] = useState<NewPrize>({
@@ -46,6 +55,8 @@ export function AddPrizesDialog({
     { position: number; percentage: number }[]
   >([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [onConfirmation, setOnConfirmation] = useState(false);
+
   const { entity: metricsEntity } = useGetMetricsQuery(
     addAddressPadding(TOURNAMENT_VERSION_KEY)
   );
@@ -89,6 +100,21 @@ export function AddPrizesDialog({
     }
   }, [open, leaderboardSize]);
 
+  useEffect(() => {
+    if (!open) {
+      setOnConfirmation(false);
+    }
+  }, [open]);
+
+  const handleDialogClose = (isOpen: boolean) => {
+    if (!isOpen) {
+      setOnConfirmation(false);
+      onOpenChange(false);
+    } else {
+      onOpenChange(true);
+    }
+  };
+
   const prizeCount = metricsEntity?.PrizeMetrics?.total_prizes ?? 0;
 
   const handleAddPrizes = async () => {
@@ -121,6 +147,8 @@ export function AddPrizesDialog({
         },
       ]);
     }
+    setNewPrize({ tokenAddress: "", tokenType: "" });
+    setSelectedToken(null);
   };
 
   const submitPrizes = async () => {
@@ -128,47 +156,29 @@ export function AddPrizesDialog({
     try {
       let prizesToAdd: Prize[] = [];
 
-      if (
-        newPrize.tokenType === "ERC20" &&
-        newPrize.amount &&
-        totalDistributionPercentage === 100
-      ) {
-        prizesToAdd = prizeDistributions.map((prize) => ({
-          id: Number(prizeCount) + 1,
-          tournament_id: tournamentId,
-          token_address: newPrize.tokenAddress,
-          token_type: new CairoCustomEnum({
-            erc20: {
-              amount: addAddressPadding(
-                bigintToHex((newPrize.amount ?? 0) * prize.percentage * 100)
-              ),
-            },
-            erc721: undefined,
-          }),
-          payout_position: prize.position,
-          claimed: false,
-        }));
-      } else if (
-        newPrize.tokenType === "ERC721" &&
-        newPrize.tokenId &&
-        newPrize.position
-      ) {
-        prizesToAdd = prizeDistributions.map((prize) => ({
-          id: Number(prizeCount) + 1,
-          tournament_id: tournamentId,
-          token_address: newPrize.tokenAddress,
-          token_type: new CairoCustomEnum({
-            erc20: {
-              amount: addAddressPadding(
-                bigintToHex(newPrize.tokenId! * 10 ** 18)
-              ),
-            },
-            erc721: undefined,
-          }),
-          payout_position: prize.position,
-          claimed: false,
-        }));
-      }
+      prizesToAdd = currentPrizes.map((prize, index) => ({
+        id: Number(prizeCount) + index + 1,
+        tournament_id: tournamentId,
+        token_address: prize.tokenAddress,
+        token_type:
+          prize.tokenType === "ERC20"
+            ? new CairoCustomEnum({
+                erc20: {
+                  amount: addAddressPadding(
+                    bigintToHex(prize.amount! * 10 ** 18)
+                  ),
+                },
+                erc721: undefined,
+              })
+            : new CairoCustomEnum({
+                erc20: undefined,
+                erc721: {
+                  id: addAddressPadding(bigintToHex(prize.tokenId!)),
+                },
+              }),
+        payout_position: prize.position ?? 0n,
+        claimed: false,
+      }));
 
       await approveAndAddPrizes(
         tournamentId,
@@ -177,9 +187,9 @@ export function AddPrizesDialog({
         true
       );
 
-      // Reset form
-      setNewPrize({ tokenAddress: "", tokenType: "" });
+      setCurrentPrizes([]);
       setSelectedToken(null);
+      setOnConfirmation(false);
       onOpenChange(false);
     } catch (error) {
       console.error("Failed to add prizes:", error);
@@ -188,8 +198,136 @@ export function AddPrizesDialog({
     }
   };
 
+  const aggregatedPrizes = currentPrizes.reduce((acc, prize) => {
+    const key = `${prize.position}-${prize.tokenAddress}-${prize.tokenType}`;
+
+    if (!acc[key]) {
+      acc[key] = {
+        ...prize,
+        amount: prize.tokenType === "ERC20" ? prize.amount : undefined,
+        tokenIds: prize.tokenType === "ERC721" ? [prize.tokenId] : [],
+        count: 1,
+      };
+    } else {
+      if (prize.tokenType === "ERC20") {
+        acc[key].amount = (acc[key].amount || 0) + (prize.amount || 0);
+      } else if (prize.tokenType === "ERC721") {
+        acc[key].tokenIds = [...(acc[key].tokenIds || []), prize.tokenId];
+      }
+      acc[key].count += 1;
+    }
+
+    return acc;
+  }, {} as Record<string, any>);
+
+  // Convert to array for rendering
+  const aggregatedPrizesArray = Object.values(aggregatedPrizes);
+
+  // Calculate total value in USD for ERC20 tokens
+  const totalValue = aggregatedPrizesArray.reduce((sum, prize: any) => {
+    if (prize.tokenType === "ERC20" && prize.amount) {
+      return sum + prize.amount;
+    }
+    return sum;
+  }, 0);
+
+  // Count total NFTs
+  const totalNFTs = aggregatedPrizesArray.reduce((sum, prize: any) => {
+    if (prize.tokenType === "ERC721" && prize.tokenIds) {
+      return sum + prize.tokenIds.length;
+    }
+    return sum;
+  }, 0);
+
+  console.log(aggregatedPrizesArray);
+
+  if (onConfirmation) {
+    return (
+      <Dialog open={open} onOpenChange={handleDialogClose}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Confirm Prizes</DialogTitle>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-4 py-4 overflow-y-auto">
+            <div className="bg-muted/50 p-4 rounded-lg">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Prize Summary</h3>
+                <div className="flex flex-col items-end">
+                  {totalValue > 0 && (
+                    <span className="font-bold text-lg">
+                      Total: ${totalValue.toFixed(2)}
+                    </span>
+                  )}
+                  {totalNFTs > 0 && (
+                    <span className="text-sm text-muted-foreground">
+                      {totalNFTs} NFT{totalNFTs !== 1 ? "s" : ""}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+              {aggregatedPrizesArray.map((prize: any, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 border rounded-md"
+                >
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={getTokenLogoUrl(prize.tokenAddress)}
+                      className="w-6 h-6"
+                      alt="Token logo"
+                    />
+                    <span className="font-medium">{selectedToken?.symbol}</span>
+                    <span>
+                      {`${prize.position}${getOrdinalSuffix(prize.position)}`}
+                    </span>
+                    {prize.count > 1 && (
+                      <span className="text-sm text-muted-foreground">
+                        ({prize.count} prizes)
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    {prize.tokenType === "ERC20" ? (
+                      <span className="font-semibold">${prize.amount}</span>
+                    ) : (
+                      <div className="flex flex-col items-end">
+                        {prize.tokenIds.map((id: number, idx: number) => (
+                          <span key={idx} className="font-semibold">
+                            #{id}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <div className="flex justify-between w-full">
+              <Button
+                variant="outline"
+                onClick={() => setOnConfirmation(false)}
+              >
+                Back to Edit
+              </Button>
+              <Button onClick={submitPrizes} disabled={isSubmitting}>
+                {isSubmitting ? "Processing..." : "Confirm & Submit"}
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>Add Prizes to Tournament</DialogTitle>
@@ -351,12 +489,12 @@ export function AddPrizesDialog({
         </div>
 
         <DialogFooter className="flex flex-row justify-between w-full overflow-hidden">
-          <div className="w-2/3 overflow-hidden">
+          <div className="w-1/2 overflow-hidden">
             <div className="flex flex-row gap-2 overflow-x-auto pb-2">
               {currentPrizes.map((prize, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-4 p-4 bg-background/50 border border-primary-dark/50 rounded flex-shrink-0 whitespace-nowrap"
+                  className="flex items-center gap-4 p-2 bg-background/50 border border-primary-dark/50 rounded flex-shrink-0 whitespace-nowrap"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-neutral-500 uppercase">
@@ -367,7 +505,6 @@ export function AddPrizesDialog({
                       className="w-6 h-6"
                       alt="Token logo"
                     />
-                    <span className="font-bold">{selectedToken?.name}</span>
                     <span className="text-sm text-neutral-500 uppercase">
                       {selectedToken?.symbol}
                     </span>
@@ -391,7 +528,7 @@ export function AddPrizesDialog({
               ))}
             </div>
           </div>
-          <div className="w-1/3 flex justify-end items-center gap-2">
+          <div className="w-1/2 flex justify-end items-center gap-2">
             <Button
               type="button"
               disabled={!isValidPrize() || isSubmitting}
@@ -399,11 +536,18 @@ export function AddPrizesDialog({
             >
               {isSubmitting ? "Adding..." : "Add Prize"}
             </Button>
-            {currentPrizes.length > 0 && (
-              <Button type="button" variant="outline" onClick={submitPrizes}>
-                Submit
-              </Button>
-            )}
+            {currentPrizes.length > 0 &&
+              (address ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setOnConfirmation(true)}
+                >
+                  Review & Submit
+                </Button>
+              ) : (
+                <Button onClick={() => connect()}>Connect Wallet</Button>
+              ))}
           </div>
         </DialogFooter>
       </DialogContent>
