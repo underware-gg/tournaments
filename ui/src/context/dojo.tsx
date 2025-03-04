@@ -55,7 +55,6 @@ export const DojoContextProvider = ({
   useEffect(() => {
     init<SchemaType>({
       client: {
-        rpcUrl: selectedChainConfig.rpcUrl!,
         toriiUrl: selectedChainConfig.toriiUrl!,
         relayUrl: selectedChainConfig.relayUrl ?? "",
         worldAddress: appConfig.manifests[chainId!].world.address ?? "",

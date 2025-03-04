@@ -116,7 +116,8 @@ export const useGetTournamentQuery = (tournamentId: BigNumberish) => {
           ModelsMapping.PrizeClaim,
           ModelsMapping.Leaderboard,
         ])
-        .includeHashedKeys(),
+        .includeHashedKeys()
+        .withLimit(10000),
     [tournamentId]
   );
 

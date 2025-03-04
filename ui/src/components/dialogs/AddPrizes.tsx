@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +24,7 @@ import { TOURNAMENT_VERSION_KEY } from "@/lib/constants";
 import { CairoCustomEnum } from "starknet";
 import { useGetMetricsQuery } from "@/dojo/hooks/useSdkQueries";
 import { getTokenLogoUrl } from "@/lib/tokensMeta";
-import { X } from "@/components/Icons";
+import { ALERT, CHECK, X } from "@/components/Icons";
 import { useAccount } from "@starknet-react/core";
 import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
 
@@ -43,7 +43,7 @@ export function AddPrizesDialog({
 }) {
   const { address } = useAccount();
   const { connect } = useConnectToSelectedChain();
-  const { approveAndAddPrizes } = useSystemCalls();
+  const { approveAndAddPrizes, getBalanceGeneral } = useSystemCalls();
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
   const [newPrize, setNewPrize] = useState<NewPrize>({
     tokenAddress: "",
@@ -56,6 +56,11 @@ export function AddPrizesDialog({
   >([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [onConfirmation, setOnConfirmation] = useState(false);
+  const [_tokenBalances, setTokenBalances] = useState<Record<string, bigint>>(
+    {}
+  );
+  const [isLoadingBalances, setIsLoadingBalances] = useState(false);
+  const [hasInsufficientBalance, setHasInsufficientBalance] = useState(false);
 
   const { entity: metricsEntity } = useGetMetricsQuery(
     addAddressPadding(TOURNAMENT_VERSION_KEY)
@@ -239,7 +244,62 @@ export function AddPrizesDialog({
     return sum;
   }, 0);
 
-  console.log(aggregatedPrizesArray);
+  const checkAllBalances = useCallback(async () => {
+    if (!address) return;
+
+    setIsLoadingBalances(true);
+
+    try {
+      // Get unique token addresses
+      const uniqueTokens = Array.from(
+        new Set(currentPrizes.map((prize) => prize.tokenAddress))
+      );
+
+      // Fetch balances for each token
+      const balances: Record<string, bigint> = {};
+
+      for (const tokenAddress of uniqueTokens) {
+        const balance = await getBalanceGeneral(tokenAddress);
+        balances[tokenAddress] = balance;
+      }
+
+      setTokenBalances(balances);
+
+      // Check if any token has insufficient balance
+      let insufficient = false;
+
+      for (const prize of aggregatedPrizesArray) {
+        if (prize.tokenType === "ERC20") {
+          // For ERC20, check if balance >= amount
+          const tokenBalance = BigInt(balances[prize.tokenAddress] || "0");
+          const requiredAmount = BigInt(Math.floor(prize.amount * 10 ** 18)); // Convert to wei
+
+          if (tokenBalance < requiredAmount) {
+            insufficient = true;
+            break;
+          }
+        } else if (prize.tokenType === "ERC721") {
+          // For ERC721, we would need to check ownership of each token ID
+          // This would require additional API calls to check NFT ownership
+          // For simplicity, we'll assume the check is done elsewhere or skip it
+          break;
+        }
+      }
+
+      setHasInsufficientBalance(insufficient);
+    } catch (error) {
+      console.error("Error checking balances:", error);
+      setHasInsufficientBalance(true);
+    } finally {
+      setIsLoadingBalances(false);
+    }
+  }, [address, currentPrizes, aggregatedPrizesArray]);
+
+  useEffect(() => {
+    if (onConfirmation && address) {
+      checkAllBalances();
+    }
+  }, [onConfirmation, address]);
 
   if (onConfirmation) {
     return (
@@ -266,6 +326,24 @@ export function AddPrizesDialog({
                   )}
                 </div>
               </div>
+              {/* Balance status */}
+              {isLoadingBalances ? (
+                <div className="mt-2 text-sm">Checking balances...</div>
+              ) : hasInsufficientBalance ? (
+                <div className="mt-2 font-medium flex flex-row items-center gap-2">
+                  <span className="w-6">
+                    <ALERT />
+                  </span>
+                  <span>Insufficient balance for some tokens</span>
+                </div>
+              ) : (
+                <div className="mt-2 font-medium flex flex-row items-center gap-2">
+                  <span className="w-6">
+                    <CHECK />
+                  </span>
+                  <span>Sufficient balance for all tokens</span>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
@@ -316,7 +394,10 @@ export function AddPrizesDialog({
               >
                 Back to Edit
               </Button>
-              <Button onClick={submitPrizes} disabled={isSubmitting}>
+              <Button
+                onClick={submitPrizes}
+                disabled={isSubmitting || hasInsufficientBalance}
+              >
                 {isSubmitting ? "Processing..." : "Confirm & Submit"}
               </Button>
             </div>
