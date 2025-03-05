@@ -14,6 +14,7 @@ import AmountInput from "@/components/createTournament/inputs/Amount";
 import {
   bigintToHex,
   calculateDistribution,
+  formatNumber,
   getOrdinalSuffix,
 } from "@/lib/utils";
 import { NewPrize } from "@/lib/types";
@@ -23,10 +24,11 @@ import { addAddressPadding, BigNumberish } from "starknet";
 import { TOURNAMENT_VERSION_KEY } from "@/lib/constants";
 import { CairoCustomEnum } from "starknet";
 import { useGetMetricsQuery } from "@/dojo/hooks/useSdkQueries";
-import { getTokenLogoUrl } from "@/lib/tokensMeta";
+import { getTokenLogoUrl, getTokenSymbol } from "@/lib/tokensMeta";
 import { ALERT, CHECK, X } from "@/components/Icons";
 import { useAccount } from "@starknet-react/core";
 import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
+import { useEkuboPrices } from "@/hooks/useEkuboPrices";
 
 export function AddPrizesDialog({
   open,
@@ -135,6 +137,7 @@ export function AddPrizesDialog({
           tokenAddress: newPrize.tokenAddress,
           amount: ((newPrize.amount ?? 0) * prize.percentage) / 100,
           position: prize.position,
+          value: ((newPrize.value ?? 0) * prize.percentage) / 100,
         })),
       ]);
     } else if (
@@ -230,8 +233,8 @@ export function AddPrizesDialog({
 
   // Calculate total value in USD for ERC20 tokens
   const totalValue = aggregatedPrizesArray.reduce((sum, prize: any) => {
-    if (prize.tokenType === "ERC20" && prize.amount) {
-      return sum + prize.amount;
+    if (prize.tokenType === "ERC20" && prize.value) {
+      return sum + prize.value;
     }
     return sum;
   }, 0);
@@ -243,6 +246,37 @@ export function AddPrizesDialog({
     }
     return sum;
   }, 0);
+
+  const uniqueTokenSymbols = useMemo(() => {
+    // First map to get symbols, then filter out undefined values, then create a Set
+    const symbols = currentPrizes
+      .map((prize) => getTokenSymbol(prize.tokenAddress))
+      .filter(
+        (symbol): symbol is string =>
+          typeof symbol === "string" && symbol !== ""
+      );
+
+    // Create a Set from the filtered array to get unique values
+    return [...new Set(symbols)];
+  }, [currentPrizes]);
+
+  const { prices, isLoading: pricesLoading } = useEkuboPrices({
+    tokens: [
+      ...uniqueTokenSymbols,
+      ...(newPrize.tokenAddress
+        ? [getTokenSymbol(newPrize.tokenAddress) ?? ""]
+        : []),
+    ],
+  });
+
+  useEffect(() => {
+    setNewPrize((prev) => ({
+      ...prev,
+      amount:
+        (prev.value ?? 0) /
+        (prices?.[getTokenSymbol(prev.tokenAddress) ?? ""] ?? 1),
+    }));
+  }, [prices, newPrize.value]);
 
   const checkAllBalances = useCallback(async () => {
     if (!address) return;
@@ -350,18 +384,13 @@ export function AddPrizesDialog({
               {aggregatedPrizesArray.map((prize: any, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-3 border rounded-md"
+                  className="flex items-center justify-between p-3 border border-primary-dark rounded-md"
                 >
                   <div className="flex items-center gap-2">
-                    <img
-                      src={getTokenLogoUrl(prize.tokenAddress)}
-                      className="w-6 h-6"
-                      alt="Token logo"
-                    />
-                    <span className="font-medium">{selectedToken?.symbol}</span>
-                    <span>
+                    <span className="font-astronaut w-10">
                       {`${prize.position}${getOrdinalSuffix(prize.position)}`}
                     </span>
+                    <span className="font-medium">{selectedToken?.symbol}</span>
                     {prize.count > 1 && (
                       <span className="text-sm text-muted-foreground">
                         ({prize.count} prizes)
@@ -370,7 +399,19 @@ export function AddPrizesDialog({
                   </div>
                   <div>
                     {prize.tokenType === "ERC20" ? (
-                      <span className="font-semibold">${prize.amount}</span>
+                      <div className="flex flex-row items-center gap-2">
+                        <span className="font-semibold">
+                          {formatNumber(prize.amount)}
+                        </span>
+                        <img
+                          src={getTokenLogoUrl(prize.tokenAddress)}
+                          className="w-6 h-6"
+                          alt="Token logo"
+                        />
+                        <span className="text-sm text-neutral-500">
+                          ~${prize.value.toFixed(2)}
+                        </span>
+                      </div>
                     ) : (
                       <div className="flex flex-col items-end">
                         {prize.tokenIds.map((id: number, idx: number) => (
@@ -414,83 +455,102 @@ export function AddPrizesDialog({
           <DialogTitle>Add Prizes to Tournament</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-6 py-4 overflow-y-auto pr-2">
+        <div className="flex flex-col gap-6 overflow-y-auto pr-2">
           {/* Token Selection */}
-          <div className="flex items-center gap-4">
-            <TokenDialog
-              selectedToken={selectedToken}
-              onSelect={(token) => {
-                setSelectedToken(token);
-                setNewPrize((prev) => ({
-                  ...prev,
-                  tokenAddress: token.address,
-                  tokenType:
-                    token.token_type.activeVariant() === "erc20"
-                      ? "ERC20"
-                      : "ERC721",
-                  // Reset other values when token changes
-                  amount: undefined,
-                  tokenId: undefined,
-                  position: undefined,
-                }));
-              }}
-            />
+          <div className="flex flex-row items-center gap-4">
+            <div className="pt-6">
+              <TokenDialog
+                selectedToken={selectedToken}
+                onSelect={(token) => {
+                  setSelectedToken(token);
+                  setNewPrize((prev) => ({
+                    ...prev,
+                    tokenAddress: token.address,
+                    tokenType:
+                      token.token_type.activeVariant() === "erc20"
+                        ? "ERC20"
+                        : "ERC721",
+                    // Reset other values when token changes
+                    amount: undefined,
+                    tokenId: undefined,
+                    position: undefined,
+                  }));
+                }}
+              />
+            </div>
+            {/* Amount/Token ID Input */}
+            <div className="flex flex-col gap-1">
+              <div className="flex flex-row justify-between">
+                <span className="min-w-[100px] font-astronaut">
+                  {isERC20 ? "Amount ($)" : "Token ID"}
+                </span>
+                {!pricesLoading ? (
+                  <div className="flex flex-row items-center gap-2">
+                    <p>~{formatNumber(newPrize.amount ?? 0)}</p>
+                    <img
+                      src={getTokenLogoUrl(newPrize.tokenAddress)}
+                      className="w-6"
+                    />
+                  </div>
+                ) : (
+                  <p>Loading...</p>
+                )}
+              </div>
+              {isERC20 ? (
+                <AmountInput
+                  value={newPrize.value || 0}
+                  onChange={(value) =>
+                    setNewPrize((prev) => ({
+                      ...prev,
+                      value: value,
+                    }))
+                  }
+                />
+              ) : (
+                <div className="flex items-center gap-4">
+                  <Input
+                    type="number"
+                    placeholder="Token ID"
+                    value={newPrize.tokenId || ""}
+                    onChange={(e) =>
+                      setNewPrize((prev) => ({
+                        ...prev,
+                        tokenId: Number(e.target.value),
+                      }))
+                    }
+                    className="w-[150px]"
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Position"
+                    min={1}
+                    max={leaderboardSize}
+                    value={newPrize.position || ""}
+                    onChange={(e) =>
+                      setNewPrize((prev) => ({
+                        ...prev,
+                        position: Number(e.target.value),
+                      }))
+                    }
+                    className="w-[100px]"
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {newPrize.tokenAddress && (
             <>
-              {/* Amount/Token ID Input */}
-              <div className="flex items-center gap-4">
-                <span className="min-w-[100px]">
-                  {isERC20 ? "Amount" : "Token ID"}
-                </span>
-                {isERC20 ? (
-                  <AmountInput
-                    value={newPrize.amount || 0}
-                    onChange={(value) =>
-                      setNewPrize((prev) => ({
-                        ...prev,
-                        amount: value,
-                      }))
-                    }
-                  />
-                ) : (
-                  <div className="flex items-center gap-4">
-                    <Input
-                      type="number"
-                      placeholder="Token ID"
-                      value={newPrize.tokenId || ""}
-                      onChange={(e) =>
-                        setNewPrize((prev) => ({
-                          ...prev,
-                          tokenId: Number(e.target.value),
-                        }))
-                      }
-                      className="w-[150px]"
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Position"
-                      min={1}
-                      max={leaderboardSize}
-                      value={newPrize.position || ""}
-                      onChange={(e) =>
-                        setNewPrize((prev) => ({
-                          ...prev,
-                          position: Number(e.target.value),
-                        }))
-                      }
-                      className="w-[100px]"
-                    />
-                  </div>
-                )}
-              </div>
-
               {/* Distribution Settings (for ERC20 only) */}
               {isERC20 && (
                 <>
                   <div className="space-y-2">
-                    <span className="min-w-[100px]">Distribution</span>
+                    <div className="flex flex-row items-center gap-2">
+                      <span className="min-w-[100px]">Distribution</span>
+                      <span className="text-sm text-neutral-500">
+                        Adjust the spread of the distribution
+                      </span>
+                    </div>
                     <div className="flex flex-row items-center gap-4">
                       <Slider
                         min={0}
@@ -533,31 +593,66 @@ export function AddPrizesDialog({
                       }).map((_, index) => (
                         <div
                           key={index}
-                          className="flex flex-col gap-2 flex-shrink-0"
+                          className="w-[175px] min-w-[175px] flex flex-row items-center justify-between flex-shrink-0 border border-neutral-500 rounded-md p-2"
                         >
-                          <span>Position {index + 1}</span>
-                          <div className="flex items-center gap-2">
+                          <span className="font-astronaut text-lg">
+                            {index + 1}
+                            {getOrdinalSuffix(index + 1)}
+                          </span>
+
+                          <div className="relative w-[50px]">
                             <Input
                               type="number"
                               min="0"
                               max="100"
-                              className="w-[60px]"
+                              className="pr-4 px-1"
                               onChange={(e) => {
                                 const value = Number(e.target.value);
-                                const newDistributions = [
-                                  ...prizeDistributions,
-                                ];
-                                newDistributions[index] = {
-                                  position: index + 1,
-                                  percentage: value,
-                                };
-                                setPrizeDistributions(newDistributions);
+                                setPrizeDistributions((prev) =>
+                                  prev.map((item) =>
+                                    item.position === index + 1
+                                      ? { ...item, percentage: value }
+                                      : item
+                                  )
+                                );
                               }}
                               value={
                                 prizeDistributions[index]?.percentage || ""
                               }
                             />
-                            <span>%</span>
+                            <span className="absolute right-1 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                              %
+                            </span>
+                          </div>
+
+                          <div className="flex flex-col">
+                            <div className="flex flex-row items-center gap-1">
+                              <span className="text-xs">
+                                {formatNumber(
+                                  ((prizeDistributions[index]?.percentage ??
+                                    0) *
+                                    (newPrize.amount ?? 0)) /
+                                    100
+                                )}
+                              </span>
+                              <img
+                                src={getTokenLogoUrl(newPrize.tokenAddress)}
+                                className="w-4"
+                              />
+                            </div>
+                            {prices?.[
+                              getTokenSymbol(newPrize.tokenAddress) ?? ""
+                            ] && (
+                              <span className="text-xs text-neutral-500">
+                                ~$
+                                {(
+                                  ((prizeDistributions[index]?.percentage ??
+                                    0) *
+                                    (newPrize.value ?? 0)) /
+                                  100
+                                ).toFixed(2)}
+                              </span>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -575,36 +670,57 @@ export function AddPrizesDialog({
               {currentPrizes.map((prize, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-4 p-2 bg-background/50 border border-primary-dark/50 rounded flex-shrink-0 whitespace-nowrap"
+                  className="flex items-center gap-2 p-2 bg-background/50 border border-primary-dark/50 rounded flex-shrink-0"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-neutral-500 uppercase">
-                      {prize.position}
-                    </span>
-                    <img
-                      src={getTokenLogoUrl(prize.tokenAddress)}
-                      className="w-6 h-6"
-                      alt="Token logo"
-                    />
-                    <span className="text-sm text-neutral-500 uppercase">
-                      {selectedToken?.symbol}
+                  <span className="font-astronaut">
+                    {prize.position}
+                    {getOrdinalSuffix(prize.position ?? 0)}
+                  </span>
+
+                  <div className="flex flex-row items-center gap-2">
+                    {prize.tokenType === "ERC20" ? (
+                      <div className="flex flex-row items-center gap-1">
+                        <div className="flex flex-row gap-1 items-center">
+                          <span>{formatNumber(prize.amount ?? 0)}</span>
+                          <img
+                            src={getTokenLogoUrl(prize.tokenAddress)}
+                            className="w-6 h-6 flex-shrink-0"
+                            alt="Token logo"
+                          />
+                        </div>
+
+                        <span className="text-sm text-neutral-500">
+                          {pricesLoading
+                            ? "Loading..."
+                            : prices?.[
+                                getTokenSymbol(prize.tokenAddress) ?? ""
+                              ] &&
+                              `~$${(
+                                (prize.amount ?? 0) *
+                                (prices?.[
+                                  getTokenSymbol(prize.tokenAddress) ?? ""
+                                ] ?? 0)
+                              ).toFixed(2)}`}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="whitespace-nowrap">
+                        #{prize.tokenId}
+                      </span>
+                    )}
+
+                    {/* Delete button */}
+                    <span
+                      className="w-6 h-6 text-primary-dark cursor-pointer flex-shrink-0"
+                      onClick={() => {
+                        const newPrizes = [...currentPrizes];
+                        newPrizes.splice(index, 1);
+                        setCurrentPrizes(newPrizes);
+                      }}
+                    >
+                      <X />
                     </span>
                   </div>
-                  {prize.tokenType === "ERC20" ? (
-                    <span>${prize.amount}</span>
-                  ) : (
-                    <span>#{prize.tokenId}</span>
-                  )}
-                  <span
-                    className="w-6 h-6 text-primary-dark cursor-pointer"
-                    onClick={() => {
-                      const newPrizes = [...currentPrizes];
-                      newPrizes.splice(index, 1);
-                      setCurrentPrizes(newPrizes);
-                    }}
-                  >
-                    <X />
-                  </span>
                 </div>
               ))}
             </div>

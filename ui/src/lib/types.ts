@@ -38,6 +38,7 @@ export interface NewPrize {
   tokenAddress: string;
   tokenType: "ERC20" | "ERC721" | "";
   amount?: number;
+  value?: number;
   tokenId?: number;
   position?: number;
 }
