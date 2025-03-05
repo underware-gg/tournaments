@@ -1,4 +1,4 @@
-import { TROPHY } from "@/components/Icons";
+import { QUESTION, TROPHY } from "@/components/Icons";
 import { Card } from "@/components/ui/card";
 import PrizeDisplay from "@/components/tournament/prizes/Prize";
 import { useState, useEffect } from "react";
@@ -15,6 +15,7 @@ interface PrizesContainerProps {
   totalPrizeNFTs: number;
   prices: TokenPrices;
   pricesLoading: boolean;
+  allPricesFound: boolean;
 }
 
 const PrizesContainer = ({
@@ -25,6 +26,7 @@ const PrizesContainer = ({
   totalPrizeNFTs,
   prices,
   pricesLoading,
+  allPricesFound,
 }: PrizesContainerProps) => {
   const [showPrizes, setShowPrizes] = useState(false);
 
@@ -47,9 +49,15 @@ const PrizesContainer = ({
               <Skeleton className="h-6 w-24 bg-primary/10" />
             ) : (
               <>
-                {totalPrizesValueUSD > 0 && (
-                  <span className="font-astronaut text-md sm:text-xl text-primary-dark">
-                    ${totalPrizesValueUSD.toFixed(2)}
+                {allPricesFound ? (
+                  totalPrizesValueUSD > 0 && (
+                    <span className="font-astronaut text-md sm:text-xl text-primary-dark">
+                      ${totalPrizesValueUSD.toFixed(2)}
+                    </span>
+                  )
+                ) : (
+                  <span className="w-8">
+                    <QUESTION />
                   </span>
                 )}
                 {totalPrizeNFTs > 0 && (

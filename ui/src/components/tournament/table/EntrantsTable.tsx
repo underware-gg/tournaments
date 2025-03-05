@@ -202,11 +202,11 @@ const EntrantsTable = ({
             <div className="flex flex-row">
               {[0, 1].map((colIndex) => (
                 <div key={colIndex} className="flex flex-col gap-1 py-2 w-1/2">
-                  {[...Array(Math.min(entryCount - offset, 5))].map(
-                    (_, index) => (
-                      <RowSkeleton key={index} />
-                    )
-                  )}
+                  {[
+                    ...Array(Math.max(0, Math.min(entryCount - offset, 5))),
+                  ].map((_, index) => (
+                    <RowSkeleton key={index} />
+                  ))}
                 </div>
               ))}
             </div>

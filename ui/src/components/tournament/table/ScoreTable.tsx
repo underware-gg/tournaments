@@ -169,7 +169,7 @@ const ScoreTable = ({
                                 <span className="w-6 flex-none">
                                   <USER />
                                 </span>
-                                <span className="flex-none max-w-20 group-hover:text-primary transition-colors duration-200">
+                                <span className="flex-none max-w-32 group-hover:text-primary transition-colors duration-200 text-ellipsis overflow-hidden whitespace-nowrap">
                                   {feltToString(registration?.player_name)}
                                 </span>
                                 <p
@@ -239,11 +239,11 @@ const ScoreTable = ({
             <div className="flex flex-row">
               {[0, 1].map((colIndex) => (
                 <div key={colIndex} className="flex flex-col gap-1 py-2 w-1/2">
-                  {[...Array(Math.min(entryCount - offset, 5))].map(
-                    (_, index) => (
-                      <RowSkeleton key={index} />
-                    )
-                  )}
+                  {[
+                    ...Array(Math.max(0, Math.min(entryCount - offset, 5))),
+                  ].map((_, index) => (
+                    <RowSkeleton key={index} />
+                  ))}
                 </div>
               ))}
             </div>

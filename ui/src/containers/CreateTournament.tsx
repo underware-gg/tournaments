@@ -69,6 +69,7 @@ const formSchema = z.object({
     .object({
       tokenAddress: z.string().optional(),
       amount: z.number().min(0).optional(),
+      value: z.number().min(0).optional(),
       creatorFeePercentage: z.number().min(0).max(100).optional(),
       gameFeePercentage: z.number().min(0).max(100).optional(),
       prizeDistribution: z
