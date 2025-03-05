@@ -469,21 +469,34 @@ export const calculatePrizeValue = (
 ): number => {
   if (prize.type !== "erc20") return 0;
 
-  const price = prices[symbol] || 1;
-  const amount = Number(prize.value);
-  return Number(price * amount) / 10 ** 18;
+  const price = prices[symbol];
+  const amount = Number(prize.value) / 10 ** 18;
+
+  // If no price is available, just return the token amount
+  if (price === undefined) return amount;
+
+  // Otherwise calculate the value using the price
+  return price * amount;
 };
 
 export const calculateTotalValue = (
   groupedPrizes: TokenPrizes,
-  prices: TokenPrices
+  prices: TokenPrices,
+  allPricesFound: boolean
 ) => {
+  if (!allPricesFound) {
+    return 0;
+  }
+
   return Object.entries(groupedPrizes)
     .filter(([_, prize]) => prize.type === "erc20")
     .reduce((total, [symbol, prize]) => {
-      const price = prices[symbol] || 1;
-      const amount = Number(prize.value);
-      return total + Number(price * amount) / 10 ** 18;
+      const price = prices[symbol];
+      const amount = Number(prize.value) / 10 ** 18;
+
+      if (price === undefined) return total;
+
+      return total + price * amount;
     }, 0);
 };
 

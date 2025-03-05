@@ -13,7 +13,7 @@ import {
 import { TokenPrices } from "@/hooks/useEkuboPrices";
 import { TokenPrizes } from "@/lib/types";
 import { getTokenLogoUrl } from "@/lib/tokensMeta";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface PrizeProps {
@@ -23,9 +23,22 @@ interface PrizeProps {
 }
 
 const Prize = ({ position, prizes, prices }: PrizeProps) => {
-  const totalPrizesValueUSD = calculateTotalValue(prizes, prices);
   const totalPrizeNFTs = countTotalNFTs(prizes);
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
+  const [allPricesFound, setAllPricesFound] = useState(false);
+  const totalPrizesValueUSD = calculateTotalValue(
+    prizes,
+    prices,
+    allPricesFound
+  );
+
+  useEffect(() => {
+    const allPricesExist = Object.keys(prizes).every(
+      (symbol) => prices[symbol] !== undefined
+    );
+
+    setAllPricesFound(allPricesExist);
+  }, [prices, prizes]);
 
   // Function to render prize details content
   const renderPrizeDetails = () => (
@@ -36,6 +49,7 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
       </h4>
       <div className="space-y-3">
         {Object.entries(prizes).map(([symbol, prize]) => {
+          const hasPrice = prices[symbol];
           const USDValue = calculatePrizeValue(prize, symbol, prices);
           return (
             <div key={symbol} className="flex justify-between items-center">
@@ -52,7 +66,7 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
                   (prize.value as bigint[]).length === 1 ? "" : "s"
                 }`
               )}
-              {prize.type === "erc20" && (
+              {prize.type === "erc20" && hasPrice && (
                 <span className="text-neutral-500">
                   ~${USDValue.toFixed(2)}
                 </span>
@@ -93,7 +107,9 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
               {totalPrizesValueUSD > 0 || totalPrizeNFTs > 0 ? (
                 <div className="flex flex-row items-center gap-2 font-astronaut sm:text-lg">
                   {totalPrizesValueUSD > 0 && (
-                    <span>${totalPrizesValueUSD.toFixed(2)}</span>
+                    <span>{`${
+                      allPricesFound ? "$" : ""
+                    }${totalPrizesValueUSD.toFixed(2)}`}</span>
                   )}
                   {totalPrizesValueUSD > 0 && totalPrizeNFTs > 0 && (
                     <span className="text-primary/25">|</span>

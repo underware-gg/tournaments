@@ -69,6 +69,7 @@ const Tournament = () => {
   const [submitScoresDialogOpen, setSubmitScoresDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [tournamentExists, setTournamentExists] = useState(false);
+  const [allPricesFound, setAllPricesFound] = useState(true);
 
   const { data: tournamentsCount } = useGetTournamentsCount({
     namespace: nameSpace,
@@ -247,9 +248,18 @@ const Tournament = () => {
     tokens: [...erc20TokenSymbols, entryFeeTokenSymbol ?? ""],
   });
 
+  useEffect(() => {
+    const allPricesExist = Object.keys(prizes).every(
+      (symbol) => prices[symbol] !== undefined
+    );
+
+    setAllPricesFound(allPricesExist);
+  }, [prices, prizes]);
+
   const totalPrizesValueUSD = calculateTotalValue(
     groupedByTokensPrizes,
-    prices
+    prices,
+    allPricesFound
   );
 
   const totalPrizeNFTs = countTotalNFTs(groupedByTokensPrizes);
@@ -519,11 +529,12 @@ const Tournament = () => {
               totalPrizeNFTs={totalPrizeNFTs}
               prices={prices}
               pricesLoading={pricesLoading}
+              allPricesFound={allPricesFound}
             />
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-5">
-          {registrationType === "fixed" && !isStarted ? (
+          {!isStarted ? (
             <EntrantsTable
               tournamentId={tournamentModel?.id}
               entryCount={entryCountModel ? Number(entryCountModel.count) : 0}
