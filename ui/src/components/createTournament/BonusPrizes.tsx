@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { StepProps } from "@/containers/CreateTournament";
 import {
@@ -33,13 +33,13 @@ interface NewPrize {
 }
 
 const BonusPrizes = ({ form }: StepProps) => {
-  const [selectedToken, setSelectedToken] = React.useState<Token | null>(null);
-  const [newPrize, setNewPrize] = React.useState<NewPrize>({
+  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+  const [newPrize, setNewPrize] = useState<NewPrize>({
     tokenAddress: "",
     tokenType: "",
   });
-  const [distributionWeight, setDistributionWeight] = React.useState(1);
-  const [prizeDistributions, setPrizeDistributions] = React.useState<
+  const [distributionWeight, setDistributionWeight] = useState(1);
+  const [prizeDistributions, setPrizeDistributions] = useState<
     { position: number; percentage: number }[]
   >([]);
 

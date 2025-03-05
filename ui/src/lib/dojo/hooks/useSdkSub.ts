@@ -4,12 +4,13 @@ import { SubscriptionQueryType, ParsedEntity } from "@dojoengine/sdk";
 import { useDojo } from "@/context/dojo";
 import { SchemaType } from "@/generated/models.gen";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
+import { NAMESPACE } from "@/lib/constants";
 
 export type TournamentSubQuery = SubscriptionQueryType<SchemaType>;
 
 export type EntityResult = {
   entityId: BigNumberish;
-} & Partial<SchemaType["tournaments"]>;
+} & Partial<SchemaType[typeof NAMESPACE]>;
 
 export type UseSdkSubEntitiesResult = {
   entities: EntityResult[] | null;
@@ -26,7 +27,7 @@ export const useSdkSubscribeEntities = ({
   query,
   enabled = true,
 }: UseSdkSubEntitiesProps): UseSdkSubEntitiesResult => {
-  const { sdk, nameSpace } = useDojo();
+  const { sdk } = useDojo();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [entities, setEntities] = useState<EntityResult[] | null>(null);
   const state = useDojoStore.getState();
@@ -58,15 +59,6 @@ export const useSdkSubscribeEntities = ({
             response.data.forEach((entity) => {
               state.updateEntity(entity as Partial<ParsedEntity<SchemaType>>);
             });
-            setEntities(
-              response.data.map(
-                (e: any) =>
-                  ({
-                    entityId: e.entityId,
-                    ...e.models[nameSpace],
-                  } as EntityResult)
-              )
-            );
           }
         },
       });

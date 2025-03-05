@@ -54,7 +54,7 @@ export const useSystemCalls = () => {
   const { toast } = useToast();
   const {
     applyTournamentEntryUpdate,
-    applyTournamentPrizeUpdate,
+    applyTournamentPrizesUpdate,
     applyTournamentCreateAndAddPrizesUpdate,
   } = useOptimisticUpdates();
   const { tournamentAddress } = useTournamentContracts();
@@ -165,10 +165,10 @@ export const useSystemCalls = () => {
     }
   };
 
-  const approveAndAddPrize = async (
+  const approveAndAddPrizes = async (
     tournamentId: BigNumberish,
     tournamentName: string,
-    prize: Prize,
+    prizes: Prize[],
     showToast: boolean
   ) => {
     toast({
@@ -176,40 +176,41 @@ export const useSystemCalls = () => {
       description: `Adding prize for tournament ${tournamentName}`,
     });
 
-    const { wait, revert, confirm } = applyTournamentPrizeUpdate(
-      tournamentId,
-      prize
-    );
+    const { revert, confirm } = applyTournamentPrizesUpdate(prizes);
 
     try {
       let calls = [];
-      calls.push({
-        contractAddress: prize.token_address,
-        entrypoint: "approve",
-        calldata: CallData.compile([
-          tournamentAddress,
-          prize.token_type.activeVariant() === "erc20"
-            ? prize.token_type.variant.erc20?.token_amount!
-            : prize.token_type.variant.erc721?.token_id!,
-          "0",
-        ]),
-      });
-      calls.push({
-        contractAddress: tournamentAddress,
-        entrypoint: "add_prize",
-        calldata: CallData.compile([
-          tournamentId,
-          prize.token_address,
-          prize.token_type,
-          prize.payout_position,
-        ]),
-      });
+      for (const prize of prizes) {
+        calls.push({
+          contractAddress: prize.token_address,
+          entrypoint: "approve",
+          calldata: CallData.compile([
+            tournamentAddress,
+            prize.token_type.activeVariant() === "erc20"
+              ? prize.token_type.variant.erc20?.amount!
+              : prize.token_type.variant.erc721?.token_id!,
+            "0",
+          ]),
+        });
+        calls.push({
+          contractAddress: tournamentAddress,
+          entrypoint: "add_prize",
+          calldata: CallData.compile([
+            tournamentId,
+            prize.token_address,
+            prize.token_type,
+            prize.payout_position,
+          ]),
+        });
+      }
+
+      console.log("calls", calls);
 
       const tx = isMainnet
         ? await account?.execute(calls)
         : account?.execute(calls);
 
-      await wait();
+      // await wait();
 
       if (showToast && tx) {
         toast({
@@ -410,22 +411,28 @@ export const useSystemCalls = () => {
     await account?.execute(calls);
   };
 
-  const mintErc20 = async (recipient: string, amount: Uint256) => {
-    const resolvedClient = await client;
-    await resolvedClient.erc20_mock.mint(
-      account as unknown as Account | AccountInterface,
-      recipient,
-      amount
-    );
+  const mintErc20 = async (
+    tokenAddress: string,
+    recipient: string,
+    amount: Uint256
+  ) => {
+    await account?.execute({
+      contractAddress: tokenAddress,
+      entrypoint: "mint",
+      calldata: [recipient, amount],
+    });
   };
 
-  const mintErc721 = async (recipient: string, tokenId: Uint256) => {
-    const resolvedClient = await client;
-    await resolvedClient.erc721_mock.mint(
-      account as unknown as Account | AccountInterface,
-      recipient,
-      tokenId
-    );
+  const mintErc721 = async (
+    tokenAddress: string,
+    recipient: string,
+    tokenId: Uint256
+  ) => {
+    await account?.execute({
+      contractAddress: tokenAddress,
+      entrypoint: "mint",
+      calldata: [recipient, tokenId],
+    });
   };
 
   const getErc20Balance = async (address: string) => {
@@ -441,7 +448,7 @@ export const useSystemCalls = () => {
   return {
     approveAndEnterTournament,
     submitScores,
-    approveAndAddPrize,
+    approveAndAddPrizes,
     createTournamentAndApproveAndAddPrizes,
     claimPrizes,
     endGame,

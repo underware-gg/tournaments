@@ -30,8 +30,7 @@ const RegisterToken = () => {
 
   useSubscribeTokensQuery();
 
-  const { mintErc20, mintErc721, getErc20Balance, getErc721Balance } =
-    useSystemCalls();
+  const { mintErc20, mintErc721, getBalanceGeneral } = useSystemCalls();
 
   const handleChangeAddress = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
@@ -44,7 +43,7 @@ const RegisterToken = () => {
   };
 
   const getTestERC20Balance = async () => {
-    const balance = await getErc20Balance(address!);
+    const balance = await getBalanceGeneral(erc20_mock);
     if (balance !== undefined) {
       setTokenBalance((prev) => ({
         ...prev,
@@ -54,7 +53,7 @@ const RegisterToken = () => {
   };
 
   const getTestERC721Balance = async () => {
-    const balance = await getErc721Balance(address!);
+    const balance = await getBalanceGeneral(erc721_mock);
     if (balance !== undefined) {
       setTokenBalance((prev) => ({
         ...prev,
@@ -138,7 +137,7 @@ const RegisterToken = () => {
             standard="erc20"
             balance={formatBalance(tokenBalance["erc20"])}
             onMint={async () => {
-              await mintErc20(address!, {
+              await mintErc20(erc20_mock, address!, {
                 low: 100000000000000000000n,
                 high: 0n,
               });
@@ -154,7 +153,7 @@ const RegisterToken = () => {
             standard="erc721"
             balance={Number(tokenBalance["erc721"])}
             onMint={async () => {
-              await mintErc721(address!, {
+              await mintErc721(erc721_mock, address!, {
                 low: BigInt(Number(tokenBalance["erc721"]) + 1),
                 high: 0n,
               });

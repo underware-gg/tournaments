@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { ARROW_LEFT, TROPHY, MONEY } from "@/components/Icons";
+import { ARROW_LEFT, TROPHY, MONEY, PLUS } from "@/components/Icons";
 import { useNavigate, useParams } from "react-router-dom";
 import EntrantsTable from "@/components/tournament/table/EntrantsTable";
 import TournamentTimeline from "@/components/TournamentTimeline";
 import { bigintToHex, feltToString, formatTime } from "@/lib/utils";
 import { addAddressPadding } from "starknet";
+import { useAccount } from "@starknet-react/core";
 import {
   useSubscribeGamesQuery,
-  useSubscribeTournamentEntriesQuery,
   useGetGameCounterQuery,
   useGetTournamentQuery,
   useSubscribeTournamentQuery,
@@ -40,7 +40,7 @@ import useModel from "@/dojo/hooks/useModel";
 import { useGameEndpoints } from "@/dojo/hooks/useGameEndpoints";
 import { EnterTournamentDialog } from "@/components/dialogs/EnterTournament";
 import ScoreTable from "@/components/tournament/table/ScoreTable";
-import { TOURNAMENT_VERSION_KEY } from "@/lib/constants";
+import { ADMIN_ADDRESS, TOURNAMENT_VERSION_KEY } from "@/lib/constants";
 import { useEkuboPrices } from "@/hooks/useEkuboPrices";
 import MyEntries from "@/components/tournament/MyEntries";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
@@ -56,20 +56,26 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import useUIStore from "@/hooks/useUIStore";
+import { AddPrizesDialog } from "@/components/dialogs/AddPrizes";
+import { ChainId } from "@/dojo/config";
 
 const Tournament = () => {
   const { id } = useParams<{ id: string }>();
+  const { address } = useAccount();
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
-  const { nameSpace } = useDojo();
+  const { nameSpace, selectedChainConfig } = useDojo();
   const state = useDojoStore.getState();
   const { gameData } = useUIStore();
   const [enterDialogOpen, setEnterDialogOpen] = useState(false);
   const [claimDialogOpen, setClaimDialogOpen] = useState(false);
   const [submitScoresDialogOpen, setSubmitScoresDialogOpen] = useState(false);
+  const [addPrizesDialogOpen, setAddPrizesDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [tournamentExists, setTournamentExists] = useState(false);
   const [allPricesFound, setAllPricesFound] = useState(true);
+  const isAdmin = address === ADMIN_ADDRESS;
+  const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
 
   const { data: tournamentsCount } = useGetTournamentsCount({
     namespace: nameSpace,
@@ -104,6 +110,7 @@ const Tournament = () => {
 
   useGetTournamentQuery(addAddressPadding(bigintToHex(id!)));
   useSubscribeTournamentQuery(addAddressPadding(bigintToHex(id!)));
+  // useSubscribePrizesQuery();
 
   const tournamentEntityId = useMemo(
     () => getEntityIdFromKeys([BigInt(id!)]),
@@ -174,8 +181,6 @@ const Tournament = () => {
   const { gameNamespace, gameScoreModel, gameScoreAttribute } =
     useGameEndpoints(tournamentModel?.game_config?.address);
 
-  console.log(gameScoreModel, gameScoreAttribute);
-
   const gameAddress = tournamentModel?.game_config?.address;
   const gameName = gameData.find(
     (game) => game.contract_address === gameAddress
@@ -191,10 +196,6 @@ const Tournament = () => {
   });
 
   const gameCount = gameCounterEntity?.GameCounter?.count ?? 0;
-
-  useSubscribeTournamentEntriesQuery({
-    tournamentId: addAddressPadding(bigintToHex(id!)),
-  });
 
   useSubscribeGamesQuery({
     gameNamespace: gameNamespace ?? "",
@@ -357,9 +358,14 @@ const Tournament = () => {
               {gameName ? feltToString(gameName) : "Unknown"}
             </TooltipContent>
           </Tooltip>
-          {/* <Button variant="outline">
-            <PLUS /> Add Prizes
-          </Button> */}
+          {!isEnded && (isMainnet ? isAdmin : true) && (
+            <Button
+              variant="outline"
+              onClick={() => setAddPrizesDialogOpen(true)}
+            >
+              <PLUS /> Add Prizes
+            </Button>
+          )}
           <EntryRequirements tournamentModel={tournamentModel} />
           {(registrationType === "fixed" && !isStarted) ||
           (registrationType === "open" && !isEnded) ? (
@@ -428,6 +434,13 @@ const Tournament = () => {
             claimablePrizes={claimablePrizes}
             claimablePrizeTypes={claimablePrizeTypes}
             prices={prices}
+          />
+          <AddPrizesDialog
+            open={addPrizesDialogOpen}
+            onOpenChange={setAddPrizesDialogOpen}
+            tournamentId={tournamentModel?.id}
+            tournamentName={feltToString(tournamentModel?.metadata?.name ?? "")}
+            leaderboardSize={leaderboardSize}
           />
         </div>
       </div>

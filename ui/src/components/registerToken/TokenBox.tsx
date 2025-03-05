@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { displayAddress } from "@/lib/utils";
-import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
-import { useAccount } from "@starknet-react/core";
 
 interface TokenBoxProps {
   title: string;
@@ -27,9 +25,7 @@ const TokenBox = ({
   variant,
   disabled,
 }: TokenBoxProps) => {
-  const { address } = useAccount();
   const [tokenId, setTokenId] = useState(0);
-  const { mintErc721 } = useSystemCalls();
   return (
     <div className="flex flex-col gap-2 items-center justify-center border border-primary bg-black p-2">
       <p className="text-lg">{title}</p>
@@ -57,14 +53,7 @@ const TokenBox = ({
         <Button
           disabled={disabled}
           onClick={async () => {
-            if (!variant) {
-              onMint();
-            } else {
-              await mintErc721(address!, {
-                low: BigInt(tokenId),
-                high: 0n,
-              });
-            }
+            onMint();
           }}
         >
           Mint

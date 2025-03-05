@@ -167,21 +167,11 @@ export const getSubmittableScores = (
     ...score,
     position: index + 1,
   }));
-  // if no scores have been submitted then we can submit the whole leaderboard in reverse order
-  const newSubmissions = leaderboardWithPositions
-    .sort((a, b) => {
-      const scoreComparison = Number(a.score) - Number(b.score);
-
-      if (scoreComparison === 0) {
-        return Number(b.entry_number) - Number(a.entry_number);
-      }
-
-      return scoreComparison;
-    })
-    .map((score) => ({
-      tokenId: score.game_token_id,
-      position: score.position,
-    }));
+  // if no scores have been submitted then we can submit the whole leaderboard
+  const newSubmissions = leaderboardWithPositions.map((score) => ({
+    tokenId: score.game_token_id,
+    position: score.position,
+  }));
   if (submittedTokenIds.length === 0) {
     return newSubmissions;
   } else {
