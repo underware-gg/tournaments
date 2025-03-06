@@ -27,11 +27,17 @@ export const processTournamentData = (
   tournamentCount: number
 ): Tournament => {
   const startTimestamp = Math.floor(
-    formData.startTime.getTime() / 1000 -
-      formData.startTime.getTimezoneOffset() * 60
+    Date.UTC(
+      formData.startTime.getUTCFullYear(),
+      formData.startTime.getUTCMonth(),
+      formData.startTime.getUTCDate(),
+      formData.startTime.getUTCHours(),
+      formData.startTime.getUTCMinutes(),
+      formData.startTime.getUTCSeconds()
+    ) / 1000
   );
 
-  const currentTime = Number(BigInt(new Date().getTime()) / 1000n + 60n);
+  const currentTime = Math.floor(Date.now() / 1000) + 60;
 
   // End time is start time + duration in days
   const endTimestamp = startTimestamp + formData.duration * SECONDS_IN_DAY;

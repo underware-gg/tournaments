@@ -15,10 +15,10 @@ const TokenGameIcon = ({
   const games = getGames();
   const Icon = games[game]?.Icon;
   const sizeClasses = {
-    xs: "size-5",
-    sm: "size-8",
-    md: "size-10",
-    lg: "size-16",
+    xs: "size-5 3xl:size-6",
+    sm: "size-8 3xl:size-10",
+    md: "size-10 3xl:size-12",
+    lg: "size-16 3xl:size-20",
   };
   return (
     <span className="relative inline-flex items-center justify-center">

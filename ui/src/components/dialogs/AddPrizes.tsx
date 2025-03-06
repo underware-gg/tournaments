@@ -349,7 +349,7 @@ export function AddPrizesDialog({
                 <h3 className="text-lg font-semibold">Prize Summary</h3>
                 <div className="flex flex-col items-end">
                   {totalValue > 0 && (
-                    <span className="font-bold text-lg">
+                    <span className="font-bold text-lg font-astronaut">
                       Total: ${totalValue.toFixed(2)}
                     </span>
                   )}
@@ -479,64 +479,66 @@ export function AddPrizesDialog({
               />
             </div>
             {/* Amount/Token ID Input */}
-            <div className="flex flex-col gap-1">
-              <div className="flex flex-row justify-between">
-                <span className="min-w-[100px] font-astronaut">
-                  {isERC20 ? "Amount ($)" : "Token ID"}
-                </span>
-                {!pricesLoading ? (
-                  <div className="flex flex-row items-center gap-2">
-                    <p>~{formatNumber(newPrize.amount ?? 0)}</p>
-                    <img
-                      src={getTokenLogoUrl(newPrize.tokenAddress)}
-                      className="w-6"
+            {newPrize.tokenAddress && (
+              <div className="flex flex-col gap-1">
+                <div className="flex flex-row justify-between">
+                  <span className="min-w-[100px] font-astronaut">
+                    {isERC20 ? "Amount ($)" : "Token ID"}
+                  </span>
+                  {!pricesLoading ? (
+                    <div className="flex flex-row items-center gap-2">
+                      <p>~{formatNumber(newPrize.amount ?? 0)}</p>
+                      <img
+                        src={getTokenLogoUrl(newPrize.tokenAddress)}
+                        className="w-6"
+                      />
+                    </div>
+                  ) : (
+                    <p>Loading...</p>
+                  )}
+                </div>
+                {isERC20 ? (
+                  <AmountInput
+                    value={newPrize.value || 0}
+                    onChange={(value) =>
+                      setNewPrize((prev) => ({
+                        ...prev,
+                        value: value,
+                      }))
+                    }
+                  />
+                ) : (
+                  <div className="flex items-center gap-4">
+                    <Input
+                      type="number"
+                      placeholder="Token ID"
+                      value={newPrize.tokenId || ""}
+                      onChange={(e) =>
+                        setNewPrize((prev) => ({
+                          ...prev,
+                          tokenId: Number(e.target.value),
+                        }))
+                      }
+                      className="w-[150px]"
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Position"
+                      min={1}
+                      max={leaderboardSize}
+                      value={newPrize.position || ""}
+                      onChange={(e) =>
+                        setNewPrize((prev) => ({
+                          ...prev,
+                          position: Number(e.target.value),
+                        }))
+                      }
+                      className="w-[100px]"
                     />
                   </div>
-                ) : (
-                  <p>Loading...</p>
                 )}
               </div>
-              {isERC20 ? (
-                <AmountInput
-                  value={newPrize.value || 0}
-                  onChange={(value) =>
-                    setNewPrize((prev) => ({
-                      ...prev,
-                      value: value,
-                    }))
-                  }
-                />
-              ) : (
-                <div className="flex items-center gap-4">
-                  <Input
-                    type="number"
-                    placeholder="Token ID"
-                    value={newPrize.tokenId || ""}
-                    onChange={(e) =>
-                      setNewPrize((prev) => ({
-                        ...prev,
-                        tokenId: Number(e.target.value),
-                      }))
-                    }
-                    className="w-[150px]"
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Position"
-                    min={1}
-                    max={leaderboardSize}
-                    value={newPrize.position || ""}
-                    onChange={(e) =>
-                      setNewPrize((prev) => ({
-                        ...prev,
-                        position: Number(e.target.value),
-                      }))
-                    }
-                    className="w-[100px]"
-                  />
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
           {newPrize.tokenAddress && (

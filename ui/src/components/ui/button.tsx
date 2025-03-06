@@ -5,7 +5,7 @@ import PressableBorderImage from "@/components/icons/PressableBorderImage";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0 [border-style:solid] [border-image-slice:4] [border-image-width:4px] relative active:top-[2px] active:left-[2px]",
+  "inline-flex items-center gap-2 whitespace-nowrap rounded-xl text-sm 3xl:text-lg font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 3xl:[&_svg]:size-8 [&_svg]:shrink-0 [border-style:solid] [border-image-slice:4] [border-image-width:4px] relative active:top-[2px] active:left-[2px]",
   {
     variants: {
       variant: {
@@ -16,11 +16,11 @@ const buttonVariants = cva(
         tab: "[border-image-width:4px_4px_0_4px]",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        xs: "h-5 min-w-5 p-1 rounded-md [&_svg]:size-3 [border-image-width:2px] text-xs",
+        default: "h-10 3xl:h-12 px-2 sm:px-4 py-2",
+        xs: "h-5 3xl:h-8 min-w-5 3xl:min-w-8 p-1 rounded-md [&_svg]:size-3 3xl:[&_svg]:size-5 [border-image-width:2px] text-xs",
         sm: "h-9 px-3",
         lg: "h-11 px-8",
-        xl: "h-14 px-5 [&_svg]:size-8",
+        xl: "h-14 3xl:h-20 px-5 [&_svg]:size-8 3xl:[&_svg]:size-12 3xl:text-2xl",
         icon: "h-10 w-10",
       },
     },

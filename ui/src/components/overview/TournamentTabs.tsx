@@ -52,7 +52,7 @@ const TournamentTabs = ({
           onClick={() => setSelectedTab("my")}
           icon={<TROPHY />}
           label="My Tournaments"
-          mobileLabel="My"
+          mobileLabel="My Tournaments"
           count={myTournamentsCount}
         />
       </div>

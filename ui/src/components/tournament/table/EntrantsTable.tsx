@@ -103,7 +103,9 @@ const EntrantsTable = ({
     >
       <div className="flex flex-col justify-between">
         <div className="flex flex-row justify-between h-8">
-          <span className="font-astronaut text-lg sm:text-2xl">Entrants</span>
+          <span className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+            Entrants
+          </span>
           {showParticipants && entryCount > 10 && (
             <Pagination
               totalPages={Math.ceil(entryCount / 10)}
@@ -124,8 +126,8 @@ const EntrantsTable = ({
                 />
               </>
             )}
-            <div className="flex flex-row items-center font-astronaut text-lg sm:text-2xl">
-              <span className="w-8 sm:w-10">
+            <div className="flex flex-row items-center font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+              <span className="w-8 2xl:w-10 3xl:w-12">
                 <USER />
               </span>
               : {entryCount}
@@ -149,7 +151,7 @@ const EntrantsTable = ({
                         <div className="hidden sm:block">
                           <HoverCard openDelay={50} closeDelay={0}>
                             <HoverCardTrigger asChild>
-                              <div className="flex flex-row items-center sm:gap-2 px-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200">
+                              <div className="flex flex-row items-center sm:gap-2 px-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200 3xl:text-lg">
                                 <span className="w-4 flex-none font-astronaut">
                                   {index +
                                     1 +
@@ -157,7 +159,7 @@ const EntrantsTable = ({
                                     (currentPage - 1) * 10}
                                   .
                                 </span>
-                                <span className="w-6 flex-none">
+                                <span className="w-6 3xl:w-8 flex-none">
                                   <USER />
                                 </span>
                                 <span className="flex-none max-w-20 group-hover:text-primary transition-colors duration-200">
@@ -189,7 +191,7 @@ const EntrantsTable = ({
                           <span className="w-6 flex-none">
                             <USER />
                           </span>
-                          <span className="flex-none max-w-20 group-hover:text-primary transition-colors duration-200">
+                          <span className="flex-none max-w-20 3xl:max-w-44 group-hover:text-primary transition-colors duration-200">
                             {feltToString(registration?.player_name)}
                           </span>
                         </div>

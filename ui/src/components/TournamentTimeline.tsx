@@ -44,7 +44,7 @@ const TournamentTimeline = ({
       {type === "fixed" && (
         <TimelineCard
           icon={
-            <span className="w-6 sm:w-8">
+            <span className="w-6 sm:w-8 3xl:w-10">
               <REGISTER />
             </span>
           }
@@ -58,7 +58,7 @@ const TournamentTimeline = ({
       )}
       <TimelineCard
         icon={
-          <span className="w-4 sm:w-6">
+          <span className="w-4 sm:w-6 3xl:w-8">
             <START_FLAG />
           </span>
         }
@@ -71,7 +71,7 @@ const TournamentTimeline = ({
       />
       <TimelineCard
         icon={
-          <span className="w-4 sm:w-6">
+          <span className="w-4 sm:w-6 3xl:w-8">
             <END_FLAG />
           </span>
         }
@@ -84,7 +84,7 @@ const TournamentTimeline = ({
       />
       <TimelineCard
         icon={
-          <span className="w-6 sm:w-8">
+          <span className="w-6 sm:w-8 3xl:w-10">
             <LEADERBOARD />
           </span>
         }

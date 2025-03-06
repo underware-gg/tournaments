@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { ARROW_LEFT, TROPHY, MONEY, PLUS } from "@/components/Icons";
+import { ARROW_LEFT, TROPHY, MONEY, GIFT } from "@/components/Icons";
 import { useNavigate, useParams } from "react-router-dom";
 import EntrantsTable from "@/components/tournament/table/EntrantsTable";
 import TournamentTimeline from "@/components/TournamentTimeline";
@@ -329,7 +329,7 @@ const Tournament = () => {
   }
 
   return (
-    <div className="sm:w-3/4 sm:mx-auto flex flex-col gap-5">
+    <div className="lg:w-[87.5%] xl:w-5/6 2xl:w-3/4 sm:mx-auto flex flex-col gap-5">
       <div className="flex flex-row justify-between">
         <Button
           variant="outline"
@@ -339,7 +339,7 @@ const Tournament = () => {
           <ARROW_LEFT />
           <span className="hidden sm:block">Back</span>
         </Button>
-        <div className="flex flex-row items-center gap-5">
+        <div className="flex flex-row items-center gap-2 sm:gap-5">
           <span className="text-primary uppercase font-astronaut text-lg sm:text-2xl">
             {status}
           </span>
@@ -363,19 +363,21 @@ const Tournament = () => {
               variant="outline"
               onClick={() => setAddPrizesDialogOpen(true)}
             >
-              <PLUS /> Add Prizes
+              <GIFT />{" "}
+              <span className="hidden sm:block 3xl:text-lg">Add Prizes</span>
             </Button>
           )}
           <EntryRequirements tournamentModel={tournamentModel} />
           {(registrationType === "fixed" && !isStarted) ||
           (registrationType === "open" && !isEnded) ? (
             <Button
-              className="uppercase p-2 sm:p-4"
+              className="uppercase"
               onClick={() => setEnterDialogOpen(true)}
             >
               <TROPHY />
-              <span className="hidden sm:block">Enter | </span>
-              <span className="font-bold text-xs sm:text-base">
+              <span>Enter</span>
+              <span className="hidden sm:block">|</span>
+              <span className="hidden sm:block font-bold text-xs sm:text-base 3xl:text-lg">
                 {hasEntryFee ? `$${entryFee}` : "Free"}
               </span>
             </Button>
@@ -447,10 +449,10 @@ const Tournament = () => {
       <div className="flex flex-col gap-1 sm:gap-2">
         <div className="flex flex-row items-center h-8 sm:h-12 justify-between">
           <div className="flex flex-row gap-5">
-            <span className="font-astronaut text-xl sm:text-4xl">
+            <span className="font-astronaut text-xl xl:text-2xl 2xl:text-4xl 3xl:text-5xl">
               {feltToString(tournamentModel?.metadata?.name ?? "")}
             </span>
-            <div className="flex flex-row items-center gap-4 text-primary-dark">
+            <div className="flex flex-row items-center gap-4 text-primary-dark 3xl:text-lg">
               <div className="flex flex-row gap-2">
                 <span className="hidden sm:block">Winners:</span>
                 <span className="text-primary">Top {leaderboardSize}</span>
@@ -464,7 +466,7 @@ const Tournament = () => {
               </div>
             </div>
           </div>
-          <div className="hidden sm:flex flex-row">
+          <div className="hidden sm:flex flex-row 3xl:text-lg">
             {!isStarted ? (
               <div>
                 <span className="text-primary-dark">Starts In: </span>
@@ -503,7 +505,7 @@ const Tournament = () => {
               className={`${
                 isExpanded
                   ? "whitespace-pre-wrap text-xs sm:text-base"
-                  : "overflow-hidden text-ellipsis whitespace-nowrap text-xs sm:text-base"
+                  : "overflow-hidden text-ellipsis whitespace-nowrap text-xs sm:text-sm xl:text-base 3xl:text-lg"
               }`}
             >
               {tournamentModel?.metadata?.description}
@@ -520,7 +522,7 @@ const Tournament = () => {
         </div>
       </div>
       <div className="flex flex-col gap-5 sm:gap-10">
-        <div className="flex flex-col sm:flex-row sm:h-[150px] gap-5">
+        <div className="flex flex-col sm:flex-row sm:h-[150px] 3xl:h-[200px] gap-5">
           <div className="sm:w-1/2 flex justify-center items-center pt-4 sm:pt-0">
             <TournamentTimeline
               type={registrationType}

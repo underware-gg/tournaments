@@ -106,12 +106,16 @@ const ScoreTable = ({
     <Card
       variant="outline"
       className={`sm:w-1/2 transition-all duration-300 ease-in-out ${
-        showParticipants ? "h-[200px]" : "h-[45px] sm:h-[60px]"
+        showParticipants
+          ? "h-[210px] 3xl:h-[270px]"
+          : "h-[45px] sm:h-[60px] 3xl:h-[80px]"
       }`}
     >
       <div className="flex flex-col justify-between">
-        <div className="flex flex-row justify-between h-6 sm:h-8">
-          <span className="font-astronaut text-lg sm:text-2xl">Scores</span>
+        <div className="flex flex-row items-center justify-between h-6 sm:h-8 3xl:h-10">
+          <span className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+            Scores
+          </span>
           {showParticipants && entryCount > 10 && (
             <Pagination
               totalPages={Math.ceil(entryCount / 10)}
@@ -122,18 +126,18 @@ const ScoreTable = ({
           <div className="flex flex-row items-center gap-2">
             {entryCount > 0 && (
               <>
-                <span className="text-neutral-500">
+                <span className="hidden sm:block text-neutral-500 3xl:text-lg">
                   {showParticipants ? "Hide" : "Show Participants"}
                 </span>
                 <Switch
                   checked={showParticipants}
                   onCheckedChange={setShowParticipants}
-                  className="h-4 sm:h-6"
+                  className="hidden sm:block h-4 xl:h-6"
                 />
               </>
             )}
-            <div className="flex flex-row items-center font-astronaut text-lg sm:text-2xl">
-              <span className="w-8 sm:w-10">
+            <div className="flex flex-row items-center font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+              <span className="w-8 2xl:w-10 3xl:w-12">
                 <USER />
               </span>
               : {entryCount}
@@ -158,7 +162,7 @@ const ScoreTable = ({
                         <div className="hidden sm:block">
                           <HoverCard openDelay={50} closeDelay={0}>
                             <HoverCardTrigger asChild>
-                              <div className="flex flex-row items-center sm:gap-2 pr-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200">
+                              <div className="flex flex-row items-center sm:gap-1 xl:gap-2 pr-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200 3xl:text-lg">
                                 <span className="w-4 flex-none font-astronaut">
                                   {index +
                                     1 +
@@ -166,10 +170,10 @@ const ScoreTable = ({
                                     (currentPage - 1) * 10}
                                   .
                                 </span>
-                                <span className="w-6 flex-none">
+                                <span className="w-6 3xl:w-8 flex-none">
                                   <USER />
                                 </span>
-                                <span className="flex-none max-w-32 group-hover:text-primary transition-colors duration-200 text-ellipsis overflow-hidden whitespace-nowrap">
+                                <span className="flex-none lg:max-w-20 xl:max-w-24 2xl:max-w-28 3xl:max-w-44 group-hover:text-primary transition-colors duration-200 text-ellipsis overflow-hidden whitespace-nowrap">
                                   {feltToString(registration?.player_name)}
                                 </span>
                                 <p
@@ -212,7 +216,7 @@ const ScoreTable = ({
                           <span className="w-6 flex-none">
                             <USER />
                           </span>
-                          <span className="flex-none max-w-20 group-hover:text-primary transition-colors duration-200">
+                          <span className="flex-none max-w-16 group-hover:text-primary transition-colors duration-200 text-ellipsis overflow-hidden whitespace-nowrap">
                             {feltToString(registration?.player_name)}
                           </span>
                           <p

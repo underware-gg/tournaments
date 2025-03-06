@@ -238,10 +238,10 @@ const Overview = () => {
             </div>
           )}
           <div className="flex flex-row gap-4 items-center">
-            <span className="hidden sm:block">Sort By:</span>
+            <span className="hidden 2xl:block">Sort By:</span>
             <DropdownMenu>
               <DropdownMenuTrigger className="bg-black border-2 border-retro-grey px-2 min-w-[100px] h-full">
-                <div className="flex flex-row items-center justify-between capitalize text-sm sm:text-base w-full sm:gap-2">
+                <div className="flex flex-row items-center justify-between capitalize text-sm 2xl:text-base w-full sm:gap-2">
                   {
                     SORT_OPTIONS[selectedTab].find(
                       (option) => option.value === sortBy
@@ -274,18 +274,18 @@ const Overview = () => {
           <div
             className={`
             transition-[height] duration-300 ease-in-out
-            ${gameFilters.length > 0 ? "h-[60px] sm:h-[72px] sm:py-2" : "h-0"}
+            ${gameFilters.length > 0 ? "h-[60px] 2xl:h-[72px] sm:py-2" : "h-0"}
           `}
           >
             {gameFilters.length > 0 && (
-              <div className="flex flex-row items-center gap-2 sm:gap-4 px-2 sm:p-4 h-[60px] sm:h-[72px] overflow-x-auto w-full">
+              <div className="flex flex-row items-center gap-2 sm:gap-4 px-2 sm:p-4 h-[60px] 2xl:h-[72px] overflow-x-auto w-full">
                 {gameFilters.map((filter) => (
                   <div
                     key={filter}
                     className="flex flex-row items-center gap-2 sm:gap-4 bg-black border-2 border-retro-grey py-2 px-4 shrink-0"
                   >
                     <GameIcon game={filter} />
-                    <span className="sm:text-2xl font-astronaut">
+                    <span className="text-lg 2xl:text-2xl font-astronaut">
                       {feltToString(
                         gameData.find(
                           (game) => game.contract_address === filter
@@ -305,7 +305,7 @@ const Overview = () => {
           </div>
           <div
             ref={scrollContainerRef}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-4 transition-all duration-300 ease-in-out sm:py-2 overflow-y-auto"
+            className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-4 transition-all duration-300 ease-in-out sm:py-2 overflow-y-auto"
           >
             {selectedTab === "my" && !address ? (
               <NoAccount />

@@ -154,17 +154,19 @@ const MyEntries = ({
     <Card
       variant="outline"
       className={`sm:w-1/2 transition-all duration-300 ease-in-out ${
-        showMyEntries ? "h-[200px]" : "h-[45px] sm:h-[60px]"
+        showMyEntries ? "h-[200px]" : "h-[60px]"
       }`}
     >
       <div className="flex flex-col justify-between">
-        <div className="flex flex-row justify-between h-6 sm:h-8">
-          <span className="font-astronaut text-lg sm:text-2xl">My Entries</span>
+        <div className="flex flex-row items-center justify-between h-6 sm:h-8">
+          <span className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+            My Entries
+          </span>
           <div className="flex flex-row items-center gap-2">
             {address ? (
               myEntriesCount > 0 ? (
                 <>
-                  <span className="text-neutral-500">
+                  <span className="text-neutral-500 3xl:text-lg">
                     {showMyEntries ? "Hide" : "Show Entries"}
                   </span>
                   <Switch
@@ -174,13 +176,15 @@ const MyEntries = ({
                   />
                 </>
               ) : (
-                <span className="text-neutral-500">No Entries</span>
+                <span className="text-neutral-500 3xl:text-lg">No Entries</span>
               )
             ) : (
-              <span className="text-neutral-500">No Account Connected</span>
+              <span className="text-neutral-500 3xl:text-lg">
+                No Account Connected
+              </span>
             )}
-            <div className="flex flex-row items-center font-astronaut text-lg sm:text-2xl">
-              <span className="w-8">
+            <div className="flex flex-row items-center font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+              <span className="w-8 3xl:w-10">
                 <DOLLAR />
               </span>
               : {myEntriesCount}

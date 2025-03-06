@@ -17,7 +17,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { StepProps } from "@/containers/CreateTournament";
 import { TROPHY, USER, X } from "@/components/Icons";
 import { displayAddress, feltToString } from "@/lib/utils";
@@ -48,6 +47,7 @@ import {
 import useUIStore from "@/hooks/useUIStore";
 // import { useEkuboPrices } from "@/hooks/useEkuboPrices";
 // import { tokens } from "@/lib/tokensMeta";
+import { OptionalSection } from "@/components/createTournament/containers/OptionalSection";
 
 const EntryRequirements = ({ form }: StepProps) => {
   const { nameSpace } = useDojo();
@@ -111,28 +111,13 @@ const EntryRequirements = ({ form }: StepProps) => {
       control={form.control}
       name="enableGating"
       render={({ field }) => (
-        <FormItem className="flex flex-col p-4">
-          <div className="flex flex-row items-center justify-between">
-            <div className="flex flex-row items-center gap-5">
-              <FormLabel className="text-2xl font-astronaut">
-                Entry Requirements
-              </FormLabel>
-              <FormDescription>
-                Enable participation restrictions
-              </FormDescription>
-            </div>
-            <FormControl>
-              <div className="flex flex-row items-center gap-2">
-                <span className="uppercase text-neutral-500 font-bold">
-                  Optional
-                </span>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </div>
-            </FormControl>
-          </div>
+        <FormItem className="flex flex-col sm:p-4">
+          <OptionalSection
+            label="Entry Requirements"
+            description="Enable participation restrictions"
+            checked={field.value}
+            onCheckedChange={field.onChange}
+          />
 
           {field.value && (
             <>
@@ -148,7 +133,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                     }
                     onClick={() => handleGatingTypeChange("token")}
                   >
-                    Token Gating
+                    Token
                   </Button>
                   <Button
                     type="button"
@@ -170,7 +155,8 @@ const EntryRequirements = ({ form }: StepProps) => {
                     }
                     onClick={() => handleGatingTypeChange("addresses")}
                   >
-                    Whitelisted Addresses
+                    Whitelist{" "}
+                    <span className="hidden sm:inline">Addresses</span>
                   </Button>
                 </div>
 
@@ -213,10 +199,10 @@ const EntryRequirements = ({ form }: StepProps) => {
                         render={({ field }) => (
                           <FormItem>
                             <div className="flex flex-row items-center gap-5">
-                              <FormLabel className="font-astronaut text-2xl">
+                              <FormLabel className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
                                 Requirement
                               </FormLabel>
-                              <FormDescription>
+                              <FormDescription className="hidden sm:block">
                                 Choose whether previous tournaments must have
                                 been won or only participated in
                               </FormDescription>
@@ -257,7 +243,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                         render={({ field }) => (
                           <FormItem>
                             <div className="flex flex-row items-center gap-5">
-                              <FormLabel className="font-astronaut text-2xl">
+                              <FormLabel className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
                                 Tournaments
                               </FormLabel>
                               <FormDescription>Add tournaments</FormDescription>
@@ -555,10 +541,10 @@ const EntryRequirements = ({ form }: StepProps) => {
                         render={({ field }) => (
                           <FormItem>
                             <div className="flex flex-row items-center gap-2">
-                              <FormLabel className="font-astronaut text-2xl">
+                              <FormLabel className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
                                 Whitelisted Addresses
                               </FormLabel>
-                              <FormDescription>
+                              <FormDescription className="hidden sm:block">
                                 Add addresses that are allowed to participate in
                                 the tournament
                               </FormDescription>

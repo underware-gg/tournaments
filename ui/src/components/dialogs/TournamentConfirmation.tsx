@@ -118,7 +118,7 @@ const TournamentConfirmation = ({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="overflow-y-auto p-6 pt-2 max-h-[60vh]">
+        <div className="overflow-y-auto sm:p-6 pt-2 max-h-[60vh]">
           <div className="space-y-6">
             {/* Details Section */}
             <div className="space-y-2">
@@ -304,7 +304,7 @@ const TournamentConfirmation = ({
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 mt-6">
+        <div className="flex justify-end gap-2 sm:mt-4 2xl:mt-6">
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>

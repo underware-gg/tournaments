@@ -100,14 +100,14 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
               transition={{ delay: position * 0.1 }}
               className="flex items-center gap-4 p-2 sm:p-3 rounded-lg border border-primary/20 w-fit hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 transition-all duration-200"
             >
-              <div className="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary/20">
-                <span className="font-astronaut sm:text-lg text-primary">
+              <div className="flex items-center justify-center w-6 h-6 xl:w-8 xl:h-8 3xl:w-10 3xl:h-10 rounded-full bg-primary/20">
+                <span className="font-astronaut xl:text-lg 3xl:text-2xl text-primary">
                   {position}
                   <sup>{getOrdinalSuffix(position)}</sup>
                 </span>
               </div>
               {totalPrizesValueUSD > 0 || totalPrizeNFTs > 0 ? (
-                <div className="flex flex-row items-center gap-2 font-astronaut sm:text-lg">
+                <div className="flex flex-row items-center gap-2 font-astronaut xl:text-lg 3xl:text-2xl">
                   {totalPrizesValueUSD > 0 && (
                     <span>{`${
                       allPricesFound ? "$" : ""

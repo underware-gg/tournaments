@@ -43,7 +43,7 @@ function App() {
     <TooltipProvider>
       <div className="flex flex-col min-h-screen h-screen overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-auto px-4 sm:px-20 sm:pt-20">
+        <main className="flex-1 overflow-auto px-4 pt-4 xl:px-10 xl:pt-10 2xl:px-20 2xl:pt-20">
           <Routes>
             <Route path="/" element={<Overview />} />
             <Route path="/tournament">

@@ -38,20 +38,22 @@ const PrizesContainer = ({
     <Card
       variant="outline"
       className={`w-full transition-all duration-300 ease-in-out ${
-        showPrizes ? "h-full" : "h-[45px] sm:h-[60px]"
+        showPrizes ? "h-full" : "h-[60px]"
       }`}
     >
       <div className="flex flex-col">
-        <div className="flex flex-row justify-between h-6 sm:h-8">
+        <div className="flex flex-row justify-between h-6 sm:h-8 3xl:h-10">
           <div className="flex flex-row items-center gap-2">
-            <span className="font-astronaut text-lg sm:text-2xl">Prizes</span>
+            <span className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+              Prizes
+            </span>
             {pricesLoading ? (
               <Skeleton className="h-6 w-24 bg-primary/10" />
             ) : (
               <>
                 {allPricesFound ? (
                   totalPrizesValueUSD > 0 && (
-                    <span className="font-astronaut text-md sm:text-xl text-primary-dark">
+                    <span className="font-astronaut text-md xl:text-lg 2xl:text-xl 3xl:text-2xl text-primary-dark">
                       ${totalPrizesValueUSD.toFixed(2)}
                     </span>
                   )
@@ -71,20 +73,20 @@ const PrizesContainer = ({
           <div className="flex flex-row items-center gap-2">
             {prizesExist ? (
               <>
-                <span className="text-sm sm:text-base text-neutral-500">
+                <span className="text-sm xl:text-base 3xl:text-lg text-neutral-500">
                   {showPrizes ? "Hide" : "Show Prizes"}
                 </span>
                 <Switch
                   checked={showPrizes}
                   onCheckedChange={setShowPrizes}
-                  className="h-4 sm:h-6"
+                  className="h-4 xl:h-6"
                 />
               </>
             ) : (
               <span className="text-neutral-500">No Prizes Added</span>
             )}
-            <div className="flex flex-row items-center font-astronaut text-lg sm:text-2xl">
-              <span className="w-6 sm:w-8">
+            <div className="flex flex-row items-center font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+              <span className="w-6 xl:w-8 3xl:w-10">
                 <TROPHY />
               </span>
               : {lowestPrizePosition}
@@ -99,7 +101,7 @@ const PrizesContainer = ({
           <div className="w-full h-0.5 bg-primary/25 mt-2" />
           <div className="p-2 sm:p-4">
             {prizesExist && (
-              <div className="flex flex-row gap-3 overflow-x-auto">
+              <div className="flex flex-row gap-3 overflow-x-auto pb-2">
                 {pricesLoading ? (
                   Array.from({ length: 5 }).map((_, index) => (
                     <div

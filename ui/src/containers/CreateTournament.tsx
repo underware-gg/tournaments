@@ -418,7 +418,7 @@ const CreateTournament = () => {
   };
 
   return (
-    <div className="flex flex-col gap-5 w-3/4 mx-auto">
+    <div className="flex flex-col gap-5 lg:w-[87.5%] xl:w-5/6 2xl:w-3/4 mx-auto">
       <div className="space-y-5">
         <div className="flex flex-row justify-between items-center">
           <Button variant="outline" onClick={() => navigate("/")}>
@@ -436,7 +436,6 @@ const CreateTournament = () => {
             <Button
               type="button"
               disabled={!canProceed()}
-              className="px-10"
               onClick={() => {
                 nextStep();
               }}
@@ -453,17 +452,17 @@ const CreateTournament = () => {
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="font-astronaut text-4xl font-bold">
+          <span className="font-astronaut hidden sm:block lg:text-2xl xl:text-3xl 2xl:text-4xl 3xl:text-5xl font-bold">
             Create Tournament
           </span>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center w-full justify-between sm:w-auto sm:gap-6">
             {Object.entries(getSectionStatus(form)).map(
               ([section, _status]) => (
                 <div
                   key={section}
                   className={cn(
-                    "flex items-center gap-2",
+                    "flex items-center sm:gap-2",
                     visitedSections.has(section) || section === currentStep
                       ? "cursor-pointer"
                       : "cursor-not-allowed opacity-50",
@@ -472,7 +471,9 @@ const CreateTournament = () => {
                   onClick={() => handleSectionClick(section)}
                 >
                   <StatusIndicator section={section} />
-                  <span className="text-sm capitalize">{section}</span>
+                  <span className="text-xs sm:text-sm capitalize">
+                    {section}
+                  </span>
                 </div>
               )
             )}

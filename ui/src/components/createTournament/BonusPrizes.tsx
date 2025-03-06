@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { StepProps } from "@/containers/CreateTournament";
 import {
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -10,7 +9,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import AmountInput from "@/components/createTournament/inputs/Amount";
-import { Switch } from "@/components/ui/switch";
 import TokenDialog from "@/components/dialogs/Token";
 import { getTokenLogoUrl, getTokenSymbol } from "@/lib/tokensMeta";
 import { Token } from "@/generated/models.gen";
@@ -22,6 +20,8 @@ import {
   formatNumber,
 } from "@/lib/utils";
 import { useEkuboPrices } from "@/hooks/useEkuboPrices";
+import { OptionalSection } from "@/components/createTournament/containers/OptionalSection";
+import { TokenValue } from "@/components/createTournament/containers/TokenValue";
 
 interface NewPrize {
   tokenAddress: string;
@@ -117,34 +117,21 @@ const BonusPrizes = ({ form }: StepProps) => {
       control={form.control}
       name="enableBonusPrizes"
       render={({ field }) => (
-        <FormItem className="flex flex-col p-4">
-          <div className="flex flex-row items-center justify-between">
-            <div className="flex flex-row items-center gap-5">
-              <FormLabel className="text-2xl font-astronaut">
-                Bonus Prizes
-              </FormLabel>
-              <FormDescription>Enable additional prizes</FormDescription>
-            </div>
-            <FormControl>
-              <div className="flex flex-row items-center gap-2">
-                <span className="uppercase text-neutral-500 font-bold">
-                  Optional
-                </span>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </div>
-            </FormControl>
-          </div>
+        <FormItem className="flex flex-col sm:p-4">
+          <OptionalSection
+            label="Bonus Prizes"
+            description="Enable additional prizes"
+            checked={field.value}
+            onCheckedChange={field.onChange}
+          />
 
           {field.value && (
             <>
               <div className="w-full h-0.5 bg-primary/25" />
               <div className="flex flex-col gap-5">
-                <div className="flex flex-row justify-between items-center px-4">
-                  <div className="flex items-center gap-10">
-                    <div className="pt-6">
+                <div className="flex flex-row justify-between items-center sm:px-4">
+                  <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-10 w-full">
+                    <div className="flex flex-row items-center justify-between pt-4 sm:pt-6 w-full sm:w-auto">
                       <TokenDialog
                         selectedToken={selectedToken}
                         onSelect={(token) => {
@@ -163,76 +150,127 @@ const BonusPrizes = ({ form }: StepProps) => {
                           }));
                         }}
                       />
+                      <Button
+                        className="sm:hidden"
+                        type="button"
+                        disabled={!isValidPrize()}
+                        onClick={() => {
+                          const currentPrizes = form.watch("bonusPrizes") || [];
+                          if (
+                            newPrize.tokenType === "ERC20" &&
+                            newPrize.amount &&
+                            totalDistributionPercentage === 100
+                          ) {
+                            form.setValue("bonusPrizes", [
+                              ...currentPrizes,
+                              ...prizeDistributions.map((prize) => ({
+                                type: "ERC20" as const,
+                                tokenAddress: newPrize.tokenAddress,
+                                amount:
+                                  ((newPrize.amount ?? 0) * prize.percentage) /
+                                  100,
+                                position: prize.position,
+                              })),
+                            ]);
+                          } else if (
+                            newPrize.tokenType === "ERC721" &&
+                            newPrize.tokenId &&
+                            newPrize.position
+                          ) {
+                            form.setValue("bonusPrizes", [
+                              ...currentPrizes,
+                              {
+                                type: "ERC721",
+                                tokenAddress: newPrize.tokenAddress,
+                                tokenId: newPrize.tokenId,
+                                position: newPrize.position,
+                              },
+                            ]);
+                          }
+                          setNewPrize({ tokenAddress: "", tokenType: "" });
+                          setSelectedToken(null);
+                        }}
+                      >
+                        Add Prize
+                      </Button>
                     </div>
-
                     {newPrize.tokenAddress && (
-                      <div className="flex flex-col gap-2">
-                        <div className="flex flex-row items-center gap-5">
-                          <FormLabel className="text-lg font-astronaut">
-                            Amount ($)
-                          </FormLabel>
-                          <FormDescription>Prize amount in USD</FormDescription>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          {newPrize.tokenType === "ERC20" ? (
-                            <div className="flex flex-row items-center gap-2">
-                              <AmountInput
-                                value={newPrize.value || 0}
-                                onChange={(value) =>
+                      <>
+                        <div className="w-full h-0.5 bg-primary/25 sm:hidden" />
+                        <div className="flex flex-col gap-2">
+                          <div className="flex flex-row items-center gap-5">
+                            <FormLabel className="text-lg font-astronaut">
+                              Amount ($)
+                            </FormLabel>
+                            <FormDescription className="hidden sm:block sm:text-xs xl:text-sm">
+                              Prize amount in USD
+                            </FormDescription>
+                            <TokenValue
+                              className="sm:hidden"
+                              amount={newPrize.amount ?? 0}
+                              tokenAddress={newPrize.tokenAddress}
+                              usdValue={newPrize.value ?? 0}
+                              isLoading={pricesLoading}
+                            />
+                          </div>
+                          <div className="flex items-center gap-4">
+                            {newPrize.tokenType === "ERC20" ? (
+                              <div className="flex flex-row items-center gap-2">
+                                <AmountInput
+                                  value={newPrize.value || 0}
+                                  onChange={(value) =>
+                                    setNewPrize((prev) => ({
+                                      ...prev,
+                                      value: value,
+                                    }))
+                                  }
+                                />
+                                <TokenValue
+                                  className="hidden sm:flex"
+                                  amount={newPrize.amount ?? 0}
+                                  tokenAddress={newPrize.tokenAddress}
+                                  usdValue={newPrize.value ?? 0}
+                                  isLoading={pricesLoading}
+                                />
+                              </div>
+                            ) : (
+                              <Input
+                                type="number"
+                                placeholder="Token ID"
+                                value={newPrize.tokenId || ""}
+                                onChange={(e) =>
                                   setNewPrize((prev) => ({
                                     ...prev,
-                                    value: value,
+                                    tokenId: Number(e.target.value),
                                   }))
                                 }
+                                className="w-[150px]"
                               />
-                              {!pricesLoading ? (
-                                <div className="flex flex-row items-center gap-2">
-                                  <p>~{formatNumber(newPrize.amount ?? 0)}</p>
-                                  <img
-                                    src={getTokenLogoUrl(newPrize.tokenAddress)}
-                                    className="w-6"
-                                  />
-                                </div>
-                              ) : (
-                                <p>Loading...</p>
-                              )}
-                            </div>
-                          ) : (
-                            <Input
-                              type="number"
-                              placeholder="Token ID"
-                              value={newPrize.tokenId || ""}
-                              onChange={(e) =>
-                                setNewPrize((prev) => ({
-                                  ...prev,
-                                  tokenId: Number(e.target.value),
-                                }))
-                              }
-                              className="w-[150px]"
-                            />
-                          )}
-                          {!isERC20 && (
-                            <Input
-                              type="number"
-                              placeholder="Position"
-                              min={1}
-                              max={form.watch("leaderboardSize")}
-                              value={newPrize.position || ""}
-                              onChange={(e) =>
-                                setNewPrize((prev) => ({
-                                  ...prev,
-                                  position: Number(e.target.value),
-                                }))
-                              }
-                              className="w-[100px]"
-                            />
-                          )}
+                            )}
+                            {!isERC20 && (
+                              <Input
+                                type="number"
+                                placeholder="Position"
+                                min={1}
+                                max={form.watch("leaderboardSize")}
+                                value={newPrize.position || ""}
+                                onChange={(e) =>
+                                  setNewPrize((prev) => ({
+                                    ...prev,
+                                    position: Number(e.target.value),
+                                  }))
+                                }
+                                className="w-[100px]"
+                              />
+                            )}
+                          </div>
                         </div>
-                      </div>
+                      </>
                     )}
                   </div>
 
                   <Button
+                    className="hidden sm:block"
                     type="button"
                     disabled={!isValidPrize()}
                     onClick={() => {
@@ -278,12 +316,12 @@ const BonusPrizes = ({ form }: StepProps) => {
                   <>
                     <div className="w-full h-0.5 bg-primary/25" />
                     <div className="flex flex-col gap-4">
-                      <div className="flex flex-row justify-between">
+                      <div className="flex flex-col sm:flex-row justify-between">
                         <div className="flex flex-row items-center gap-5">
-                          <FormLabel className="font-astronaut text-2xl">
+                          <FormLabel className="font-astronaut text-lg">
                             Prize Distribution
                           </FormLabel>
-                          <FormDescription>
+                          <FormDescription className="hidden sm:block sm:text-xs xl:text-sm">
                             Set prize percentages for each position
                           </FormDescription>
                         </div>
@@ -291,7 +329,7 @@ const BonusPrizes = ({ form }: StepProps) => {
                           <div className="flex flex-row gap-2 items-center justify-between text-sm text-muted-foreground">
                             <div className="flex flex-row items-center gap-2">
                               <FormLabel>Distribution Weight</FormLabel>
-                              <FormDescription>
+                              <FormDescription className="hidden sm:block sm:text-xs xl:text-sm">
                                 Adjust the spread of the distribution
                               </FormDescription>
                             </div>
@@ -332,7 +370,7 @@ const BonusPrizes = ({ form }: StepProps) => {
                           </div>
                         </div>
                       </div>
-                      <div className="flex flex-row gap-4 overflow-x-auto pb-2">
+                      <div className="flex flex-col items-center sm:flex-row gap-4 overflow-x-auto pb-2">
                         {Array.from({
                           length: form.watch("leaderboardSize"),
                         }).map((_, index) => (
@@ -345,7 +383,7 @@ const BonusPrizes = ({ form }: StepProps) => {
                               {getOrdinalSuffix(index + 1)}
                             </span>
 
-                            <div className="relative w-[50px]">
+                            <div className="relative m-0 w-[50px]">
                               <Input
                                 type="number"
                                 min="0"

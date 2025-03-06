@@ -72,9 +72,6 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
                 className="w-6 h-6"
                 alt="Token logo"
               />
-              <span className="font-bold w-[100px] truncate">
-                {selectedToken.name}
-              </span>
               <span className="text-sm text-neutral-500 uppercase">
                 {selectedToken.symbol}
               </span>

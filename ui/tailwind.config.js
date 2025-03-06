@@ -33,8 +33,14 @@ export default {
       },
       fontFamily: {
         'astronaut': ['AstroNaut', 'sans-serif']
+      },
+      screens: {
+        '3xl': '1920px',  // Full HD
+        '4xl': '2560px',  // 2K / QHD
+        '5xl': '3440px',  // Ultrawide
+        '6xl': '3840px',  // 4K / UHD
       }
-  	}
+    }
   },
   plugins: [require("tailwindcss-animate")],
 }

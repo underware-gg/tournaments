@@ -125,8 +125,10 @@ export const TournamentCard = ({
     >
       <div className="flex flex-col justify-between h-full">
         <div className="flex flex-col gap-2">
-          <div className="flex flex-row justify-between font-astronaut text-xl">
-            <p>{feltToString(tournament?.metadata?.name!)}</p>
+          <div className="flex flex-row justify-between font-astronaut text-lg 2xl:text-xl">
+            <p className="truncate">
+              {feltToString(tournament?.metadata?.name!)}
+            </p>
             <div className="flex flex-row items-center">
               <span className="w-6">
                 <USER />

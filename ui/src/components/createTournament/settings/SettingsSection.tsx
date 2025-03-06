@@ -83,8 +83,12 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
   return (
     <FormItem>
       <div className="flex flex-row items-center gap-5">
-        <FormLabel className="font-astronaut text-2xl">Settings</FormLabel>
-        <FormDescription>Select the game settings</FormDescription>
+        <FormLabel className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+          Settings
+        </FormLabel>
+        <FormDescription className="sm:text-xs xl:text-sm 3xl:text-base">
+          Select the game settings
+        </FormDescription>
       </div>
       <FormControl>
         <div className="flex flex-col gap-4">
