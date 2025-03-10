@@ -335,7 +335,12 @@ pub mod tournament_component {
             // validate submission
             self
                 ._validate_score_submission(
-                    @tournament, @registration, leaderboard.span(), submitted_score, position,
+                    @tournament,
+                    @registration,
+                    leaderboard.span(),
+                    submitted_score,
+                    position,
+                    token_id,
                 );
 
             // update leaderboard
@@ -1376,6 +1381,7 @@ pub mod tournament_component {
             current_leaderboard: Span<u64>,
             submitted_score: u32,
             submitted_position: u8,
+            token_id: u64,
         ) {
             let schedule = *tournament.schedule;
             assert!(
@@ -1413,30 +1419,50 @@ pub mod tournament_component {
             // if the score being submitted is for a position already on the leaderboard
             if position_index < current_leaderboard.len() {
                 // validate it's higher
-                let current_score_at_position = game_dispatcher
-                    .score(*current_leaderboard.at(position_index));
+                let game_id_at_position = *current_leaderboard.at(position_index);
+                let score_at_position = game_dispatcher.score(game_id_at_position);
 
                 assert!(
-                    submitted_score > current_score_at_position,
+                    submitted_score >= score_at_position,
                     "Tournament: Score {} is less than current score of {} at position {}",
                     submitted_score,
-                    current_score_at_position,
+                    score_at_position,
                     submitted_position,
                 );
+
+                if submitted_score == score_at_position {
+                    assert!(
+                        token_id < game_id_at_position,
+                        "Tournament: Tie goes to game with lower id. Submitted game id {} is higher than current game id {}",
+                        token_id,
+                        game_id_at_position,
+                    );
+                }
             }
 
             // if score is being submitted for any position other than first
             if submitted_position > 1 {
-                // validate it is less than the score above it.
-                let current_score_above_position = game_dispatcher
-                    .score(*current_leaderboard.at(position_index - 1));
+                // validate it is less than or equal to the score above it
+                let position_above = position_index - 1;
+                let game_id_above = *current_leaderboard.at(position_above);
+                let current_score_above_position = game_dispatcher.score(game_id_above);
 
                 assert!(
-                    submitted_score < current_score_above_position,
+                    submitted_score <= current_score_above_position,
                     "Tournament: Score {} qualifies for higher position than {}",
                     submitted_score,
                     submitted_position,
                 );
+
+                // If scores are equal, ensure the game ID is higher (lower priority in case of tie)
+                if submitted_score == current_score_above_position {
+                    assert!(
+                        token_id > game_id_above,
+                        "Tournament: For equal scores, game id {} should be higher than game id above {}",
+                        token_id,
+                        game_id_above,
+                    );
+                }
             }
         }
 
