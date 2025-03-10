@@ -22,6 +22,7 @@ import {
 import { useEkuboPrices } from "@/hooks/useEkuboPrices";
 import { OptionalSection } from "@/components/createTournament/containers/OptionalSection";
 import { TokenValue } from "@/components/createTournament/containers/TokenValue";
+import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
 
 interface NewPrize {
   tokenAddress: string;
@@ -42,6 +43,9 @@ const BonusPrizes = ({ form }: StepProps) => {
   const [prizeDistributions, setPrizeDistributions] = useState<
     { position: number; percentage: number }[]
   >([]);
+  const [hasInsufficientBalance, setHasInsufficientBalance] = useState(false);
+
+  const { getBalanceGeneral } = useSystemCalls();
 
   const uniqueTokenSymbols = useMemo(() => {
     const bonusPrizes = form.watch("bonusPrizes") || [];
@@ -112,6 +116,19 @@ const BonusPrizes = ({ form }: StepProps) => {
     }));
   }, [prices, newPrize.value]);
 
+  useEffect(() => {
+    const checkBalances = async () => {
+      const balances = await getBalanceGeneral(newPrize.tokenAddress);
+      const amount = (newPrize.amount ?? 0) * 10 ** 18;
+      if (balances < BigInt(amount)) {
+        setHasInsufficientBalance(true);
+      } else {
+        setHasInsufficientBalance(false);
+      }
+    };
+    checkBalances();
+  }, [newPrize.tokenAddress, newPrize.amount]);
+
   return (
     <FormField
       control={form.control}
@@ -153,7 +170,7 @@ const BonusPrizes = ({ form }: StepProps) => {
                       <Button
                         className="sm:hidden"
                         type="button"
-                        disabled={!isValidPrize()}
+                        disabled={!isValidPrize() || hasInsufficientBalance}
                         onClick={() => {
                           const currentPrizes = form.watch("bonusPrizes") || [];
                           if (
@@ -191,7 +208,9 @@ const BonusPrizes = ({ form }: StepProps) => {
                           setSelectedToken(null);
                         }}
                       >
-                        Add Prize
+                        {hasInsufficientBalance
+                          ? "Insufficient Balance"
+                          : "Add Prize"}
                       </Button>
                     </div>
                     {newPrize.tokenAddress && (
@@ -272,7 +291,7 @@ const BonusPrizes = ({ form }: StepProps) => {
                   <Button
                     className="hidden sm:block"
                     type="button"
-                    disabled={!isValidPrize()}
+                    disabled={!isValidPrize() || hasInsufficientBalance}
                     onClick={() => {
                       const currentPrizes = form.watch("bonusPrizes") || [];
                       if (
@@ -309,7 +328,9 @@ const BonusPrizes = ({ form }: StepProps) => {
                       setSelectedToken(null);
                     }}
                   >
-                    Add Prize
+                    {hasInsufficientBalance
+                      ? "Insufficient Balance"
+                      : "Add Prize"}
                   </Button>
                 </div>
                 {isERC20 && (

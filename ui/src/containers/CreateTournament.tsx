@@ -37,9 +37,9 @@ export interface StepProps {
 const formSchema = z.object({
   // Schedule step
   startTime: z.date(),
-  duration: z.number().min(1).max(90),
+  duration: z.number().min(1).max(7776000), // 90 days
   type: z.enum(["fixed", "open"]),
-  submissionPeriod: z.number().min(1).max(90),
+  submissionPeriod: z.number().min(1).max(324000), // 90 hours
 
   // Details step
   game: z.string().min(2).max(66),

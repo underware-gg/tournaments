@@ -1,18 +1,21 @@
 import { Card } from "@/components/ui/card";
 import Pagination from "@/components/table/Pagination";
-import { USER, VERIFIED, QUESTION } from "@/components/Icons";
+import { USER, VERIFIED } from "@/components/Icons";
 import { useState, useEffect, useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
 import { BigNumberish } from "starknet";
 import { useGetTournamentLeaderboard } from "@/dojo/hooks/useSqlQueries";
-import { displayAddress, feltToString, indexAddress } from "@/lib/utils";
+import { feltToString, indexAddress } from "@/lib/utils";
 import { useDojo } from "@/context/dojo";
 import { useGetUsernames } from "@/hooks/useController";
-import RowSkeleton from "./RowSkeleton";
 import { HoverCardContent } from "@/components/ui/hover-card";
 import { HoverCard } from "@/components/ui/hover-card";
 import { HoverCardTrigger } from "@/components/ui/hover-card";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  MobilePlayerCard,
+  PlayerDetails,
+} from "@/components/tournament/table/PlayerCard";
+import TableSkeleton from "@/components/tournament/table/Skeleton";
 
 interface ScoreTableProps {
   tournamentId: BigNumberish;
@@ -63,44 +66,7 @@ const ScoreTable = ({
 
   const { usernames } = useGetUsernames(ownerAddresses ?? []);
 
-  // Function to render player details content
-  const renderPlayerDetails = (registration: any, index: number) => (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-2 px-4">
-        <div className="flex flex-row gap-2">
-          <span className="text-primary-dark">Player Name:</span>
-          <span>{feltToString(registration?.player_name)}</span>
-        </div>
-        <div className="flex flex-row gap-2">
-          <span className="text-primary-dark">Owner:</span>
-          <span>
-            {usernames?.get(ownerAddresses?.[index] ?? "") ||
-              displayAddress(ownerAddresses?.[index] ?? "")}
-          </span>
-        </div>
-      </div>
-      <div className="w-full h-0.5 bg-primary/50" />
-      {registration?.metadata !== "" ? (
-        <img
-          src={JSON.parse(registration?.metadata)?.image}
-          alt="metadata"
-          className="w-full h-auto px-4"
-        />
-      ) : (
-        <span className="text-center text-neutral-500">No Token URI</span>
-      )}
-      {isEnded && (
-        <div className="flex items-center gap-2 justify-center mt-2">
-          <span className="text-primary">
-            {registration.has_submitted ? <VERIFIED /> : <QUESTION />}
-          </span>
-          <span>
-            {registration.has_submitted ? "Submitted" : "Not submitted"}
-          </span>
-        </div>
-      )}
-    </div>
-  );
+  console.log(selectedPlayer);
 
   return (
     <Card
@@ -147,13 +113,21 @@ const ScoreTable = ({
         <div
           className={`transition-all duration-300 delay-150 ease-in-out ${
             showParticipants ? "h-auto opacity-100" : "h-0 opacity-0"
-          } overflow-hidden`}
+          }`}
         >
           <div className="w-full h-0.5 bg-primary/25 mt-2" />
           {!loading ? (
             <div className="flex flex-row py-2">
               {[0, 1].map((colIndex) => (
-                <div key={colIndex} className="flex flex-col w-1/2">
+                <div
+                  key={colIndex}
+                  className={`flex flex-col w-1/2 relative ${
+                    colIndex === 0 ? "pr-3" : "pl-3"
+                  }`}
+                >
+                  {colIndex === 0 && (
+                    <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-primary/25 h-full" />
+                  )}
                   {leaderboard
                     ?.slice(colIndex * 5, colIndex * 5 + 5)
                     .map((registration, index) => (
@@ -162,7 +136,11 @@ const ScoreTable = ({
                         <div className="hidden sm:block">
                           <HoverCard openDelay={50} closeDelay={0}>
                             <HoverCardTrigger asChild>
-                              <div className="flex flex-row items-center sm:gap-1 xl:gap-2 pr-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200 3xl:text-lg">
+                              <div
+                                className={`flex flex-row items-center sm:gap-1 xl:gap-2 px-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200 3xl:text-lg relative ${
+                                  registration.has_submitted ? "pr-4" : ""
+                                }`}
+                              >
                                 <span className="w-4 flex-none font-astronaut">
                                   {index +
                                     1 +
@@ -190,6 +168,11 @@ const ScoreTable = ({
                                     {registration.score ?? 0}
                                   </span>
                                 </div>
+                                {!!registration.has_submitted && (
+                                  <span className="absolute -right-2 top-1/2 transform -translate-y-1/2 w-5 h-5">
+                                    <VERIFIED />
+                                  </span>
+                                )}
                               </div>
                             </HoverCardTrigger>
                             <HoverCardContent
@@ -197,16 +180,28 @@ const ScoreTable = ({
                               align="center"
                               side="top"
                             >
-                              {renderPlayerDetails(registration, index)}
+                              <PlayerDetails
+                                playerName={registration?.player_name}
+                                ownerAddress={
+                                  ownerAddresses?.[index + colIndex * 5]
+                                }
+                                usernames={usernames}
+                                metadata={registration?.metadata}
+                                isEnded={isEnded}
+                                hasSubmitted={registration.has_submitted}
+                              />
                             </HoverCardContent>
                           </HoverCard>
                         </div>
 
                         {/* Mobile clickable row (hidden on desktop) */}
                         <div
-                          className="sm:hidden flex flex-row items-center sm:gap-2 pr-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200"
+                          className="sm:hidden flex flex-row items-center sm:gap-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200"
                           onClick={() => {
-                            setSelectedPlayer({ registration, index });
+                            setSelectedPlayer({
+                              registration,
+                              index: index + colIndex * 5,
+                            });
                             setIsMobileDialogOpen(true);
                           }}
                         >
@@ -240,37 +235,20 @@ const ScoreTable = ({
               ))}
             </div>
           ) : (
-            <div className="flex flex-row">
-              {[0, 1].map((colIndex) => (
-                <div key={colIndex} className="flex flex-col gap-1 py-2 w-1/2">
-                  {[
-                    ...Array(Math.max(0, Math.min(entryCount - offset, 5))),
-                  ].map((_, index) => (
-                    <RowSkeleton key={index} />
-                  ))}
-                </div>
-              ))}
-            </div>
+            <TableSkeleton entryCount={entryCount} offset={offset} />
           )}
         </div>
       </div>
 
       {/* Mobile dialog for player details */}
-      <Dialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen}>
-        <DialogContent className="sm:hidden bg-black border border-primary p-4 rounded-lg max-w-[90vw] mx-auto">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-astronaut text-lg text-primary">
-              Player Details
-            </h3>
-          </div>
-
-          {selectedPlayer &&
-            renderPlayerDetails(
-              selectedPlayer.registration,
-              selectedPlayer.index
-            )}
-        </DialogContent>
-      </Dialog>
+      <MobilePlayerCard
+        open={isMobileDialogOpen}
+        onOpenChange={setIsMobileDialogOpen}
+        selectedPlayer={selectedPlayer}
+        usernames={usernames}
+        ownerAddress={ownerAddresses?.[selectedPlayer?.index ?? 0]}
+        isEnded={isEnded}
+      />
     </Card>
   );
 };

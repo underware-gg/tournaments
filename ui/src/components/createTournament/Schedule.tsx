@@ -27,21 +27,26 @@ import {
 import { format } from "date-fns";
 import { CALENDAR } from "@/components/Icons";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { SECONDS_IN_DAY, SECONDS_IN_HOUR } from "@/lib/constants";
+import { Input } from "../ui/input";
+import { useDojo } from "@/context/dojo";
+import { ChainId } from "@/dojo/config";
 
 const Schedule = ({ form }: StepProps) => {
+  const { selectedChainConfig } = useDojo();
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
   const PREDEFINED_DURATIONS = [
-    { value: 1, label: "1D" },
-    { value: 3, label: "3D" },
-    { value: 7, label: "1W" },
-    { value: 14, label: "2W" },
+    { value: 86400, label: "1D" },
+    { value: 259200, label: "3D" },
+    { value: 604800, label: "1W" },
+    { value: 1209600, label: "2W" },
   ];
 
   const DURATION_TO_DEFAULT_SUBMISSION = {
-    1: 1, // 1 day -> 1 hour
-    3: 6, // 3 days -> 6 hours
-    7: 24, // 1 week -> 1 day (24 hours)
-    14: 48, // 2 weeks -> 2 days (48 hours)
+    "1D": 3600, // 1 day -> 1 hour
+    "3D": 21600, // 3 days -> 6 hours
+    "1W": 86400, // 1 week -> 1 day (24 hours)
+    "2W": 172800, // 2 weeks -> 2 days (48 hours)
   } as const;
 
   const disablePastDates = (date: Date) => {
@@ -49,6 +54,12 @@ const Schedule = ({ form }: StepProps) => {
     now.setHours(0, 0, 0, 0);
     return date < now;
   };
+
+  const submissionHours = form.watch("submissionPeriod") / (60 * 60);
+  const durationDays = form.watch("duration") / (24 * 60 * 60);
+
+  const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
+  console.log(form.watch("duration"));
 
   return (
     <>
@@ -141,8 +152,12 @@ const Schedule = ({ form }: StepProps) => {
                     </div>
                     <FormControl>
                       {/* Duration Section */}
-                      <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-8 xl:gap-5">
-                        <div className="flex flex-row justify-center sm:justify-start gap-2 w-full sm:w-fit">
+                      <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-8 xl:gap-0">
+                        <div
+                          className={`flex flex-row items-center justify-center sm:justify-start gap-2 w-full ${
+                            isMainnet ? "sm:w-2/3" : "sm:w-3/5"
+                          }`}
+                        >
                           {PREDEFINED_DURATIONS.map(({ value, label }) => (
                             <Button
                               key={value}
@@ -153,54 +168,79 @@ const Schedule = ({ form }: StepProps) => {
                               className="px-2"
                               onClick={() => {
                                 field.onChange(value);
+
+                                // Find the duration object with the matching value
+                                const selectedDuration =
+                                  PREDEFINED_DURATIONS.find(
+                                    (duration) => duration.value === value
+                                  );
+
+                                // Get the label from the found duration object
+                                const durationLabel = selectedDuration?.label;
+
+                                // Use the label to get the default submission period
+                                if (
+                                  durationLabel &&
+                                  DURATION_TO_DEFAULT_SUBMISSION[
+                                    durationLabel as keyof typeof DURATION_TO_DEFAULT_SUBMISSION
+                                  ]
+                                ) {
+                                  form.setValue(
+                                    "submissionPeriod",
+                                    DURATION_TO_DEFAULT_SUBMISSION[
+                                      durationLabel as keyof typeof DURATION_TO_DEFAULT_SUBMISSION
+                                    ]
+                                  );
+                                } else {
+                                  // Fallback to a default value if no mapping is found
+                                  form.setValue("submissionPeriod", 3600); // Default to 1 hour
+                                }
                               }}
                             >
                               {label}
                             </Button>
                           ))}
+                          {!isMainnet && (
+                            <div className="flex flex-col gap-1">
+                              <Label className="text-xs font-medium">
+                                Custom (seconds)
+                              </Label>
+                              <Input
+                                className="w-24 px-1"
+                                type="number"
+                                value={field.value}
+                                onChange={(e) =>
+                                  field.onChange(Number(e.target.value))
+                                }
+                              />
+                            </div>
+                          )}
                         </div>
-                        <div className="flex flex-row gap-2 w-full">
+                        <div
+                          className={`flex flex-row gap-2 w-full ${
+                            isMainnet ? "sm:w-2/3" : "sm:w-2/5"
+                          }`}
+                        >
                           <div className="flex flex-col gap-2 w-1/2">
                             <div className="flex justify-between items-center">
                               <Label className="xl:text-xs 2xl:text-sm font-medium">
                                 Duration
                               </Label>
                               <span className="text-sm text-muted-foreground xl:text-xs 2xl:text-sm">
-                                {field.value}{" "}
-                                {field.value === 1 ? "day" : "days"}
+                                {Number.isInteger(durationDays)
+                                  ? durationDays
+                                  : durationDays.toFixed(2)}{" "}
+                                {durationDays === 1 ? "day" : "days"}
                               </span>
                             </div>
                             <Slider
                               value={[field.value]}
                               onValueChange={([duration]) => {
                                 field.onChange(duration);
-
-                                // Set default submission period based on duration
-                                const defaultSubmissionHours =
-                                  DURATION_TO_DEFAULT_SUBMISSION[
-                                    duration as keyof typeof DURATION_TO_DEFAULT_SUBMISSION
-                                  ] || Math.min(duration * 24, 24); // fallback to 24 hours or duration in hours if shorter
-
-                                // Convert duration to hours for submission period check
-                                const durationInHours = duration * 24;
-                                const currentSubmissionHours =
-                                  form.watch("submissionPeriod");
-                                // Update submission period if it exceeds new duration or if it's a predefined duration
-                                if (
-                                  currentSubmissionHours > durationInHours ||
-                                  Object.keys(
-                                    DURATION_TO_DEFAULT_SUBMISSION
-                                  ).includes(duration.toString())
-                                ) {
-                                  form.setValue(
-                                    "submissionPeriod",
-                                    defaultSubmissionHours
-                                  );
-                                }
                               }}
-                              max={90}
-                              min={1}
-                              step={1}
+                              max={7776000}
+                              min={SECONDS_IN_DAY}
+                              step={SECONDS_IN_DAY}
                             />
                           </div>
 
@@ -209,31 +249,25 @@ const Schedule = ({ form }: StepProps) => {
                             <div className="flex justify-between items-center">
                               <Label className="xl:text-xs 2xl:text-sm font-medium">
                                 Submission{" "}
-                                <span className="hidden xl:inline">
-                                  {" "}
-                                  Period
-                                </span>
                               </Label>
                               <span className="text-sm text-muted-foreground xl:text-xs 2xl:text-sm">
-                                {form.watch("submissionPeriod") || 1}{" "}
-                                {form.watch("submissionPeriod") || 1 === 1
-                                  ? "hour"
-                                  : "hours"}
+                                {Number.isInteger(submissionHours)
+                                  ? submissionHours
+                                  : submissionHours.toFixed(2)}{" "}
+                                {submissionHours === 1 ? "hour" : "hours"}
                               </span>
                             </div>
                             <Slider
                               value={[form.watch("submissionPeriod") || 1]}
                               onValueChange={([submissionHours]) => {
-                                // Ensure submission period doesn't exceed duration in hours
-                                const maxHours = field.value * 24;
                                 form.setValue(
                                   "submissionPeriod",
-                                  Math.min(maxHours, submissionHours)
+                                  submissionHours
                                 );
                               }}
-                              max={field.value * 24} // Max hours based on selected days
-                              min={1}
-                              step={1}
+                              max={field.value}
+                              min={SECONDS_IN_HOUR}
+                              step={SECONDS_IN_HOUR}
                             />
                           </div>
                         </div>
@@ -332,8 +366,8 @@ const Schedule = ({ form }: StepProps) => {
               type={form.watch("type")}
               createdTime={Math.floor(new Date().getTime() / 1000)} // Convert to Unix timestamp
               startTime={Math.floor(form.watch("startTime").getTime() / 1000)} // Convert to Unix timestamp
-              duration={form.watch("duration") * 24 * 60 * 60} // Convert days to seconds
-              submissionPeriod={form.watch("submissionPeriod") * 60 * 60} // Convert hours to seconds
+              duration={form.watch("duration")}
+              submissionPeriod={form.watch("submissionPeriod")}
             />
           </div>
         </div>

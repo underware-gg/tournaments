@@ -8,7 +8,7 @@ import { useGetTournamentEntrants } from "@/dojo/hooks/useSqlQueries";
 import { displayAddress, feltToString, indexAddress } from "@/lib/utils";
 import { useDojo } from "@/context/dojo";
 import { useGetUsernames } from "@/hooks/useController";
-import RowSkeleton from "./RowSkeleton";
+import TableSkeleton from "@/components/tournament/table/Skeleton";
 import { HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { HoverCard } from "@/components/ui/hover-card";
 import { DialogContent } from "@/components/ui/dialog";
@@ -143,7 +143,15 @@ const EntrantsTable = ({
           {!loading ? (
             <div className="flex flex-row py-2">
               {[0, 1].map((colIndex) => (
-                <div key={colIndex} className="flex flex-col w-1/2">
+                <div
+                  key={colIndex}
+                  className={`flex flex-col w-1/2 relative ${
+                    colIndex === 0 ? "pr-3" : "pl-3"
+                  }`}
+                >
+                  {colIndex === 0 && (
+                    <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-primary/25 h-full" />
+                  )}
                   {entrants
                     ?.slice(colIndex * 5, colIndex * 5 + 5)
                     .map((registration, index) => (
@@ -179,7 +187,7 @@ const EntrantsTable = ({
 
                         {/* Mobile clickable row (hidden on desktop) */}
                         <div
-                          className="sm:hidden flex flex-row items-center sm:gap-2 pr-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200"
+                          className="sm:hidden flex flex-row items-center sm:gap-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200"
                           onClick={() => {
                             setSelectedPlayer({ registration, index });
                             setIsMobileDialogOpen(true);
@@ -201,17 +209,7 @@ const EntrantsTable = ({
               ))}
             </div>
           ) : (
-            <div className="flex flex-row">
-              {[0, 1].map((colIndex) => (
-                <div key={colIndex} className="flex flex-col gap-1 py-2 w-1/2">
-                  {[
-                    ...Array(Math.max(0, Math.min(entryCount - offset, 5))),
-                  ].map((_, index) => (
-                    <RowSkeleton key={index} />
-                  ))}
-                </div>
-              ))}
-            </div>
+            <TableSkeleton entryCount={entryCount} offset={offset} />
           )}
         </div>
       </div>

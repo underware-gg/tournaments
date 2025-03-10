@@ -134,6 +134,9 @@ const Tournament = () => {
 
   const totalSubmissions = leaderboardModel?.token_ids.length ?? 0;
 
+  const allSubmitted =
+    totalSubmissions === tournamentModel?.game_config.prize_spots;
+
   const tournamentPrizes = state.getEntitiesByModel(nameSpace, "Prize");
 
   const prizes: Prize[] = (tournamentPrizes
@@ -385,9 +388,10 @@ const Tournament = () => {
             <Button
               className="uppercase"
               onClick={() => setSubmitScoresDialogOpen(true)}
+              disabled={allSubmitted}
             >
               <TROPHY />
-              {` Submit Scores`}
+              {allSubmitted ? "Submitted" : "Submit Scores"}
             </Button>
           ) : isSubmitted ? (
             <Button
@@ -396,7 +400,9 @@ const Tournament = () => {
               disabled={allClaimed}
             >
               <MONEY />
-              {allClaimed ? (
+              {allPrizes.length === 0 ? (
+                <span className="hidden sm:block">No Prizes</span>
+              ) : allClaimed ? (
                 <span className="hidden sm:block">Prizes Claimed</span>
               ) : (
                 <>

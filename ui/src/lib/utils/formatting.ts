@@ -18,9 +18,6 @@ import {
 import { PositionPrizes, TokenPrizes } from "@/lib/types";
 import { TokenPrices } from "@/hooks/useEkuboPrices";
 
-const SECONDS_IN_DAY = 86400;
-const SECONDS_IN_HOUR = 3600;
-
 export const processTournamentData = (
   formData: TournamentFormData,
   address: string,
@@ -39,8 +36,8 @@ export const processTournamentData = (
 
   const currentTime = Math.floor(Date.now() / 1000) + 60;
 
-  // End time is start time + duration in days
-  const endTimestamp = startTimestamp + formData.duration * SECONDS_IN_DAY;
+  // End time is start time + duration in seconds
+  const endTimestamp = startTimestamp + formData.duration;
 
   // Process entry requirement based on type and requirement
   let entryRequirement;
@@ -100,7 +97,7 @@ export const processTournamentData = (
         start: startTimestamp,
         end: endTimestamp,
       },
-      submission_duration: Number(formData.submissionPeriod) * SECONDS_IN_HOUR,
+      submission_duration: Number(formData.submissionPeriod),
     },
     game_config: {
       address: addAddressPadding(formData.game),
@@ -301,7 +298,7 @@ export const getClaimablePrizes = (
   );
   const claimedEntryFeePositions = claimedPrizes.map((prize) =>
     prize.prize_type?.activeVariant() === "EntryFees"
-      ? prize.prize_type.variant.EntryFees.Position
+      ? prize.prize_type.variant.EntryFees?.variant?.Position
       : null
   );
   const claimedSponsoredPrizeKeys = claimedPrizes.map((prize) =>

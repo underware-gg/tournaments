@@ -43,7 +43,7 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
   // Function to render prize details content
   const renderPrizeDetails = () => (
     <div className="space-y-2">
-      <h4 className="font-medium font-astronaut">
+      <h4 className="font-medium font-astronaut pt-4 px-4">
         {position}
         <sup>{getOrdinalSuffix(position)}</sup> Prize
       </h4>
@@ -52,7 +52,10 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
           const hasPrice = prices[symbol];
           const USDValue = calculatePrizeValue(prize, symbol, prices);
           return (
-            <div key={symbol} className="flex justify-between items-center">
+            <div
+              key={symbol}
+              className="flex justify-between items-center px-4"
+            >
               {prize.type === "erc20" ? (
                 <div className="flex flex-row gap-1 items-center">
                   <span>{`${(Number(prize.value) / 10 ** 18).toFixed(
@@ -77,8 +80,8 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
           );
         })}
         {totalPrizesValueUSD > 0 && (
-          <div className="pt-2 border-t border-primary/20">
-            <div className="flex justify-between items-center">
+          <div className="pt-2 border-t border-primary/50">
+            <div className="flex justify-between items-center px-4 pb-4">
               <span className="font-astronaut">Total</span>
               <span>${totalPrizesValueUSD.toFixed(2)}</span>
             </div>
@@ -128,7 +131,7 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
             </motion.div>
           </HoverCardTrigger>
           <HoverCardContent
-            className="w-48 p-4 text-sm z-50"
+            className="w-48 p-0 text-sm z-50"
             align="center"
             side="top"
             sideOffset={5}
@@ -173,7 +176,7 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
 
       {/* Mobile dialog for prize details */}
       <Dialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen}>
-        <DialogContent className="sm:hidden bg-black border border-primary p-4 rounded-lg max-w-[90vw] mx-auto">
+        <DialogContent className="sm:hidden bg-black border border-primary p-0 rounded-lg max-w-[90vw] mx-auto">
           {renderPrizeDetails()}
         </DialogContent>
       </Dialog>

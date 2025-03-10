@@ -5,6 +5,9 @@ export const NAMESPACE = "budokan_v_1_0_2";
 
 export const TOURNAMENT_VERSION_KEY: string = "0x302e302e31";
 
+export const SECONDS_IN_DAY = 86400;
+export const SECONDS_IN_HOUR = 3600;
+
 export const TOKEN_ICONS: Record<string, React.ComponentType> = {
   ETH: ETH,
   USDC: ETH,
