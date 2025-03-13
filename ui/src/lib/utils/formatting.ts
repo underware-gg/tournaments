@@ -680,6 +680,10 @@ export const processQualificationProof = (
   }
 
   if (requirementVariant === "token") {
+    if (!ownedTokenIds || ownedTokenIds.length === 0) {
+      return new CairoOption(CairoOptionVariant.None);
+    }
+
     return new CairoOption(
       CairoOptionVariant.Some,
       new CairoCustomEnum({

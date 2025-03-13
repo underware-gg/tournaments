@@ -433,6 +433,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                                             );
                                             const content = (
                                               <div
+                                                key={index}
                                                 className={`flex flex-row items-center justify-between border-b border-brand-muted ${
                                                   beenSelected
                                                     ? "bg-brand/70 text-black"
