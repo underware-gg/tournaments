@@ -66,8 +66,6 @@ const ScoreTable = ({
 
   const { usernames } = useGetUsernames(ownerAddresses ?? []);
 
-  console.log(selectedPlayer);
-
   return (
     <Card
       variant="outline"
@@ -79,7 +77,7 @@ const ScoreTable = ({
     >
       <div className="flex flex-col justify-between">
         <div className="flex flex-row items-center justify-between h-6 sm:h-8 3xl:h-10">
-          <span className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+          <span className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
             Scores
           </span>
           {showParticipants && entryCount > 10 && (
@@ -92,7 +90,7 @@ const ScoreTable = ({
           <div className="flex flex-row items-center gap-2">
             {entryCount > 0 && (
               <>
-                <span className="hidden sm:block text-neutral-500 3xl:text-lg">
+                <span className="hidden sm:block text-neutral 3xl:text-lg">
                   {showParticipants ? "Hide" : "Show Participants"}
                 </span>
                 <Switch
@@ -102,7 +100,7 @@ const ScoreTable = ({
                 />
               </>
             )}
-            <div className="flex flex-row items-center font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+            <div className="flex flex-row items-center font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
               <span className="w-8 2xl:w-10 3xl:w-12">
                 <USER />
               </span>
@@ -115,7 +113,7 @@ const ScoreTable = ({
             showParticipants ? "h-auto opacity-100" : "h-0 opacity-0"
           }`}
         >
-          <div className="w-full h-0.5 bg-primary/25 mt-2" />
+          <div className="w-full h-0.5 bg-brand/25 mt-2" />
           {!loading ? (
             <div className="flex flex-row py-2">
               {[0, 1].map((colIndex) => (
@@ -125,8 +123,8 @@ const ScoreTable = ({
                     colIndex === 0 ? "pr-3" : "pl-3"
                   }`}
                 >
-                  {colIndex === 0 && (
-                    <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-primary/25 h-full" />
+                  {colIndex === 0 && leaderboard.length > 5 && (
+                    <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-brand/25 h-full" />
                   )}
                   {leaderboard
                     ?.slice(colIndex * 5, colIndex * 5 + 5)
@@ -137,11 +135,11 @@ const ScoreTable = ({
                           <HoverCard openDelay={50} closeDelay={0}>
                             <HoverCardTrigger asChild>
                               <div
-                                className={`flex flex-row items-center sm:gap-1 xl:gap-2 px-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200 3xl:text-lg relative ${
+                                className={`flex flex-row items-center sm:gap-1 xl:gap-2 px-2 hover:cursor-pointer hover:bg-brand/25 hover:border-brand/30 border border-transparent rounded transition-all duration-200 3xl:text-lg relative ${
                                   registration.has_submitted ? "pr-4" : ""
                                 }`}
                               >
-                                <span className="w-4 flex-none font-astronaut">
+                                <span className="w-4 flex-none font-brand">
                                   {index +
                                     1 +
                                     colIndex * 5 +
@@ -151,7 +149,7 @@ const ScoreTable = ({
                                 <span className="w-6 3xl:w-8 flex-none">
                                   <USER />
                                 </span>
-                                <span className="flex-none lg:max-w-20 xl:max-w-24 2xl:max-w-28 3xl:max-w-44 group-hover:text-primary transition-colors duration-200 text-ellipsis overflow-hidden whitespace-nowrap">
+                                <span className="flex-none lg:max-w-20 xl:max-w-24 2xl:max-w-28 3xl:max-w-44 group-hover:text-brand transition-colors duration-200 text-ellipsis overflow-hidden whitespace-nowrap">
                                   {feltToString(registration?.player_name)}
                                 </span>
                                 <p
@@ -164,7 +162,7 @@ const ScoreTable = ({
                                   }}
                                 ></p>
                                 <div className="flex flex-row items-center gap-2">
-                                  <span className="flex-none text-primary font-astronaut">
+                                  <span className="flex-none text-brand font-brand">
                                     {registration.score ?? 0}
                                   </span>
                                 </div>
@@ -196,7 +194,7 @@ const ScoreTable = ({
 
                         {/* Mobile clickable row (hidden on desktop) */}
                         <div
-                          className="sm:hidden flex flex-row items-center sm:gap-2 hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 border border-transparent rounded transition-all duration-200"
+                          className="sm:hidden flex flex-row items-center sm:gap-2 hover:cursor-pointer hover:bg-brand/25 hover:border-brand/30 border border-transparent rounded transition-all duration-200"
                           onClick={() => {
                             setSelectedPlayer({
                               registration,
@@ -205,13 +203,13 @@ const ScoreTable = ({
                             setIsMobileDialogOpen(true);
                           }}
                         >
-                          <span className="w-4 flex-none font-astronaut">
+                          <span className="w-4 flex-none font-brand">
                             {index + 1 + colIndex * 5 + (currentPage - 1) * 10}.
                           </span>
                           <span className="w-6 flex-none">
                             <USER />
                           </span>
-                          <span className="flex-none max-w-16 group-hover:text-primary transition-colors duration-200 text-ellipsis overflow-hidden whitespace-nowrap">
+                          <span className="flex-none max-w-16 group-hover:text-brand transition-colors duration-200 text-ellipsis overflow-hidden whitespace-nowrap">
                             {feltToString(registration?.player_name)}
                           </span>
                           <p
@@ -224,7 +222,7 @@ const ScoreTable = ({
                             }}
                           ></p>
                           <div className="flex flex-row items-center gap-2">
-                            <span className="flex-none text-primary font-astronaut">
+                            <span className="flex-none text-brand font-brand">
                               {registration.score ?? 0}
                             </span>
                           </div>

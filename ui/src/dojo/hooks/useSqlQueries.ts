@@ -148,7 +148,11 @@ export const useGetMyTournamentsCount = ({
   return { data: data?.[0]?.count, loading, error };
 };
 
-const getTournamentWhereClause = (status: string, currentTime: string) => {
+const getTournamentWhereClause = (
+  status: string,
+  currentTime: string,
+  tournamentIds?: string[]
+) => {
   switch (status) {
     case "upcoming":
       return `WHERE t.'schedule.game.start' > '${currentTime}'`;
@@ -158,6 +162,10 @@ const getTournamentWhereClause = (status: string, currentTime: string) => {
       return `WHERE t.'schedule.game.end' <= '${currentTime}'`;
     case "all":
       return "";
+    case "tournaments":
+      return `WHERE t.id IN (${tournamentIds
+        ?.map((id) => `'${id}'`)
+        .join(",")})`;
   }
 };
 
@@ -184,6 +192,7 @@ export const useGetTournaments = ({
   currentTime,
   gameFilters,
   status,
+  tournamentIds,
   sortBy = "start_time",
   offset = 0,
   limit = 5,
@@ -192,12 +201,17 @@ export const useGetTournaments = ({
   namespace: string;
   gameFilters: string[];
   status: string;
+  tournamentIds?: string[];
   currentTime?: string;
   sortBy?: string;
   offset?: number;
   limit?: number;
   active?: boolean;
 }) => {
+  const tournamentIdsKey = useMemo(
+    () => JSON.stringify(tournamentIds),
+    [tournamentIds]
+  );
   const query = useMemo(
     () =>
       active
@@ -230,7 +244,7 @@ export const useGetTournaments = ({
     FROM '${namespace}-Tournament' as t
     LEFT JOIN '${namespace}-Prize' p ON t.id = p.tournament_id
     LEFT JOIN '${namespace}-EntryCount' e ON t.id = e.tournament_id
-    ${getTournamentWhereClause(status, currentTime ?? "")}
+    ${getTournamentWhereClause(status, currentTime ?? "", tournamentIds)}
         ${
           gameFilters.length > 0
             ? `AND t.'game_config.address' IN (${gameFilters
@@ -244,7 +258,17 @@ export const useGetTournaments = ({
     OFFSET ${offset}
   `
         : null,
-    [namespace, currentTime, gameFilters, status, sortBy, offset, limit, active]
+    [
+      namespace,
+      currentTime,
+      gameFilters,
+      status,
+      sortBy,
+      offset,
+      limit,
+      active,
+      tournamentIdsKey,
+    ]
   );
   const { data, loading, error, refetch } = useSqlExecute(query);
   return { data, loading, error, refetch };
@@ -377,25 +401,26 @@ export const useGetTokenOwnerQuery = (
 
 export const useGetAccountTokenIds = (
   address: string | null,
-  gameAddresses: string[]
+  tokenAddresses: string[],
+  active = false
 ) => {
-  const gameAddressesKey = useMemo(
-    () => JSON.stringify(gameAddresses),
-    [gameAddresses]
+  const tokenAddressesKey = useMemo(
+    () => JSON.stringify(tokenAddresses),
+    [tokenAddresses]
   );
   const query = useMemo(
     () =>
-      address
+      address && active
         ? `
     SELECT tb.*, t.metadata
     FROM token_balances tb
     LEFT JOIN tokens t ON tb.token_id = t.id
-    WHERE (tb.account_address = "${address}" AND tb.contract_address IN (${gameAddresses
+    WHERE (tb.account_address = "${address}" AND tb.contract_address IN (${tokenAddresses
             .map((address) => `"${address}"`)
             .join(",")}));
   `
         : null,
-    [address, gameAddressesKey]
+    [address, tokenAddressesKey, active]
   );
   const { data, loading, error } = useSqlExecute(query);
   return { data, loading, error };
@@ -533,6 +558,75 @@ export const useGetTournamentLeaderboard = ({
       gameScoreModel,
       gameScoreAttribute,
     ]
+  );
+  const { data, loading, error } = useSqlExecute(query);
+  return { data, loading, error };
+};
+
+export const useGetTournamentLeaderboards = ({
+  namespace,
+  tournamentIds,
+  active = false,
+  offset = 0,
+  limit = 5,
+}: {
+  namespace: string;
+  tournamentIds: BigNumberish[];
+  active?: boolean;
+  offset?: number;
+  limit?: number;
+}) => {
+  const tournamentIdsKey = useMemo(
+    () => JSON.stringify(tournamentIds),
+    [tournamentIds]
+  );
+  const query = useMemo(
+    () =>
+      active
+        ? `
+    SELECT * FROM '${namespace}-Leaderboard'
+    WHERE tournament_id IN (${tournamentIds
+      .map((id) => `"${addAddressPadding(id)}"`)
+      .join(",")})
+    ORDER BY tournament_id ASC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `
+        : null,
+    [namespace, tournamentIdsKey, offset, limit, active]
+  );
+  const { data, loading, error } = useSqlExecute(query);
+  return { data, loading, error };
+};
+
+export const useGetTournamentRegistrants = ({
+  namespace,
+  gameIds,
+  active = false,
+  offset = 0,
+  limit = 5,
+}: {
+  namespace: string;
+  gameIds: BigNumberish[];
+  active?: boolean;
+  offset?: number;
+  limit?: number;
+}) => {
+  const gameIdsKey = useMemo(() => JSON.stringify(gameIds), [gameIds]);
+  const query = useMemo(
+    () =>
+      active
+        ? `
+    SELECT * FROM '${namespace}-Registration'
+    WHERE game_token_id IN (${gameIds
+      .map((id) => `"${addAddressPadding(id)}"`)
+      .join(",")})
+    ORDER BY game_token_id ASC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `
+        : null,
+    [namespace, gameIdsKey, offset, limit, active]
   );
   const { data, loading, error } = useSqlExecute(query);
   return { data, loading, error };

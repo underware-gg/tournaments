@@ -144,7 +144,7 @@ const BonusPrizes = ({ form }: StepProps) => {
 
           {field.value && (
             <>
-              <div className="w-full h-0.5 bg-primary/25" />
+              <div className="w-full h-0.5 bg-brand/25" />
               <div className="flex flex-col gap-5">
                 <div className="flex flex-row justify-between items-center sm:px-4">
                   <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-10 w-full">
@@ -215,10 +215,10 @@ const BonusPrizes = ({ form }: StepProps) => {
                     </div>
                     {newPrize.tokenAddress && (
                       <>
-                        <div className="w-full h-0.5 bg-primary/25 sm:hidden" />
+                        <div className="w-full h-0.5 bg-brand/25 sm:hidden" />
                         <div className="flex flex-col gap-2">
                           <div className="flex flex-row items-center gap-5">
-                            <FormLabel className="text-lg font-astronaut">
+                            <FormLabel className="text-lg font-brand">
                               Amount ($)
                             </FormLabel>
                             <FormDescription className="hidden sm:block sm:text-xs xl:text-sm">
@@ -335,11 +335,11 @@ const BonusPrizes = ({ form }: StepProps) => {
                 </div>
                 {isERC20 && (
                   <>
-                    <div className="w-full h-0.5 bg-primary/25" />
+                    <div className="w-full h-0.5 bg-brand/25" />
                     <div className="flex flex-col gap-4">
                       <div className="flex flex-col sm:flex-row justify-between">
                         <div className="flex flex-row items-center gap-5">
-                          <FormLabel className="font-astronaut text-lg">
+                          <FormLabel className="font-brand text-lg">
                             Prize Distribution
                           </FormLabel>
                           <FormDescription className="hidden sm:block sm:text-xs xl:text-sm">
@@ -372,7 +372,6 @@ const BonusPrizes = ({ form }: StepProps) => {
                                   form.watch("leaderboardSize"),
                                   value
                                 );
-                                console.log(form.watch("leaderboardSize"));
                                 setPrizeDistributions(
                                   distributions.map((percentage, index) => ({
                                     position: index + 1,
@@ -397,9 +396,9 @@ const BonusPrizes = ({ form }: StepProps) => {
                         }).map((_, index) => (
                           <div
                             key={index}
-                            className="w-[175px] min-w-[175px] flex flex-row items-center justify-between flex-shrink-0 border border-neutral-500 rounded-md p-2"
+                            className="w-[175px] min-w-[175px] flex flex-row items-center justify-between flex-shrink-0 border border-neutral rounded-md p-2"
                           >
-                            <span className="font-astronaut text-lg">
+                            <span className="font-brand text-lg">
                               {index + 1}
                               {getOrdinalSuffix(index + 1)}
                             </span>
@@ -447,7 +446,7 @@ const BonusPrizes = ({ form }: StepProps) => {
                               {prices?.[
                                 getTokenSymbol(newPrize.tokenAddress) ?? ""
                               ] && (
-                                <span className="text-xs text-neutral-500">
+                                <span className="text-xs text-neutral">
                                   ~$
                                   {(
                                     ((prizeDistributions[index]?.percentage ??
@@ -467,9 +466,9 @@ const BonusPrizes = ({ form }: StepProps) => {
 
                 {(form.watch("bonusPrizes") || []).length > 0 && (
                   <>
-                    <div className="w-full h-0.5 bg-primary/25" />
+                    <div className="w-full h-0.5 bg-brand/25" />
                     <div className="space-y-2">
-                      <FormLabel className="font-astronaut text-2xl">
+                      <FormLabel className="font-brand text-2xl">
                         Added Prizes
                       </FormLabel>
                       <div className="flex flex-row items-center gap-2 overflow-x-auto pb-2 w-full">
@@ -477,7 +476,7 @@ const BonusPrizes = ({ form }: StepProps) => {
                           (prize, index) => (
                             <div
                               key={index}
-                              className="flex items-center gap-2 p-2 bg-background/50 border border-primary-dark/50 rounded flex-shrink-0"
+                              className="flex items-center gap-2 p-2 bg-background/50 border border-brand-muted/50 rounded flex-shrink-0"
                             >
                               <span>
                                 {prize.position}
@@ -500,7 +499,7 @@ const BonusPrizes = ({ form }: StepProps) => {
                                       />
                                     </div>
 
-                                    <span className="text-sm text-neutral-500">
+                                    <span className="text-sm text-neutral">
                                       {pricesLoading
                                         ? "Loading..."
                                         : prices?.[
@@ -526,7 +525,7 @@ const BonusPrizes = ({ form }: StepProps) => {
 
                                 {/* Delete button */}
                                 <span
-                                  className="w-6 h-6 text-primary-dark cursor-pointer flex-shrink-0"
+                                  className="w-6 h-6 text-brand-muted cursor-pointer flex-shrink-0"
                                   onClick={() => {
                                     const newPrizes = [
                                       ...(form.watch("bonusPrizes") || []),

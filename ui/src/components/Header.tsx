@@ -58,7 +58,7 @@ const Header = () => {
               <div className="flex flex-col gap-4 py-4">
                 <SheetClose asChild>
                   <div
-                    className="text-3xl font-astronaut hover:cursor-pointer hover:text-primary-dark transition-colors duration-200"
+                    className="text-3xl font-brand hover:cursor-pointer hover:text-brand-muted transition-colors duration-200"
                     onClick={() => navigate("/")}
                   >
                     Games
@@ -89,14 +89,14 @@ const Header = () => {
                         }}
                         disabled={isDisabled}
                       >
-                        <span className="flex flex-row items-center gap-2 font-astronaut">
+                        <span className="flex flex-row items-center gap-2 font-brand">
                           <TokenGameIcon game={key} />
                           {game.name}
                         </span>
                       </Button>
                       {isDisabled && (
                         <div className="absolute top-1 right-2 flex items-center justify-center rounded-md">
-                          <span className="text-xs font-astronaut uppercase">
+                          <span className="text-xs font-brand uppercase">
                             Coming Soon
                           </span>
                         </div>
@@ -121,12 +121,12 @@ const Header = () => {
 
       {/* Logo - hidden on small screens */}
       <div
-        className="hidden sm:flex text-4xl font-astronaut hover:cursor-pointer hover:text-primary-dark transition-colors duration-200"
+        className="hidden sm:block font-brand hover:cursor-pointer hover:text-brand-muted transition-colors duration-200"
         onClick={() => {
           navigate("/");
         }}
       >
-        Budokan
+        <img src="/logo.svg" alt="Budokan" width={200} height={60} />
       </div>
 
       <div className="flex flex-row items-center gap-2 ml-auto">
@@ -203,7 +203,7 @@ const Header = () => {
             </span>
             {account && (
               <span
-                className="hidden sm:block hover:bg-primary-dark p-1"
+                className="hidden sm:block hover:bg-brand-muted p-1"
                 onClick={() => {
                   disconnect();
                 }}

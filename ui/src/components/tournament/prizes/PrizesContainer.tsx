@@ -44,16 +44,16 @@ const PrizesContainer = ({
       <div className="flex flex-col">
         <div className="flex flex-row justify-between h-6 sm:h-8 3xl:h-10">
           <div className="flex flex-row items-center gap-2">
-            <span className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+            <span className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
               Prizes
             </span>
             {pricesLoading ? (
-              <Skeleton className="h-6 w-24 bg-primary/10" />
+              <Skeleton className="h-6 w-24 bg-brand/10" />
             ) : (
               <>
                 {allPricesFound ? (
                   totalPrizesValueUSD > 0 && (
-                    <span className="font-astronaut text-md xl:text-lg 2xl:text-xl 3xl:text-2xl text-primary-dark">
+                    <span className="font-brand text-md xl:text-lg 2xl:text-xl 3xl:text-2xl text-brand-muted">
                       ${totalPrizesValueUSD.toFixed(2)}
                     </span>
                   )
@@ -63,7 +63,7 @@ const PrizesContainer = ({
                   </span>
                 )}
                 {totalPrizeNFTs > 0 && (
-                  <span className="font-astronaut text-xl text-primary-dark">
+                  <span className="font-brand text-xl text-brand-muted">
                     {totalPrizeNFTs} NFT{totalPrizeNFTs === 1 ? "" : "s"}
                   </span>
                 )}
@@ -73,7 +73,7 @@ const PrizesContainer = ({
           <div className="flex flex-row items-center gap-2">
             {prizesExist ? (
               <>
-                <span className="text-sm xl:text-base 3xl:text-lg text-neutral-500">
+                <span className="text-sm xl:text-base 3xl:text-lg text-neutral">
                   {showPrizes ? "Hide" : "Show Prizes"}
                 </span>
                 <Switch
@@ -83,9 +83,9 @@ const PrizesContainer = ({
                 />
               </>
             ) : (
-              <span className="text-neutral-500">No Prizes Added</span>
+              <span className="text-neutral">No Prizes Added</span>
             )}
-            <div className="flex flex-row items-center font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+            <div className="flex flex-row items-center font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
               <span className="w-6 xl:w-8 3xl:w-10">
                 <TROPHY />
               </span>
@@ -98,7 +98,7 @@ const PrizesContainer = ({
             showPrizes ? "h-auto opacity-100" : "h-0 opacity-0"
           } overflow-hidden`}
         >
-          <div className="w-full h-0.5 bg-primary/25 mt-2" />
+          <div className="w-full h-0.5 bg-brand/25 mt-2" />
           <div className="p-2 sm:p-4">
             {prizesExist && (
               <div className="flex flex-row gap-3 overflow-x-auto pb-2">
@@ -106,10 +106,10 @@ const PrizesContainer = ({
                   Array.from({ length: 5 }).map((_, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-4 p-3 rounded-lg border border-primary/20 w-fit hover:cursor-pointer"
+                      className="flex items-center gap-4 p-3 rounded-lg border border-brand/20 w-fit hover:cursor-pointer"
                     >
                       <Skeleton className="h-12 w-12 rounded-full" />
-                      <Skeleton className="h-6 w-full bg-primary/10" />
+                      <Skeleton className="h-6 w-full bg-brand/10" />
                     </div>
                   ))
                 ) : (

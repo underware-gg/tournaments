@@ -23,16 +23,16 @@ export default {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
-        'primary':  withOpacityValue('--color-primary'),
-        'primary-dark': withOpacityValue('--color-primary-dark'),
-        'primary-darker': withOpacityValue('--color-primary-darker'),
-        'retro-grey': 'rgba(34, 34, 34, 1)',
+        'brand':  withOpacityValue('--color-brand'),
+        'brand-muted': withOpacityValue('--color-brand-muted'),
+        'brand-subtle': withOpacityValue('--color-brand-subtle'),
         'destructive': withOpacityValue('--color-destructive'),
         'warning': withOpacityValue('--color-warning'),
         'success': withOpacityValue('--color-success'),
+        'neutral': withOpacityValue('--color-neutral'),
       },
       fontFamily: {
-        'astronaut': ['AstroNaut', 'sans-serif']
+        'brand': 'var(--font-brand)',
       },
       screens: {
         '3xl': '1920px',  // Full HD

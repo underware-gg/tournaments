@@ -23,17 +23,18 @@ export const PlayerDetails = ({
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2 px-4">
         <div className="flex flex-row gap-2">
-          <span className="text-primary-dark">Player Name:</span>
+          <span className="text-brand-muted">Player Name:</span>
           <span className="truncate">{feltToString(playerName)}</span>
         </div>
         <div className="flex flex-row gap-2">
-          <span className="text-primary-dark">Owner:</span>
+          <span className="text-brand-muted">Owner:</span>
           <span>
-            {usernames?.get(ownerAddress) || displayAddress(ownerAddress)}
+            {usernames?.get(ownerAddress) ||
+              displayAddress(ownerAddress ?? "0x0")}
           </span>
         </div>
       </div>
-      <div className="w-full h-0.5 bg-primary/50" />
+      <div className="w-full h-0.5 bg-brand/50" />
       {metadata !== "" ? (
         <img
           src={JSON.parse(metadata)?.image}
@@ -41,11 +42,11 @@ export const PlayerDetails = ({
           className="w-full h-auto px-4"
         />
       ) : (
-        <span className="text-center text-neutral-500">No Token URI</span>
+        <span className="text-center text-neutral">No Token URI</span>
       )}
       {isEnded && (
         <div className="flex items-center gap-2 justify-center">
-          <span className="text-primary w-6 h-6">
+          <span className="text-brand w-6 h-6">
             {hasSubmitted ? <VERIFIED /> : <QUESTION />}
           </span>
           <span>{hasSubmitted ? "Submitted" : "Not submitted"}</span>
@@ -72,11 +73,9 @@ export const MobilePlayerCard = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:hidden bg-black border border-primary p-4 rounded-lg max-w-[90vw] mx-auto">
+      <DialogContent className="sm:hidden bg-black border border-brand p-4 rounded-lg max-w-[90vw] mx-auto">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-astronaut text-lg text-primary">
-            Player Details
-          </h3>
+          <h3 className="font-brand text-lg text-brand">Player Details</h3>
         </div>
 
         {selectedPlayer && (

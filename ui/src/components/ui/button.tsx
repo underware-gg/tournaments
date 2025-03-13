@@ -9,10 +9,9 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-black hover:bg-primary/90 border-2",
+        default: "bg-brand text-black hover:bg-brand/90 border-2",
         destructive: "bg-destructive text-neutral-50 hover:opacity-90 border-2",
-        outline:
-          "bg-black text-primary hover:bg-primary/10 border-2 border-primary",
+        outline: "bg-black text-brand hover:bg-brand/10 border-2 border-brand",
         tab: "[border-image-width:4px_4px_0_4px]",
       },
       size: {

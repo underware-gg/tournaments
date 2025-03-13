@@ -346,6 +346,7 @@ export type QualificationProof = {
   // For qualifying via NFT ownership
   NFT: NFTQualification;
 };
+export type QualificationProofEnum = CairoCustomEnum;
 
 // Type definition for `tournaments::components::models::tournament::TournamentQualification` struct
 export type TournamentQualification = {

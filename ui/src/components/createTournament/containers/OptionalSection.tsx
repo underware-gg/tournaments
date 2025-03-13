@@ -20,12 +20,12 @@ export const OptionalSection = ({
     <div className={`flex flex-row items-center justify-between ${className}`}>
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-5 w-full">
         <div className="flex flex-row items-center justify-between">
-          <FormLabel className="font-astronaut text-lg sm:text-xl lg:text-2xl 2xl:text-3xl font-bold">
+          <FormLabel className="font-brand text-lg sm:text-xl lg:text-2xl 2xl:text-3xl font-bold">
             {label}
           </FormLabel>
           <FormControl className="sm:hidden">
             <div className="flex flex-row items-center gap-2">
-              <span className="uppercase text-neutral-500 font-bold text-xs">
+              <span className="uppercase text-neutral font-bold text-xs">
                 Optional
               </span>
               <Switch checked={checked} onCheckedChange={onCheckedChange} />
@@ -38,7 +38,7 @@ export const OptionalSection = ({
       </div>
       <FormControl className="hidden sm:flex">
         <div className="flex flex-row items-center gap-2">
-          <span className="uppercase text-neutral-500 font-bold">Optional</span>
+          <span className="uppercase text-neutral font-bold">Optional</span>
           <Switch checked={checked} onCheckedChange={onCheckedChange} />
         </div>
       </FormControl>

@@ -14,6 +14,7 @@ import {
   EntryFee,
   PrizeClaim,
   Leaderboard,
+  QualificationProofEnum,
 } from "@/generated/models.gen";
 import { PositionPrizes, TokenPrizes } from "@/lib/types";
 import { TokenPrices } from "@/hooks/useEkuboPrices";
@@ -53,16 +54,16 @@ export const processTournamentData = (
       case "tournament":
         entryRequirement = new CairoCustomEnum({
           token: undefined,
-          tournament: {
+          tournament: new CairoCustomEnum({
             winners:
               formData.gatingOptions.tournament?.requirement === "won"
                 ? formData.gatingOptions.tournament.tournaments.map((t) => t.id)
-                : [],
+                : undefined,
             participants:
               formData.gatingOptions.tournament?.requirement === "participated"
                 ? formData.gatingOptions.tournament.tournaments.map((t) => t.id)
-                : [],
-          },
+                : undefined,
+          }),
           allowlist: undefined,
         });
         break;
@@ -630,4 +631,69 @@ export const processPrizesFromSql = (
             Number(a.payout_position) - Number(b.payout_position)
         )
     : null;
+};
+
+export const processQualificationProof = (
+  requirementVariant: string,
+  ownedTokenIds: string[],
+  tournamentRequirementVariant: string,
+  hasWonTournamentMap: Record<
+    string,
+    { tokenId: string; position: number } | undefined
+  >,
+  hasParticipatedInTournamentMap: Record<string, string | undefined>
+): CairoOption<QualificationProofEnum> => {
+  if (requirementVariant === "tournament") {
+    // Find the first tournament ID that has a value in the appropriate map
+    let tournamentId: string | undefined;
+
+    if (tournamentRequirementVariant === "winners") {
+      // Find first tournament ID where user has won
+      tournamentId = Object.keys(hasWonTournamentMap).find(
+        (id) => hasWonTournamentMap[id] !== undefined
+      );
+    } else {
+      // Find first tournament ID where user has participated
+      tournamentId = Object.keys(hasParticipatedInTournamentMap).find(
+        (id) => hasParticipatedInTournamentMap[id] !== undefined
+      );
+    }
+
+    // If we found a valid tournament ID
+    if (tournamentId) {
+      const qualificationProof = new CairoCustomEnum({
+        Tournament: {
+          tournament_id: tournamentId,
+          token_id:
+            tournamentRequirementVariant === "winners"
+              ? hasWonTournamentMap[tournamentId]?.tokenId
+              : hasParticipatedInTournamentMap[tournamentId],
+          position:
+            tournamentRequirementVariant === "winners"
+              ? hasWonTournamentMap[tournamentId]?.position
+              : 1,
+        },
+        NFT: undefined,
+      }) as QualificationProofEnum;
+      return new CairoOption(CairoOptionVariant.Some, qualificationProof);
+    }
+  }
+
+  if (requirementVariant === "token") {
+    return new CairoOption(
+      CairoOptionVariant.Some,
+      new CairoCustomEnum({
+        Tournament: undefined,
+        NFT: {
+          token_id: {
+            low: ownedTokenIds[0],
+            high: "0",
+          },
+        },
+      })
+    );
+  }
+
+  // Default return for all other cases
+  return new CairoOption(CairoOptionVariant.None);
 };

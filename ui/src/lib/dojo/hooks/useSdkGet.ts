@@ -43,7 +43,6 @@ export const useSdkGetEntities = ({
     setIsLoading(true);
     try {
       setIsLoading(true);
-      console.log("memoizedQuery", memoizedQuery);
       const entities = await sdk.getEntities({
         query: memoizedQuery,
       });

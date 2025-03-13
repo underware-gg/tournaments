@@ -33,19 +33,19 @@ const TimelineCard = ({
       <Card
         variant={completed ? "default" : "outline"}
         className={`p-2 ${
-          completed ? "text-black bg-primary-dark" : "text-primary-dark"
+          completed ? "text-black bg-brand-muted" : "text-brand-muted"
         } h-10 w-10 sm:h-14 sm:w-14 3xl:h-20 3xl:w-20 flex items-center justify-center z-20`}
       >
         {icon}
       </Card>
       {date && (
-        <div className="flex flex-col items-center font-astronaut">
+        <div className="flex flex-col items-center font-brand">
           <span className="text-xs">{format(date, "dd/MM")}</span>
           <span className="text-xs">{format(date, "HH:mm")}</span>
         </div>
       )}
       {label && (
-        <span className="absolute -top-10 sm:-top-6 left-[calc(100%_-_0px)] w-[calc(100%_+_10px)] sm:w-[calc(100%_+_20px)] text-[10px] sm:text-[14px] 3xl:text-[16px] text-center font-astronaut whitespace-nowrap text-primary-dark">
+        <span className="absolute -top-10 sm:-top-6 left-[calc(100%_-_0px)] w-[calc(100%_+_10px)] sm:w-[calc(100%_+_20px)] text-[10px] sm:text-[14px] 3xl:text-[16px] text-center font-brand whitespace-nowrap text-brand-muted">
           {label}
         </span>
       )}
@@ -56,7 +56,7 @@ const TimelineCard = ({
       )}
       {showConnector && (
         <motion.div
-          className="absolute top-5 sm:top-7 left-[calc(100%_-_0px)] w-[calc(100%_+_10px)] sm:w-[calc(100%_+_20px)] 3xl:w-[calc(100%_+_30px)] h-0.5 border-t-4 border-dotted border-primary-dark z-10"
+          className="absolute top-5 sm:top-7 left-[calc(100%_-_0px)] w-[calc(100%_+_10px)] sm:w-[calc(100%_+_20px)] 3xl:w-[calc(100%_+_30px)] h-0.5 border-t-4 border-dotted border-brand-muted z-10"
           initial={{ width: 0 }}
           animate={{ width: "calc(100% + var(--timeline-extension, 10px))" }}
           transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}

@@ -60,7 +60,7 @@ export function ClaimPrizesDialog({
                 className="flex flex-row items-center justify-between"
                 key={index}
               >
-                <span className="text-primary-dark">
+                <span className="text-brand-muted">
                   {prize.type === "entry_fee_game_creator"
                     ? "Game Creator Share"
                     : prize.type === "entry_fee_tournament_creator"
@@ -75,7 +75,7 @@ export function ClaimPrizesDialog({
                     src={getTokenLogoUrl(prize.token_address)}
                     className="w-6 h-6"
                   />
-                  <span className="text-neutral-500">
+                  <span className="text-neutral">
                     ~${(prizeAmount * tokenPrice).toFixed(2)}
                   </span>
                 </div>

@@ -330,11 +330,7 @@ export const makeDojoAppConfig = (): DojoAppConfig => {
     initialChainId !== ChainId.KATANA_LOCAL
       ? (() => {
           try {
-            return initializeController(
-              manifests[initialChainId],
-              chainConfig.rpcUrl!,
-              initialChainId
-            );
+            return initializeController(chainConfig.rpcUrl!, initialChainId);
           } catch (error) {
             console.error(
               `Failed to initialize controller for chain ${initialChainId}:`,

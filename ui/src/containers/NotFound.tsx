@@ -19,10 +19,10 @@ const NotFound: React.FC<NotFoundProps> = ({ message = "Page not found" }) => {
         </Button>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <span className="font-astronaut text-3xl text-retro-red">
+        <span className="font-brand text-3xl text-retro-red">
           Oops! {message}
         </span>
-        <p className="text-primary-dark">
+        <p className="text-brand-muted">
           The page you're looking for doesn't exist or has been removed.
         </p>
       </div>

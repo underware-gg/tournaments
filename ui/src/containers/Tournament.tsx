@@ -4,8 +4,13 @@ import { ARROW_LEFT, TROPHY, MONEY, GIFT } from "@/components/Icons";
 import { useNavigate, useParams } from "react-router-dom";
 import EntrantsTable from "@/components/tournament/table/EntrantsTable";
 import TournamentTimeline from "@/components/TournamentTimeline";
-import { bigintToHex, feltToString, formatTime } from "@/lib/utils";
-import { addAddressPadding } from "starknet";
+import {
+  bigintToHex,
+  feltToString,
+  formatTime,
+  indexAddress,
+} from "@/lib/utils";
+import { addAddressPadding, CairoCustomEnum } from "starknet";
 import { useAccount } from "@starknet-react/core";
 import {
   useSubscribeGamesQuery,
@@ -35,6 +40,7 @@ import {
   getErc20TokenSymbols,
   groupPrizesByPositions,
   groupPrizesByTokens,
+  processTournamentFromSql,
 } from "@/lib/utils/formatting";
 import useModel from "@/dojo/hooks/useModel";
 import { useGameEndpoints } from "@/dojo/hooks/useGameEndpoints";
@@ -48,7 +54,11 @@ import EntryRequirements from "@/components/tournament/EntryRequirements";
 import PrizesContainer from "@/components/tournament/prizes/PrizesContainer";
 import { ClaimPrizesDialog } from "@/components/dialogs/ClaimPrizes";
 import { SubmitScoresDialog } from "@/components/dialogs/SubmitScores";
-import { useGetTournamentsCount } from "@/dojo/hooks/useSqlQueries";
+import {
+  useGetAccountTokenIds,
+  useGetTournaments,
+  useGetTournamentsCount,
+} from "@/dojo/hooks/useSqlQueries";
 import NotFound from "@/containers/NotFound";
 import {
   Tooltip,
@@ -135,7 +145,8 @@ const Tournament = () => {
   const totalSubmissions = leaderboardModel?.token_ids.length ?? 0;
 
   const allSubmitted =
-    totalSubmissions === tournamentModel?.game_config.prize_spots;
+    totalSubmissions ===
+    Math.min(Number(entryCountModel?.count), leaderboardSize);
 
   const tournamentPrizes = state.getEntitiesByModel(nameSpace, "Prize");
 
@@ -291,8 +302,6 @@ const Tournament = () => {
         BigInt(tournamentModel?.schedule.submission_duration ?? 0n)
     ) < Number(BigInt(Date.now()) / 1000n);
 
-  // const isSubmitted = false;
-
   const startsIn =
     Number(tournamentModel?.schedule.game.start) -
     Number(BigInt(Date.now()) / 1000n);
@@ -313,14 +322,68 @@ const Tournament = () => {
 
   const hasPrizes = Object.keys(groupedPrizes).length > 0;
 
+  // handle fetching of tournament data if there is a tournament entry requirement
+
+  const tournament: CairoCustomEnum =
+    tournamentModel?.entry_requirement.Some?.variant?.tournament;
+
+  const tournamentVariant = tournament?.activeVariant();
+
+  const tournamentIdsQuery = useMemo(() => {
+    if (tournamentVariant === "winners") {
+      return tournamentModel.entry_requirement.Some?.variant?.tournament?.variant?.winners?.map(
+        (winner: any) => addAddressPadding(bigintToHex(winner))
+      );
+    } else if (tournamentVariant === "participants") {
+      return tournamentModel.entry_requirement.Some?.variant?.tournament?.variant?.participants?.map(
+        (participant: any) => addAddressPadding(bigintToHex(participant))
+      );
+    }
+    return [];
+  }, [tournamentModel]);
+
+  const { data: tournaments } = useGetTournaments({
+    namespace: nameSpace,
+    gameFilters: [],
+    limit: 100,
+    status: "tournaments",
+    tournamentIds: tournamentIdsQuery,
+    active: tournamentIdsQuery.length > 0,
+  });
+
+  const tournamentsData = tournaments?.map((tournament) => {
+    return {
+      ...processTournamentFromSql(tournament),
+      entry_count: tournament.entry_count,
+    };
+  });
+
+  // get owned game tokens
+
+  const queryAddress = useMemo(() => {
+    if (!address || address === "0x0") return null;
+    return indexAddress(address);
+  }, [address]);
+
+  const queryGameAddress = useMemo(() => {
+    if (!gameAddress || gameAddress === "0x0") return null;
+    return indexAddress(gameAddress);
+  }, [gameAddress]);
+
+  const { data: ownedTokens } = useGetAccountTokenIds(
+    queryAddress,
+    [queryGameAddress ?? "0x0"],
+    true
+  );
+
   if (loading) {
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 bg-black/20 backdrop-blur-sm z-50">
         <div className="relative w-16 h-16">
-          <div className="absolute w-full h-full border-4 border-primary rounded-full animate-ping opacity-75"></div>
-          <div className="absolute w-full h-full border-4 border-primary-dark rounded-full animate-pulse"></div>
+          <div className="absolute w-full h-full border-4 border-brand rounded-full animate-ping opacity-75"></div>
+          <div className="absolute w-full h-full border-4 border-brand-muted rounded-full animate-pulse"></div>
         </div>
-        <span className="font-astronaut text-2xl text-primary-dark animate-pulse">
+        <span className="font-brand text-2xl text-brand-muted animate-pulse">
           Loading tournament...
         </span>
       </div>
@@ -343,7 +406,7 @@ const Tournament = () => {
           <span className="hidden sm:block">Back</span>
         </Button>
         <div className="flex flex-row items-center gap-2 sm:gap-5">
-          <span className="text-primary uppercase font-astronaut text-lg sm:text-2xl">
+          <span className="text-brand uppercase font-brand text-lg sm:text-2xl">
             {status}
           </span>
           <Tooltip delayDuration={50}>
@@ -356,11 +419,16 @@ const Tournament = () => {
               side="top"
               align="center"
               sideOffset={5}
-              className="bg-black text-neutral-500 border border-primary-dark px-2 py-1 rounded text-sm z-50"
+              className="bg-black text-neutral border border-brand-muted px-2 py-1 rounded text-sm z-50"
             >
               {gameName ? feltToString(gameName) : "Unknown"}
             </TooltipContent>
           </Tooltip>
+          <EntryRequirements
+            tournamentModel={tournamentModel}
+            tournamentsData={tournamentsData}
+            tokens={tokens}
+          />
           {!isEnded && (isMainnet ? isAdmin : true) && (
             <Button
               variant="outline"
@@ -370,7 +438,6 @@ const Tournament = () => {
               <span className="hidden sm:block 3xl:text-lg">Add Prizes</span>
             </Button>
           )}
-          <EntryRequirements tournamentModel={tournamentModel} />
           {(registrationType === "fixed" && !isStarted) ||
           (registrationType === "open" && !isEnded) ? (
             <Button
@@ -423,6 +490,7 @@ const Tournament = () => {
             entryCountModel={entryCountModel}
             gameCount={gameCount}
             tokens={tokens}
+            tournamentsData={tournamentsData}
           />
           <SubmitScoresDialog
             open={submitScoresDialogOpen}
@@ -455,17 +523,17 @@ const Tournament = () => {
       <div className="flex flex-col gap-1 sm:gap-2">
         <div className="flex flex-row items-center h-8 sm:h-12 justify-between">
           <div className="flex flex-row gap-5">
-            <span className="font-astronaut text-xl xl:text-2xl 2xl:text-4xl 3xl:text-5xl">
+            <span className="font-brand text-xl xl:text-2xl 2xl:text-4xl 3xl:text-5xl">
               {feltToString(tournamentModel?.metadata?.name ?? "")}
             </span>
-            <div className="flex flex-row items-center gap-4 text-primary-dark 3xl:text-lg">
+            <div className="flex flex-row items-center gap-4 text-brand-muted 3xl:text-lg">
               <div className="flex flex-row gap-2">
                 <span className="hidden sm:block">Winners:</span>
-                <span className="text-primary">Top {leaderboardSize}</span>
+                <span className="text-brand">Top {leaderboardSize}</span>
               </div>
               <div className="flex flex-row gap-2">
                 <span className="hidden sm:block">Registration:</span>
-                <span className="text-primary">
+                <span className="text-brand">
                   {registrationType.charAt(0).toUpperCase() +
                     registrationType.slice(1)}
                 </span>
@@ -475,18 +543,18 @@ const Tournament = () => {
           <div className="hidden sm:flex flex-row 3xl:text-lg">
             {!isStarted ? (
               <div>
-                <span className="text-primary-dark">Starts In: </span>
-                <span className="text-primary">{formatTime(startsIn)}</span>
+                <span className="text-brand-muted">Starts In: </span>
+                <span className="text-brand">{formatTime(startsIn)}</span>
               </div>
             ) : !isEnded ? (
               <div>
-                <span className="text-primary-dark">Ends In: </span>
-                <span className="text-primary">{formatTime(endsIn)}</span>
+                <span className="text-brand-muted">Ends In: </span>
+                <span className="text-brand">{formatTime(endsIn)}</span>
               </div>
             ) : !isSubmitted ? (
               <div>
-                <span className="text-primary-dark">Submission Ends In: </span>
-                <span className="text-primary">
+                <span className="text-brand-muted">Submission Ends In: </span>
+                <span className="text-brand">
                   {formatTime(submissionEndsIn)}
                 </span>
               </div>
@@ -520,7 +588,7 @@ const Tournament = () => {
           {isOverflowing && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="self-start text-primary hover:text-primary-dark font-bold text-sm sm:text-base"
+              className="self-start text-brand hover:text-brand-muted font-bold text-sm sm:text-base"
             >
               {isExpanded ? "See Less" : "See More"}
             </button>
@@ -581,6 +649,7 @@ const Tournament = () => {
             gameNamespace={gameNamespace ?? ""}
             gameScoreModel={gameScoreModel ?? ""}
             gameScoreAttribute={gameScoreAttribute ?? ""}
+            ownedTokens={ownedTokens}
           />
         </div>
       </div>

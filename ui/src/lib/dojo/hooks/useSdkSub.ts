@@ -38,7 +38,6 @@ export const useSdkSubscribeEntities = ({
     let _unsubscribe: (() => void) | undefined;
 
     const _subscribe = async () => {
-      console.log(memoizedQuery);
       const [_initialEntities, subscription] = await sdk.subscribeEntityQuery({
         query: memoizedQuery,
         callback: (response) => {
