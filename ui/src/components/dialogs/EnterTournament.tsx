@@ -413,7 +413,7 @@ export function EnterTournamentDialog({
                         {address ? (
                           tournamentRequirementVariant === "winners" ? (
                             !!hasWonTournamentMap[tournament.id.toString()]
-                              .tokenId
+                              ?.tokenId
                           ) : !!hasParticipatedInTournamentMap[
                               tournament.id.toString()
                             ] ? (
