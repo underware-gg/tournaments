@@ -11,7 +11,7 @@ const NotFound: React.FC<NotFoundProps> = ({ message = "Page not found" }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="w-3/4 px-20 pt-20 mx-auto flex flex-col gap-5">
+    <div className="w-3/4 mx-auto flex flex-col gap-5">
       <div className="flex flex-row justify-between">
         <Button variant="outline" onClick={() => navigate("/")}>
           <ARROW_LEFT />
