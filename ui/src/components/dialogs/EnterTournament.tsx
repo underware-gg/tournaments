@@ -117,6 +117,8 @@ export function EnterTournamentDialog({
 
   const hasBalance = BigInt(balance) >= BigInt(entryAmount ?? 0n);
 
+  const hasEntryRequirement = tournamentModel?.entry_requirement.isSome();
+
   const requirementVariant =
     tournamentModel?.entry_requirement.Some?.activeVariant();
 
@@ -178,12 +180,39 @@ export function EnterTournamentDialog({
     active: true,
   });
 
-  const hasParticipatedInTournamentMap = useMemo(() => {
-    if (!registrations) return {};
+  const currentTime = BigInt(new Date().getTime()) / 1000n;
 
-    return registrations.reduce((acc, registration) => {
+  const requiredTournamentRegistrations = useMemo(() => {
+    if (!registrations || !tournamentsData) {
+      return [];
+    }
+
+    // Create a Set of tournament IDs from tournamentsData for faster lookups
+    const tournamentIdSet = new Set(
+      tournamentsData.map((tournament) => tournament.id)
+    );
+
+    // Filter registrations that have a tournament ID in the set
+    return registrations.filter((registration) =>
+      tournamentIdSet.has(registration.tournament_id.toString())
+    );
+  }, [registrations, tournamentsData]);
+
+  const hasParticipatedInTournamentMap = useMemo(() => {
+    if (!requiredTournamentRegistrations) return {};
+
+    return requiredTournamentRegistrations.reduce((acc, registration) => {
+      const registrationTournamentId = registration.tournament_id;
+      const registeredTournament = tournamentsData.find(
+        (tournament) => tournament.id === registrationTournamentId
+      );
+      const registeredTournamentFinalizedTime =
+        BigInt(registeredTournament?.schedule.game.end ?? 0n) +
+        BigInt(registeredTournament?.schedule.submission_duration ?? 0n);
+      const hasRegisteredTournamentFinalized =
+        registeredTournamentFinalizedTime < currentTime;
       // Only set token ID if has_submitted is true
-      if (registration.has_submitted) {
+      if (hasRegisteredTournamentFinalized) {
         // If we haven't stored a token ID for this tournament yet, store this one
         if (!acc[registration.tournament_id]) {
           acc[registration.tournament_id] = registration.game_token_id;
@@ -191,7 +220,7 @@ export function EnterTournamentDialog({
       }
       return acc;
     }, {} as Record<string, string | undefined>);
-  }, [registrations]);
+  }, [requiredTournamentRegistrations, tournamentsData]);
 
   const parseTokenIds = (tokenIdsString: string): string[] => {
     try {
@@ -217,33 +246,83 @@ export function EnterTournamentDialog({
     if (!leaderboards || !ownedGameIds) return {};
 
     return leaderboards.reduce((acc, leaderboard) => {
-      // Parse the token_ids string into an array
-      const leaderboardTokenIds = parseTokenIds(leaderboard.token_ids);
+      const leaderboardTournamentId = leaderboard.tournament_id;
+      const leaderboardTournament = tournamentsData.find(
+        (tournament) => tournament.id === leaderboardTournamentId
+      );
+      const leaderboardTournamentFinalizedTime =
+        BigInt(leaderboardTournament?.schedule.game.end ?? 0n) +
+        BigInt(leaderboardTournament?.schedule.submission_duration ?? 0n);
+      const hasLeaderboardTournamentFinalized =
+        leaderboardTournamentFinalizedTime < currentTime;
+      if (hasLeaderboardTournamentFinalized) {
+        // Parse the token_ids string into an array
+        const leaderboardTokenIds = parseTokenIds(leaderboard.token_ids);
 
-      // Find the first owned token ID that appears in the leaderboard and its position
-      let matchingTokenId: string | undefined;
-      let position: number = 0;
+        // Find the first owned token ID that appears in the leaderboard and its position
+        let matchingTokenId: string | undefined;
+        let position: number = 0;
 
-      for (let i = 0; i < leaderboardTokenIds.length; i++) {
-        const leaderboardTokenId = leaderboardTokenIds[i];
-        if (ownedGameIds.includes(leaderboardTokenId)) {
-          matchingTokenId = leaderboardTokenId;
-          position = i; // This is the position (0-based index)
-          break;
+        for (let i = 0; i < leaderboardTokenIds.length; i++) {
+          const leaderboardTokenId = leaderboardTokenIds[i];
+          if (ownedGameIds.includes(leaderboardTokenId)) {
+            matchingTokenId = leaderboardTokenId;
+            position = i; // This is the position (0-based index)
+            break;
+          }
         }
-      }
 
-      // If we found a matching token ID, store it along with its position
-      if (matchingTokenId) {
-        acc[leaderboard.tournament_id] = {
-          tokenId: matchingTokenId,
-          position: position + 1, // Convert to 1-based position for display
-        };
+        // If we found a matching token ID, store it along with its position
+        if (matchingTokenId) {
+          acc[leaderboard.tournament_id] = {
+            tokenId: matchingTokenId,
+            position: position + 1, // Convert to 1-based position for display
+          };
+        }
       }
 
       return acc;
     }, {} as Record<string, { tokenId: string; position: number } | undefined>);
   }, [leaderboards, ownedGameIds]);
+
+  const meetsEntryRequirements = useMemo(() => {
+    if (!hasEntryRequirement) {
+      return true;
+    }
+
+    if (requirementVariant === "token") {
+      return ownedTokenIds?.length > 0;
+    }
+    if (requirementVariant === "tournament") {
+      if (!tournamentsData || tournamentsData.length === 0) {
+        return false;
+      }
+
+      // Check if the user meets at least one tournament requirement
+      return tournamentsData.some((tournament) => {
+        const tournamentId = tournament.id.toString();
+
+        // If requirement is for winners, check hasWonTournamentMap
+        if (tournamentRequirementVariant === "winners") {
+          return hasWonTournamentMap[tournamentId] !== undefined;
+        }
+        // If requirement is for participants, check hasParticipatedInTournamentMap
+        else if (tournamentRequirementVariant === "participants") {
+          return hasParticipatedInTournamentMap[tournamentId] !== undefined;
+        }
+
+        // Default case if requirementType is something else
+        return false;
+      });
+    }
+    return true;
+  }, [
+    tournamentsData,
+    tournamentRequirementVariant,
+    hasWonTournamentMap,
+    hasParticipatedInTournamentMap,
+    hasEntryRequirement,
+  ]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -280,7 +359,7 @@ export function EnterTournamentDialog({
             </div>
           )}
 
-          {tournamentModel?.entry_requirement.isSome() && (
+          {hasEntryRequirement && (
             <div className="flex flex-col gap-2">
               <span className="text-lg">Entry Requirements</span>
               <span className="px-2">
@@ -383,7 +462,10 @@ export function EnterTournamentDialog({
           </DialogClose>
           {address ? (
             <DialogClose asChild>
-              <Button disabled={!hasBalance} onClick={handleEnterTournament}>
+              <Button
+                disabled={!hasBalance || !meetsEntryRequirements}
+                onClick={handleEnterTournament}
+              >
                 Enter Tournament
               </Button>
             </DialogClose>
