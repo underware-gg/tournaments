@@ -1,6 +1,5 @@
 import { Card } from "@/components/ui/card";
 import { DOLLAR } from "@/components/Icons";
-import { useGetAccountTokenIds } from "@/dojo/hooks/useSqlQueries";
 import {
   useGetGameMetadataInListQuery,
   useGetRegistrationsForTournamentInTokenListQuery,
@@ -22,6 +21,7 @@ interface MyEntriesProps {
   gameNamespace: string;
   gameScoreModel: string;
   gameScoreAttribute: string;
+  ownedTokens: any[];
 }
 
 const MyEntries = ({
@@ -30,25 +30,12 @@ const MyEntries = ({
   gameNamespace,
   gameScoreModel,
   gameScoreAttribute,
+  ownedTokens,
 }: MyEntriesProps) => {
   const { address } = useAccount();
   const state = useDojoStore.getState();
   const { nameSpace } = useDojo();
   const [showMyEntries, setShowMyEntries] = useState(false);
-
-  const queryAddress = useMemo(() => {
-    if (!address || address === "0x0") return null;
-    return indexAddress(address);
-  }, [address]);
-
-  const queryGameAddress = useMemo(() => {
-    if (!gameAddress || gameAddress === "0x0") return null;
-    return indexAddress(gameAddress);
-  }, [gameAddress]);
-
-  const { data: ownedTokens } = useGetAccountTokenIds(queryAddress, [
-    queryGameAddress ?? "0x0",
-  ]);
 
   const ownedTokenIds = useMemo(() => {
     return ownedTokens
@@ -159,14 +146,14 @@ const MyEntries = ({
     >
       <div className="flex flex-col justify-between">
         <div className="flex flex-row items-center justify-between h-6 sm:h-8">
-          <span className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+          <span className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
             My Entries
           </span>
           <div className="flex flex-row items-center gap-2">
             {address ? (
               myEntriesCount > 0 ? (
                 <>
-                  <span className="text-neutral-500 3xl:text-lg">
+                  <span className="text-neutral 3xl:text-lg">
                     {showMyEntries ? "Hide" : "Show Entries"}
                   </span>
                   <Switch
@@ -176,14 +163,14 @@ const MyEntries = ({
                   />
                 </>
               ) : (
-                <span className="text-neutral-500 3xl:text-lg">No Entries</span>
+                <span className="text-neutral 3xl:text-lg">No Entries</span>
               )
             ) : (
-              <span className="text-neutral-500 3xl:text-lg">
+              <span className="text-neutral 3xl:text-lg">
                 No Account Connected
               </span>
             )}
-            <div className="flex flex-row items-center font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+            <div className="flex flex-row items-center font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
               <span className="w-8 3xl:w-10">
                 <DOLLAR />
               </span>
@@ -196,7 +183,7 @@ const MyEntries = ({
             showMyEntries ? "h-auto opacity-100" : "h-0 opacity-0"
           } overflow-hidden`}
         >
-          <div className="w-full h-0.5 bg-primary/25 mt-2" />
+          <div className="w-full h-0.5 bg-brand/25 mt-2" />
           <div className="p-2 h-auto">
             <div className="flex flex-row gap-5 overflow-x-auto">
               {mergedEntries?.map((mergedEntry, index) => (

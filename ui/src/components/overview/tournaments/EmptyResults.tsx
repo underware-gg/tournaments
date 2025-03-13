@@ -13,13 +13,13 @@ const EmptyResults = ({ gameFilters }: EmptyResultsProps) => {
   return (
     <div className="col-span-3 flex flex-col items-center justify-center gap-6 py-20">
       <div className="flex flex-col items-center gap-4">
-        <span className="text-primary-dark opacity-50 w-20 h-20">
+        <span className="text-brand-muted opacity-50 w-20 h-20">
           <TROPHY />
         </span>
-        <h3 className="text-2xl font-astronaut text-center">
+        <h3 className="text-2xl font-brand text-center">
           No Tournaments Found
         </h3>
-        <p className="text-primary-dark text-center max-w-md">
+        <p className="text-brand-muted text-center max-w-md">
           {gameFilters.length > 0
             ? `No tournaments currently available for ${gameFilters
                 .map((f) => games[f].name)

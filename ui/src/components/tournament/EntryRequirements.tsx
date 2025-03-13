@@ -1,53 +1,32 @@
 import { Card } from "@/components/ui/card";
 import { CairoCustomEnum } from "starknet";
-import { useDojoStore } from "@/dojo/hooks/useDojoStore";
-import { Token } from "@/generated/models.gen";
-import { bigintToHex, displayAddress } from "@/lib/utils";
-import { addAddressPadding } from "starknet";
-import { ChainId } from "@/dojo/config";
+import { Token, Tournament } from "@/generated/models.gen";
+import { displayAddress, feltToString } from "@/lib/utils";
 import { useDojo } from "@/context/dojo";
-import { COIN, CHECK } from "@/components/Icons";
+import { COIN, CHECK, TROPHY, CLOCK } from "@/components/Icons";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Tournament as TournamentModel } from "@/generated/models.gen";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const EntryRequirements = ({
   tournamentModel,
+  tournamentsData,
+  tokens,
 }: {
   tournamentModel: TournamentModel;
+  tournamentsData: Tournament[];
+  tokens: Token[];
 }) => {
   if (!tournamentModel?.entry_requirement?.isSome()) {
     return null;
   }
-
-  const { selectedChainConfig, nameSpace } = useDojo();
-
-  const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
-
-  const sepoliaTokens = [
-    {
-      address:
-        "0x064fd80fcb41d00214430574a0aa19d21cc5d6452aeb4996f31b6e9ba4f466a0",
-      is_registered: true,
-      name: "Lords",
-      symbol: "LORDS",
-      token_type: new CairoCustomEnum({
-        erc20: {
-          amount: addAddressPadding(bigintToHex(BigInt(1))),
-        },
-      }),
-    },
-  ];
-
-  const tokens = isSepolia
-    ? sepoliaTokens
-    : useDojoStore
-        .getState()
-        .getEntitiesByModel(nameSpace, "Token")
-        .map((token) => token.models[nameSpace].Token as Token);
+  const navigate = useNavigate();
+  const { selectedChainConfig } = useDojo();
 
   const token = tokens.find(
     (token) =>
@@ -56,7 +35,12 @@ const EntryRequirements = ({
 
   const activeVariant = tournamentModel.entry_requirement.Some?.activeVariant();
 
-  const allowlist = tournamentModel.entry_requirement.Some?.variant.allowlist;
+  const tournament: CairoCustomEnum =
+    tournamentModel.entry_requirement.Some?.variant?.tournament;
+
+  const tournamentVariant = tournament?.activeVariant();
+
+  const allowlist = tournamentModel.entry_requirement.Some?.variant?.allowlist;
 
   const blockExplorerExists =
     selectedChainConfig.blockExplorerUrl !== undefined;
@@ -66,20 +50,25 @@ const EntryRequirements = ({
       <HoverCardTrigger asChild>
         <Card
           variant="outline"
-          className="relative flex flex-row items-center justify-between w-36 h-full p-1 hover:cursor-pointer"
+          className="relative flex flex-row items-center justify-between w-36 h-full p-1 px-2 hover:cursor-pointer"
         >
-          <span className="absolute left-0 -top-5 text-xs whitespace-nowrap uppercase text-primary-dark font-bold">
-            Entry Requirement:
+          <span className="absolute left-0 -top-5 text-xs whitespace-nowrap uppercase text-brand-muted font-bold">
+            Entry Requirements:
           </span>
           {activeVariant === "token" ? (
-            <div className="text-primary flex flex-row items-center justify-center gap-1 w-full">
+            <div className="text-brand flex flex-row items-center justify-center gap-1 w-full">
               <span className="w-8">
                 <COIN />
               </span>
               <span className="text-xs">{token?.name}</span>
             </div>
           ) : activeVariant === "tournament" ? (
-            "NFT"
+            <div className="flex flex-row items-center gap-1">
+              <span className="w-6">
+                <TROPHY />
+              </span>
+              <span className="capitalize">{tournament.activeVariant()}</span>
+            </div>
           ) : (
             <div className="flex flex-row items-center justify-center gap-1 w-full">
               <span className="w-8">
@@ -97,17 +86,10 @@ const EntryRequirements = ({
         sideOffset={5}
       >
         <div className="flex flex-col gap-2 h-full">
-          <h4 className="font-medium">
-            {activeVariant === "token"
-              ? "Token Requirements"
-              : activeVariant === "tournament"
-              ? "NFT Requirements"
-              : "Allowlist"}
-          </h4>
           {activeVariant === "token" ? (
             <>
               <p className="text-muted-foreground">
-                To enter this tournament, you need:
+                To enter this tournament you must hold:
               </p>
               <div className="flex items-center gap-2">
                 <span className="w-8">
@@ -115,7 +97,7 @@ const EntryRequirements = ({
                 </span>
                 <span>{token?.name}</span>
                 <span
-                  className="text-primary-dark hover:cursor-pointer"
+                  className="text-brand-muted hover:cursor-pointer"
                   onClick={() => {
                     if (blockExplorerExists) {
                       window.open(
@@ -128,12 +110,45 @@ const EntryRequirements = ({
                   {displayAddress(token?.address ?? "0x0")}
                 </span>
               </div>
-              {/* Add more token details as needed */}
             </>
           ) : activeVariant === "tournament" ? (
-            <p className="text-muted-foreground">
-              NFT requirement details here
-            </p>
+            <>
+              <h4 className="text-lg">
+                Tournament{" "}
+                <span className="capitalize">{tournamentVariant}</span>
+              </h4>
+              <div className="h-[100px] flex flex-col gap-2 overflow-y-auto">
+                {tournamentsData?.map((tournament, index) => {
+                  const tournamentEnd = tournament.schedule.game.end;
+                  const tournamentEnded =
+                    BigInt(tournamentEnd) < BigInt(Date.now()) / 1000n;
+                  return (
+                    <div
+                      key={index}
+                      className="flex flex-row items-center gap-2"
+                    >
+                      <span>{feltToString(tournament.metadata.name)}</span>|
+                      <div className="flex flex-row items-center gap-1">
+                        <span className="w-4">
+                          <CLOCK />
+                        </span>
+                        <span>{tournamentEnded ? "Ended" : "Active"}</span>
+                      </div>
+                      |
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        onClick={() => {
+                          navigate(`/tournament/${Number(tournament.id)}`);
+                        }}
+                      >
+                        View
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           ) : (
             <div className="h-[100px] flex flex-col gap-2 overflow-y-auto">
               {allowlist?.map((item: string, index: number) => (

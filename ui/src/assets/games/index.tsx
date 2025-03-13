@@ -6,6 +6,8 @@ import dopeWars from "./dope-wars.png";
 import jokersOfNeon from "./jokers-of-neon.png";
 import { ChainId } from "@/dojo/config";
 import { useDojo } from "@/context/dojo";
+// import { useDojoSystem } from "@/dojo/hooks/useDojoSystem";
+// import { addAddressPadding } from "starknet";
 
 export interface Game {
   name: string;
@@ -17,9 +19,10 @@ export const getGames = (): Record<string, Game> => {
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
   const isLocalKatana = selectedChainConfig.chainId === ChainId.KATANA_LOCAL;
   const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
+  // const gameMockAddress = useDojoSystem("game_mock").contractAddress;
   if (isLocalKatana) {
     return {
-      "0x0258fe2bce59251748d82ab91f461f8045f8b80b554e867ec70e2b3cb71449a9": {
+      "0x06b9ae82d70df624b322f96a602cbf95301e0bf03b9381ce7bdbbf23916573b2": {
         name: "Loot Survivor",
         Icon: function LootSurvivorIcon(
           props: ImgHTMLAttributes<HTMLImageElement>

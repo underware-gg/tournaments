@@ -51,10 +51,10 @@ const Details = ({ form }: StepProps) => {
     <>
       <div className="flex flex-col lg:p-2 2xl:p-4 gap-2 sm:gap-5">
         <div className="flex flex-col">
-          <span className="font-astronaut text-lg sm:text-xl lg:text-2xl 2xl:text-3xl 3xl:text-4xl font-bold">
+          <span className="font-brand text-lg sm:text-xl lg:text-2xl 2xl:text-3xl 3xl:text-4xl font-bold">
             Details
           </span>
-          <div className="w-full h-0.5 bg-primary/25" />
+          <div className="w-full h-0.5 bg-brand/25" />
         </div>
         <div className="flex flex-col sm:flex-row gap-5 sm:px-4">
           <div className="flex flex-col gap-2 sm:gap-5 w-full sm:w-3/5">
@@ -64,7 +64,7 @@ const Details = ({ form }: StepProps) => {
               render={({ field }) => (
                 <FormItem>
                   <div className="flex flex-row items-center gap-5">
-                    <FormLabel className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+                    <FormLabel className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
                       Game
                     </FormLabel>
                     <FormDescription className="sm:text-xs xl:text-sm 3xl:text-base">
@@ -78,7 +78,7 @@ const Details = ({ form }: StepProps) => {
                           key={key}
                           variant={field.value === key ? "default" : "outline"}
                           className={`flex flex-col justify-between sm:h-[100px] 3xl:h-[120px] w-[100px] 3xl:w-[120px] flex-shrink-0 p-2 hover:cursor-pointer ${
-                            field.value === key && "bg-primary-dark"
+                            field.value === key && "bg-brand-muted"
                           }`}
                           onClick={() => field.onChange(key)}
                           disabled={
@@ -90,11 +90,11 @@ const Details = ({ form }: StepProps) => {
                           <TokenGameIcon size="md" game={key} />
                           <Tooltip delayDuration={50}>
                             <TooltipTrigger asChild>
-                              <p className="font-astronaut text-center truncate w-full 3xl:text-lg">
+                              <p className="font-brand text-center truncate w-full 3xl:text-lg">
                                 {game.name}
                               </p>
                             </TooltipTrigger>
-                            <TooltipContent className="border-primary bg-black text-neutral-500 3xl:text-lg">
+                            <TooltipContent className="border-brand bg-black text-neutral 3xl:text-lg">
                               {game.name}
                             </TooltipContent>
                           </Tooltip>
@@ -106,7 +106,7 @@ const Details = ({ form }: StepProps) => {
                 </FormItem>
               )}
             />
-            <div className="w-full h-0.5 bg-primary/25" />
+            <div className="w-full h-0.5 bg-brand/25" />
             <FormField
               control={form.control}
               name="settings"
@@ -115,14 +115,14 @@ const Details = ({ form }: StepProps) => {
               )}
             />
           </div>
-          <div className="w-full h-0.5 bg-primary/25 sm:hidden" />
+          <div className="w-full h-0.5 bg-brand/25 sm:hidden" />
           <div className="flex flex-col gap-5 w-full sm:w-2/5">
             <FormField
               control={form.control}
               name="name"
               render={({ field: { value, onChange, ...fieldProps } }) => (
                 <FormItem>
-                  <FormLabel className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+                  <FormLabel className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
                     Name
                   </FormLabel>
                   <FormControl>
@@ -143,7 +143,7 @@ const Details = ({ form }: StepProps) => {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+                  <FormLabel className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
                     Description
                   </FormLabel>
                   <FormControl>
@@ -157,14 +157,14 @@ const Details = ({ form }: StepProps) => {
                 </FormItem>
               )}
             />
-            <div className="w-full h-0.5 bg-primary/25" />
+            <div className="w-full h-0.5 bg-brand/25" />
             <FormField
               control={form.control}
               name="leaderboardSize"
               render={({ field }) => (
                 <FormItem>
                   <div className="flex flex-row items-center gap-5 relative overflow-visible">
-                    <FormLabel className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+                    <FormLabel className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
                       Leaderboard Size
                     </FormLabel>
                     <FormDescription className="hidden sm:block sm:text-xs xl:text-sm 3xl:text-base">
@@ -183,7 +183,7 @@ const Details = ({ form }: StepProps) => {
                             <p className="text-muted-foreground">
                               Determines how many players are scored.
                             </p>
-                            <p className="text-neutral-500 text-wrap">
+                            <p className="text-neutral text-wrap">
                               The size of the leaderboard governs how many
                               players can recieve entry fees and prizes as well
                               as who can qualify for further tournaments.
@@ -209,9 +209,7 @@ const Details = ({ form }: StepProps) => {
                               variant={
                                 field.value === size ? "default" : "outline"
                               }
-                              className={`sm:px-2 2xl:px-4
-                              ${field.value === size && "bg-primary-dark"}
-                            `}
+                              className={`sm:px-2 2xl:px-4`}
                               type="button"
                               onClick={() => field.onChange(size)}
                             >
@@ -248,15 +246,13 @@ const Details = ({ form }: StepProps) => {
         </div>
       </div>
       <Dialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen}>
-        <DialogContent className="sm:hidden bg-black border border-primary p-4 rounded-lg max-w-[90vw] mx-auto">
+        <DialogContent className="sm:hidden bg-black border border-brand p-4 rounded-lg max-w-[90vw] mx-auto">
           <div className="flex flex-col gap-4 justify-between items-center mb-4">
-            <h3 className="font-astronaut text-lg text-primary">
-              Leaderboard Size
-            </h3>
+            <h3 className="font-brand text-lg text-brand">Leaderboard Size</h3>
             <p className="text-muted-foreground">
               Determines how many players are scored.
             </p>
-            <p className="text-neutral-500 text-wrap text-sm text-center">
+            <p className="text-neutral text-wrap text-sm text-center">
               The size of the leaderboard governs how many players can recieve
               entry fees and prizes as well as who can qualify for further
               tournaments.

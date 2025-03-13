@@ -5,7 +5,7 @@ import {
   Prize,
   Token,
   EntryFee,
-  QualificationProof,
+  QualificationProofEnum,
   PrizeTypeEnum,
 } from "@/generated/models.gen";
 import {
@@ -44,10 +44,6 @@ const prepareForExecution = (tournament: Tournament): ExecutableTournament => {
   };
 };
 
-export function selectTournament(client: any, isMainnet: boolean): any {
-  return isMainnet ? client["LSTournament"] : client["tournament_mock"];
-}
-
 export const useSystemCalls = () => {
   const { client, selectedChainConfig } = useDojo();
   const { account, address } = useAccount();
@@ -70,7 +66,7 @@ export const useSystemCalls = () => {
     newEntryCount: BigNumberish,
     player_name: BigNumberish,
     player_address: BigNumberish,
-    qualification: CairoOption<QualificationProof>,
+    qualification: CairoOption<QualificationProofEnum>,
     gameCount: BigNumberish
   ) => {
     const { wait, revert, confirm } = applyTournamentEntryUpdate(
@@ -203,8 +199,6 @@ export const useSystemCalls = () => {
           ]),
         });
       }
-
-      console.log("calls", calls);
 
       const tx = isMainnet
         ? await account?.execute(calls)

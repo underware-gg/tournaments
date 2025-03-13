@@ -48,6 +48,7 @@ import useUIStore from "@/hooks/useUIStore";
 // import { useEkuboPrices } from "@/hooks/useEkuboPrices";
 // import { tokens } from "@/lib/tokensMeta";
 import { OptionalSection } from "@/components/createTournament/containers/OptionalSection";
+import { getChecksumAddress, validateChecksumAddress } from "starknet";
 
 const EntryRequirements = ({ form }: StepProps) => {
   const { nameSpace } = useDojo();
@@ -57,6 +58,7 @@ const EntryRequirements = ({ form }: StepProps) => {
   const [gameFilters, setGameFilters] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const { gameData } = useUIStore();
+  const [addressError, setAddressError] = useState("");
 
   const { data: tournaments } = useGetTournaments({
     namespace: nameSpace,
@@ -121,7 +123,7 @@ const EntryRequirements = ({ form }: StepProps) => {
 
           {field.value && (
             <>
-              <div className="w-full h-0.5 bg-primary/25" />
+              <div className="w-full h-0.5 bg-brand/25" />
               <div className="space-y-4 p-4">
                 <div className="flex gap-4">
                   <Button
@@ -162,7 +164,7 @@ const EntryRequirements = ({ form }: StepProps) => {
 
                 {form.watch("gatingOptions.type") === "token" && (
                   <>
-                    <div className="w-full h-0.5 bg-primary/25" />
+                    <div className="w-full h-0.5 bg-brand/25" />
                     <div className="flex flex-row items-center gap-5">
                       <FormField
                         control={form.control}
@@ -191,7 +193,7 @@ const EntryRequirements = ({ form }: StepProps) => {
 
                 {form.watch("gatingOptions.type") === "tournament" && (
                   <>
-                    <div className="w-full h-0.5 bg-primary/25" />
+                    <div className="w-full h-0.5 bg-brand/25" />
                     <div className="space-y-4">
                       <FormField
                         control={form.control}
@@ -199,7 +201,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                         render={({ field }) => (
                           <FormItem>
                             <div className="flex flex-row items-center gap-5">
-                              <FormLabel className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+                              <FormLabel className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
                                 Requirement
                               </FormLabel>
                               <FormDescription className="hidden sm:block">
@@ -236,14 +238,14 @@ const EntryRequirements = ({ form }: StepProps) => {
                           </FormItem>
                         )}
                       />
-                      <div className="w-full h-0.5 bg-primary/25" />
+                      <div className="w-full h-0.5 bg-brand/25" />
                       <FormField
                         control={form.control}
                         name="gatingOptions.tournament.tournaments"
                         render={({ field }) => (
                           <FormItem>
                             <div className="flex flex-row items-center gap-5">
-                              <FormLabel className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+                              <FormLabel className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
                                 Tournaments
                               </FormLabel>
                               <FormDescription>Add tournaments</FormDescription>
@@ -256,7 +258,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                                       return (
                                         <div
                                           key={selectedTournament.id}
-                                          className="inline-flex items-center gap-2 p-2 border border-primary-dark rounded w-fit"
+                                          className="inline-flex items-center gap-2 p-2 border border-brand-muted rounded w-fit"
                                         >
                                           <span>
                                             {feltToString(
@@ -311,7 +313,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                                       </DialogTitle>
                                       {/* Search input */}
                                       <div className="px-4 pb-2 flex flex-col gap-2">
-                                        <div className="flex items-center border rounded border-primary-dark bg-background">
+                                        <div className="flex items-center border rounded border-brand-muted bg-background">
                                           <Search className="w-4 h-4 ml-3 text-muted-foreground" />
                                           <Input
                                             placeholder="Search tournaments..."
@@ -332,9 +334,9 @@ const EntryRequirements = ({ form }: StepProps) => {
                                                 gameFilters.includes(
                                                   game.contract_address
                                                 )
-                                                  ? "bg-primary-dark text-black"
+                                                  ? "bg-brand-muted text-black"
                                                   : "bg-black"
-                                              } border border-neutral-500 px-2 flex items-center gap-2 cursor-pointer`}
+                                              } border border-brand-muted px-2 flex items-center gap-2 cursor-pointer`}
                                               onClick={() => {
                                                 if (
                                                   gameFilters.includes(
@@ -370,7 +372,7 @@ const EntryRequirements = ({ form }: StepProps) => {
                                     </DialogHeader>
 
                                     {/* Tournament list */}
-                                    <div className="flex-1 overflow-y-auto border-t border-primary-dark">
+                                    <div className="flex-1 overflow-y-auto border-t border-brand-muted">
                                       {tournamentsData?.length > 0 ? (
                                         tournamentsData.map(
                                           (tournament, index) => {
@@ -422,85 +424,97 @@ const EntryRequirements = ({ form }: StepProps) => {
                                             // const groupedPrizes = groupPrizesByTokens(allPrizes, tokens);
 
                                             // const totalPrizesValueUSD = calculateTotalValue(groupedPrizes, prices);
-                                            return (
-                                              <DialogClose asChild key={index}>
-                                                <div
-                                                  className="flex flex-row items-center justify-between border-b border-primary-dark px-4 py-2 hover:bg-primary/20 hover:cursor-pointer"
-                                                  onClick={() => {
-                                                    if (
-                                                      !(
-                                                        field.value || []
-                                                      ).includes(
-                                                        tournament.tournament
-                                                      )
-                                                    ) {
-                                                      field.onChange([
-                                                        ...(field.value || []),
-                                                        tournament.tournament,
-                                                      ]);
-                                                    }
-                                                  }}
-                                                >
-                                                  <div className="flex flex-row items-center gap-2">
-                                                    <span className="font-astronaut">
-                                                      {feltToString(
-                                                        tournament.tournament
-                                                          .metadata.name
-                                                      )}
-                                                    </span>
-                                                    -
-                                                    <span className="font-astronaut">
-                                                      #
-                                                      {Number(
-                                                        tournament.tournament.id
-                                                      ).toString()}
-                                                    </span>
-                                                  </div>
-                                                  <span className="font-astronaut">
-                                                    {status}
-                                                  </span>
-                                                  <div className="flex flex-row">
-                                                    <span className="w-6 h-6">
-                                                      <USER />
-                                                    </span>
-                                                    {tournament.entryCount}
-                                                  </div>
-                                                  <div className="relative group flex items-center justify-center">
-                                                    <Tooltip delayDuration={50}>
-                                                      <TooltipTrigger asChild>
-                                                        <div className="flex items-center justify-center">
-                                                          <TokenGameIcon
-                                                            size="sm"
-                                                            game={
-                                                              tournament
-                                                                .tournament
-                                                                .game_config
-                                                                .address
-                                                            }
-                                                          />
-                                                        </div>
-                                                      </TooltipTrigger>
-                                                      <TooltipContent
-                                                        side="top"
-                                                        className="bg-black text-neutral-500 border border-primary-dark px-2 py-1 rounded text-sm"
-                                                      >
-                                                        {name
-                                                          ? feltToString(name)
-                                                          : "Unknown"}
-                                                      </TooltipContent>
-                                                    </Tooltip>
-                                                  </div>
-                                                  {/* <div>${tournament.pot}</div> */}
-                                                  <div className="flex flex-row items-center">
-                                                    <span className="w-5 h-5">
-                                                      <TROPHY />
-                                                    </span>
-                                                    {Number(
+                                            const beenSelected = (
+                                              field.value || []
+                                            ).some(
+                                              (element) =>
+                                                element.id ===
+                                                tournament.tournament.id
+                                            );
+                                            const content = (
+                                              <div
+                                                key={index}
+                                                className={`flex flex-row items-center justify-between border-b border-brand-muted ${
+                                                  beenSelected
+                                                    ? "bg-brand/70 text-black"
+                                                    : "bg-background hover:bg-brand/20"
+                                                } px-4 py-2 hover:cursor-pointer`}
+                                                onClick={() => {
+                                                  if (!beenSelected) {
+                                                    field.onChange([
+                                                      ...(field.value || []),
+                                                      tournament.tournament,
+                                                    ]);
+                                                  }
+                                                }}
+                                              >
+                                                <div className="flex flex-row items-center gap-2">
+                                                  <span className="font-brand">
+                                                    {feltToString(
                                                       tournament.tournament
-                                                        .game_config.prize_spots
+                                                        .metadata.name
+                                                    )}
+                                                  </span>
+                                                  -
+                                                  <span className="font-brand">
+                                                    #
+                                                    {Number(
+                                                      tournament.tournament.id
                                                     ).toString()}
-                                                  </div>
+                                                  </span>
                                                 </div>
+                                                <span className="font-brand">
+                                                  {status}
+                                                </span>
+                                                <div className="flex flex-row">
+                                                  <span className="w-6 h-6">
+                                                    <USER />
+                                                  </span>
+                                                  {tournament.entryCount}
+                                                </div>
+                                                <div className="relative group flex items-center justify-center">
+                                                  <Tooltip delayDuration={50}>
+                                                    <TooltipTrigger asChild>
+                                                      <div className="flex items-center justify-center">
+                                                        <TokenGameIcon
+                                                          size="sm"
+                                                          game={
+                                                            tournament
+                                                              .tournament
+                                                              .game_config
+                                                              .address
+                                                          }
+                                                        />
+                                                      </div>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent
+                                                      side="top"
+                                                      className="bg-black text-neutral border border-brand-muted px-2 py-1 rounded text-sm"
+                                                    >
+                                                      {name
+                                                        ? feltToString(name)
+                                                        : "Unknown"}
+                                                    </TooltipContent>
+                                                  </Tooltip>
+                                                </div>
+                                                {/* <div>${tournament.pot}</div> */}
+                                                <div className="flex flex-row items-center">
+                                                  <span className="w-5 h-5">
+                                                    <TROPHY />
+                                                  </span>
+                                                  {Number(
+                                                    tournament.tournament
+                                                      .game_config.prize_spots
+                                                  ).toString()}
+                                                </div>
+                                              </div>
+                                            );
+
+                                            return beenSelected ? (
+                                              content
+                                            ) : (
+                                              <DialogClose asChild key={index}>
+                                                {content}
                                               </DialogClose>
                                             );
                                           }
@@ -533,7 +547,7 @@ const EntryRequirements = ({ form }: StepProps) => {
 
                 {form.watch("gatingOptions.type") === "addresses" && (
                   <>
-                    <div className="w-full h-0.5 bg-primary/25" />
+                    <div className="w-full h-0.5 bg-brand/25" />
                     <div className="space-y-4">
                       <FormField
                         control={form.control}
@@ -541,13 +555,20 @@ const EntryRequirements = ({ form }: StepProps) => {
                         render={({ field }) => (
                           <FormItem>
                             <div className="flex flex-row items-center gap-2">
-                              <FormLabel className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+                              <FormLabel className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
                                 Whitelisted Addresses
                               </FormLabel>
-                              <FormDescription className="hidden sm:block">
-                                Add addresses that are allowed to participate in
-                                the tournament
-                              </FormDescription>
+                              <div className="flex flex-row items-center gap-2">
+                                <FormDescription className="hidden sm:block">
+                                  Add addresses that are allowed to participate
+                                  in the tournament
+                                </FormDescription>
+                                {addressError && (
+                                  <span className="text-red-500 text-sm">
+                                    {addressError}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             <FormControl>
                               <div className="flex flex-col gap-5">
@@ -563,11 +584,68 @@ const EntryRequirements = ({ form }: StepProps) => {
                                     type="button"
                                     onClick={() => {
                                       if (newAddress) {
-                                        field.onChange([
-                                          ...field.value,
-                                          newAddress,
-                                        ]);
-                                        setNewAddress("");
+                                        // Split by comma and trim whitespace
+                                        const addresses = newAddress
+                                          .split(",")
+                                          .map((addr) =>
+                                            getChecksumAddress(addr.trim())
+                                          )
+                                          .filter((addr) => addr.length > 0);
+
+                                        // Validate each address and track invalid ones
+                                        const validAddresses: string[] = [];
+                                        const invalidAddresses: string[] = [];
+                                        const duplicateAddresses: string[] = [];
+
+                                        addresses.forEach((addr) => {
+                                          try {
+                                            // Check if address is already in the list
+                                            if (field.value.includes(addr)) {
+                                              duplicateAddresses.push(
+                                                displayAddress(addr)
+                                              );
+                                            }
+                                            // Validate the address
+                                            else if (
+                                              validateChecksumAddress(addr)
+                                            ) {
+                                              validAddresses.push(addr);
+                                            } else {
+                                              invalidAddresses.push(addr);
+                                            }
+                                          } catch (e) {
+                                            invalidAddresses.push(addr);
+                                          }
+                                        });
+
+                                        // Construct error message
+                                        let errorMessage = "";
+                                        if (invalidAddresses.length > 0) {
+                                          errorMessage += `Invalid addresses: ${invalidAddresses.join(
+                                            ", "
+                                          )}`;
+                                        }
+                                        if (duplicateAddresses.length > 0) {
+                                          if (errorMessage)
+                                            errorMessage += ". ";
+                                          errorMessage += `Duplicate addresses: ${duplicateAddresses.join(
+                                            ", "
+                                          )}`;
+                                        }
+
+                                        if (validAddresses.length > 0) {
+                                          field.onChange([
+                                            ...field.value,
+                                            ...validAddresses,
+                                          ]);
+                                          setNewAddress("");
+                                          setAddressError(errorMessage);
+                                        } else {
+                                          setAddressError(
+                                            errorMessage ||
+                                              "No valid addresses found"
+                                          );
+                                        }
                                       }
                                     }}
                                   >
@@ -576,12 +654,12 @@ const EntryRequirements = ({ form }: StepProps) => {
                                 </div>
                                 {field.value.length > 0 && (
                                   <>
-                                    <div className="w-full h-0.5 bg-primary/25" />
+                                    <div className="w-full h-0.5 bg-brand/25" />
                                     <div className="flex flex-row gap-2 overflow-x-auto">
                                       {field.value.map((address, index) => (
                                         <div
                                           key={index}
-                                          className="flex items-center justify-between p-2 border border-neutral-500 rounded w-fit"
+                                          className="flex items-center justify-between p-2 border border-neutral rounded w-fit"
                                         >
                                           <span className="truncate">
                                             {displayAddress(address)}

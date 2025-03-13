@@ -349,7 +349,7 @@ export function AddPrizesDialog({
                 <h3 className="text-lg font-semibold">Prize Summary</h3>
                 <div className="flex flex-col items-end">
                   {totalValue > 0 && (
-                    <span className="font-bold text-lg font-astronaut">
+                    <span className="font-bold text-lg font-brand">
                       Total: ${totalValue.toFixed(2)}
                     </span>
                   )}
@@ -384,10 +384,10 @@ export function AddPrizesDialog({
               {aggregatedPrizesArray.map((prize: any, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-3 border border-primary-dark rounded-md"
+                  className="flex items-center justify-between p-3 border border-brand-muted rounded-md"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="font-astronaut w-10">
+                    <span className="font-brand w-10">
                       {`${prize.position}${getOrdinalSuffix(prize.position)}`}
                     </span>
                     <span className="font-medium">{selectedToken?.symbol}</span>
@@ -408,7 +408,7 @@ export function AddPrizesDialog({
                           className="w-6 h-6"
                           alt="Token logo"
                         />
-                        <span className="text-sm text-neutral-500">
+                        <span className="text-sm text-neutral">
                           ~${prize.value.toFixed(2)}
                         </span>
                       </div>
@@ -482,7 +482,7 @@ export function AddPrizesDialog({
             {newPrize.tokenAddress && (
               <div className="flex flex-col gap-1">
                 <div className="flex flex-row justify-between">
-                  <span className="min-w-[100px] font-astronaut">
+                  <span className="min-w-[100px] font-brand">
                     {isERC20 ? "Amount ($)" : "Token ID"}
                   </span>
                   {!pricesLoading ? (
@@ -549,7 +549,7 @@ export function AddPrizesDialog({
                   <div className="space-y-2">
                     <div className="flex flex-row items-center gap-2">
                       <span className="min-w-[100px]">Distribution</span>
-                      <span className="text-sm text-neutral-500">
+                      <span className="text-sm text-neutral">
                         Adjust the spread of the distribution
                       </span>
                     </div>
@@ -595,9 +595,9 @@ export function AddPrizesDialog({
                       }).map((_, index) => (
                         <div
                           key={index}
-                          className="w-[175px] min-w-[175px] flex flex-row items-center justify-between flex-shrink-0 border border-neutral-500 rounded-md p-2"
+                          className="w-[175px] min-w-[175px] flex flex-row items-center justify-between flex-shrink-0 border border-neutral rounded-md p-2"
                         >
-                          <span className="font-astronaut text-lg">
+                          <span className="font-brand text-lg">
                             {index + 1}
                             {getOrdinalSuffix(index + 1)}
                           </span>
@@ -645,7 +645,7 @@ export function AddPrizesDialog({
                             {prices?.[
                               getTokenSymbol(newPrize.tokenAddress) ?? ""
                             ] && (
-                              <span className="text-xs text-neutral-500">
+                              <span className="text-xs text-neutral">
                                 ~$
                                 {(
                                   ((prizeDistributions[index]?.percentage ??
@@ -672,9 +672,9 @@ export function AddPrizesDialog({
               {currentPrizes.map((prize, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-2 p-2 bg-background/50 border border-primary-dark/50 rounded flex-shrink-0"
+                  className="flex items-center gap-2 p-2 bg-background/50 border border-brand-muted/50 rounded flex-shrink-0"
                 >
-                  <span className="font-astronaut">
+                  <span className="font-brand">
                     {prize.position}
                     {getOrdinalSuffix(prize.position ?? 0)}
                   </span>
@@ -691,7 +691,7 @@ export function AddPrizesDialog({
                           />
                         </div>
 
-                        <span className="text-sm text-neutral-500">
+                        <span className="text-sm text-neutral">
                           {pricesLoading
                             ? "Loading..."
                             : prices?.[
@@ -713,7 +713,7 @@ export function AddPrizesDialog({
 
                     {/* Delete button */}
                     <span
-                      className="w-6 h-6 text-primary-dark cursor-pointer flex-shrink-0"
+                      className="w-6 h-6 text-brand-muted cursor-pointer flex-shrink-0"
                       onClick={() => {
                         const newPrizes = [...currentPrizes];
                         newPrizes.splice(index, 1);

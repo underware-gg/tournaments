@@ -72,7 +72,7 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
                 className="w-6 h-6"
                 alt="Token logo"
               />
-              <span className="text-sm text-neutral-500 uppercase">
+              <span className="text-sm text-neutral uppercase">
                 {selectedToken.symbol}
               </span>
             </div>
@@ -85,7 +85,7 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
         <DialogHeader className="flex-shrink-0 pb-4">
           <DialogTitle className="p-4">Select Token</DialogTitle>
           <div className="px-4 pb-4">
-            <div className="flex items-center border rounded border-primary-dark bg-background">
+            <div className="flex items-center border rounded border-brand-muted bg-background">
               <Search className="w-4 h-4 ml-3 text-muted-foreground" />
               <Input
                 placeholder="Search tokens..."
@@ -102,7 +102,7 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
             return (
               <DialogClose asChild key={index}>
                 <div
-                  className={`w-full flex flex-row items-center justify-between hover:bg-primary/20 hover:cursor-pointer px-5 py-2 ${
+                  className={`w-full flex flex-row items-center justify-between hover:bg-brand/20 hover:cursor-pointer px-5 py-2 ${
                     selectedToken?.address === token.address
                       ? "bg-terminal-green/75 text-terminal-black"
                       : ""
@@ -119,12 +119,12 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
                     )}
                     <div className="flex flex-col">
                       <span className="font-bold">{token.name}</span>
-                      <span className="uppercase text-neutral-500">
+                      <span className="uppercase text-neutral">
                         {token.symbol}
                       </span>
                     </div>
                   </div>
-                  <span className="uppercase text-neutral-500">
+                  <span className="uppercase text-neutral">
                     {token.token_type.activeVariant()}
                   </span>
                 </div>

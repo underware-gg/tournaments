@@ -155,8 +155,6 @@ const Overview = () => {
       active: selectedTab === "my",
     });
 
-  console.log(myTournaments);
-
   const tournamentsData = (
     selectedTab === "my" ? myTournaments : tournaments
   ).map((tournament) => {
@@ -218,7 +216,7 @@ const Overview = () => {
     <div className="flex flex-row gap-5">
       <GameFilters />
       <div className="flex flex-col gap-2 sm:gap-0 w-full sm:w-4/5 p-1 sm:p-2">
-        <div className="flex flex-row justify-between w-full sm:border-b-4 border-primary">
+        <div className="flex flex-row justify-between w-full sm:border-b-4 border-brand">
           {/* Hide TournamentTabs on mobile when selectedTab is "my" */}
           <div className={selectedTab === "my" ? "hidden sm:block" : "block"}>
             <TournamentTabs
@@ -233,14 +231,12 @@ const Overview = () => {
 
           {/* Show a title when on "my" tab on mobile */}
           {selectedTab === "my" && (
-            <div className="sm:hidden font-astronaut text-xl">
-              My Tournaments
-            </div>
+            <div className="sm:hidden font-brand text-xl">My Tournaments</div>
           )}
           <div className="flex flex-row gap-4 items-center">
             <span className="hidden 2xl:block">Sort By:</span>
             <DropdownMenu>
-              <DropdownMenuTrigger className="bg-black border-2 border-retro-grey px-2 min-w-[100px] h-full">
+              <DropdownMenuTrigger className="bg-black border-2 border-brand-muted px-2 min-w-[100px] h-8">
                 <div className="flex flex-row items-center justify-between capitalize text-sm 2xl:text-base w-full sm:gap-2">
                   {
                     SORT_OPTIONS[selectedTab].find(
@@ -252,15 +248,15 @@ const Overview = () => {
                   </span>
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-black border-2 border-retro-grey">
-                <DropdownMenuLabel className="text-primary">
+              <DropdownMenuContent className="bg-black border-2 border-brand-muted">
+                <DropdownMenuLabel className="text-brand">
                   Options
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-primary-dark" />
+                <DropdownMenuSeparator className="bg-brand-muted" />
                 {SORT_OPTIONS[selectedTab].map((option) => (
                   <DropdownMenuItem
                     key={option.value}
-                    className="text-primary cursor-pointer"
+                    className="text-brand cursor-pointer"
                     onClick={() => setSortBy(option.value)}
                   >
                     {option.label}
@@ -282,10 +278,10 @@ const Overview = () => {
                 {gameFilters.map((filter) => (
                   <div
                     key={filter}
-                    className="flex flex-row items-center gap-2 sm:gap-4 bg-black border-2 border-retro-grey py-2 px-4 shrink-0"
+                    className="flex flex-row items-center gap-2 sm:gap-4 bg-black border-2 border-brand-muted py-2 px-4 shrink-0"
                   >
                     <GameIcon game={filter} />
-                    <span className="text-lg 2xl:text-2xl font-astronaut">
+                    <span className="text-lg 2xl:text-2xl font-brand">
                       {feltToString(
                         gameData.find(
                           (game) => game.contract_address === filter
@@ -293,7 +289,7 @@ const Overview = () => {
                       )}
                     </span>
                     <span
-                      className="w-4 h-4 sm:w-6 sm:h-6 text-primary-dark cursor-pointer"
+                      className="w-4 h-4 sm:w-6 sm:h-6 text-brand-muted cursor-pointer"
                       onClick={() => removeGameFilter(filter)}
                     >
                       <X />

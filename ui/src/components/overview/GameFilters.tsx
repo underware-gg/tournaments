@@ -16,8 +16,8 @@ const GameFilters = () => {
             <Button
               size={"xl"}
               variant="outline"
-              className={`text-lg px-2 xl:px-4 xl:text-xl 2xl:text-2xl font-astronaut w-full ${
-                gameFilters.includes(key) ? "bg-primary/25" : ""
+              className={`text-lg px-2 xl:px-4 xl:text-xl 2xl:text-2xl font-brand w-full ${
+                gameFilters.includes(key) ? "bg-brand/25" : ""
               }`}
               onClick={() => {
                 if (gameFilters.includes(key)) {
@@ -37,7 +37,7 @@ const GameFilters = () => {
             </Button>
             {isDisabled && (
               <div className="absolute top-1 right-2 flex items-center justify-center rounded-md">
-                <span className="text-sm font-astronaut uppercase">
+                <span className="text-sm font-brand uppercase">
                   Coming Soon
                 </span>
               </div>

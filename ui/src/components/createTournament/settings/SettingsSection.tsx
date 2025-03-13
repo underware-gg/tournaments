@@ -80,10 +80,11 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
     );
   }, [settingsEntities, form.watch("game")]);
 
+  const hasSettings = mergedGameSettings[field.value]?.hasSettings ?? false;
   return (
     <FormItem>
       <div className="flex flex-row items-center gap-5">
-        <FormLabel className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+        <FormLabel className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
           Settings
         </FormLabel>
         <FormDescription className="sm:text-xs xl:text-sm 3xl:text-base">
@@ -95,16 +96,23 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
           <div className="space-y-4">
             <div className="flex justify-between items-start">
               <div className="flex flex-col">
-                <h3 className="font-astronaut text-lg">
-                  {feltToString(mergedGameSettings[field.value]?.name ?? "")}
+                <h3 className="font-brand text-lg">
+                  {hasSettings
+                    ? feltToString(mergedGameSettings[field.value]?.name ?? "")
+                    : "Default"}
                 </h3>
-                <p className="text-sm text-primary-dark">
-                  {mergedGameSettings[field.value]?.description}
+                <p className="text-sm text-brand-muted">
+                  {hasSettings
+                    ? mergedGameSettings[field.value]?.description
+                    : "No settings available"}
                 </p>
               </div>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline" disabled={!form.watch("game")}>
+                  <Button
+                    variant="outline"
+                    disabled={!form.watch("game") || !hasSettings}
+                  >
                     Select Settings
                   </Button>
                 </DialogTrigger>

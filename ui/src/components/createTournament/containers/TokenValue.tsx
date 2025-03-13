@@ -32,9 +32,7 @@ export const TokenValue = ({
             className="w-6"
             alt="Token logo"
           />
-          <span className="text-sm text-neutral-500">
-            ~${usdValue.toFixed(2)}
-          </span>
+          <span className="text-sm text-neutral">~${usdValue.toFixed(2)}</span>
         </div>
       )}
     </>

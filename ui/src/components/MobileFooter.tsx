@@ -48,7 +48,7 @@ const MobileFooter = () => {
     <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-black flex flex-row items-stretch h-12 z-50 relative">
       {/* Animated indicator */}
       <motion.div
-        className="absolute top-0 h-1 bg-primary"
+        className="absolute top-0 h-1 bg-brand"
         initial={false}
         animate={{
           width: indicatorWidth,
@@ -60,7 +60,7 @@ const MobileFooter = () => {
       <button
         ref={(el) => (tabRefs.current[0] = el)}
         className={`flex flex-col items-center justify-center flex-1 ${
-          activeTabIndex === 0 ? "text-primary" : "text-gray-400"
+          activeTabIndex === 0 ? "text-brand" : "text-gray-400"
         }`}
         onClick={() => {
           navigate("/");
@@ -75,7 +75,7 @@ const MobileFooter = () => {
       <button
         ref={(el) => (tabRefs.current[1] = el)}
         className={`flex flex-col items-center justify-center flex-1 ${
-          activeTabIndex === 1 ? "text-primary" : "text-gray-400"
+          activeTabIndex === 1 ? "text-brand" : "text-gray-400"
         }`}
         onClick={() => {
           navigate("/");
@@ -90,7 +90,7 @@ const MobileFooter = () => {
       <button
         ref={(el) => (tabRefs.current[2] = el)}
         className={`flex flex-col items-center justify-center flex-1 ${
-          activeTabIndex === 2 ? "text-primary" : "text-gray-400"
+          activeTabIndex === 2 ? "text-brand" : "text-gray-400"
         }`}
         onClick={() => navigate("/create-tournament")}
       >

@@ -53,7 +53,7 @@ const TournamentTimeline = ({
           label="Registration"
           showConnector
           active={pulse ? !isStarted : false}
-          completed={isStarted}
+          completed={true}
         />
       )}
       <TimelineCard
@@ -67,7 +67,7 @@ const TournamentTimeline = ({
         label="Duration"
         showConnector
         active={pulse ? isStarted && !isEnded : false}
-        completed={isEnded}
+        completed={isStarted}
       />
       <TimelineCard
         icon={
@@ -80,7 +80,7 @@ const TournamentTimeline = ({
         label="Submission"
         showConnector
         active={pulse ? isEnded && !isSubmissionEnded : false}
-        completed={isSubmissionEnded}
+        completed={isEnded}
       />
       <TimelineCard
         icon={

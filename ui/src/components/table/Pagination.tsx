@@ -48,7 +48,7 @@ const Pagination = ({
         return (
           <span
             key={`ellipsis-${index}`}
-            className="sm:px-1 text-primary shrink-0"
+            className="sm:px-1 text-brand shrink-0"
           >
             {page}
           </span>

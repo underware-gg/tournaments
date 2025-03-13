@@ -129,9 +129,9 @@ const CreateTournament = () => {
         now.setMinutes(Math.ceil(now.getMinutes() / 5) * 5);
         return now;
       })(),
-      duration: 7,
+      duration: 86400,
       type: "fixed",
-      submissionPeriod: 1,
+      submissionPeriod: 3600,
 
       // Other steps
       enableGating: false,
@@ -452,7 +452,7 @@ const CreateTournament = () => {
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="font-astronaut hidden sm:block lg:text-2xl xl:text-3xl 2xl:text-4xl 3xl:text-5xl font-bold">
+          <span className="font-brand hidden sm:block lg:text-2xl xl:text-3xl 2xl:text-4xl 3xl:text-5xl font-bold">
             Create Tournament
           </span>
 
@@ -466,7 +466,7 @@ const CreateTournament = () => {
                     visitedSections.has(section) || section === currentStep
                       ? "cursor-pointer"
                       : "cursor-not-allowed opacity-50",
-                    currentStep === section && "border-b-2 border-primary"
+                    currentStep === section && "border-b-2 border-brand"
                   )}
                   onClick={() => handleSectionClick(section)}
                 >

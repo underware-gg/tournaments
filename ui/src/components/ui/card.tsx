@@ -8,9 +8,9 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-black border-2",
+        default: "bg-brand text-black border-2",
         destructive: "bg-destructive text-neutral-50 border-2",
-        outline: "bg-black text-primary border-2 border-primary",
+        outline: "bg-black text-brand border-2 border-brand",
       },
       size: {
         default: "p-4",
@@ -26,9 +26,9 @@ const cardVariants = cva(
 );
 
 const interactiveVariants = {
-  default: "hover:bg-primary/90 hover:cursor-pointer",
+  default: "hover:bg-brand/90 hover:cursor-pointer",
   destructive: "hover:bg-destructive/90 hover:cursor-pointer",
-  outline: "hover:bg-primary/10 hover:cursor-pointer",
+  outline: "hover:bg-brand/10 hover:cursor-pointer",
 } as const;
 
 const disabledVariants = {

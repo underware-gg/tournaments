@@ -125,7 +125,7 @@ export const TournamentCard = ({
     >
       <div className="flex flex-col justify-between h-full">
         <div className="flex flex-col gap-2">
-          <div className="flex flex-row justify-between font-astronaut text-lg 2xl:text-xl">
+          <div className="flex flex-row justify-between font-brand text-lg 2xl:text-xl">
             <p className="truncate">
               {feltToString(tournament?.metadata?.name!)}
             </p>
@@ -136,23 +136,23 @@ export const TournamentCard = ({
               : {entryCount}
             </div>
           </div>
-          <div className="hidden sm:block w-full h-0.5 bg-primary/25" />
+          <div className="hidden sm:block w-full h-0.5 bg-brand/25" />
         </div>
         <div className="hidden sm:flex flex-row">
           <div className="flex flex-col w-1/2">
             <div className="flex flex-row gap-2">
-              <span className="text-primary-dark">Registration:</span>
+              <span className="text-brand-muted">Registration:</span>
               <span>{registrationType}</span>
             </div>
             <div className="flex flex-row gap-2">
               {status === "upcoming" ? (
                 <>
-                  <span className="text-primary-dark">Starts In:</span>
+                  <span className="text-brand-muted">Starts In:</span>
                   <span>{startsIn}</span>
                 </>
               ) : (
                 <>
-                  <span className="text-primary-dark">Ends In:</span>
+                  <span className="text-brand-muted">Ends In:</span>
                   <span>{endsIn}</span>
                 </>
               )}
@@ -169,7 +169,7 @@ export const TournamentCard = ({
                 side="top"
                 align="center"
                 sideOffset={5}
-                className="bg-black text-neutral-500 border border-primary-dark px-2 py-1 rounded text-sm z-50"
+                className="bg-black text-neutral border border-brand-muted px-2 py-1 rounded text-sm z-50"
               >
                 {gameName ? feltToString(gameName) : "Unknown"}
               </TooltipContent>
@@ -181,17 +181,17 @@ export const TournamentCard = ({
             <TokenGameIcon key={index} game={gameAddress} size={"md"} />
           </div>
           <div className="flex flex-row items-center gap-2">
-            <span className="text-primary-dark">Fee:</span>
+            <span className="text-brand-muted">Fee:</span>
             {pricesLoading ? (
-              <Skeleton className="h-6 w-16 bg-primary/20" />
+              <Skeleton className="h-6 w-16 bg-brand/20" />
             ) : (
               <span>{hasEntryFee ? `$${entryFee}` : "FREE"}</span>
             )}
           </div>
           <div className="flex flex-row items-center gap-2">
-            <span className="text-primary-dark">Pot:</span>
+            <span className="text-brand-muted">Pot:</span>
             {pricesLoading ? (
-              <Skeleton className="h-6 w-16 bg-primary/20" />
+              <Skeleton className="h-6 w-16 bg-brand/20" />
             ) : totalPrizesValueUSD > 0 || totalPrizeNFTs > 0 ? (
               <div className="flex flex-row items-center gap-2">
                 {totalPrizesValueUSD > 0 && (

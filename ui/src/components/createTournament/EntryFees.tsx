@@ -92,7 +92,7 @@ const EntryFees = ({ form }: StepProps) => {
 
           {field.value && (
             <>
-              <div className="w-full h-0.5 bg-primary/25" />
+              <div className="w-full h-0.5 bg-brand/25" />
               <div className="space-y-4">
                 <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
                   <FormField
@@ -115,7 +115,7 @@ const EntryFees = ({ form }: StepProps) => {
                       </FormItem>
                     )}
                   />
-                  <div className="w-full h-0.5 bg-primary/25 sm:hidden" />
+                  <div className="w-full h-0.5 bg-brand/25 sm:hidden" />
                   <FormField
                     control={form.control}
                     name="entryFees.value"
@@ -123,7 +123,7 @@ const EntryFees = ({ form }: StepProps) => {
                       <FormItem>
                         <div className="flex flex-col gap-2">
                           <div className="flex flex-row items-center gap-5">
-                            <FormLabel className="text-lg font-astronaut">
+                            <FormLabel className="text-lg font-brand">
                               Amount ($)
                             </FormLabel>
                             <FormDescription className="hidden sm:block sm:text-xs xl:text-sm">
@@ -157,7 +157,7 @@ const EntryFees = ({ form }: StepProps) => {
                     )}
                   />
                 </div>
-                <div className="w-full h-0.5 bg-primary/25" />
+                <div className="w-full h-0.5 bg-brand/25" />
                 <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -165,7 +165,7 @@ const EntryFees = ({ form }: StepProps) => {
                     render={({ field }) => (
                       <FormItem>
                         <div className="flex flex-row items-center gap-5">
-                          <FormLabel className="font-astronaut text-lg">
+                          <FormLabel className="font-brand text-lg">
                             Creator Fee (%)
                           </FormLabel>
                           <FormDescription className="hidden sm:block sm:text-xs xl:text-sm">
@@ -239,14 +239,14 @@ const EntryFees = ({ form }: StepProps) => {
                       </FormItem>
                     )}
                   />
-                  <div className="w-full h-0.5 bg-primary/25 sm:hidden" />
+                  <div className="w-full h-0.5 bg-brand/25 sm:hidden" />
                   <FormField
                     control={form.control}
                     name="entryFees.gameFeePercentage"
                     render={({ field }) => (
                       <FormItem>
                         <div className="flex flex-row items-center gap-5">
-                          <FormLabel className="font-astronaut text-lg">
+                          <FormLabel className="font-brand text-lg">
                             Game Fee (%)
                           </FormLabel>
                           <FormDescription className="hidden sm:block sm:text-xs xl:text-sm">
@@ -320,11 +320,11 @@ const EntryFees = ({ form }: StepProps) => {
                     )}
                   />
                 </div>
-                <div className="w-full h-0.5 bg-primary/25" />
+                <div className="w-full h-0.5 bg-brand/25" />
                 <div className="space-y-4">
                   <div className="flex flex-col sm:flex-row justify-between">
                     <div className="flex flex-row items-center gap-5">
-                      <FormLabel className="font-astronaut text-lg">
+                      <FormLabel className="font-brand text-lg">
                         Prize Distribution
                       </FormLabel>
                       <FormDescription className="hidden sm:block sm:text-xs xl:text-sm">
@@ -394,9 +394,9 @@ const EntryFees = ({ form }: StepProps) => {
                           control={form.control}
                           name={`entryFees.prizeDistribution.${index}.percentage`}
                           render={({ field }) => (
-                            <FormItem className="w-[175px] min-w-[175px] flex flex-row items-center justify-between flex-shrink-0 border border-neutral-500 rounded-md p-2 space-y-0">
+                            <FormItem className="w-[175px] min-w-[175px] flex flex-row items-center justify-between flex-shrink-0 border border-neutral rounded-md p-2 space-y-0">
                               <FormLabel>
-                                <span className="font-astronaut text-lg">
+                                <span className="font-brand text-lg">
                                   {index + 1}
                                   {getOrdinalSuffix(index + 1)}
                                 </span>
@@ -448,7 +448,7 @@ const EntryFees = ({ form }: StepProps) => {
                                           ) ?? ""
                                         ) ?? ""
                                       ] && (
-                                        <span className="text-xs text-neutral-500">
+                                        <span className="text-xs text-neutral">
                                           ~$
                                           {(
                                             ((form.watch(

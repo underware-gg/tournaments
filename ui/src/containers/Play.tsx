@@ -38,7 +38,7 @@ const Play = () => {
   });
 
   return (
-    <div className="flex flex-col gap-5 h-[calc(100vh-80px)] w-3/4 mx-auto px-20 pt-20">
+    <div className="flex flex-col gap-5 h-[calc(100vh-80px)] w-3/4 mx-auto">
       <div className="space-y-5">
         <div className="flex flex-row justify-between items-center">
           <Button variant="outline" onClick={() => navigate("/")}>
@@ -50,7 +50,7 @@ const Play = () => {
       <div className="flex flex-col gap-5">
         <div className="flex flex-row items-center h-12 justify-between">
           <div className="flex flex-row gap-5">
-            <span className="font-astronaut text-4xl">Game Simulator</span>
+            <span className="font-brand text-4xl">Game Simulator</span>
           </div>
         </div>
         <div className="flex flex-row gap-2">

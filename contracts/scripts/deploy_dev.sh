@@ -46,7 +46,7 @@ echo "TEST_ERC721: $TEST_ERC721"
 echo "Waiting 10 seconds before execution..."
 sleep 10
 
-sozo execute tournament_mock initializer --calldata 0,1,$TEST_ERC20,$TEST_ERC721
+sozo execute tournament_mock initializer 0 1 $TEST_ERC20 $TEST_ERC721
 sozo execute game_mock initializer
 
 #------------------

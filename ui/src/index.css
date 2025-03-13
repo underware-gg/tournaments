@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -59,122 +61,134 @@
 }
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* =================
+     Theme Configuration
+     ================= */
+
+  /* Colors - Main Theme */
+  --color-brand       : 225, 249, 128;
+  /* Main brand color */
+  --color-brand-muted : 177, 185, 122;
+  /* Secondary brand color */
+  --color-brand-subtle: 43, 50, 0;
+  /* Tertiary brand color */
+
+  /* Colors - System */
+  --color-background: 0, 0, 0;
+  /* Page background */
+  --color-foreground: 255, 255, 255;
+  /* Default text */
+  --color-neutral   : 128, 128, 128;
+  /* Neutral/gray color */
+
+  /* Colors - Semantic */
+  --color-destructive: 255, 76, 76;
+  /* Error/delete actions */
+  --color-warning    : 255, 193, 7;
+  /* Warning messages */
+  --color-success    : 0, 200, 83;
+  /* Success messages */
+
+  /* Typography */
+  --font-brand: 'AstroNaut', sans-serif;
+  /* Headers, prominent text */
+  --font-body : 'Jost', sans-serif;
+  /* Body text */
+
+  /* Layout */
+  --radius: 0.5rem;
+  /* Border radius */
+
+  /* Border colors for different button variants */
+  --border-default    : var(--color-brand-muted);
+  --border-destructive: var(--color-destructive);
+  --border-outline    : var(--color-brand);
+  --border-tab        : var(--color-brand-muted);
+
+  --timeline-extension: 10px;
+  /* Timeline spacing */
+
+  /* =================
+     Theme Application
+     ================= */
+
+  /* Base styles */
+  font-family: var(--font-body);
   line-height: 1.5;
   font-weight: 400;
+  color      : rgba(var(--color-brand), 1);
 
-  color: rgba(0, 218, 163, 1);
-  background-image: radial-gradient(circle, rgba(0, 218, 163, 0.1), rgba(0, 218, 163, 0)),
-    url(/background.png);
+  /* Background */
+  background-image: radial-gradient(circle,
+      rgba(var(--color-brand), 0.05),
+      rgba(var(--color-brand), 0)), url(/background.png);
   background-size      : cover;
   background-position  : center;
   background-repeat    : no-repeat;
   background-attachment: fixed;
 
+  /* Text rendering */
   font-synthesis         : none;
   text-rendering         : optimizeLegibility;
   -webkit-font-smoothing : antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  --pixel-border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2333FF33'%3E%3Cpath d='M2,2h2v2H2V2ZM4,0h2V2h-2V0Zm6,4h2v2h-2v-2ZM0,4H2v2H0v-2ZM6,0h2V2h-2V0Zm2,2h2v2h-2V2Zm0,6h2v2h-2v-2Zm-2,2h2v2h-2v-2ZM0,6H2v2H0v-2Zm10,0h2v2h-2v-2Zm-6,4h2v2h-2v-2Zm-2-2h2v2H2v-2Zm6-2h2v2h-2v-2Zm-2,2h2v2h-2v-2Zm2-4h2v2h-2v-2Zm-4,4h2v2h-2v-2Zm2-2h2v2h-2v-2Z'/%3E%3C/svg%3E");
-  --timeline-extension: 10px;
-
-  /* Primary colors */
-  --color-primary       : 0, 218, 163;
-  --color-primary-dark  : 0, 140, 105;
-  --color-primary-darker: 31, 66, 42;
-
-  /* Neutral colors */
-  --color-neutral: 128, 128, 128;
-
-  /* Semantic colors */
-  --color-destructive: 255, 76, 76;
-  --color-warning    : 255, 193, 7;
-  --color-success    : 0, 200, 83;
-
-  /* Border colors for different button variants */
-  --border-default    : var(--color-primary-dark);
-  --border-destructive: var(--color-destructive);
-  --border-outline    : var(--color-primary);
-  --border-tab        : var(--color-primary-dark);
-
-  /* Background and text colors */
-  --color-background: 0, 0, 0;
-  --color-foreground: 255, 255, 255;
 }
 
+/* Responsive adjustments */
 @media (min-width: 640px) {
   :root {
     --timeline-extension: 20px;
   }
 }
 
-a {
-  font-weight    : 500;
-  color          : #646cff;
-  text-decoration: inherit;
-}
+/* =================
+   Scrollbar Styling
+   ================= */
 
-a:hover {
-  color: #535bf2;
-}
-
-@layer base {
-  :root {
-    --radius: 0.5rem;
-  }
-}
-
-/* Custom scrollbar styling */
+/* Firefox */
 * {
   scrollbar-width: thin;
-  /* Firefox */
-  scrollbar-color: rgba(0, 218, 163, 0.5) rgba(0, 0, 0, 0.1);
-  /* Firefox */
+  scrollbar-color: rgba(var(--color-brand), 0.5) rgba(var(--color-brand-subtle), 0.1);
 }
 
-/* WebKit browsers (Chrome, Safari, Edge) */
+/* WebKit (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
   width : 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background   : rgba(0, 0, 0, 0.1);
+  background   : rgba(var(--color-brand-subtle), 0.1);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background   : rgba(0, 218, 163, 0.5);
+  background   : rgba(var(--color-brand), 0.5);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 218, 163, 0.8);
+  background: rgba(var(--color-brand), 0.8);
 }
 
-/* For touch devices, ensure scrolling feels natural */
+/* Touch device optimizations */
 @media (pointer: coarse) {
   * {
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Make scrollbars thinner on touch devices */
   ::-webkit-scrollbar {
     width : 4px;
     height: 4px;
   }
 }
 
-/* Hide scrollbars but keep functionality for specific elements if needed */
+/* Optional: Hide scrollbars */
 .hide-scrollbar {
   -ms-overflow-style: none;
-  /* IE and Edge */
   scrollbar-width   : none;
-  /* Firefox */
 }
 
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
-  /* Chrome, Safari, Opera */
 }

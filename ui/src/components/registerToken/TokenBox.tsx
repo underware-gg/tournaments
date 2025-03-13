@@ -27,7 +27,7 @@ const TokenBox = ({
 }: TokenBoxProps) => {
   const [tokenId, setTokenId] = useState(0);
   return (
-    <div className="flex flex-col gap-2 items-center justify-center border border-primary bg-black p-2">
+    <div className="flex flex-col gap-2 items-center justify-center border border-brand bg-black p-2">
       <p className="text-lg">{title}</p>
       <div className="relative flex flex-row items-center gap-2">
         <p className="text-lg">Address: {displayAddress(contractAddress)}</p>

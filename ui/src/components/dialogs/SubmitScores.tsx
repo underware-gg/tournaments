@@ -81,7 +81,7 @@ export function SubmitScoresDialog({
             {!loading ? (
               currentLeaderboard?.map((score, index) => (
                 <div className="flex flex-row items-center gap-5" key={index}>
-                  <span className="font-astronaut w-10">
+                  <span className="font-brand w-10">
                     {index + 1}
                     {getOrdinalSuffix(index + 1)}
                   </span>
@@ -95,7 +95,7 @@ export function SubmitScoresDialog({
                       backgroundPosition: "0 center",
                     }}
                   ></p>
-                  <span className="font-astronaut">{score.score}</span>
+                  <span className="font-brand">{score.score}</span>
                 </div>
               ))
             ) : (

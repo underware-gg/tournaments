@@ -5,5 +5,6 @@ rpc = "http://localhost:5050/"
 index_pending = true
 index_transactions = false
 contracts = [
-  "erc721:0x258fe2bce59251748d82ab91f461f8045f8b80b554e867ec70e2b3cb71449a9", # game_mock
+  "erc721:0x6b9ae82d70df624b322f96a602cbf95301e0bf03b9381ce7bdbbf23916573b2", # game_mock
+  "erc721:0x3cd49567e166e69cae48d7cd0391a087bcfbc034b85363cbfe4c24a6e88e747", # test_erc721
 ]

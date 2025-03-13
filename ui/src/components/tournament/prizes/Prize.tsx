@@ -43,7 +43,7 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
   // Function to render prize details content
   const renderPrizeDetails = () => (
     <div className="space-y-2">
-      <h4 className="font-medium font-astronaut pt-4 px-4">
+      <h4 className="font-medium font-brand pt-4 px-4">
         {position}
         <sup>{getOrdinalSuffix(position)}</sup> Prize
       </h4>
@@ -72,17 +72,15 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
                 }`
               )}
               {prize.type === "erc20" && hasPrice && (
-                <span className="text-neutral-500">
-                  ~${USDValue.toFixed(2)}
-                </span>
+                <span className="text-neutral">~${USDValue.toFixed(2)}</span>
               )}
             </div>
           );
         })}
         {totalPrizesValueUSD > 0 && (
-          <div className="pt-2 border-t border-primary/50">
+          <div className="pt-2 border-t border-brand/50">
             <div className="flex justify-between items-center px-4 pb-4">
-              <span className="font-astronaut">Total</span>
+              <span className="font-brand">Total</span>
               <span>${totalPrizesValueUSD.toFixed(2)}</span>
             </div>
           </div>
@@ -101,23 +99,23 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: position * 0.1 }}
-              className="flex items-center gap-4 p-2 sm:p-3 rounded-lg border border-primary/20 w-fit hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 transition-all duration-200"
+              className="flex items-center gap-4 p-2 sm:p-3 rounded-lg border border-brand/20 w-fit hover:cursor-pointer hover:bg-brand/25 hover:border-brand/30 transition-all duration-200"
             >
-              <div className="flex items-center justify-center w-6 h-6 xl:w-8 xl:h-8 3xl:w-10 3xl:h-10 rounded-full bg-primary/20">
-                <span className="font-astronaut xl:text-lg 3xl:text-2xl text-primary">
+              <div className="flex items-center justify-center w-6 h-6 xl:w-8 xl:h-8 3xl:w-10 3xl:h-10 rounded-full bg-brand/20">
+                <span className="font-brand xl:text-lg 3xl:text-2xl text-brand">
                   {position}
                   <sup>{getOrdinalSuffix(position)}</sup>
                 </span>
               </div>
               {totalPrizesValueUSD > 0 || totalPrizeNFTs > 0 ? (
-                <div className="flex flex-row items-center gap-2 font-astronaut xl:text-lg 3xl:text-2xl">
+                <div className="flex flex-row items-center gap-2 font-brand xl:text-lg 3xl:text-2xl">
                   {totalPrizesValueUSD > 0 && (
                     <span>{`${
                       allPricesFound ? "$" : ""
                     }${totalPrizesValueUSD.toFixed(2)}`}</span>
                   )}
                   {totalPrizesValueUSD > 0 && totalPrizeNFTs > 0 && (
-                    <span className="text-primary/25">|</span>
+                    <span className="text-brand/25">|</span>
                   )}
                   {totalPrizeNFTs > 0 && (
                     <span>
@@ -143,25 +141,25 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
 
       {/* Mobile clickable element (hidden on desktop) */}
       <motion.div
-        className="sm:hidden flex items-center gap-4 p-2 rounded-lg border border-primary/20 w-fit hover:cursor-pointer hover:bg-primary/25 hover:border-primary/30 transition-all duration-200"
+        className="sm:hidden flex items-center gap-4 p-2 rounded-lg border border-brand/20 w-fit hover:cursor-pointer hover:bg-brand/25 hover:border-brand/30 transition-all duration-200"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: position * 0.1 }}
         onClick={() => setIsMobileDialogOpen(true)}
       >
-        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20">
-          <span className="font-astronaut text-primary">
+        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-brand/20">
+          <span className="font-brand text-brand">
             {position}
             <sup>{getOrdinalSuffix(position)}</sup>
           </span>
         </div>
         {totalPrizesValueUSD > 0 || totalPrizeNFTs > 0 ? (
-          <div className="flex flex-row items-center gap-2 font-astronaut">
+          <div className="flex flex-row items-center gap-2 font-brand">
             {totalPrizesValueUSD > 0 && (
               <span>${totalPrizesValueUSD.toFixed(2)}</span>
             )}
             {totalPrizesValueUSD > 0 && totalPrizeNFTs > 0 && (
-              <span className="text-primary/25">|</span>
+              <span className="text-brand/25">|</span>
             )}
             {totalPrizeNFTs > 0 && (
               <span>
@@ -176,7 +174,7 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
 
       {/* Mobile dialog for prize details */}
       <Dialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen}>
-        <DialogContent className="sm:hidden bg-black border border-primary p-0 rounded-lg max-w-[90vw] mx-auto">
+        <DialogContent className="sm:hidden bg-black border border-brand p-0 rounded-lg max-w-[90vw] mx-auto">
           {renderPrizeDetails()}
         </DialogContent>
       </Dialog>

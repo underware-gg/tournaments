@@ -59,16 +59,15 @@ const Schedule = ({ form }: StepProps) => {
   const durationDays = form.watch("duration") / (24 * 60 * 60);
 
   const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
-  console.log(form.watch("duration"));
 
   return (
     <>
       <div className="flex flex-col gap-5 lg:p-2 2xl:p-4">
         <div className="flex flex-col">
-          <span className="font-astronaut text-lg sm:text-xl lg:text-2xl 2xl:text-3xl 3xl:text-4xl font-bold">
+          <span className="font-brand text-lg sm:text-xl lg:text-2xl 2xl:text-3xl 3xl:text-4xl font-bold">
             Schedule
           </span>
-          <div className="w-full h-0.5 bg-primary/25" />
+          <div className="w-full h-0.5 bg-brand/25" />
         </div>
         <div className="flex flex-col sm:flex-row sm:justify-between gap-4 sm:gap-0 sm:px-4">
           <div className="w-full sm:w-2/5">
@@ -78,7 +77,7 @@ const Schedule = ({ form }: StepProps) => {
               render={({ field }) => (
                 <FormItem className="flex flex-col justify-center h-full gap-2 sm:gap-4">
                   <div className="flex flex-row items-center gap-4">
-                    <FormLabel className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+                    <FormLabel className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
                       Start Time
                     </FormLabel>
 
@@ -124,7 +123,7 @@ const Schedule = ({ form }: StepProps) => {
                           }}
                           disabled={disablePastDates}
                           initialFocus
-                          className="rounded-md border-4 border-primary-dark w-auto"
+                          className="rounded-md border-4 border-brand-muted w-auto"
                         />
                       </PopoverContent>
                     </Popover>
@@ -134,7 +133,7 @@ const Schedule = ({ form }: StepProps) => {
               )}
             />
           </div>
-          <div className="w-full h-0.5 bg-primary/25 sm:hidden" />
+          <div className="w-full h-0.5 bg-brand/25 sm:hidden" />
           <div className="flex flex-col gap-4 w-full sm:w-3/5">
             <FormField
               control={form.control}
@@ -143,7 +142,7 @@ const Schedule = ({ form }: StepProps) => {
                 <FormItem>
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-row items-center gap-4">
-                      <FormLabel className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+                      <FormLabel className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
                         Duration
                       </FormLabel>
                       <FormDescription className="sm:text-xs xl:text-sm 3xl:text-base">
@@ -212,6 +211,7 @@ const Schedule = ({ form }: StepProps) => {
                                 onChange={(e) =>
                                   field.onChange(Number(e.target.value))
                                 }
+                                min={900}
                               />
                             </div>
                           )}
@@ -278,7 +278,7 @@ const Schedule = ({ form }: StepProps) => {
                 </FormItem>
               )}
             />
-            <div className="w-full h-0.5 bg-primary/25" />
+            <div className="w-full h-0.5 bg-brand/25" />
             <FormField
               control={form.control}
               name="type"
@@ -286,7 +286,7 @@ const Schedule = ({ form }: StepProps) => {
                 <FormItem>
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-row items-center gap-4">
-                      <FormLabel className="font-astronaut text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+                      <FormLabel className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
                         Registration Type
                       </FormLabel>
                       <div className="flex flex-row gap-2 relative">
@@ -305,19 +305,19 @@ const Schedule = ({ form }: StepProps) => {
                                 <h4 className="text-lg">Registration Types</h4>
                                 <ul className="list-disc pl-4 space-y-2">
                                   <li className="text-muted-foreground text-wrap">
-                                    <span className="font-medium text-primary">
+                                    <span className="font-medium text-brand">
                                       Fixed:
                                     </span>{" "}
-                                    <span className="text-neutral-500">
+                                    <span className="text-neutral">
                                       An event with a registration period for
                                       capped number of entries.
                                     </span>
                                   </li>
                                   <li className="text-muted-foreground text-wrap">
-                                    <span className="font-medium text-primary">
+                                    <span className="font-medium text-brand">
                                       Open:
                                     </span>{" "}
-                                    <span className="text-neutral-500">
+                                    <span className="text-neutral">
                                       An event where entries can be made
                                       throughout the tournament period.
                                     </span>
@@ -361,7 +361,7 @@ const Schedule = ({ form }: StepProps) => {
                 </FormItem>
               )}
             />
-            <div className="w-full h-0.5 bg-primary/25 mb-4 sm:mb-0" />
+            <div className="w-full h-0.5 bg-brand/25 mb-4 sm:mb-0" />
             <TournamentTimeline
               type={form.watch("type")}
               createdTime={Math.floor(new Date().getTime() / 1000)} // Convert to Unix timestamp
@@ -373,22 +373,22 @@ const Schedule = ({ form }: StepProps) => {
         </div>
       </div>
       <Dialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen}>
-        <DialogContent className="sm:hidden bg-black border border-primary p-4 rounded-lg max-w-[90vw] mx-auto">
+        <DialogContent className="sm:hidden bg-black border border-brand p-4 rounded-lg max-w-[90vw] mx-auto">
           <div className="flex flex-col gap-4 justify-between items-center mb-4">
-            <h3 className="font-astronaut text-lg text-primary">
+            <h3 className="font-brand text-lg text-brand">
               Registration Types
             </h3>
             <ul className="list-disc pl-4 space-y-2">
               <li className="text-muted-foreground text-wrap">
-                <span className="font-medium text-primary">Fixed:</span>{" "}
-                <span className="text-neutral-500">
+                <span className="font-medium text-brand">Fixed:</span>{" "}
+                <span className="text-neutral">
                   An event with a registration period for capped number of
                   entries.
                 </span>
               </li>
               <li className="text-muted-foreground text-wrap">
-                <span className="font-medium text-primary">Open:</span>{" "}
-                <span className="text-neutral-500">
+                <span className="font-medium text-brand">Open:</span>{" "}
+                <span className="text-neutral">
                   An event where entries can be made throughout the tournament
                   period.
                 </span>
