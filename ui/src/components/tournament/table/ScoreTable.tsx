@@ -109,7 +109,7 @@ const ScoreTable = ({
           </div>
         </div>
         <div
-          className={`transition-all duration-300 delay-150 ease-in-out ${
+          className={`transition-all duration-300 delay-50 ease-in-out ${
             showParticipants ? "h-auto opacity-100" : "h-0 opacity-0"
           }`}
         >

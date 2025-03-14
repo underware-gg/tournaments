@@ -268,16 +268,22 @@ export const useGetGameSettingsQuery = (
 };
 
 export const useGetScoresQuery = (namespace: string, model: string) => {
+  const isValidInput = useMemo(() => {
+    return Boolean(namespace && model);
+  }, [namespace, model]);
   const query = useMemo(
     () =>
-      new ToriiQueryBuilder()
-        .withClause(KeysClause([`${namespace}-${model}`], []).build())
-        .withEntityModels([`${namespace}-${model}`])
-        .includeHashedKeys(),
-    [namespace, model]
+      isValidInput
+        ? new ToriiQueryBuilder()
+            .withClause(KeysClause([`${namespace}-${model}`], []).build())
+            .withEntityModels([`${namespace}-${model}`])
+            .includeHashedKeys()
+        : null,
+    [namespace, model, isValidInput]
   );
   const { entities, isLoading, refetch } = useSdkGetEntities({
     query,
+    enabled: isValidInput,
   });
   return { entities, isLoading, refetch };
 };
@@ -391,39 +397,54 @@ export const useSubscribeGamesQuery = ({
 }: {
   gameNamespace: string;
 }) => {
+  const isValidInput = useMemo(() => {
+    return Boolean(gameNamespace);
+  }, [gameNamespace]);
   const query = useMemo(
     () =>
-      new ToriiQueryBuilder()
-        .withClause(
-          KeysClause(
-            [`${gameNamespace}-Game`, `${gameNamespace}-TokenMetadata`],
-            []
-          ).build()
-        )
-        .withEntityModels([
-          `${gameNamespace}-Game`,
-          `${gameNamespace}-TokenMetadata`,
-        ])
-        .includeHashedKeys(),
-    [gameNamespace]
+      isValidInput
+        ? new ToriiQueryBuilder()
+            .withClause(
+              KeysClause(
+                [`${gameNamespace}-Game`, `${gameNamespace}-TokenMetadata`],
+                []
+              ).build()
+            )
+            .withEntityModels([
+              `${gameNamespace}-Game`,
+              `${gameNamespace}-TokenMetadata`,
+            ])
+            .includeHashedKeys()
+        : null,
+    [gameNamespace, isValidInput]
   );
   const { entities, isSubscribed } = useSdkSubscribeEntities({
     query,
+    enabled: isValidInput,
   });
   return { entities, isSubscribed };
 };
 
-export const useSubscribeScoresQuery = (namespace: string, model: string) => {
+export const useSubscribeScoresQuery = (namespace?: string, model?: string) => {
+  const isValidInput = useMemo(() => {
+    return Boolean(namespace && model);
+  }, [namespace, model]);
+
   const query = useMemo(
     () =>
-      new ToriiQueryBuilder()
-        .withClause(KeysClause([`${namespace}-${model}`], []).build())
-        .withEntityModels([`${namespace}-${model}`])
-        .includeHashedKeys(),
-    [namespace, model]
+      isValidInput
+        ? new ToriiQueryBuilder()
+            .withClause(KeysClause([`${namespace}-${model}`], []).build())
+            .withEntityModels([`${namespace}-${model}`])
+            .includeHashedKeys()
+        : null,
+    [namespace, model, isValidInput]
   );
+
   const { entities, isSubscribed } = useSdkSubscribeEntities({
     query,
+    enabled: isValidInput,
   });
+
   return { entities, isSubscribed };
 };

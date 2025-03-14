@@ -20,7 +20,6 @@ import useUIStore from "@/hooks/useUIStore";
 import { getGames } from "@/assets/games";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
 import { SPACE_INVADER_LINE } from "@/components/Icons";
-// import { ADMIN_ADDRESS } from "@/lib/constants";
 
 const Header = () => {
   const { account } = useAccount();
@@ -32,10 +31,10 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedChainConfig } = useDojo();
-  // const isAdmin = address === ADMIN_ADDRESS;
 
   const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
   const isHomeScreen = location.pathname === "/";
+  const games = getGames();
 
   return (
     <div className="flex flex-row items-center justify-between px-5 sm:py-5 sm:px-10 h-[60px] sm:h-[80px]">
@@ -64,7 +63,7 @@ const Header = () => {
                     Games
                   </div>
                 </SheetClose>
-                {Object.entries(getGames()).map(([key, game]) => {
+                {Object.entries(games).map(([key, game]) => {
                   const isDisabled = !gameData.find(
                     (game) => game.contract_address === key
                   );

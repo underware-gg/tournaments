@@ -12,6 +12,7 @@ import {
 import { Tournament as TournamentModel } from "@/generated/models.gen";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
 
 const EntryRequirements = ({
   tournamentModel,
@@ -28,22 +29,146 @@ const EntryRequirements = ({
   const navigate = useNavigate();
   const { selectedChainConfig } = useDojo();
 
-  const token = tokens.find(
-    (token) =>
-      token.address === tournamentModel.entry_requirement.Some?.variant.token
+  const entryRequirement = useMemo(
+    () => tournamentModel.entry_requirement.Some,
+    [tournamentModel]
+  );
+  const activeVariant = useMemo(
+    () => entryRequirement?.activeVariant(),
+    [entryRequirement]
   );
 
-  const activeVariant = tournamentModel.entry_requirement.Some?.activeVariant();
+  const token = useMemo(
+    () =>
+      tokens.find((token) => token.address === entryRequirement?.variant.token),
+    [tokens, entryRequirement]
+  );
 
-  const tournament: CairoCustomEnum =
-    tournamentModel.entry_requirement.Some?.variant?.tournament;
+  const tournament = useMemo(
+    () => entryRequirement?.variant?.tournament as CairoCustomEnum | undefined,
+    [entryRequirement]
+  );
 
-  const tournamentVariant = tournament?.activeVariant();
+  const tournamentVariant = useMemo(
+    () => tournament?.activeVariant(),
+    [tournament]
+  );
 
-  const allowlist = tournamentModel.entry_requirement.Some?.variant?.allowlist;
+  const allowlist = useMemo(
+    () => entryRequirement?.variant?.allowlist,
+    [entryRequirement]
+  );
 
   const blockExplorerExists =
     selectedChainConfig.blockExplorerUrl !== undefined;
+
+  const renderContent = () => {
+    if (activeVariant === "token") {
+      return (
+        <div className="text-brand flex flex-row items-center justify-center gap-1 w-full">
+          <span className="w-8">
+            <COIN />
+          </span>
+          <span className="text-xs">{token?.name}</span>
+        </div>
+      );
+    } else if (activeVariant === "tournament") {
+      return (
+        <div className="flex flex-row items-center gap-1">
+          <span className="w-6">
+            <TROPHY />
+          </span>
+          <span className="capitalize">{tournamentVariant}</span>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex flex-row items-center justify-center gap-1 w-full">
+          <span className="w-8">
+            <CHECK />
+          </span>
+          <span>Allowlist</span>
+        </div>
+      );
+    }
+  };
+
+  const renderHoverContent = () => {
+    if (activeVariant === "token") {
+      return (
+        <>
+          <p className="text-muted-foreground">
+            To enter this tournament you must hold:
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="w-8">
+              <COIN />
+            </span>
+            <span>{token?.name}</span>
+            <span
+              className="text-brand-muted hover:cursor-pointer"
+              onClick={() => {
+                if (blockExplorerExists) {
+                  window.open(
+                    `${selectedChainConfig.blockExplorerUrl}nft-contract/${token?.address}`,
+                    "_blank"
+                  );
+                }
+              }}
+            >
+              {displayAddress(token?.address ?? "0x0")}
+            </span>
+          </div>
+        </>
+      );
+    } else if (activeVariant === "tournament") {
+      return (
+        <>
+          <h4 className="text-lg">
+            Tournament <span className="capitalize">{tournamentVariant}</span>
+          </h4>
+          <div className="h-[100px] flex flex-col gap-2 overflow-y-auto">
+            {tournamentsData?.map((tournament, index) => {
+              const tournamentEnd = tournament.schedule.game.end;
+              const tournamentEnded =
+                BigInt(tournamentEnd) < BigInt(Date.now()) / 1000n;
+              return (
+                <div key={index} className="flex flex-row items-center gap-2">
+                  <span>{feltToString(tournament.metadata.name)}</span>|
+                  <div className="flex flex-row items-center gap-1">
+                    <span className="w-4">
+                      <CLOCK />
+                    </span>
+                    <span>{tournamentEnded ? "Ended" : "Active"}</span>
+                  </div>
+                  |
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    onClick={() => {
+                      navigate(`/tournament/${Number(tournament.id)}`);
+                    }}
+                  >
+                    View
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      );
+    } else {
+      return (
+        <div className="h-[100px] flex flex-col gap-2 overflow-y-auto">
+          {allowlist?.map((item: string, index: number) => (
+            <div key={index}>
+              <span>{displayAddress(item)}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+  };
 
   return (
     <HoverCard openDelay={50} closeDelay={0}>
@@ -55,28 +180,7 @@ const EntryRequirements = ({
           <span className="absolute left-0 -top-5 text-xs whitespace-nowrap uppercase text-brand-muted font-bold">
             Entry Requirements:
           </span>
-          {activeVariant === "token" ? (
-            <div className="text-brand flex flex-row items-center justify-center gap-1 w-full">
-              <span className="w-8">
-                <COIN />
-              </span>
-              <span className="text-xs">{token?.name}</span>
-            </div>
-          ) : activeVariant === "tournament" ? (
-            <div className="flex flex-row items-center gap-1">
-              <span className="w-6">
-                <TROPHY />
-              </span>
-              <span className="capitalize">{tournament.activeVariant()}</span>
-            </div>
-          ) : (
-            <div className="flex flex-row items-center justify-center gap-1 w-full">
-              <span className="w-8">
-                <CHECK />
-              </span>
-              <span>Allowlist</span>
-            </div>
-          )}
+          {renderContent()}
         </Card>
       </HoverCardTrigger>
       <HoverCardContent
@@ -85,80 +189,7 @@ const EntryRequirements = ({
         side="bottom"
         sideOffset={5}
       >
-        <div className="flex flex-col gap-2 h-full">
-          {activeVariant === "token" ? (
-            <>
-              <p className="text-muted-foreground">
-                To enter this tournament you must hold:
-              </p>
-              <div className="flex items-center gap-2">
-                <span className="w-8">
-                  <COIN />
-                </span>
-                <span>{token?.name}</span>
-                <span
-                  className="text-brand-muted hover:cursor-pointer"
-                  onClick={() => {
-                    if (blockExplorerExists) {
-                      window.open(
-                        `${selectedChainConfig.blockExplorerUrl}nft-contract/${token?.address}`,
-                        "_blank"
-                      );
-                    }
-                  }}
-                >
-                  {displayAddress(token?.address ?? "0x0")}
-                </span>
-              </div>
-            </>
-          ) : activeVariant === "tournament" ? (
-            <>
-              <h4 className="text-lg">
-                Tournament{" "}
-                <span className="capitalize">{tournamentVariant}</span>
-              </h4>
-              <div className="h-[100px] flex flex-col gap-2 overflow-y-auto">
-                {tournamentsData?.map((tournament, index) => {
-                  const tournamentEnd = tournament.schedule.game.end;
-                  const tournamentEnded =
-                    BigInt(tournamentEnd) < BigInt(Date.now()) / 1000n;
-                  return (
-                    <div
-                      key={index}
-                      className="flex flex-row items-center gap-2"
-                    >
-                      <span>{feltToString(tournament.metadata.name)}</span>|
-                      <div className="flex flex-row items-center gap-1">
-                        <span className="w-4">
-                          <CLOCK />
-                        </span>
-                        <span>{tournamentEnded ? "Ended" : "Active"}</span>
-                      </div>
-                      |
-                      <Button
-                        size="xs"
-                        variant="outline"
-                        onClick={() => {
-                          navigate(`/tournament/${Number(tournament.id)}`);
-                        }}
-                      >
-                        View
-                      </Button>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          ) : (
-            <div className="h-[100px] flex flex-col gap-2 overflow-y-auto">
-              {allowlist?.map((item: string, index: number) => (
-                <div key={index}>
-                  <span>{displayAddress(item)}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <div className="flex flex-col gap-2 h-full">{renderHoverContent()}</div>
       </HoverCardContent>
     </HoverCard>
   );

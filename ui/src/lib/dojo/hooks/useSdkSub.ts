@@ -15,6 +15,7 @@ export type EntityResult = {
 export type UseSdkSubEntitiesResult = {
   entities: EntityResult[] | null;
   isSubscribed: boolean;
+  error?: Error | null;
 };
 
 export type UseSdkSubEntitiesProps = {
@@ -30,52 +31,80 @@ export const useSdkSubscribeEntities = ({
   const { sdk } = useDojo();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [entities, setEntities] = useState<EntityResult[] | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const state = useDojoStore.getState();
 
-  const memoizedQuery = useMemo(() => query, [JSON.stringify(query)]);
+  const memoizedQuery = useMemo(() => {
+    return query;
+  }, [query]);
 
   useEffect(() => {
     let _unsubscribe: (() => void) | undefined;
 
     const _subscribe = async () => {
-      const [_initialEntities, subscription] = await sdk.subscribeEntityQuery({
-        query: memoizedQuery,
-        callback: (response) => {
-          if (response.error) {
-            console.error(
-              "useSdkSubscribeEntities() error:",
-              response.error.message
-            );
-          } else if (
-            response.data &&
-            (response.data[0] as Partial<ParsedEntity<SchemaType>>).entityId !==
-              "0x0"
-          ) {
-            console.log(
-              "useSdkSubscribeEntities() response.data:",
-              response.data
-            );
-            response.data.forEach((entity) => {
-              state.updateEntity(entity as Partial<ParsedEntity<SchemaType>>);
-            });
+      if (!memoizedQuery) {
+        setIsSubscribed(false);
+        setEntities(null);
+        return;
+      }
+
+      try {
+        const [_initialEntities, subscription] = await sdk.subscribeEntityQuery(
+          {
+            query: memoizedQuery,
+            callback: (response) => {
+              if (response.error) {
+                console.error(
+                  "useSdkSubscribeEntities() error:",
+                  response.error.message
+                );
+                setError(new Error(response.error.message));
+              } else if (
+                response.data &&
+                (response.data[0] as Partial<ParsedEntity<SchemaType>>)
+                  .entityId !== "0x0"
+              ) {
+                console.log(
+                  "useSdkSubscribeEntities() response.data:",
+                  response.data
+                );
+                response.data.forEach((entity) => {
+                  state.updateEntity(
+                    entity as Partial<ParsedEntity<SchemaType>>
+                  );
+                });
+              }
+            },
           }
-        },
-      });
-      setIsSubscribed(true);
-      _unsubscribe = () => subscription.cancel();
+        );
+
+        setIsSubscribed(true);
+        setError(null);
+        _unsubscribe = () => subscription.cancel();
+      } catch (err) {
+        console.error("Failed to subscribe to entity query:", err);
+        setError(err instanceof Error ? err : new Error(String(err)));
+        setIsSubscribed(false);
+        setEntities(null);
+      }
     };
 
     setIsSubscribed(false);
-    if (enabled) {
+    if (enabled && memoizedQuery) {
       _subscribe();
     } else {
       setEntities(null);
     }
 
-    // umnount
     return () => {
       setIsSubscribed(false);
-      _unsubscribe?.();
+      if (_unsubscribe) {
+        try {
+          _unsubscribe();
+        } catch (err) {
+          console.error("Error during unsubscribe:", err);
+        }
+      }
       _unsubscribe = undefined;
     };
   }, [sdk, memoizedQuery, enabled]);
@@ -83,5 +112,6 @@ export const useSdkSubscribeEntities = ({
   return {
     entities,
     isSubscribed,
+    error,
   };
 };

@@ -212,6 +212,10 @@ export const useGetTournaments = ({
     () => JSON.stringify(tournamentIds),
     [tournamentIds]
   );
+  const gameFiltersKey = useMemo(
+    () => JSON.stringify(gameFilters || []),
+    [gameFilters]
+  );
   const query = useMemo(
     () =>
       active
@@ -261,7 +265,7 @@ export const useGetTournaments = ({
     [
       namespace,
       currentTime,
-      gameFilters,
+      gameFiltersKey,
       status,
       sortBy,
       offset,

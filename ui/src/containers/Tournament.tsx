@@ -201,7 +201,10 @@ const Tournament = () => {
   )?.name;
 
   // subscribe and fetch game scores
-  useSubscribeScoresQuery(gameNamespace ?? "", gameScoreModel ?? "");
+  useSubscribeScoresQuery(
+    gameNamespace ?? undefined,
+    gameScoreModel ?? undefined
+  );
   useGetScoresQuery(gameNamespace ?? "", gameScoreModel ?? "");
 
   const { entity: gameCounterEntity } = useGetGameCounterQuery({
@@ -260,7 +263,10 @@ const Tournament = () => {
   )?.symbol;
 
   const { prices, isLoading: pricesLoading } = useEkuboPrices({
-    tokens: [...erc20TokenSymbols, entryFeeTokenSymbol ?? ""],
+    tokens: [
+      ...erc20TokenSymbols,
+      ...(entryFeeTokenSymbol ? [entryFeeTokenSymbol] : []),
+    ],
   });
 
   useEffect(() => {

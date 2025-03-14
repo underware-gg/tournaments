@@ -68,7 +68,10 @@ export const TournamentCard = ({
 
   const erc20TokenSymbols = getErc20TokenSymbols(groupedPrizes);
   const { prices, isLoading: pricesLoading } = useEkuboPrices({
-    tokens: [...erc20TokenSymbols, entryFeeTokenSymbol ?? ""],
+    tokens: [
+      ...erc20TokenSymbols,
+      ...(entryFeeTokenSymbol ? [entryFeeTokenSymbol] : []),
+    ],
   });
 
   const totalPrizesValueUSD = calculateTotalValue(
