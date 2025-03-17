@@ -66,7 +66,7 @@ export const DojoContextProvider = ({
         revision: "1",
       },
     }).then(setSdk);
-  }, []);
+  }, [selectedChainConfig, chainId]);
 
   const isLoading = sdk === undefined;
 

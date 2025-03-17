@@ -325,12 +325,20 @@ export const makeDojoAppConfig = (): DojoAppConfig => {
   const chainConfig = dojoContextConfig[initialChainId];
   validateChainConfig(chainConfig, initialChainId);
 
+  const chains = getStarknetProviderChains(supportedChainIds);
+
+  const chainRpcUrls: { rpcUrl: string }[] = [
+    { rpcUrl: chains[2].rpcUrls.default.http[0] },
+    { rpcUrl: chains[3].rpcUrls.default.http[0] },
+    { rpcUrl: chains[1].rpcUrls.default.http[0] },
+  ];
+
   // Initialize controller with error handling
   const controller =
     initialChainId !== ChainId.KATANA_LOCAL
       ? (() => {
           try {
-            return initializeController(chainConfig.rpcUrl!, initialChainId);
+            return initializeController(chainRpcUrls, initialChainId);
           } catch (error) {
             console.error(
               `Failed to initialize controller for chain ${initialChainId}:`,

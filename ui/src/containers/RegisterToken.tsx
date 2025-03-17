@@ -13,6 +13,7 @@ import { displayAddress } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { ARROW_LEFT } from "@/components/Icons";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 const RegisterToken = () => {
   const { address } = useAccount();
@@ -165,18 +166,20 @@ const RegisterToken = () => {
                 )}
               </>
             )}
-            <span className="font-brand text-lg sm:text-xl lg:text-2xl 2xl:text-3xl 3xl:text-4xl font-bold">
-              Register Token
-            </span>
-            <p className="text-lg text-center">
-              To register a token you must hold an amount of it. In the case of
-              registering an NFT, you must also provide the token ID.
-            </p>
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-row items-center gap-2">
+              <span className="font-brand text-lg sm:text-xl lg:text-2xl 2xl:text-3xl 3xl:text-4xl font-bold">
+                Register Token
+              </span>
+              <p>
+                To register a token you must hold an amount of it. In the case
+                of registering an NFT, you must also provide the token ID.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 px-4">
+              <div className="flex flex-row items-center gap-2">
                 <div className="flex flex-col items-center gap-2">
                   <h3 className="text-xl uppercase">Select Token Type</h3>
-                  <div className="flex flex-row gap-10">
+                  <div className="flex flex-row gap-2">
                     <Button
                       variant={tokenType === "erc20" ? "default" : "outline"}
                       onClick={() => setTokenType("erc20")}
@@ -186,39 +189,43 @@ const RegisterToken = () => {
                     <Button
                       variant={tokenType === "erc721" ? "default" : "outline"}
                       onClick={() => setTokenType("erc721")}
-                    ></Button>
+                    >
+                      ERC721
+                    </Button>
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-2">
                   <h3 className="text-xl uppercase">Paste Contract Address</h3>
-                  <input
+                  <Input
                     type="text"
                     name="tokenAddress"
                     onChange={handleChangeAddress}
-                    className="p-1 m-2 h-12 w-[700px] 2xl:text-2xl bg-terminal-black border border-terminal-green animate-pulse transform"
+                    className="p-1 m-2 h-12 w-[700px] 2xl:text-2xl"
                   />
                 </div>
                 {tokenType === "erc721" && (
                   <div className="flex flex-col items-center gap-2">
                     <h3 className="text-xl">Enter Token ID</h3>
-                    <input
+                    <Input
                       type="number"
                       name="tokenId"
                       onChange={handleChangeTokenId}
-                      className="p-1 m-2 h-12 w-20 2xl:text-2xl bg-terminal-black border border-terminal-green transform"
+                      className="p-1 m-2 h-12 w-20 2xl:text-2xl"
                     />
                   </div>
                 )}
                 {/* <Button
-            onClick={handleRegisterToken}
-            disabled={
-              tokenAddress == "" ||
-              tokenType === null ||
-              (tokenType === TokenDataEnum.erc721 ? tokenId === "" : false)
-            }
-          >
-            Register Token
-          </Button> */}
+                  onClick={handleRegisterToken}
+                  disabled={
+                    tokenAddress == "" ||
+                    tokenType === null ||
+                    (tokenType === TokenDataEnum.erc721
+                      ? tokenId === ""
+                      : false)
+                  }
+                >
+                  Register Token
+                </Button> */}
               </div>
             </div>
           </div>

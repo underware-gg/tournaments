@@ -4,11 +4,11 @@ import { ChainId } from "@/dojo/config";
 import { stringToFelt } from "@/lib/utils";
 
 export const initializeController = (
-  rpcUrl: string,
+  chainRpcUrls: { rpcUrl: string }[],
   defaultChainId: string
 ): Connector => {
   return new ControllerConnector({
-    chains: [{ rpcUrl: rpcUrl }],
+    chains: chainRpcUrls,
     defaultChainId: stringToFelt(defaultChainId).toString(),
     preset: "budokan",
     slot:

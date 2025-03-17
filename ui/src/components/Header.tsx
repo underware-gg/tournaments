@@ -7,11 +7,13 @@ import {
   SPACE_INVADER_SOLID,
   TROPHY_LINE,
   COIN,
+  CHAIN,
 } from "@/components/Icons";
 import { displayAddress } from "@/lib/utils";
 import {
   useControllerUsername,
   useControllerProfile,
+  useControllerSwitchChain,
 } from "@/hooks/useController";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDojo } from "@/context/dojo";
@@ -34,6 +36,8 @@ const Header = () => {
   const { disconnect } = useDisconnect();
   const { openProfile } = useControllerProfile();
   const { username } = useControllerUsername();
+  const { switchToMainnet, switchToSepolia, switchToSlot } =
+    useControllerSwitchChain();
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedChainConfig } = useDojo();
@@ -140,6 +144,20 @@ const Header = () => {
       <div className="flex flex-row items-center gap-2">
         {/* Navigation buttons - only visible on larger screens */}
         <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-2">
+          <Button
+            onClick={() => {
+              if (isMainnet) {
+                switchToSlot();
+              } else {
+                switchToMainnet();
+              }
+            }}
+          >
+            <div className="flex flex-row items-center gap-2">
+              <CHAIN />
+              {isMainnet ? "Mainnet" : "Slot"}
+            </div>
+          </Button>
           {!isMainnet && location.pathname !== "/play" && (
             <Button
               onClick={() => {

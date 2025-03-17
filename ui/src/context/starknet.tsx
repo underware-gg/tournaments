@@ -23,18 +23,25 @@ export function StarknetProvider({
   children: React.ReactNode;
   dojoAppConfig: DojoAppConfig;
 }) {
-  function rpc(chain: Chain) {
-    const nodeUrl = chain.rpcUrls.default.http[0];
-    return {
-      nodeUrl,
-    };
-  }
-  const provider = jsonRpcProvider({ rpc });
-
   const chains: Chain[] = useMemo(
     () => getStarknetProviderChains(dojoAppConfig.supportedChainIds),
     [dojoAppConfig]
   );
+
+  const provider = jsonRpcProvider({
+    rpc: (chain: Chain) => {
+      switch (chain) {
+        case chains[2]:
+          return { nodeUrl: chains[2].rpcUrls.default.http[0] };
+        case chains[3]:
+          return { nodeUrl: chains[3].rpcUrls.default.http[0] };
+        case chains[1]:
+          return { nodeUrl: chains[1].rpcUrls.default.http[0] };
+        default:
+          throw new Error(`Unsupported chain: ${chain.network}`);
+      }
+    },
+  });
 
   const selectedChainId = useMemo(
     () => dojoAppConfig.initialChainId,
@@ -62,6 +69,12 @@ export function StarknetProvider({
       }).then(setPa);
     }
   }, [selectedChainConfig?.rpcUrl]);
+
+  console.log(
+    chains,
+    [...chainConnectors, ...pa],
+    provider(selectedChainConfig?.chain!)
+  );
 
   return (
     <StarknetConfig
