@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDojo } from "@/context/dojo";
-import { ChainId } from "@/dojo/config";
+import { ChainId } from "@/dojo/setup/networks";
 
 export interface TokenPrices {
   [key: string]: number | undefined;

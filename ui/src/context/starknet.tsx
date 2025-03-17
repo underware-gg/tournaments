@@ -1,87 +1,96 @@
 "use client";
-import { useMemo, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Chain } from "@starknet-react/chains";
 import { jsonRpcProvider, StarknetConfig } from "@starknet-react/core";
 import React from "react";
-import { useChainConnectors } from "../lib/connectors";
-import {
-  DojoAppConfig,
-  dojoContextConfig,
-  getDojoChainConfig,
-  ChainId,
-  getStarknetProviderChains,
-} from "@/dojo/config";
+import { ChainId, CHAINS } from "@/dojo/setup/networks";
 import {
   predeployedAccounts,
   PredeployedAccountsConnector,
 } from "@dojoengine/predeployed-connector";
+import { initializeController } from "@/dojo/setup/controllerSetup";
 
-export function StarknetProvider({
-  children,
-  dojoAppConfig,
-}: {
-  children: React.ReactNode;
-  dojoAppConfig: DojoAppConfig;
-}) {
-  const chains: Chain[] = useMemo(
-    () => getStarknetProviderChains(dojoAppConfig.supportedChainIds),
-    [dojoAppConfig]
-  );
+const getDefaultChainId = (): ChainId => {
+  const envChainId = import.meta.env.VITE_CHAIN_ID as ChainId;
 
+  if (envChainId && !isChainIdSupported(envChainId)) {
+    throw new Error(`Unsupported chain ID in environment: ${envChainId}`);
+  }
+
+  return envChainId || ChainId.KATANA_LOCAL;
+};
+
+const isChainIdSupported = (chainId: ChainId): boolean => {
+  return Object.keys(CHAINS).includes(chainId);
+};
+
+const controller =
+  getDefaultChainId() !== ChainId.KATANA_LOCAL
+    ? (() => {
+        try {
+          const chainRpcUrls: { rpcUrl: string }[] = Object.values(CHAINS)
+            .filter((chain) => chain.chainId !== ChainId.KATANA_LOCAL)
+            .map((chain) => ({
+              rpcUrl: chain?.chain?.rpcUrls.default.http[0] ?? "",
+            }));
+
+          return initializeController(chainRpcUrls, getDefaultChainId());
+        } catch (error) {
+          console.error(
+            `Failed to initialize controller for chain ${getDefaultChainId()}:`,
+            error
+          );
+          return undefined;
+        }
+      })()
+    : undefined;
+
+export function StarknetProvider({ children }: { children: React.ReactNode }) {
   const provider = jsonRpcProvider({
     rpc: (chain: Chain) => {
       switch (chain) {
-        case chains[2]:
-          return { nodeUrl: chains[2].rpcUrls.default.http[0] };
-        case chains[3]:
-          return { nodeUrl: chains[3].rpcUrls.default.http[0] };
-        case chains[1]:
-          return { nodeUrl: chains[1].rpcUrls.default.http[0] };
+        case CHAINS[ChainId.SN_MAIN].chain:
+          return {
+            nodeUrl: CHAINS[ChainId.SN_MAIN].chain?.rpcUrls.default.http[0],
+          };
+        case CHAINS[ChainId.SN_SEPOLIA].chain:
+          return {
+            nodeUrl: CHAINS[ChainId.SN_SEPOLIA].chain?.rpcUrls.default.http[0],
+          };
+        case CHAINS[ChainId.WP_TOURNAMENTS].chain:
+          return {
+            nodeUrl:
+              CHAINS[ChainId.WP_TOURNAMENTS].chain?.rpcUrls.default.http[0],
+          };
         default:
           throw new Error(`Unsupported chain: ${chain.network}`);
       }
     },
   });
 
-  const selectedChainId = useMemo(
-    () => dojoAppConfig.initialChainId,
-    [dojoAppConfig]
-  );
-
-  const selectedChainConfig = useMemo(
-    () => getDojoChainConfig(selectedChainId),
-    [dojoContextConfig, selectedChainId]
-  );
-
-  const chainConnectors = useChainConnectors(
-    dojoAppConfig,
-    selectedChainConfig!
-  );
-
   const [pa, setPa] = useState<PredeployedAccountsConnector[]>([]);
 
   useEffect(() => {
-    if (selectedChainId === ChainId.KATANA_LOCAL) {
+    if (getDefaultChainId() === ChainId.KATANA_LOCAL) {
       predeployedAccounts({
-        rpc: selectedChainConfig?.rpcUrl as string,
+        rpc: CHAINS[getDefaultChainId()]?.chain?.rpcUrls.default.http[0] ?? "",
         id: "katana",
         name: "Katana",
       }).then(setPa);
     }
-  }, [selectedChainConfig?.rpcUrl]);
+  }, [getDefaultChainId()]);
 
   console.log(
-    chains,
-    [...chainConnectors, ...pa],
-    provider(selectedChainConfig?.chain!)
+    Object.values(CHAINS).map((chain) => chain.chain),
+    [...[controller], ...pa],
+    provider(CHAINS[getDefaultChainId()]?.chain!)
   );
 
   return (
     <StarknetConfig
-      autoConnect
-      chains={chains}
-      connectors={[...chainConnectors, ...pa]}
-      provider={() => provider(selectedChainConfig?.chain!)}
+      chains={Object.values(CHAINS).map((chain) => chain.chain!)}
+      connectors={[...[controller!], ...pa]}
+      provider={() => provider(CHAINS[getDefaultChainId()]?.chain!)}
     >
       {children}
     </StarknetConfig>

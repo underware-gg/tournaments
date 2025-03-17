@@ -4,7 +4,7 @@ import darkShuffle from "./dark-shuffle.svg";
 import zkube from "./zkube.png";
 import dopeWars from "./dope-wars.png";
 import jokersOfNeon from "./jokers-of-neon.png";
-import { ChainId } from "@/dojo/config";
+import { ChainId } from "@/dojo/setup/networks";
 import { useDojo } from "@/context/dojo";
 // import { useDojoSystem } from "@/dojo/hooks/useDojoSystem";
 // import { addAddressPadding } from "starknet";

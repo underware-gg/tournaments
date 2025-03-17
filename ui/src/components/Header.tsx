@@ -1,4 +1,9 @@
-import { useAccount, useDisconnect } from "@starknet-react/core";
+import {
+  useAccount,
+  useDisconnect,
+  useNetwork,
+  useProvider,
+} from "@starknet-react/core";
 import { Button } from "@/components/ui/button";
 import {
   CONTROLLER,
@@ -7,7 +12,6 @@ import {
   SPACE_INVADER_SOLID,
   TROPHY_LINE,
   COIN,
-  CHAIN,
 } from "@/components/Icons";
 import { displayAddress } from "@/lib/utils";
 import {
@@ -17,7 +21,7 @@ import {
 } from "@/hooks/useController";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDojo } from "@/context/dojo";
-import { ChainId } from "@/dojo/config";
+import { ChainId } from "@/dojo/setup/networks";
 import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
 import {
   Sheet,
@@ -25,6 +29,12 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import useUIStore from "@/hooks/useUIStore";
 import { getGames } from "@/assets/games";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
@@ -36,15 +46,17 @@ const Header = () => {
   const { disconnect } = useDisconnect();
   const { openProfile } = useControllerProfile();
   const { username } = useControllerUsername();
-  const { switchToMainnet, switchToSepolia, switchToSlot } =
-    useControllerSwitchChain();
+  const { switchToMainnet, switchToSlot } = useControllerSwitchChain();
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedChainConfig } = useDojo();
-
+  const { chain } = useNetwork();
+  const { provider } = useProvider();
   const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
   const isHomeScreen = location.pathname === "/";
   const games = getGames();
+
+  console.log(provider, chain);
 
   return (
     <div className="flex flex-row items-center justify-between px-5 sm:py-5 sm:px-10 h-[60px] sm:h-[80px]">
@@ -144,20 +156,27 @@ const Header = () => {
       <div className="flex flex-row items-center gap-2">
         {/* Navigation buttons - only visible on larger screens */}
         <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-2">
-          <Button
-            onClick={() => {
-              if (isMainnet) {
-                switchToSlot();
-              } else {
-                switchToMainnet();
-              }
-            }}
-          >
-            <div className="flex flex-row items-center gap-2">
-              <CHAIN />
-              {isMainnet ? "Mainnet" : "Slot"}
-            </div>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Button variant="outline">{selectedChainConfig.chainId}</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-black border-2 border-brand-muted">
+              <DropdownMenuItem
+                key="mainnet"
+                className="text-brand cursor-pointer"
+                onClick={() => switchToMainnet()}
+              >
+                Mainnet
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                key="slot"
+                className="text-brand cursor-pointer"
+                onClick={() => switchToSlot()}
+              >
+                Slot
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           {!isMainnet && location.pathname !== "/play" && (
             <Button
               onClick={() => {

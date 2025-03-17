@@ -1,6 +1,6 @@
 import { Connector } from "@starknet-react/core";
 import { ControllerConnector } from "@cartridge/connector";
-import { ChainId } from "@/dojo/config";
+import { ChainId } from "@/dojo/setup/networks";
 import { stringToFelt } from "@/lib/utils";
 
 export const initializeController = (

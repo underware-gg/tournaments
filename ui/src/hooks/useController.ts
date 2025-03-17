@@ -3,7 +3,7 @@ import { useAccount, useConnect } from "@starknet-react/core";
 import { lookupAddresses } from "@cartridge/controller";
 import { ControllerConnector } from "@cartridge/connector";
 import { supportedConnectorIds } from "@/lib/connectors";
-import { ChainId } from "@/dojo/config";
+import { ChainId } from "@/dojo/setup/networks";
 import { stringToFelt } from "@/lib/utils";
 
 // sync from here:

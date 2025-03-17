@@ -22,7 +22,7 @@ import { useToast } from "@/hooks/useToast";
 // import { useOptimisticUpdates } from "@/dojo/hooks/useOptimisticUpdates";
 import { feltToString } from "@/lib/utils";
 import { useTournamentContracts } from "@/dojo/hooks/useTournamentContracts";
-import { ChainId } from "@/dojo/config";
+import { ChainId } from "@/dojo/setup/networks";
 
 // Type for the transformed tournament
 type ExecutableTournament = Omit<Tournament, "metadata"> & {
