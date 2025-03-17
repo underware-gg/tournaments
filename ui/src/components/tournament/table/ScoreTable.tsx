@@ -3,9 +3,9 @@ import Pagination from "@/components/table/Pagination";
 import { USER, VERIFIED } from "@/components/Icons";
 import { useState, useEffect, useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
-import { BigNumberish } from "starknet";
+import { addAddressPadding, BigNumberish } from "starknet";
 import { useGetTournamentLeaderboard } from "@/dojo/hooks/useSqlQueries";
-import { feltToString, indexAddress } from "@/lib/utils";
+import { feltToString, indexAddress, bigintToHex } from "@/lib/utils";
 import { useDojo } from "@/context/dojo";
 import { useGetUsernames } from "@/hooks/useController";
 import { HoverCardContent } from "@/components/ui/hover-card";
@@ -16,6 +16,7 @@ import {
   PlayerDetails,
 } from "@/components/tournament/table/PlayerCard";
 import TableSkeleton from "@/components/tournament/table/Skeleton";
+// import { Leaderboard } from "@/generated/models.gen";
 
 interface ScoreTableProps {
   tournamentId: BigNumberish;
@@ -25,6 +26,7 @@ interface ScoreTableProps {
   gameScoreModel: string;
   gameScoreAttribute: string;
   isEnded: boolean;
+  // leaderboardModel: Leaderboard;
 }
 
 const ScoreTable = ({
@@ -35,18 +37,23 @@ const ScoreTable = ({
   gameScoreModel,
   gameScoreAttribute,
   isEnded,
-}: ScoreTableProps) => {
+}: // leaderboardModel,
+ScoreTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showParticipants, setShowParticipants] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
   const { nameSpace } = useDojo();
-
+  const [prevEntryCount, setPrevEntryCount] = useState<number | null>(null);
   const offset = (currentPage - 1) * 10;
 
-  const { data: leaderboard, loading } = useGetTournamentLeaderboard({
+  const {
+    data: leaderboard,
+    refetch: refetchLeaderboard,
+    loading,
+  } = useGetTournamentLeaderboard({
     namespace: nameSpace,
-    tournamentId: tournamentId,
+    tournamentId: addAddressPadding(bigintToHex(tournamentId)),
     gameNamespace: gameNamespace,
     gameAddress: indexAddress(gameAddress?.toString() ?? "0x0"),
     gameScoreModel: gameScoreModel,
@@ -61,8 +68,18 @@ const ScoreTable = ({
   );
 
   useEffect(() => {
+    if (prevEntryCount !== null && prevEntryCount !== entryCount) {
+      const timer = setTimeout(() => {
+        refetchLeaderboard();
+        console.log("refetching leaderboard");
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+
+    setPrevEntryCount(entryCount);
     setShowParticipants(entryCount > 0);
-  }, [entryCount]);
+  }, [entryCount, prevEntryCount]);
 
   const { usernames } = useGetUsernames(ownerAddresses ?? []);
 
@@ -70,9 +87,7 @@ const ScoreTable = ({
     <Card
       variant="outline"
       className={`sm:w-1/2 transition-all duration-300 ease-in-out ${
-        showParticipants
-          ? "h-[210px] 3xl:h-[270px]"
-          : "h-[45px] sm:h-[60px] 3xl:h-[80px]"
+        showParticipants ? "h-[210px] 3xl:h-[270px]" : "h-[60px] 3xl:h-[80px]"
       }`}
     >
       <div className="flex flex-col justify-between">
@@ -96,7 +111,7 @@ const ScoreTable = ({
                 <Switch
                   checked={showParticipants}
                   onCheckedChange={setShowParticipants}
-                  className="hidden sm:block h-4 xl:h-6"
+                  className="hidden sm:block"
                 />
               </>
             )}

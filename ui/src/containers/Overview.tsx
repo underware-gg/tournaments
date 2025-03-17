@@ -22,14 +22,17 @@ import {
 } from "@/dojo/hooks/useSqlQueries";
 import { bigintToHex, feltToString, indexAddress } from "@/lib/utils";
 import { addAddressPadding } from "starknet";
-import { processPrizesFromSql } from "@/lib/utils/formatting";
 import { useDojo } from "@/context/dojo";
-import { processTournamentFromSql } from "@/lib/utils/formatting";
 import EmptyResults from "@/components/overview/tournaments/EmptyResults";
 import { TournamentCard } from "@/components/overview/TournamanentCard";
 import TournamentSkeletons from "@/components/overview/TournamentSkeletons";
 import NoAccount from "@/components/overview/tournaments/NoAccount";
 import { useAccount } from "@starknet-react/core";
+import { useSubscribeTournamentsQuery } from "@/dojo/hooks/useSdkQueries";
+import { useDojoStore } from "@/dojo/hooks/useDojoStore";
+import { ParsedEntity } from "@dojoengine/sdk";
+import { SchemaType } from "@/generated/models.gen";
+import useTournamentStore, { TournamentTab } from "@/hooks/tournamentStore";
 
 const SORT_OPTIONS = {
   upcoming: [
@@ -47,7 +50,7 @@ const SORT_OPTIONS = {
   ],
   my: [
     { value: "start_time", label: "Start Time" },
-    { value: "status", label: "Status" },
+    { value: "end_time", label: "End Time" },
   ],
 } as const;
 
@@ -55,11 +58,35 @@ const Overview = () => {
   const { nameSpace } = useDojo();
   const { address } = useAccount();
   const { selectedTab, setSelectedTab } = useUIStore();
-  const [page, setPage] = useState(0);
   const { gameFilters, setGameFilters, gameData } = useUIStore();
-  const [sortBy, setSortBy] = useState<string>(
-    SORT_OPTIONS[selectedTab][0].value
+
+  // Use the tournament store with tab-specific data
+  const {
+    getCurrentTabPage,
+    incrementPage,
+    resetPage,
+    getCurrentTabTournaments,
+    addTournaments,
+    setTournaments,
+    clearTournaments,
+    sortByTab,
+    setSortBy,
+    isLoadingByTab,
+    setIsLoading,
+    processTournamentsFromRaw,
+  } = useTournamentStore();
+
+  const subscribedTournaments = useDojoStore((state) =>
+    state.getEntitiesByModel(nameSpace, "Tournament")
   );
+  const subscribedTournamentsKey = useMemo(
+    () => JSON.stringify(subscribedTournaments),
+    [subscribedTournaments]
+  );
+
+  const [prevSubscribedTournaments, setPrevSubscribedTournaments] = useState<
+    ParsedEntity<SchemaType>[] | null
+  >(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
@@ -67,7 +94,10 @@ const Overview = () => {
     return addAddressPadding(bigintToHex(BigInt(Date.now()) / 1000n));
   }, []);
 
-  const { data: upcomingTournamentsCount } = useGetUpcomingTournamentsCount({
+  const {
+    data: upcomingTournamentsCount,
+    refetch: refetchUpcomingTournamentsCount,
+  } = useGetUpcomingTournamentsCount({
     namespace: nameSpace,
     currentTime: currentTime,
   });
@@ -111,15 +141,27 @@ const Overview = () => {
     myTournamentsCount,
   ]);
 
-  useEffect(() => {
-    setSortBy(SORT_OPTIONS[selectedTab][0].value);
-  }, [selectedTab]);
+  // Get current tab's data
+  const currentPage = getCurrentTabPage(selectedTab as TournamentTab);
+  const currentTournaments = getCurrentTabTournaments(
+    selectedTab as TournamentTab
+  );
+  const currentSortBy = sortByTab[selectedTab as TournamentTab];
+  const isCurrentTabLoading = isLoadingByTab[selectedTab as TournamentTab];
 
+  // Update sortBy in the store when tab changes
   useEffect(() => {
+    setSortBy(selectedTab as TournamentTab, SORT_OPTIONS[selectedTab][0].value);
+  }, [selectedTab, setSortBy]);
+
+  // Reset data when filters change
+  useEffect(() => {
+    clearTournaments(selectedTab as TournamentTab);
+    resetPage(selectedTab as TournamentTab);
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
-  }, [gameFilters]);
+  }, [gameFilters, clearTournaments, resetPage, selectedTab]);
 
   const removeGameFilter = (filter: string) => {
     setGameFilters(gameFilters.filter((f) => f !== filter));
@@ -130,19 +172,51 @@ const Overview = () => {
     []
   );
 
-  const { data: tournaments, loading: tournamentsLoading } = useGetTournaments({
+  // Prevent initial double loading by controlling when to fetch
+  const shouldFetch = useMemo(() => {
+    // Only fetch if:
+    // 1. We're on the first page (always fetch first page)
+    // 2. OR we're on a subsequent page AND we don't have enough data yet
+    const hasEnoughData =
+      currentTournaments.length >= (currentPage + 1) * 12 ||
+      currentTournaments.length === tournamentCounts[selectedTab];
+
+    return currentPage === 0 || (currentPage > 0 && !hasEnoughData);
+  }, [currentPage, currentTournaments.length, tournamentCounts, selectedTab]);
+
+  // Use this to conditionally fetch data
+  const {
+    data: tournaments,
+    loading: tournamentsLoading,
+    // refetch: refetchTournaments,
+  } = useGetTournaments({
     namespace: nameSpace,
     currentTime: hexTimestamp,
     gameFilters: gameFilters,
-    offset: page * 12,
+    offset: currentPage * 12,
     limit: 12,
     status: selectedTab,
-    sortBy: sortBy,
-    active:
-      selectedTab === "upcoming" ||
-      selectedTab === "live" ||
-      selectedTab === "ended",
+    sortBy: currentSortBy,
+    // Only activate the query for the appropriate tabs and when we need to fetch
+    active: ["upcoming", "live", "ended"].includes(selectedTab) && shouldFetch,
   });
+
+  useSubscribeTournamentsQuery();
+
+  useEffect(() => {
+    if (
+      prevSubscribedTournaments !== null &&
+      prevSubscribedTournaments !== subscribedTournaments
+    ) {
+      const timer = setTimeout(() => {
+        refetchUpcomingTournamentsCount();
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+
+    setPrevSubscribedTournaments(subscribedTournaments);
+  }, [subscribedTournamentsKey, prevSubscribedTournaments]);
 
   const { data: myTournaments, loading: myTournamentsLoading } =
     useGetMyTournaments({
@@ -151,61 +225,211 @@ const Overview = () => {
       gameAddresses: gameAddresses ?? [],
       gameFilters: gameFilters,
       limit: 12,
-      offset: page * 12,
+      offset: currentPage * 12,
       active: selectedTab === "my",
+      sortBy: currentSortBy,
     });
 
-  const tournamentsData = (
-    selectedTab === "my" ? myTournaments : tournaments
-  ).map((tournament) => {
-    const processedTournament = processTournamentFromSql(tournament);
-    const processedPrizes = processPrizesFromSql(
-      tournament.prizes,
-      tournament.id
-    );
-    return {
-      tournament: processedTournament,
-      prizes: processedPrizes,
-      entryCount: Number(tournament.entry_count),
-    };
-  });
-
+  // Process and store tournaments when data is loaded
   useEffect(() => {
+    // Set loading state based on current tab's loading status
+    setIsLoading(
+      selectedTab as TournamentTab,
+      tournamentsLoading || myTournamentsLoading
+    );
+
+    // Only process data if we're not loading
+    if (!tournamentsLoading && !myTournamentsLoading) {
+      const rawTournaments = selectedTab === "my" ? myTournaments : tournaments;
+
+      // Make sure we have data and we're on the right page
+      if (
+        rawTournaments &&
+        Array.isArray(rawTournaments) &&
+        rawTournaments.length > 0
+      ) {
+        const processedTournaments = processTournamentsFromRaw(rawTournaments);
+
+        // For first page, replace all tournaments
+        // For subsequent pages, add only new tournaments
+        if (currentPage === 0) {
+          setTournaments(selectedTab as TournamentTab, processedTournaments);
+        } else {
+          addTournaments(selectedTab as TournamentTab, processedTournaments);
+        }
+      } else if (currentPage === 0) {
+        // If there are no results for the first page, clear the tournaments
+        setTournaments(selectedTab as TournamentTab, []);
+      }
+    }
+  }, [
+    tournaments,
+    myTournaments,
+    tournamentsLoading,
+    myTournamentsLoading,
+    currentPage,
+    selectedTab,
+    setTournaments,
+    addTournaments,
+    setIsLoading,
+    processTournamentsFromRaw,
+  ]);
+
+  // Infinite scroll implementation with debounce to prevent multiple triggers
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
+
+    // Log the current state to understand what's happening
+    console.log("Observer setup:", {
+      isLoading: isCurrentTabLoading,
+      hasMoreData: tournamentCounts[selectedTab] > currentTournaments.length,
+      currentCount: currentTournaments.length,
+      currentPage,
+      shouldObserve:
+        !isCurrentTabLoading &&
+        tournamentCounts[selectedTab] > currentTournaments.length &&
+        currentTournaments.length > 0 &&
+        currentPage > 0,
+    });
+
     const observer = new IntersectionObserver(
       (entries) => {
+        // Clear any existing timeout to prevent multiple triggers
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+
+        const hasMoreToLoad =
+          tournamentCounts[selectedTab] > currentTournaments.length;
+        const hasFullPage =
+          currentTournaments.length > 0 && currentTournaments.length % 12 === 0;
+        const isNotInitialLoad = currentPage > 0;
+
+        console.log("Observer triggered:", {
+          isIntersecting: entries[0].isIntersecting,
+          isLoading: isCurrentTabLoading,
+          hasMoreToLoad,
+          hasFullPage,
+          isNotInitialLoad,
+        });
+
         if (
           entries[0].isIntersecting &&
-          !(tournamentsLoading || myTournamentsLoading) &&
-          tournamentCounts[selectedTab] > 12
+          !isCurrentTabLoading &&
+          hasMoreToLoad &&
+          hasFullPage &&
+          isNotInitialLoad
         ) {
-          setPage((prevPage) => prevPage + 1);
+          // Use a timeout to debounce the page increment
+          timeoutId = setTimeout(() => {
+            console.log(
+              "Incrementing page from",
+              currentPage,
+              "to",
+              currentPage + 1
+            );
+            incrementPage(selectedTab as TournamentTab);
+          }, 300);
         }
       },
       { threshold: 0.1 }
     );
 
-    if (loadingRef.current) {
+    // Only observe if we meet all conditions
+    if (
+      loadingRef.current &&
+      !isCurrentTabLoading &&
+      tournamentCounts[selectedTab] > currentTournaments.length &&
+      currentTournaments.length > 0 &&
+      currentPage > 0
+    ) {
+      console.log("Starting to observe loading element");
       observer.observe(loadingRef.current);
+    } else {
+      console.log("Not observing loading element");
     }
 
-    return () => observer.disconnect();
-  }, [tournamentsLoading, myTournamentsLoading, tournamentCounts]);
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      observer.disconnect();
+    };
+  }, [
+    isCurrentTabLoading,
+    tournamentCounts,
+    selectedTab,
+    currentTournaments.length,
+    currentPage,
+    incrementPage,
+  ]);
 
+  // Add this effect to handle the first page scroll
   useEffect(() => {
-    if (myTournamentsCount > 0) {
-      setSelectedTab("my");
-    } else if (upcomingTournamentsCount > 0) {
-      setSelectedTab("upcoming");
-    } else if (liveTournamentsCount > 0) {
-      setSelectedTab("live");
-    } else if (endedTournamentsCount > 0) {
-      setSelectedTab("ended");
+    const handleScroll = () => {
+      if (
+        scrollContainerRef.current &&
+        currentPage === 0 &&
+        !isCurrentTabLoading &&
+        tournamentCounts[selectedTab] > currentTournaments.length &&
+        currentTournaments.length > 0 &&
+        currentTournaments.length % 12 === 0
+      ) {
+        const { scrollTop, scrollHeight, clientHeight } =
+          scrollContainerRef.current;
+
+        // If we're near the bottom (within 100px)
+        if (scrollTop + clientHeight >= scrollHeight - 100) {
+          console.log("First page scroll detected, incrementing page");
+          incrementPage(selectedTab as TournamentTab);
+        }
+      }
+    };
+
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [
+    currentPage,
+    isCurrentTabLoading,
+    tournamentCounts,
+    selectedTab,
+    currentTournaments.length,
+    incrementPage,
+  ]);
+
+  // Add this near your other state declarations
+  const isFirstRender = useRef(true);
+
+  // Update the effect to only run on first render
+  useEffect(() => {
+    // Only set the default tab on first render
+    if (isFirstRender.current) {
+      if (upcomingTournamentsCount > 0) {
+        setSelectedTab("upcoming");
+      } else if (liveTournamentsCount > 0) {
+        setSelectedTab("live");
+      } else if (myTournamentsCount > 0) {
+        setSelectedTab("my");
+      } else if (endedTournamentsCount > 0) {
+        setSelectedTab("ended");
+      }
+
+      // Set to false after first render
+      isFirstRender.current = false;
     }
   }, [
     upcomingTournamentsCount,
     liveTournamentsCount,
     endedTournamentsCount,
     myTournamentsCount,
+    setSelectedTab,
   ]);
 
   const LoadingSpinner = () => (
@@ -213,10 +437,10 @@ const Overview = () => {
   );
 
   return (
-    <div className="flex flex-row gap-5">
+    <div className="flex flex-row gap-5 h-full">
       <GameFilters />
       <div className="flex flex-col gap-2 sm:gap-0 w-full sm:w-4/5 p-1 sm:p-2">
-        <div className="flex flex-row justify-between w-full sm:border-b-4 border-brand">
+        <div className="flex flex-row items-center justify-between w-full border-b-4 border-brand h-[44px]">
           {/* Hide TournamentTabs on mobile when selectedTab is "my" */}
           <div className={selectedTab === "my" ? "hidden sm:block" : "block"}>
             <TournamentTabs
@@ -240,7 +464,7 @@ const Overview = () => {
                 <div className="flex flex-row items-center justify-between capitalize text-sm 2xl:text-base w-full sm:gap-2">
                   {
                     SORT_OPTIONS[selectedTab].find(
-                      (option) => option.value === sortBy
+                      (option) => option.value === currentSortBy
                     )?.label
                   }
                   <span className="w-6">
@@ -257,7 +481,9 @@ const Overview = () => {
                   <DropdownMenuItem
                     key={option.value}
                     className="text-brand cursor-pointer"
-                    onClick={() => setSortBy(option.value)}
+                    onClick={() =>
+                      setSortBy(selectedTab as TournamentTab, option.value)
+                    }
                   >
                     {option.label}
                   </DropdownMenuItem>
@@ -301,31 +527,42 @@ const Overview = () => {
           </div>
           <div
             ref={scrollContainerRef}
-            className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-4 transition-all duration-300 ease-in-out sm:py-2 overflow-y-auto"
+            className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 sm:gap-4 transition-all duration-300 ease-in-out sm:py-2 overflow-y-auto"
           >
             {selectedTab === "my" && !address ? (
               <NoAccount />
-            ) : tournamentsLoading || myTournamentsLoading ? (
+            ) : isCurrentTabLoading && currentPage === 0 ? (
               <TournamentSkeletons
                 tournamentsCount={tournamentCounts[selectedTab]}
               />
-            ) : tournamentsData.length > 0 ? (
-              tournamentsData.map((tournament, index) => (
-                <TournamentCard
-                  key={index}
-                  tournament={tournament.tournament}
-                  index={index}
-                  status={selectedTab}
-                  prizes={tournament.prizes}
-                  entryCount={tournament.entryCount}
-                />
-              ))
+            ) : currentTournaments.length > 0 ? (
+              <>
+                {currentTournaments.map((tournament, index) => (
+                  <TournamentCard
+                    key={`${tournament.tournament.id}-${index}`}
+                    tournament={tournament.tournament}
+                    index={index}
+                    status={selectedTab}
+                    prizes={tournament.prizes}
+                    entryCount={tournament.entryCount}
+                  />
+                ))}
+
+                {isCurrentTabLoading && currentPage > 0 && (
+                  <TournamentSkeletons
+                    tournamentsCount={tournamentCounts[selectedTab]}
+                    count={12}
+                  />
+                )}
+              </>
             ) : (
               <EmptyResults gameFilters={gameFilters} />
             )}
           </div>
-          <div ref={loadingRef} className="w-full py-4 flex justify-center">
-            {(tournamentsLoading || myTournamentsLoading) && <LoadingSpinner />}
+          <div ref={loadingRef} className="w-full h-10 flex justify-center">
+            {isCurrentTabLoading && currentPage === 0
+              ? null
+              : isCurrentTabLoading && <LoadingSpinner />}
           </div>
         </div>
       </div>

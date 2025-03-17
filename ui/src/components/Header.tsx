@@ -1,6 +1,13 @@
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import { Button } from "@/components/ui/button";
-import { CONTROLLER, PLUS, LOGOUT, PLAY } from "@/components/Icons";
+import {
+  CONTROLLER,
+  LOGOUT,
+  PLAY,
+  SPACE_INVADER_SOLID,
+  TROPHY_LINE,
+  COIN,
+} from "@/components/Icons";
 import { displayAddress } from "@/lib/utils";
 import {
   useControllerUsername,
@@ -19,7 +26,6 @@ import {
 import useUIStore from "@/hooks/useUIStore";
 import { getGames } from "@/assets/games";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
-import { SPACE_INVADER_LINE } from "@/components/Icons";
 
 const Header = () => {
   const { account } = useAccount();
@@ -49,7 +55,7 @@ const Header = () => {
                 className="p-0 flex items-center justify-center"
               >
                 <span className="flex items-center justify-center w-full h-full">
-                  <SPACE_INVADER_LINE />
+                  <SPACE_INVADER_SOLID />
                 </span>
               </Button>
             </SheetTrigger>
@@ -118,17 +124,20 @@ const Header = () => {
         </div>
       )}
 
-      {/* Logo - hidden on small screens */}
       <div
-        className="hidden sm:block font-brand hover:cursor-pointer hover:text-brand-muted transition-colors duration-200"
+        className="font-brand hover:cursor-pointer hover:text-brand-muted transition-colors duration-200 h-full flex items-center"
         onClick={() => {
           navigate("/");
         }}
       >
-        <img src="/logo.svg" alt="Budokan" width={200} height={60} />
+        <img
+          className="h-8 max-w-32 sm:max-w-none sm:h-10 xl:h-12 hover:opacity-80 transition-opacity duration-200 object-contain"
+          src="/logo.svg"
+          alt="logo"
+        />
       </div>
 
-      <div className="flex flex-row items-center gap-2 ml-auto">
+      <div className="flex flex-row items-center gap-2">
         {/* Navigation buttons - only visible on larger screens */}
         <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-2">
           {!isMainnet && location.pathname !== "/play" && (
@@ -150,7 +159,7 @@ const Header = () => {
               }}
             >
               <span className="flex flex-row items-center gap-2">
-                <PLUS />
+                <COIN />
                 Register Token
               </span>
             </Button>
@@ -163,7 +172,7 @@ const Header = () => {
               }}
             >
               <span className="flex flex-row items-center gap-2">
-                <PLUS />
+                <TROPHY_LINE />
                 Create Tournament
               </span>
             </Button>
