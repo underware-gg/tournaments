@@ -8,7 +8,7 @@ import { feltToString } from "@/lib/utils";
 import { TokenMetadata } from "@/generated/models.gen";
 import { BigNumberish } from "starknet";
 import { Button } from "@/components/ui/button";
-import { getGameUrl } from "@/assets/games";
+import { getGameName, getGameUrl } from "@/assets/games";
 
 interface EntryCardProps {
   gameAddress: string;
@@ -31,6 +31,8 @@ const EntryCard = ({ gameAddress, mergedEntry }: EntryCardProps) => {
     BigInt(mergedEntry.gameMetadata?.lifecycle.start.Some) < currentDate;
 
   const gameUrl = getGameUrl(gameAddress);
+
+  const gameName = getGameName(gameAddress);
 
   if (!mergedEntry.entry_number) {
     return null;
@@ -64,7 +66,14 @@ const EntryCard = ({ gameAddress, mergedEntry }: EntryCardProps) => {
           <Button
             size="sm"
             onClick={() => {
-              window.open(gameUrl, "_blank");
+              window.open(
+                gameName === "Dark Shuffle"
+                  ? `https://darkshuffle.io/play/${Number(
+                      mergedEntry.game_token_id
+                    )}`
+                  : gameUrl,
+                "_blank"
+              );
             }}
           >
             PLAY

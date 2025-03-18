@@ -199,26 +199,26 @@ const Schedule = ({ form }: StepProps) => {
                               {label}
                             </Button>
                           ))}
-                          {!isMainnet && (
-                            <div className="flex flex-col gap-1">
-                              <Label className="text-xs font-medium">
-                                Custom (seconds)
-                              </Label>
-                              <Input
-                                className="w-24 px-1"
-                                type="number"
-                                value={field.value}
-                                onChange={(e) => {
-                                  field.onChange(Number(e.target.value));
-                                  form.setValue(
-                                    "submissionPeriod",
-                                    Number(e.target.value)
-                                  );
-                                }}
-                                min={900}
-                              />
-                            </div>
-                          )}
+                          {/* {!isMainnet && ( */}
+                          <div className="flex flex-col gap-1">
+                            <Label className="text-xs font-medium">
+                              Custom (seconds)
+                            </Label>
+                            <Input
+                              className="w-24 px-1"
+                              type="number"
+                              value={field.value}
+                              onChange={(e) => {
+                                field.onChange(Number(e.target.value));
+                                form.setValue(
+                                  "submissionPeriod",
+                                  Number(e.target.value)
+                                );
+                              }}
+                              min={900}
+                            />
+                          </div>
+                          {/* )} */}
                         </div>
                         <div
                           className={`flex flex-row gap-2 w-full ${

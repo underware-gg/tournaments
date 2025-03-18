@@ -21,6 +21,12 @@ export const getGameUrl = (gameAddress: string): string => {
   return game?.url || "";
 };
 
+export const getGameName = (gameAddress: string): string => {
+  const games = getGames();
+  const game = games[gameAddress];
+  return game?.name || "";
+};
+
 export const getGames = (): Record<string, Game> => {
   const { selectedChainConfig } = useDojo();
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
@@ -53,7 +59,7 @@ export const getGames = (): Record<string, Game> => {
     };
   } else if (isMainnet) {
     return {
-      "0x020fc3c9efd0dde5f53642dac7f53638aeaae98ff9af5f1642546f389ce9dec5": {
+      "0x0320f977f47f0885e376b781d9e244d9f59f10154ce844ae1815c919f0374726": {
         name: "Dark Shuffle",
         Icon: function DarkShuffleIcon(
           props: ImgHTMLAttributes<HTMLImageElement>
