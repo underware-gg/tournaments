@@ -1,9 +1,4 @@
-import {
-  useAccount,
-  useDisconnect,
-  useNetwork,
-  useProvider,
-} from "@starknet-react/core";
+import { useAccount, useDisconnect } from "@starknet-react/core";
 import { Button } from "@/components/ui/button";
 import {
   CONTROLLER,
@@ -52,13 +47,10 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedChainConfig } = useDojo();
-  const { chain } = useNetwork();
-  const { provider } = useProvider();
   const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
   const isHomeScreen = location.pathname === "/";
   const games = getGames();
-
-  console.log(provider, chain);
+  const isLocal = selectedChainConfig.chainId === ChainId.KATANA_LOCAL;
 
   return (
     <div className="flex flex-row items-center justify-between px-5 sm:py-5 sm:px-10 h-[60px] sm:h-[80px]">
@@ -158,40 +150,38 @@ const Header = () => {
       <div className="flex flex-row items-center gap-2">
         {/* Navigation buttons - only visible on larger screens */}
         <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button variant="outline" className="w-32 ">
-                {selectedChainConfig.chainId === ChainId.SN_MAIN ? (
-                  <STARKNET />
-                ) : (
-                  <SLOT />
-                )}
-                {NetworkId[selectedChainConfig.chainId as ChainId]}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-black border-2 border-brand-muted">
-              <DropdownMenuItem
-                key="mainnet"
-                className="text-brand cursor-pointer"
-                onClick={() => switchToMainnet()}
-              >
-                <span className="[&_svg]:w-8 [&_svg]:h-8">
-                  <STARKNET />
-                </span>
-                {NetworkId[ChainId.SN_MAIN]}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                key="slot"
-                className="text-brand cursor-pointer"
-                onClick={() => switchToSlot()}
-              >
-                <span className="[&_svg]:w-8 [&_svg]:h-8">
-                  <SLOT />
-                </span>
-                {NetworkId[ChainId.WP_TOURNAMENTS]}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {!isLocal && (
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button variant="outline" className="w-32 ">
+                  {selectedChainConfig.chainId === ChainId.SN_MAIN ? (
+                    <STARKNET />
+                  ) : (
+                    <SLOT />
+                  )}
+                  {NetworkId[selectedChainConfig.chainId as ChainId]}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-black border-2 border-brand-muted">
+                <DropdownMenuItem
+                  key="mainnet"
+                  active={selectedChainConfig.chainId === ChainId.SN_MAIN}
+                  onClick={() => switchToMainnet()}
+                >
+                  <span className="[&_svg]:w-8 [&_svg]:h-8">
+                    <STARKNET />
+                  </span>
+                  {NetworkId[ChainId.SN_MAIN]}
+                </DropdownMenuItem>
+                <DropdownMenuItem key="slot" onClick={() => switchToSlot()}>
+                  <span className="[&_svg]:w-8 [&_svg]:h-8">
+                    <SLOT />
+                  </span>
+                  {NetworkId[ChainId.WP_TOURNAMENTS]}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           {!isMainnet && location.pathname !== "/play" && (
             <Button
               onClick={() => {

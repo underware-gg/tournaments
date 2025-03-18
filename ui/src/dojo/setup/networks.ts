@@ -197,3 +197,17 @@ export const CHAINS: Record<ChainId, DojoChainConfig> = {
   [ChainId.WP_TOURNAMENTS]: makeDojoChainConfig(slotKatanaConfig),
   [ChainId.KATANA_LOCAL]: makeDojoChainConfig(localKatanaConfig),
 };
+
+export const getDefaultChainId = (): ChainId => {
+  const envChainId = import.meta.env.VITE_CHAIN_ID as ChainId;
+
+  if (envChainId && !isChainIdSupported(envChainId)) {
+    throw new Error(`Unsupported chain ID in environment: ${envChainId}`);
+  }
+
+  return envChainId || ChainId.KATANA_LOCAL;
+};
+
+const isChainIdSupported = (chainId: ChainId): boolean => {
+  return Object.keys(CHAINS).includes(chainId);
+};
