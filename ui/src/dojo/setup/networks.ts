@@ -13,18 +13,18 @@ import {
   KATANA_ETH_CONTRACT_ADDRESS,
 } from "@dojoengine/core";
 
-export enum NetworkId {
-  MAINNET = "MAINNET",
-  SEPOLIA = "SEPOLIA",
-  KATANA = "KATANA",
-  KATANA_LOCAL = "KATANA_LOCAL",
-}
-
 export enum ChainId {
   KATANA_LOCAL = "KATANA_LOCAL",
   WP_TOURNAMENTS = "WP_TOURNAMENTS",
   SN_MAIN = "SN_MAIN",
   SN_SEPOLIA = "SN_SEPOLIA",
+}
+
+export enum NetworkId {
+  KATANA_LOCAL = "KATANA_LOCAL",
+  WP_TOURNAMENTS = "KATANA",
+  SN_MAIN = "MAINNET",
+  SN_SEPOLIA = "SEPOLIA",
 }
 
 //

@@ -12,6 +12,8 @@ import {
   SPACE_INVADER_SOLID,
   TROPHY_LINE,
   COIN,
+  SLOT,
+  STARKNET,
 } from "@/components/Icons";
 import { displayAddress } from "@/lib/utils";
 import {
@@ -21,7 +23,7 @@ import {
 } from "@/hooks/useController";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDojo } from "@/context/dojo";
-import { ChainId } from "@/dojo/setup/networks";
+import { ChainId, NetworkId } from "@/dojo/setup/networks";
 import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
 import {
   Sheet,
@@ -158,7 +160,14 @@ const Header = () => {
         <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <Button variant="outline">{selectedChainConfig.chainId}</Button>
+              <Button variant="outline" className="w-32 ">
+                {selectedChainConfig.chainId === ChainId.SN_MAIN ? (
+                  <STARKNET />
+                ) : (
+                  <SLOT />
+                )}
+                {NetworkId[selectedChainConfig.chainId as ChainId]}
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-black border-2 border-brand-muted">
               <DropdownMenuItem
@@ -166,14 +175,20 @@ const Header = () => {
                 className="text-brand cursor-pointer"
                 onClick={() => switchToMainnet()}
               >
-                Mainnet
+                <span className="[&_svg]:w-8 [&_svg]:h-8">
+                  <STARKNET />
+                </span>
+                {NetworkId[ChainId.SN_MAIN]}
               </DropdownMenuItem>
               <DropdownMenuItem
                 key="slot"
                 className="text-brand cursor-pointer"
                 onClick={() => switchToSlot()}
               >
-                Slot
+                <span className="[&_svg]:w-8 [&_svg]:h-8">
+                  <SLOT />
+                </span>
+                {NetworkId[ChainId.WP_TOURNAMENTS]}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
