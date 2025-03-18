@@ -15,13 +15,14 @@ import {
   feltToString,
   indexAddress,
   bigintToHex,
+  formatNumber,
 } from "@/lib/utils";
 import { addAddressPadding, BigNumberish } from "starknet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
 import { useGetUsernames } from "@/hooks/useController";
-import { CHECK, X, COIN } from "@/components/Icons";
+import { CHECK, X, COIN, FAT_ARROW_RIGHT } from "@/components/Icons";
 import {
   useGetAccountTokenIds,
   useGetTournamentRegistrants,
@@ -30,12 +31,13 @@ import {
 } from "@/dojo/hooks/useSqlQueries";
 import { useDojo } from "@/context/dojo";
 import { processQualificationProof } from "@/lib/utils/formatting";
+import { getTokenLogoUrl } from "@/lib/tokensMeta";
 
 interface EnterTournamentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   hasEntryFee?: boolean;
-  entryFee?: string;
+  entryFeePrice?: number;
   tournamentModel: Tournament;
   // entryCountModel: EntryCount;
   // gameCount: BigNumberish;
@@ -61,7 +63,7 @@ export function EnterTournamentDialog({
   open,
   onOpenChange,
   hasEntryFee,
-  entryFee,
+  entryFeePrice,
   tournamentModel,
   // entryCountModel,
   // gameCount,
@@ -599,6 +601,30 @@ export function EnterTournamentDialog({
 
   console.log(meetsEntryRequirements, proof, entriesLeftByTournament);
 
+  // display the entry fee distribution
+
+  const creatorShare = Number(
+    tournamentModel?.entry_fee.Some?.tournament_creator_share.Some ?? 0n
+  );
+  const gameShare = Number(
+    tournamentModel?.entry_fee.Some?.game_creator_share.Some ?? 0n
+  );
+  const prizePoolShare = 100 - creatorShare - gameShare;
+  const creatorAmount =
+    (Number(BigInt(tournamentModel?.entry_fee.Some?.amount!)) *
+      (creatorShare / 100)) /
+    10 ** 18;
+
+  const gameAmount =
+    (Number(BigInt(tournamentModel?.entry_fee.Some?.amount!)) *
+      (gameShare / 100)) /
+    10 ** 18;
+
+  const prizePoolAmount =
+    (Number(BigInt(tournamentModel?.entry_fee.Some?.amount!)) *
+      (prizePoolShare / 100)) /
+    10 ** 18;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -609,27 +635,108 @@ export function EnterTournamentDialog({
           {hasEntryFee && (
             <div className="flex flex-col gap-2">
               <span className="text-lg">Entry Fee</span>
-              <div className="flex flex-row items-center justify-center gap-2">
-                <div className="flex flex-row items-center gap-1">
-                  <span>{Number(entryAmount) / 10 ** 18}</span>
-                  <span>
-                    {
-                      tokens.find((token) => token.address === entryToken)
-                        ?.symbol
-                    }
+              <div className="flex flex-col items-center">
+                <div className="flex flex-row items-center justify-center gap-2">
+                  <div className="flex flex-row items-center gap-1">
+                    <span>{formatNumber(Number(entryAmount) / 10 ** 18)}</span>
+                    <img
+                      src={getTokenLogoUrl(entryToken ?? "")}
+                      alt={entryToken ?? ""}
+                      className="w-6 h-6"
+                    />
+
+                    <span>
+                      {
+                        tokens.find((token) => token.address === entryToken)
+                          ?.symbol
+                      }
+                    </span>
+                  </div>
+                  <span className="text-neutral">
+                    ~$
+                    {(
+                      Number(
+                        BigInt(tournamentModel?.entry_fee.Some?.amount!) /
+                          10n ** 18n
+                      ) * Number(entryFeePrice)
+                    ).toFixed(2)}
                   </span>
+                  {address &&
+                    (hasBalance ? (
+                      <span className="w-8 h-8">
+                        <CHECK />
+                      </span>
+                    ) : (
+                      <span className="w-8 h-8">
+                        <X />
+                      </span>
+                    ))}
                 </div>
-                <span className="text-neutral">~${entryFee}</span>
-                {address &&
-                  (hasBalance ? (
-                    <span className="w-8 h-8">
-                      <CHECK />
-                    </span>
-                  ) : (
-                    <span className="w-8 h-8">
-                      <X />
-                    </span>
-                  ))}
+                <span className="w-10 rotate-90">
+                  <FAT_ARROW_RIGHT />
+                </span>
+                <div className="flex flex-row items-center gap-2 w-full">
+                  <div
+                    className={`flex flex-col items-center gap-1 border border-brand-muted rounded-md p-2 w-1/3 ${
+                      creatorAmount > 0 ? "" : "opacity-50"
+                    }`}
+                  >
+                    <span>Creator Fee</span>
+                    <div className="flex flex-row items-center">
+                      <span className="text-sm">
+                        +{formatNumber(creatorAmount)}
+                      </span>
+                      <img
+                        src={getTokenLogoUrl(entryToken ?? "")}
+                        alt={entryToken ?? ""}
+                        className="w-5"
+                      />
+                      <span className="text-sm text-neutral">
+                        ~${formatNumber(creatorAmount * (entryFeePrice ?? 0))}
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    className={`flex flex-col items-center gap-1 border border-brand-muted rounded-md p-2 w-1/3 ${
+                      gameAmount > 0 ? "" : "opacity-50"
+                    }`}
+                  >
+                    <span>Game Fee</span>
+                    <div className="flex flex-row items-center">
+                      <span className="text-sm">
+                        +{formatNumber(gameAmount)}
+                      </span>
+                      <img
+                        src={getTokenLogoUrl(entryToken ?? "")}
+                        alt={entryToken ?? ""}
+                        className="w-5"
+                      />
+                      <span className="text-sm text-neutral">
+                        ~${formatNumber(gameAmount * (entryFeePrice ?? 0))}
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    className={`flex flex-col items-center gap-1 border border-brand-muted rounded-md p-2 w-1/3 ${
+                      prizePoolAmount > 0 ? "" : "opacity-50"
+                    }`}
+                  >
+                    <span>Prize Pool</span>
+                    <div className="flex flex-row items-center">
+                      <span className="text-sm">
+                        +{formatNumber(prizePoolAmount)}
+                      </span>
+                      <img
+                        src={getTokenLogoUrl(entryToken ?? "")}
+                        alt={entryToken ?? ""}
+                        className="w-5"
+                      />
+                      <span className="text-sm text-neutral">
+                        ~${formatNumber(prizePoolAmount * (entryFeePrice ?? 0))}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

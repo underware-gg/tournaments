@@ -15,7 +15,7 @@ export function formatNumber(num: number): string {
   } else if (Math.abs(num) >= 1000) {
     return parseFloat((num / 1000).toFixed(2)) + "k";
   } else if (Math.abs(num) >= 10) {
-    return num.toFixed(0);
+    return num.toFixed(2);
   } else if (Math.abs(num) > 0) {
     return num.toFixed(2);
   } else {
@@ -382,7 +382,19 @@ export const calculateDistribution = (
   creatorFee?: number,
   gameFee?: number
 ): number[] => {
-  const availablePercentage = 100 - (creatorFee ?? 0) - (gameFee ?? 0);
+  // Handle invalid inputs
+  if (positions <= 0) {
+    return [];
+  }
+
+  const safeCreatorFee = creatorFee ?? 0;
+  const safeGameFee = gameFee ?? 0;
+  const availablePercentage = 100 - safeCreatorFee - safeGameFee;
+
+  // If there's nothing to distribute, return array of zeros
+  if (availablePercentage <= 0) {
+    return Array(positions).fill(0);
+  }
 
   // First calculate raw percentages
   const rawDistributions: number[] = [];
@@ -393,6 +405,12 @@ export const calculateDistribution = (
 
   // Normalize to get percentages
   const total = rawDistributions.reduce((a, b) => a + b, 0);
+
+  // Prevent division by zero
+  if (total === 0) {
+    return Array(positions).fill(0);
+  }
+
   const normalizedDistributions = rawDistributions.map(
     (d) => (d * availablePercentage) / total
   );

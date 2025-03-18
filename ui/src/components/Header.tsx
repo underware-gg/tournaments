@@ -189,25 +189,28 @@ const Header = () => {
           className="px-2"
         >
           <span className="flex flex-row items-center gap-2">
-            <CONTROLLER />
             <span
+              className="flex flex-row items-center gap-2"
               onClick={() => {
                 if (account) {
                   openProfile();
                 }
               }}
             >
-              {account ? (
-                username ? (
-                  <span className="text-ellipsis overflow-hidden whitespace-nowrap max-w-[100px]">
-                    {username}
-                  </span>
+              <CONTROLLER />
+              <span>
+                {account ? (
+                  username ? (
+                    <span className="text-ellipsis overflow-hidden whitespace-nowrap max-w-[100px]">
+                      {username}
+                    </span>
+                  ) : (
+                    displayAddress(account.address)
+                  )
                 ) : (
-                  displayAddress(account.address)
-                )
-              ) : (
-                "Connect"
-              )}
+                  "Connect"
+                )}
+              </span>
             </span>
             {account && (
               <span

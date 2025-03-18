@@ -213,13 +213,6 @@ const Tournament = () => {
   );
   useGetScoresQuery(gameNamespace ?? "", gameScoreModel ?? "");
 
-  // const { entity: gameCounterEntity } = useGetGameCounterQuery({
-  //   key: addAddressPadding(BigInt(TOURNAMENT_VERSION_KEY)),
-  //   nameSpace: gameNamespace ?? "",
-  // });
-
-  // const gameCount = gameCounterEntity?.GameCounter?.count ?? 0;
-
   useSubscribeGamesQuery({
     gameNamespace: gameNamespace ?? "",
   });
@@ -293,7 +286,7 @@ const Tournament = () => {
 
   const entryFeePrice = prices[entryFeeTokenSymbol ?? ""];
 
-  const entryFee = tournamentModel?.entry_fee.isSome()
+  const entryFee = hasEntryFee
     ? (
         Number(BigInt(tournamentModel?.entry_fee.Some?.amount!) / 10n ** 18n) *
         Number(entryFeePrice)
@@ -499,7 +492,7 @@ const Tournament = () => {
             open={enterDialogOpen}
             onOpenChange={setEnterDialogOpen}
             hasEntryFee={hasEntryFee}
-            entryFee={entryFee}
+            entryFeePrice={entryFeePrice}
             tournamentModel={tournamentModel}
             // entryCountModel={entryCountModel}
             // gameCount={gameCount}

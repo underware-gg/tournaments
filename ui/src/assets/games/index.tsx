@@ -21,6 +21,12 @@ export const getGameUrl = (gameAddress: string): string => {
   return game?.url || "";
 };
 
+export const getGameName = (gameAddress: string): string => {
+  const games = getGames();
+  const game = games[gameAddress];
+  return game?.name || "";
+};
+
 export const getGames = (): Record<string, Game> => {
   const { selectedChainConfig } = useDojo();
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;

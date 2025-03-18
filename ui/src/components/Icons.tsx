@@ -611,3 +611,45 @@ export const RIBBON_SOLID: React.FC = () => (
     />
   </svg>
 );
+
+export const FAT_ARROW_RIGHT: React.FC = () => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M12.7777 17.4442H14.3331V15.8889H12.7777V17.4442Z"
+      fill="currentColor"
+    />
+    <path
+      d="M6.55592 15.8885L6.55592 8.11118H11.2226L11.2226 6.55587L5.00049 6.55587L5.00049 17.4447H11.2226V15.8894L6.55592 15.8885Z"
+      fill="currentColor"
+    />
+    <path
+      d="M12.7777 17.4442L11.222 17.4439V19H12.7781L12.7777 17.4442Z"
+      fill="currentColor"
+    />
+    <path
+      d="M18.9998 12.7783V11.2222L17.4437 11.2222V12.7783H18.9998Z"
+      fill="currentColor"
+    />
+    <path
+      d="M14.3331 15.8889L15.8885 15.8888V14.3335H14.3332L14.3331 15.8889Z"
+      fill="currentColor"
+    />
+    <path d="M12.7781 5L11.222 5V6.5561H12.7781V5Z" fill="currentColor" />
+    <path
+      d="M14.3331 8.11162V6.55631L12.7781 6.5561L12.7777 8.11162H14.3331Z"
+      fill="currentColor"
+    />
+    <path
+      d="M15.8885 9.66661V8.1113L14.3331 8.11162L14.3332 9.66661H15.8885Z"
+      fill="currentColor"
+    />
+    <path
+      d="M15.8885 14.3335L17.4435 14.3333L17.4437 12.7783L15.8882 12.778L15.8885 14.3335Z"
+      fill="currentColor"
+    />
+    <path
+      d="M17.4437 11.2222L17.4439 9.66674L15.8885 9.66661L15.8886 11.222L17.4437 11.2222Z"
+      fill="currentColor"
+    />
+  </svg>
+);
