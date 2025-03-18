@@ -5,7 +5,13 @@ import Tournament from "@/containers/Tournament";
 import CreateTournament from "@/containers/CreateTournament";
 import RegisterToken from "@/containers/RegisterToken";
 import Play from "@/containers/Play";
-import { Routes, Route, useParams } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  useParams,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import { useGetTokensQuery } from "@/dojo/hooks/useSdkQueries";
 import {
   useGetGameNamespaces,
@@ -13,7 +19,7 @@ import {
 } from "@/dojo/hooks/useSqlQueries";
 import { Toaster } from "@/components/ui/toaster";
 import useUIStore from "@/hooks/useUIStore";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import NotFound from "@/containers/NotFound";
@@ -22,6 +28,9 @@ import { useNetwork } from "@starknet-react/core";
 function App() {
   const { setGameData } = useUIStore();
   const { chain } = useNetwork();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const previousChainRef = useRef<string | undefined>(chain?.id.toString());
 
   useGetTokensQuery();
 
@@ -43,9 +52,23 @@ function App() {
 
   useEffect(() => {
     if (chain) {
-      console.log("chain", chain);
+      // Check if chain has changed
+      const currentChainId = chain.id.toString();
+      if (
+        previousChainRef.current &&
+        previousChainRef.current !== currentChainId
+      ) {
+        // Chain has changed, redirect to overview page
+        // Only redirect if not already on the overview page
+        if (location.pathname !== "/") {
+          navigate("/", { replace: true });
+        }
+      }
+
+      // Update the previous chain ref
+      previousChainRef.current = currentChainId;
     }
-  }, [chain]);
+  }, [chain, navigate, location.pathname]);
 
   return (
     <TooltipProvider>

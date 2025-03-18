@@ -8,9 +8,9 @@ import { NAMESPACE } from "@/lib/constants";
 import { ChainId, CHAINS } from "@/dojo/setup/networks";
 import { DojoAppConfig } from "@/context/dojo";
 
-const manifests: Record<ChainId, DojoManifest> = {
+export const manifests: Record<ChainId, DojoManifest> = {
   [ChainId.KATANA_LOCAL]: tournament_manifest_dev as DojoManifest,
-  [ChainId.WP_TOURNAMENTS]: tournament_manifest_slot as DojoManifest,
+  [ChainId.WP_BUDOKAN]: tournament_manifest_slot as DojoManifest,
   [ChainId.SN_MAIN]: tournament_manifest_mainnet as DojoManifest,
   [ChainId.SN_SEPOLIA]: tournament_manifest_sepolia as DojoManifest,
 };

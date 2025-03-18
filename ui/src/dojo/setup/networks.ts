@@ -15,14 +15,14 @@ import {
 
 export enum ChainId {
   KATANA_LOCAL = "KATANA_LOCAL",
-  WP_TOURNAMENTS = "WP_TOURNAMENTS",
+  WP_BUDOKAN = "WP_BUDOKAN",
   SN_MAIN = "SN_MAIN",
   SN_SEPOLIA = "SN_SEPOLIA",
 }
 
 export enum NetworkId {
   KATANA_LOCAL = "KATANA_LOCAL",
-  WP_TOURNAMENTS = "KATANA",
+  WP_BUDOKAN = "KATANA",
   SN_MAIN = "MAINNET",
   SN_SEPOLIA = "SEPOLIA",
 }
@@ -98,19 +98,19 @@ const localKatanaConfig: DojoChainConfig = {
 
 const slotKatanaConfig: DojoChainConfig = {
   chain: undefined, // derive from this
-  chainId: ChainId.WP_TOURNAMENTS,
+  chainId: ChainId.WP_BUDOKAN,
   name: "Katana Slot",
-  rpcUrl: "https://api.cartridge.gg/x/tournaments/katana",
-  toriiUrl: "https://api.cartridge.gg/x/tournaments/torii",
+  rpcUrl: "https://api.cartridge.gg/x/budokan/katana",
+  toriiUrl: "https://api.cartridge.gg/x/budokan/torii",
   toriiTokensUrl: "",
   relayUrl: undefined,
   blastRpc: undefined,
   blockExplorerUrl: undefined,
   ekuboPriceAPI: "https://mainnet-api.ekubo.org/price",
   masterAddress:
-    "0x5b6b8189bb580f0df1e6d6bec509ff0d6c9be7365d10627e0cf222ec1b47a71",
+    "0x127fd5f1fe78a71f8bcd1fec63e3fe2f0486b6ecd5c86a0466c3a21fa5cfcec",
   masterPrivateKey:
-    "0x33003003001800009900180300d206308b0070db00121318d17b5e6262150b",
+    "0xc5b2fcab997346f3ea1c00b002ecf6f382c5f9c9659a3894eb783c5320f912",
   accountClassHash: KATANA_CLASS_HASH,
   ethAddress: KATANA_ETH_CONTRACT_ADDRESS,
   connectorIds: [supportedConnectorIds.CONTROLLER],
@@ -186,7 +186,6 @@ const makeDojoChainConfig = (config: DojoChainConfig): DojoChainConfig => {
     chain.chain.rpcUrls.default.http = [chain.rpcUrl];
     chain.chain.rpcUrls.public.http = [chain.rpcUrl];
   }
-  // console.log(networkConfig)
 
   return chain;
 };
@@ -194,7 +193,7 @@ const makeDojoChainConfig = (config: DojoChainConfig): DojoChainConfig => {
 export const CHAINS: Record<ChainId, DojoChainConfig> = {
   [ChainId.SN_MAIN]: makeDojoChainConfig(snMainnetConfig),
   [ChainId.SN_SEPOLIA]: makeDojoChainConfig(snSepoliaConfig),
-  [ChainId.WP_TOURNAMENTS]: makeDojoChainConfig(slotKatanaConfig),
+  [ChainId.WP_BUDOKAN]: makeDojoChainConfig(slotKatanaConfig),
   [ChainId.KATANA_LOCAL]: makeDojoChainConfig(localKatanaConfig),
 };
 

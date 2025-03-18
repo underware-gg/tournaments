@@ -611,17 +611,17 @@ export function EnterTournamentDialog({
   );
   const prizePoolShare = 100 - creatorShare - gameShare;
   const creatorAmount =
-    (Number(BigInt(tournamentModel?.entry_fee.Some?.amount!)) *
+    (Number(BigInt(tournamentModel?.entry_fee.Some?.amount ?? 0)) *
       (creatorShare / 100)) /
     10 ** 18;
 
   const gameAmount =
-    (Number(BigInt(tournamentModel?.entry_fee.Some?.amount!)) *
+    (Number(BigInt(tournamentModel?.entry_fee.Some?.amount ?? 0)) *
       (gameShare / 100)) /
     10 ** 18;
 
   const prizePoolAmount =
-    (Number(BigInt(tournamentModel?.entry_fee.Some?.amount!)) *
+    (Number(BigInt(tournamentModel?.entry_fee.Some?.amount ?? 0)) *
       (prizePoolShare / 100)) /
     10 ** 18;
 

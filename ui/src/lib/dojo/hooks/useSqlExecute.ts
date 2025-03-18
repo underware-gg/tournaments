@@ -72,6 +72,8 @@ export function useSqlExecute(query: string | null, tokens?: boolean) {
         const errorMessage =
           err instanceof Error ? err.message : "An unknown error occurred";
         setError(errorMessage);
+        // Clear data when an error occurs
+        setData([]);
         console.error("Query error:", errorMessage);
       }
     } finally {

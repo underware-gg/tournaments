@@ -19,10 +19,8 @@ import {
   AccountInterface,
 } from "starknet";
 import { useToast } from "@/hooks/useToast";
-// import { useOptimisticUpdates } from "@/dojo/hooks/useOptimisticUpdates";
 import { feltToString } from "@/lib/utils";
 import { useTournamentContracts } from "@/dojo/hooks/useTournamentContracts";
-import { ChainId } from "@/dojo/setup/networks";
 
 // Type for the transformed tournament
 type ExecutableTournament = Omit<Tournament, "metadata"> & {
@@ -45,17 +43,10 @@ const prepareForExecution = (tournament: Tournament): ExecutableTournament => {
 };
 
 export const useSystemCalls = () => {
-  const { client, selectedChainConfig } = useDojo();
+  const { client } = useDojo();
   const { account, address } = useAccount();
   const { toast } = useToast();
-  // const {
-  //   applyTournamentEntryUpdate,
-  //   applyTournamentPrizesUpdate,
-  //   applyTournamentCreateAndAddPrizesUpdate,
-  // } = useOptimisticUpdates();
   const { tournamentAddress } = useTournamentContracts();
-
-  const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
 
   // Tournament
 
@@ -63,18 +54,10 @@ export const useSystemCalls = () => {
     entryFeeToken: CairoOption<EntryFee>,
     tournamentId: BigNumberish,
     tournamentName: string,
-    // newEntryCount: BigNumberish,
     player_name: BigNumberish,
     player_address: BigNumberish,
     qualification: CairoOption<QualificationProofEnum>
-    // gameCount: BigNumberish
   ) => {
-    // const { wait, revert, confirm } = applyTournamentEntryUpdate(
-    //   tournamentId,
-    //   newEntryCount,
-    //   gameCount
-    // );
-
     try {
       let calls = [];
       if (entryFeeToken.isSome()) {
@@ -99,11 +82,7 @@ export const useSystemCalls = () => {
         ]),
       });
 
-      const tx = isMainnet
-        ? await account?.execute(calls)
-        : account?.execute(calls);
-
-      // await wait();
+      const tx = await account?.execute(calls);
 
       if (tx) {
         toast({
@@ -112,11 +91,8 @@ export const useSystemCalls = () => {
         });
       }
     } catch (error) {
-      // revert();
       console.error("Error executing enter tournament:", error);
       throw error;
-    } finally {
-      // confirm();
     }
   };
 
@@ -142,9 +118,7 @@ export const useSystemCalls = () => {
         });
       }
 
-      const tx = isMainnet
-        ? await account?.execute(calls)
-        : account?.execute(calls);
+      const tx = await account?.execute(calls);
 
       if (tx) {
         toast({
@@ -153,11 +127,8 @@ export const useSystemCalls = () => {
         });
       }
     } catch (error) {
-      // revert();
       console.error("Error executing submit scores:", error);
       throw error;
-    } finally {
-      // confirm();
     }
   };
 
@@ -167,13 +138,6 @@ export const useSystemCalls = () => {
     prizes: Prize[],
     showToast: boolean
   ) => {
-    toast({
-      title: "Adding Prize...",
-      description: `Adding prize for tournament ${tournamentName}`,
-    });
-
-    // const { revert, confirm } = applyTournamentPrizesUpdate(prizes);
-
     try {
       let calls = [];
       for (const prize of prizes) {
@@ -200,11 +164,7 @@ export const useSystemCalls = () => {
         });
       }
 
-      const tx = isMainnet
-        ? await account?.execute(calls)
-        : account?.execute(calls);
-
-      // await wait();
+      const tx = await account?.execute(calls);
 
       if (showToast && tx) {
         toast({
@@ -213,11 +173,8 @@ export const useSystemCalls = () => {
         });
       }
     } catch (error) {
-      // revert();
       console.error("Error executing add prize:", error);
       throw error;
-    } finally {
-      // confirm();
     }
   };
 
@@ -225,11 +182,6 @@ export const useSystemCalls = () => {
     tournament: Tournament,
     prizes: Prize[]
   ) => {
-    // const { revert, confirm } = applyTournamentCreateAndAddPrizesUpdate(
-    //   tournament,
-    //   prizes
-    // );
-
     const executableTournament = prepareForExecution(tournament);
 
     try {
@@ -273,9 +225,7 @@ export const useSystemCalls = () => {
         calls.push(addPrizesCall);
       }
 
-      const tx = isMainnet
-        ? await account?.execute(calls)
-        : account?.execute(calls);
+      const tx = await account?.execute(calls);
 
       if (tx) {
         toast({
@@ -286,11 +236,8 @@ export const useSystemCalls = () => {
         });
       }
     } catch (error) {
-      // revert();
       console.error("Error executing create tournament:", error);
       throw error;
-    } finally {
-      // confirm();
     }
   };
 
@@ -309,9 +256,7 @@ export const useSystemCalls = () => {
         });
       }
 
-      const tx = isMainnet
-        ? await account?.execute(calls)
-        : account?.execute(calls);
+      const tx = await account?.execute(calls);
 
       if (tx) {
         toast({

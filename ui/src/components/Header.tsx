@@ -150,7 +150,7 @@ const Header = () => {
       <div className="flex flex-row items-center gap-2">
         {/* Navigation buttons - only visible on larger screens */}
         <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-2">
-          {!isLocal && (
+          {!isLocal && account && (
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <Button variant="outline" className="w-32 ">
@@ -173,11 +173,15 @@ const Header = () => {
                   </span>
                   {NetworkId[ChainId.SN_MAIN]}
                 </DropdownMenuItem>
-                <DropdownMenuItem key="slot" onClick={() => switchToSlot()}>
+                <DropdownMenuItem
+                  key="slot"
+                  active={selectedChainConfig.chainId === ChainId.WP_BUDOKAN}
+                  onClick={() => switchToSlot()}
+                >
                   <span className="[&_svg]:w-8 [&_svg]:h-8">
                     <SLOT />
                   </span>
-                  {NetworkId[ChainId.WP_TOURNAMENTS]}
+                  {NetworkId[ChainId.WP_BUDOKAN]}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

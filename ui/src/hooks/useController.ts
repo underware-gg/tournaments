@@ -87,7 +87,7 @@ export const useControllerSwitchChain = () => {
 
   const switchToSlot = async () => {
     await controllerConnector?.controller.switchStarknetChain(
-      stringToFelt(ChainId.WP_TOURNAMENTS).toString()
+      stringToFelt(ChainId.WP_BUDOKAN).toString()
     );
   };
 

@@ -9,6 +9,7 @@ import {
   PredeployedAccountsConnector,
 } from "@dojoengine/predeployed-connector";
 import { initializeController } from "@/dojo/setup/controllerSetup";
+import { manifests } from "@/dojo/setup/config";
 
 // Initialize controller outside component
 const initController = () => {
@@ -23,7 +24,11 @@ const initController = () => {
         rpcUrl: chain?.chain?.rpcUrls.default.http[0] ?? "",
       }));
 
-    return initializeController(chainRpcUrls, getDefaultChainId());
+    return initializeController(
+      chainRpcUrls,
+      getDefaultChainId(),
+      manifests[getDefaultChainId()]
+    );
   } catch (error) {
     console.error(
       `Failed to initialize controller for chain ${getDefaultChainId()}:`,
@@ -43,24 +48,26 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
   const defaultChainId = getDefaultChainId();
 
   // Create provider with memoization
-  const provider = useMemo(
-    () =>
-      jsonRpcProvider({
-        rpc: (chain: Chain) => {
-          // Find the matching chain configuration
-          const matchingChain = Object.values(CHAINS).find(
-            (c) => c.chain === chain
-          );
-
-          if (matchingChain?.chain?.rpcUrls.default.http[0]) {
-            return { nodeUrl: matchingChain.chain.rpcUrls.default.http[0] };
-          }
-
+  const provider = jsonRpcProvider({
+    rpc: (chain: Chain) => {
+      switch (chain) {
+        case CHAINS[ChainId.SN_MAIN].chain:
+          return {
+            nodeUrl: CHAINS[ChainId.SN_MAIN].chain?.rpcUrls.default.http[0],
+          };
+        case CHAINS[ChainId.SN_SEPOLIA].chain:
+          return {
+            nodeUrl: CHAINS[ChainId.SN_SEPOLIA].chain?.rpcUrls.default.http[0],
+          };
+        case CHAINS[ChainId.WP_BUDOKAN].chain:
+          return {
+            nodeUrl: CHAINS[ChainId.WP_BUDOKAN].chain?.rpcUrls.default.http[0],
+          };
+        default:
           throw new Error(`Unsupported chain: ${chain.network}`);
-        },
-      }),
-    []
-  );
+      }
+    },
+  });
 
   // Initialize predeployed accounts for Katana
   useEffect(() => {
@@ -107,11 +114,7 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <StarknetConfig
-      chains={chains}
-      connectors={connectors}
-      provider={() => provider(defaultChain)}
-    >
+    <StarknetConfig chains={chains} connectors={connectors} provider={provider}>
       {children}
     </StarknetConfig>
   );
