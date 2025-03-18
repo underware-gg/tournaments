@@ -17,9 +17,11 @@ import { useEffect } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import NotFound from "@/containers/NotFound";
+import { useNetwork } from "@starknet-react/core";
 
 function App() {
   const { setGameData } = useUIStore();
+  const { chain } = useNetwork();
 
   useGetTokensQuery();
 
@@ -38,6 +40,12 @@ function App() {
       setGameData(gamesMetadata);
     }
   }, [gamesMetadata]);
+
+  useEffect(() => {
+    if (chain) {
+      console.log("chain", chain);
+    }
+  }, [chain]);
 
   return (
     <TooltipProvider>
