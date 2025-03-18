@@ -27,7 +27,7 @@ import EmptyResults from "@/components/overview/tournaments/EmptyResults";
 import { TournamentCard } from "@/components/overview/TournamanentCard";
 import TournamentSkeletons from "@/components/overview/TournamentSkeletons";
 import NoAccount from "@/components/overview/tournaments/NoAccount";
-import { useAccount } from "@starknet-react/core";
+import { useAccount, useNetwork } from "@starknet-react/core";
 import { useSubscribeTournamentsQuery } from "@/dojo/hooks/useSdkQueries";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { ParsedEntity } from "@dojoengine/sdk";
@@ -57,6 +57,7 @@ const SORT_OPTIONS = {
 const Overview = () => {
   const { nameSpace } = useDojo();
   const { address } = useAccount();
+  const { chain } = useNetwork();
   const { selectedTab, setSelectedTab } = useUIStore();
   const { gameFilters, setGameFilters, gameData } = useUIStore();
 
@@ -69,12 +70,19 @@ const Overview = () => {
     addTournaments,
     setTournaments,
     clearTournaments,
+    clearAllTournaments,
     sortByTab,
     setSortBy,
     isLoadingByTab,
     setIsLoading,
     processTournamentsFromRaw,
   } = useTournamentStore();
+
+  useEffect(() => {
+    if (chain) {
+      clearAllTournaments();
+    }
+  }, [chain]);
 
   const subscribedTournaments = useDojoStore((state) =>
     state.getEntitiesByModel(nameSpace, "Tournament")
@@ -279,19 +287,6 @@ const Overview = () => {
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null;
 
-    // Log the current state to understand what's happening
-    console.log("Observer setup:", {
-      isLoading: isCurrentTabLoading,
-      hasMoreData: tournamentCounts[selectedTab] > currentTournaments.length,
-      currentCount: currentTournaments.length,
-      currentPage,
-      shouldObserve:
-        !isCurrentTabLoading &&
-        tournamentCounts[selectedTab] > currentTournaments.length &&
-        currentTournaments.length > 0 &&
-        currentPage > 0,
-    });
-
     const observer = new IntersectionObserver(
       (entries) => {
         // Clear any existing timeout to prevent multiple triggers
@@ -305,14 +300,6 @@ const Overview = () => {
           currentTournaments.length > 0 && currentTournaments.length % 12 === 0;
         const isNotInitialLoad = currentPage > 0;
 
-        console.log("Observer triggered:", {
-          isIntersecting: entries[0].isIntersecting,
-          isLoading: isCurrentTabLoading,
-          hasMoreToLoad,
-          hasFullPage,
-          isNotInitialLoad,
-        });
-
         if (
           entries[0].isIntersecting &&
           !isCurrentTabLoading &&
@@ -322,12 +309,6 @@ const Overview = () => {
         ) {
           // Use a timeout to debounce the page increment
           timeoutId = setTimeout(() => {
-            console.log(
-              "Incrementing page from",
-              currentPage,
-              "to",
-              currentPage + 1
-            );
             incrementPage(selectedTab as TournamentTab);
           }, 300);
         }
@@ -343,10 +324,7 @@ const Overview = () => {
       currentTournaments.length > 0 &&
       currentPage > 0
     ) {
-      console.log("Starting to observe loading element");
       observer.observe(loadingRef.current);
-    } else {
-      console.log("Not observing loading element");
     }
 
     return () => {
@@ -380,7 +358,6 @@ const Overview = () => {
 
         // If we're near the bottom (within 100px)
         if (scrollTop + clientHeight >= scrollHeight - 100) {
-          console.log("First page scroll detected, incrementing page");
           incrementPage(selectedTab as TournamentTab);
         }
       }

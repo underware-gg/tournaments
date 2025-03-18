@@ -73,7 +73,7 @@ import {
 } from "@/components/ui/tooltip";
 import useUIStore from "@/hooks/useUIStore";
 import { AddPrizesDialog } from "@/components/dialogs/AddPrizes";
-import { ChainId } from "@/dojo/config";
+import { ChainId } from "@/dojo/setup/networks";
 
 const Tournament = () => {
   const { id } = useParams<{ id: string }>();

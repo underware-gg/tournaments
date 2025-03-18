@@ -7,15 +7,18 @@ import {
   SPACE_INVADER_SOLID,
   TROPHY_LINE,
   COIN,
+  SLOT,
+  STARKNET,
 } from "@/components/Icons";
 import { displayAddress } from "@/lib/utils";
 import {
   useControllerUsername,
   useControllerProfile,
+  useControllerSwitchChain,
 } from "@/hooks/useController";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDojo } from "@/context/dojo";
-import { ChainId } from "@/dojo/config";
+import { ChainId, NetworkId } from "@/dojo/setup/networks";
 import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
 import {
   Sheet,
@@ -23,6 +26,12 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import useUIStore from "@/hooks/useUIStore";
 import { getGames } from "@/assets/games";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
@@ -34,13 +43,14 @@ const Header = () => {
   const { disconnect } = useDisconnect();
   const { openProfile } = useControllerProfile();
   const { username } = useControllerUsername();
+  const { switchToMainnet, switchToSlot } = useControllerSwitchChain();
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedChainConfig } = useDojo();
-
   const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
   const isHomeScreen = location.pathname === "/";
   const games = getGames();
+  const isLocal = selectedChainConfig.chainId === ChainId.KATANA_LOCAL;
 
   return (
     <div className="flex flex-row items-center justify-between px-5 sm:py-5 sm:px-10 h-[60px] sm:h-[80px]">
@@ -140,6 +150,42 @@ const Header = () => {
       <div className="flex flex-row items-center gap-2">
         {/* Navigation buttons - only visible on larger screens */}
         <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-2">
+          {!isLocal && account && (
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button variant="outline" className="w-32 ">
+                  {selectedChainConfig.chainId === ChainId.SN_MAIN ? (
+                    <STARKNET />
+                  ) : (
+                    <SLOT />
+                  )}
+                  {NetworkId[selectedChainConfig.chainId as ChainId]}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-black border-2 border-brand-muted">
+                <DropdownMenuItem
+                  key="mainnet"
+                  active={selectedChainConfig.chainId === ChainId.SN_MAIN}
+                  onClick={() => switchToMainnet()}
+                >
+                  <span className="[&_svg]:w-8 [&_svg]:h-8">
+                    <STARKNET />
+                  </span>
+                  {NetworkId[ChainId.SN_MAIN]}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  key="slot"
+                  active={selectedChainConfig.chainId === ChainId.WP_BUDOKAN}
+                  onClick={() => switchToSlot()}
+                >
+                  <span className="[&_svg]:w-8 [&_svg]:h-8">
+                    <SLOT />
+                  </span>
+                  {NetworkId[ChainId.WP_BUDOKAN]}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           {!isMainnet && location.pathname !== "/play" && (
             <Button
               onClick={() => {

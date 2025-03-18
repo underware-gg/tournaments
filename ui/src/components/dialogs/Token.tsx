@@ -14,7 +14,7 @@ import { getTokenLogoUrl } from "@/lib/tokensMeta";
 import { useDojo } from "@/context/dojo";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { Token } from "@/generated/models.gen";
-import { ChainId } from "@/dojo/config";
+import { ChainId } from "@/dojo/setup/networks";
 import { addAddressPadding, CairoCustomEnum } from "starknet";
 import { bigintToHex } from "@/lib/utils";
 import { QUESTION } from "@/components/Icons";

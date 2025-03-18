@@ -30,7 +30,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { SECONDS_IN_DAY, SECONDS_IN_HOUR } from "@/lib/constants";
 import { Input } from "../ui/input";
 import { useDojo } from "@/context/dojo";
-import { ChainId } from "@/dojo/config";
+import { ChainId } from "@/dojo/setup/networks";
 
 const Schedule = ({ form }: StepProps) => {
   const { selectedChainConfig } = useDojo();

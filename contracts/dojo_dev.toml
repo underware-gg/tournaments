@@ -1,6 +1,6 @@
 [world]
-name = "Tournament"
-description = "Tournament component used to create and compete in tournaments across Dojo games."
+name = "Budokan"
+description = "Budokan local dev world"
 cover_uri = "file://assets/cover.png"
 icon_uri = "file://assets/icon.png"
 website = "https://github.com/dojoengine/dojo-starter"

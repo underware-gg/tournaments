@@ -101,8 +101,6 @@ const EntrantsTable = ({
     </div>
   );
 
-  console.log(entryCount);
-
   return (
     <Card
       variant="outline"
