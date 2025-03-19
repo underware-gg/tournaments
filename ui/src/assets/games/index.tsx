@@ -35,7 +35,7 @@ export const getGames = (): Record<string, Game> => {
   // const gameMockAddress = useDojoSystem("game_mock").contractAddress;
   if (isLocalKatana) {
     return {
-      "0x06b9ae82d70df624b322f96a602cbf95301e0bf03b9381ce7bdbbf23916573b2": {
+      "0x0035389eec883a077ca4cc036cbe17fc802d297a08e8d7e930781de9ed492d05": {
         name: "Loot Survivor",
         Icon: function LootSurvivorIcon(
           props: ImgHTMLAttributes<HTMLImageElement>

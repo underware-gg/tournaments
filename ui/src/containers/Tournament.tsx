@@ -494,7 +494,7 @@ const Tournament = () => {
             hasEntryFee={hasEntryFee}
             entryFeePrice={entryFeePrice}
             tournamentModel={tournamentModel}
-            // entryCountModel={entryCountModel}
+            entryCountModel={entryCountModel}
             // gameCount={gameCount}
             tokens={tokens}
             tournamentsData={tournamentsData}

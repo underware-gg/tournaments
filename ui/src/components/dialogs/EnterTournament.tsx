@@ -9,20 +9,21 @@ import {
 } from "@/components/ui/dialog";
 import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
 import { useAccount } from "@starknet-react/core";
-import { Tournament, Token } from "@/generated/models.gen";
+import { Tournament, Token, EntryCount } from "@/generated/models.gen";
 import {
   stringToFelt,
   feltToString,
   indexAddress,
   bigintToHex,
   formatNumber,
+  displayAddress,
 } from "@/lib/utils";
 import { addAddressPadding, BigNumberish } from "starknet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
 import { useGetUsernames } from "@/hooks/useController";
-import { CHECK, X, COIN, FAT_ARROW_RIGHT } from "@/components/Icons";
+import { CHECK, X, COIN, FAT_ARROW_RIGHT, USER } from "@/components/Icons";
 import {
   useGetAccountTokenIds,
   useGetTournamentRegistrants,
@@ -39,7 +40,7 @@ interface EnterTournamentDialogProps {
   hasEntryFee?: boolean;
   entryFeePrice?: number;
   tournamentModel: Tournament;
-  // entryCountModel: EntryCount;
+  entryCountModel: EntryCount;
   // gameCount: BigNumberish;
   tokens: Token[];
   tournamentsData: Tournament[];
@@ -53,9 +54,10 @@ type Proof = {
 };
 
 // Update the entriesLeftByTournament type to include either tournamentId or token
-type EntryCount = {
+type EntriesLeftCount = {
   tournamentId?: string;
   token?: string;
+  address?: string;
   entriesLeft: number;
 };
 
@@ -65,7 +67,7 @@ export function EnterTournamentDialog({
   hasEntryFee,
   entryFeePrice,
   tournamentModel,
-  // entryCountModel,
+  entryCountModel,
   // gameCount,
   tokens,
   tournamentsData,
@@ -150,6 +152,10 @@ export function EnterTournamentDialog({
   const requiredTokenAddresses = requiredTokenAddress
     ? [indexAddress(requiredTokenAddress ?? "")]
     : [];
+
+  const allowlistAddresses =
+    tournamentModel?.entry_requirement.Some?.entry_requirement_type?.variant
+      ?.allowlist;
 
   const { data: ownedTokens } = useGetAccountTokenIds(
     indexAddress(address ?? ""),
@@ -357,6 +363,13 @@ export function EnterTournamentDialog({
       }
     }
 
+    if (requirementVariant === "allowlist") {
+      methods.push({
+        type: "allowlist",
+        address: address,
+      });
+    }
+
     return methods;
   }, [
     hasEntryRequirement,
@@ -366,9 +379,8 @@ export function EnterTournamentDialog({
     hasParticipatedInTournamentMap,
     ownedTokenIds,
     tournamentsData,
+    entryCountModel?.count,
   ]);
-
-  console.log(qualificationMethods);
 
   const { data: qualificationEntries } = useGetTournamentQualificationEntries({
     namespace: nameSpace ?? "",
@@ -377,16 +389,14 @@ export function EnterTournamentDialog({
     active: qualificationMethods.length > 0,
   });
 
-  console.log(qualificationEntries);
-
   const { meetsEntryRequirements, proof, entriesLeftByTournament } = useMemo<{
     meetsEntryRequirements: boolean;
     proof: Proof;
-    entriesLeftByTournament: EntryCount[];
+    entriesLeftByTournament: EntriesLeftCount[];
   }>(() => {
     let canEnter = false;
     let proof: Proof = { tokenId: "" };
-    let entriesLeftByTournament: EntryCount[] = [];
+    let entriesLeftByTournament: EntriesLeftCount[] = [];
 
     // If no entry requirement, user can always enter
     if (!hasEntryRequirement) {
@@ -582,6 +592,55 @@ export function EnterTournamentDialog({
       }
     }
 
+    // Handle allowlist-based entry requirements
+    if (requirementVariant === "allowlist") {
+      // If no address, can't enter
+      if (!address) {
+        return {
+          meetsEntryRequirements: false,
+          proof: {},
+          entriesLeftByTournament: [],
+        };
+      }
+
+      // Check if the user's address is in the allowlist
+      const isInAllowlist = allowlistAddresses?.some(
+        (allowedAddress: string) =>
+          allowedAddress.toLowerCase() === address.toLowerCase()
+      );
+
+      if (!isInAllowlist) {
+        return {
+          meetsEntryRequirements: false,
+          proof: { tokenId: "" },
+          entriesLeftByTournament: [],
+        };
+      }
+
+      // Get current entry count for this address from qualificationEntries
+      const currentEntryCount = qualificationEntries[0]?.entry_count ?? 0;
+
+      // Calculate remaining entries
+      const remaining = (Number(entryLimit) ?? 0) - currentEntryCount;
+
+      // If this address has entries left
+      if (remaining > 0) {
+        canEnter = true;
+        entriesLeftByTournament = [
+          {
+            address,
+            entriesLeft: remaining,
+          },
+        ];
+      }
+
+      return {
+        meetsEntryRequirements: canEnter,
+        proof: { tokenId: "" }, // Empty proof for allowlist
+        entriesLeftByTournament,
+      };
+    }
+
     return {
       meetsEntryRequirements: canEnter,
       proof,
@@ -597,9 +656,9 @@ export function EnterTournamentDialog({
     ownedTokenIds,
     entryLimit,
     requirementVariant,
+    address,
+    allowlistAddresses,
   ]);
-
-  console.log(meetsEntryRequirements, proof, entriesLeftByTournament);
 
   // display the entry fee distribution
 
@@ -756,7 +815,7 @@ export function EnterTournamentDialog({
                     }:`}
                   </div>
                 ) : (
-                  "Must hold ERC721"
+                  "Must be part of the allowlist"
                 )}
               </span>
               {requirementVariant === "token" ? (
@@ -797,56 +856,84 @@ export function EnterTournamentDialog({
                     <span className="text-warning">Connect Account</span>
                   )}
                 </div>
-              ) : (
-                requirementVariant === "tournament" && (
-                  <div className="flex flex-col gap-2 px-4">
-                    {tournamentsData.map((tournament) => (
-                      <div
-                        key={tournament.id}
-                        className="flex flex-row items-center justify-between border border-brand-muted rounded-md p-2"
-                      >
-                        <span>{feltToString(tournament.metadata.name)}</span>
-                        {address ? (
-                          tournamentRequirementVariant === "winners" ? (
-                            !!hasWonTournamentMap[tournament.id.toString()]
-                              ?.tokenId
-                          ) : !!hasParticipatedInTournamentMap[
-                              tournament.id.toString()
-                            ] ? (
-                            <div className="flex flex-row items-center gap-2">
-                              <span className="w-5">
-                                <CHECK />
-                              </span>
-                              <span>
-                                {`${
-                                  entriesLeftByTournament.find(
-                                    (entry) =>
-                                      entry.tournamentId ===
-                                      tournament.id.toString()
-                                  )?.entriesLeft
-                                } ${
-                                  entriesLeftByTournament.find(
-                                    (entry) =>
-                                      entry.tournamentId ===
-                                      tournament.id.toString()
-                                  )?.entriesLeft === 1
-                                    ? "entry"
-                                    : "entries"
-                                } left`}
-                              </span>
-                            </div>
-                          ) : (
+              ) : requirementVariant === "tournament" ? (
+                <div className="flex flex-col gap-2 px-4">
+                  {tournamentsData.map((tournament) => (
+                    <div
+                      key={tournament.id}
+                      className="flex flex-row items-center justify-between border border-brand-muted rounded-md p-2"
+                    >
+                      <span>{feltToString(tournament.metadata.name)}</span>
+                      {address ? (
+                        tournamentRequirementVariant === "winners" ? (
+                          !!hasWonTournamentMap[tournament.id.toString()]
+                            ?.tokenId
+                        ) : !!hasParticipatedInTournamentMap[
+                            tournament.id.toString()
+                          ] ? (
+                          <div className="flex flex-row items-center gap-2">
                             <span className="w-5">
-                              <X />
+                              <CHECK />
                             </span>
-                          )
+                            <span>
+                              {`${
+                                entriesLeftByTournament.find(
+                                  (entry) =>
+                                    entry.tournamentId ===
+                                    tournament.id.toString()
+                                )?.entriesLeft
+                              } ${
+                                entriesLeftByTournament.find(
+                                  (entry) =>
+                                    entry.tournamentId ===
+                                    tournament.id.toString()
+                                )?.entriesLeft === 1
+                                  ? "entry"
+                                  : "entries"
+                              } left`}
+                            </span>
+                          </div>
                         ) : (
-                          <span className="text-neutral">Connect Account</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )
+                          <span className="w-5">
+                            <X />
+                          </span>
+                        )
+                      ) : (
+                        <span className="text-neutral">Connect Account</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : address ? (
+                <div className="flex flex-row items-center gap-2 px-4">
+                  <span className="w-8">
+                    <USER />
+                  </span>
+                  <span>{displayAddress(address)}</span>
+                  {meetsEntryRequirements ? (
+                    <div className="flex flex-row items-center gap-2">
+                      <span className="w-5">
+                        <CHECK />
+                      </span>
+                      <span>
+                        {`${
+                          entriesLeftByTournament.find(
+                            (entry) => entry.address === address
+                          )?.entriesLeft
+                        } entries left`}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-row items-center gap-2">
+                      <span className="w-5">
+                        <X />
+                      </span>
+                      <span>No entries</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <span className="text-neutral">Connect Account</span>
               )}
             </div>
           )}
@@ -878,7 +965,7 @@ export function EnterTournamentDialog({
           {address ? (
             <DialogClose asChild>
               <Button
-                disabled={!hasBalance || !meetsEntryRequirements}
+                // disabled={!hasBalance || !meetsEntryRequirements}
                 onClick={handleEnterTournament}
               >
                 Enter Tournament
