@@ -688,12 +688,12 @@ export function EnterTournamentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Enter Tournament</DialogTitle>
+          <DialogTitle className="text-xl">Enter Tournament</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           {hasEntryFee && (
             <div className="flex flex-col gap-2">
-              <span className="text-lg">Entry Fee</span>
+              <span className="text-lg font-brand">Entry Fee</span>
               <div className="flex flex-col items-center">
                 <div className="flex flex-row items-center justify-center gap-2">
                   <div className="flex flex-row items-center gap-1">
@@ -722,13 +722,19 @@ export function EnterTournamentDialog({
                   </span>
                   {address &&
                     (hasBalance ? (
-                      <span className="w-8 h-8">
-                        <CHECK />
-                      </span>
+                      <div className="flex flex-row items-center gap-2">
+                        <span className="w-6 h-6">
+                          <CHECK />
+                        </span>
+                        <span className="text-sm">Enough Balance</span>
+                      </div>
                     ) : (
-                      <span className="w-8 h-8">
-                        <X />
-                      </span>
+                      <div className="flex flex-row items-center gap-2">
+                        <span className="w-6 h-6">
+                          <X />
+                        </span>
+                        <span className="text-sm">Not Enough Balance</span>
+                      </div>
                     ))}
                 </div>
                 <span className="w-10 rotate-90">
@@ -740,9 +746,12 @@ export function EnterTournamentDialog({
                       creatorAmount > 0 ? "" : "opacity-50"
                     }`}
                   >
-                    <span>Creator Fee</span>
+                    <span className="text-sm sm:text-base">
+                      {creatorShare}%
+                    </span>
+                    <span className="text-sm sm:text-base">Creator Fee</span>
                     <div className="flex flex-row items-center">
-                      <span className="text-sm">
+                      <span className="text-xs sm:text-sm">
                         +{formatNumber(creatorAmount)}
                       </span>
                       <img
@@ -750,7 +759,7 @@ export function EnterTournamentDialog({
                         alt={entryToken ?? ""}
                         className="w-5"
                       />
-                      <span className="text-sm text-neutral">
+                      <span className="hidden sm:block text-xs sm:text-sm text-neutral">
                         ~${formatNumber(creatorAmount * (entryFeePrice ?? 0))}
                       </span>
                     </div>
@@ -760,9 +769,10 @@ export function EnterTournamentDialog({
                       gameAmount > 0 ? "" : "opacity-50"
                     }`}
                   >
-                    <span>Game Fee</span>
+                    <span className="text-sm sm:text-base">{gameShare}%</span>
+                    <span className="text-sm sm:text-base">Game Fee</span>
                     <div className="flex flex-row items-center">
-                      <span className="text-sm">
+                      <span className="text-xs sm:text-sm">
                         +{formatNumber(gameAmount)}
                       </span>
                       <img
@@ -770,7 +780,7 @@ export function EnterTournamentDialog({
                         alt={entryToken ?? ""}
                         className="w-5"
                       />
-                      <span className="text-sm text-neutral">
+                      <span className="hidden sm:block text-xs sm:text-sm text-neutral">
                         ~${formatNumber(gameAmount * (entryFeePrice ?? 0))}
                       </span>
                     </div>
@@ -780,9 +790,12 @@ export function EnterTournamentDialog({
                       prizePoolAmount > 0 ? "" : "opacity-50"
                     }`}
                   >
-                    <span>Prize Pool</span>
+                    <span className="text-sm sm:text-base">
+                      {prizePoolShare}%
+                    </span>
+                    <span className="text-sm sm:text-base">Prize Pool</span>
                     <div className="flex flex-row items-center">
-                      <span className="text-sm">
+                      <span className="text-xs sm:text-sm">
                         +{formatNumber(prizePoolAmount)}
                       </span>
                       <img
@@ -790,7 +803,7 @@ export function EnterTournamentDialog({
                         alt={entryToken ?? ""}
                         className="w-5"
                       />
-                      <span className="text-sm text-neutral">
+                      <span className="hidden sm:block text-xs sm:text-sm text-neutral">
                         ~${formatNumber(prizePoolAmount * (entryFeePrice ?? 0))}
                       </span>
                     </div>
@@ -802,7 +815,7 @@ export function EnterTournamentDialog({
 
           {hasEntryRequirement && (
             <div className="flex flex-col gap-2">
-              <span className="text-lg">Entry Requirements</span>
+              <span className="text-lg font-brand">Entry Requirements</span>
               <span className="px-2">
                 {requirementVariant === "token" ? (
                   "You must hold the NFT"
@@ -937,8 +950,8 @@ export function EnterTournamentDialog({
               )}
             </div>
           )}
-          <div className="space-y-2">
-            <Label htmlFor="playerName" className="text-lg">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="playerName" className="text-lg font-brand">
               Player Name
             </Label>
             <div className="flex flex-col gap-4">

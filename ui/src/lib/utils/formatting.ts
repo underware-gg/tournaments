@@ -221,54 +221,54 @@ export const extractEntryFeePrizes = (
     return [];
   }
 
-  const gameCreatorShare = entryFee.Some?.game_creator_share?.isSome()
-    ? [
-        {
-          id: 0,
-          tournament_id: tournamentId,
-          payout_position: 0,
-          token_address: entryFee.Some?.token_address!,
-          token_type: new CairoCustomEnum({
-            erc20: {
-              amount: addAddressPadding(
-                bigintToHex(
-                  (totalFeeAmount *
-                    BigInt(entryFee?.Some.game_creator_share?.Some!)) /
-                    100n
-                )
-              ),
-            },
-            erc721: undefined,
-          }),
-          type: "entry_fee_game_creator",
-        } as Prize,
-      ]
-    : [];
+  // const gameCreatorShare = entryFee.Some?.game_creator_share?.isSome()
+  //   ? [
+  //       {
+  //         id: 0,
+  //         tournament_id: tournamentId,
+  //         payout_position: 0,
+  //         token_address: entryFee.Some?.token_address!,
+  //         token_type: new CairoCustomEnum({
+  //           erc20: {
+  //             amount: addAddressPadding(
+  //               bigintToHex(
+  //                 (totalFeeAmount *
+  //                   BigInt(entryFee?.Some.game_creator_share?.Some!)) /
+  //                   100n
+  //               )
+  //             ),
+  //           },
+  //           erc721: undefined,
+  //         }),
+  //         type: "entry_fee_game_creator",
+  //       } as Prize,
+  //     ]
+  //   : [];
 
-  const tournamentCreatorShare =
-    entryFee.Some?.tournament_creator_share?.isSome()
-      ? [
-          {
-            id: 0,
-            tournament_id: tournamentId,
-            payout_position: 0,
-            token_address: entryFee.Some?.token_address!,
-            token_type: new CairoCustomEnum({
-              erc20: {
-                amount: addAddressPadding(
-                  bigintToHex(
-                    (totalFeeAmount *
-                      BigInt(entryFee?.Some.tournament_creator_share?.Some!)) /
-                      100n
-                  )
-                ),
-              },
-              erc721: undefined,
-            }),
-            type: "entry_fee_tournament_creator",
-          } as Prize,
-        ]
-      : [];
+  // const tournamentCreatorShare =
+  //   entryFee.Some?.tournament_creator_share?.isSome()
+  //     ? [
+  //         {
+  //           id: 0,
+  //           tournament_id: tournamentId,
+  //           payout_position: 0,
+  //           token_address: entryFee.Some?.token_address!,
+  //           token_type: new CairoCustomEnum({
+  //             erc20: {
+  //               amount: addAddressPadding(
+  //                 bigintToHex(
+  //                   (totalFeeAmount *
+  //                     BigInt(entryFee?.Some.tournament_creator_share?.Some!)) /
+  //                     100n
+  //                 )
+  //               ),
+  //             },
+  //             erc721: undefined,
+  //           }),
+  //           type: "entry_fee_tournament_creator",
+  //         } as Prize,
+  //       ]
+  //     : [];
 
   const distrbutionPrizes =
     entryFee.Some?.distribution
@@ -294,7 +294,7 @@ export const extractEntryFeePrizes = (
       })
       .filter((prize) => prize !== null) || []; // Filter out null entries
 
-  return [...gameCreatorShare, ...tournamentCreatorShare, ...distrbutionPrizes];
+  return [...distrbutionPrizes];
 };
 
 export const getClaimablePrizes = (
