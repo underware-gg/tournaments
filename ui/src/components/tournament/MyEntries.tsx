@@ -51,6 +51,7 @@ const MyEntries = ({
     tokenIds: ownedTokenIds ?? [],
     limit: 1000,
     offset: 0,
+    nameSpace,
   });
 
   const myRegistrations = state

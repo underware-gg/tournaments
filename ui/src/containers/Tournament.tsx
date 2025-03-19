@@ -124,7 +124,7 @@ const Tournament = () => {
     };
   }, [id, tournamentsCount]);
 
-  useGetTournamentQuery(addAddressPadding(bigintToHex(id!)));
+  useGetTournamentQuery(addAddressPadding(bigintToHex(id!)), nameSpace);
   useSubscribeTournamentQuery(addAddressPadding(bigintToHex(id!)));
   // useSubscribePrizesQuery();
 
