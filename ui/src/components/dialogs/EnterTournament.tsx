@@ -884,6 +884,48 @@ export function EnterTournamentDialog({
                               <span className="w-5">
                                 <CHECK />
                               </span>
+                              {entriesLeftByTournament.find(
+                                (entry) =>
+                                  entry.tournamentId ===
+                                  tournament.id.toString()
+                              )?.entriesLeft ?? 0 > 0 ? (
+                                <span>
+                                  {`${
+                                    entriesLeftByTournament.find(
+                                      (entry) =>
+                                        entry.tournamentId ===
+                                        tournament.id.toString()
+                                    )?.entriesLeft
+                                  } ${
+                                    entriesLeftByTournament.find(
+                                      (entry) =>
+                                        entry.tournamentId ===
+                                        tournament.id.toString()
+                                    )?.entriesLeft === 1
+                                      ? "entry"
+                                      : "entries"
+                                  } left`}
+                                </span>
+                              ) : (
+                                <span>No entries left</span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="w-5">
+                              <X />
+                            </span>
+                          )
+                        ) : !!hasParticipatedInTournamentMap[
+                            tournament.id.toString()
+                          ] ? (
+                          <div className="flex flex-row items-center gap-2">
+                            <span className="w-5">
+                              <CHECK />
+                            </span>
+                            {entriesLeftByTournament.find(
+                              (entry) =>
+                                entry.tournamentId === tournament.id.toString()
+                            )?.entriesLeft ?? 0 > 0 ? (
                               <span>
                                 {`${
                                   entriesLeftByTournament.find(
@@ -901,36 +943,9 @@ export function EnterTournamentDialog({
                                     : "entries"
                                 } left`}
                               </span>
-                            </div>
-                          ) : (
-                            <span className="w-5">
-                              <X />
-                            </span>
-                          )
-                        ) : !!hasParticipatedInTournamentMap[
-                            tournament.id.toString()
-                          ] ? (
-                          <div className="flex flex-row items-center gap-2">
-                            <span className="w-5">
-                              <CHECK />
-                            </span>
-                            <span>
-                              {`${
-                                entriesLeftByTournament.find(
-                                  (entry) =>
-                                    entry.tournamentId ===
-                                    tournament.id.toString()
-                                )?.entriesLeft
-                              } ${
-                                entriesLeftByTournament.find(
-                                  (entry) =>
-                                    entry.tournamentId ===
-                                    tournament.id.toString()
-                                )?.entriesLeft === 1
-                                  ? "entry"
-                                  : "entries"
-                              } left`}
-                            </span>
+                            ) : (
+                              <span>No entries left</span>
+                            )}
                           </div>
                         ) : (
                           <span className="w-5">
