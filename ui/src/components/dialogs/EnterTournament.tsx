@@ -978,7 +978,7 @@ export function EnterTournamentDialog({
           {address ? (
             <DialogClose asChild>
               <Button
-                // disabled={!hasBalance || !meetsEntryRequirements}
+                disabled={!hasBalance || !meetsEntryRequirements}
                 onClick={handleEnterTournament}
               >
                 Enter Tournament
