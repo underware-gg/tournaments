@@ -879,8 +879,34 @@ export function EnterTournamentDialog({
                       <span>{feltToString(tournament.metadata.name)}</span>
                       {address ? (
                         tournamentRequirementVariant === "winners" ? (
-                          !!hasWonTournamentMap[tournament.id.toString()]
-                            ?.tokenId
+                          !!hasWonTournamentMap[tournament.id.toString()] ? (
+                            <div className="flex flex-row items-center gap-2">
+                              <span className="w-5">
+                                <CHECK />
+                              </span>
+                              <span>
+                                {`${
+                                  entriesLeftByTournament.find(
+                                    (entry) =>
+                                      entry.tournamentId ===
+                                      tournament.id.toString()
+                                  )?.entriesLeft
+                                } ${
+                                  entriesLeftByTournament.find(
+                                    (entry) =>
+                                      entry.tournamentId ===
+                                      tournament.id.toString()
+                                  )?.entriesLeft === 1
+                                    ? "entry"
+                                    : "entries"
+                                } left`}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="w-5">
+                              <X />
+                            </span>
+                          )
                         ) : !!hasParticipatedInTournamentMap[
                             tournament.id.toString()
                           ] ? (
