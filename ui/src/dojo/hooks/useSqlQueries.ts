@@ -429,8 +429,8 @@ export const useGetAccountTokenIds = (
         : null,
     [address, tokenAddressesKey, active]
   );
-  const { data, loading, error } = useSqlExecute(query);
-  return { data, loading, error };
+  const { data, loading, error, refetch } = useSqlExecute(query);
+  return { data, loading, error, refetch };
 };
 
 export const useGetTournamentEntrants = ({
