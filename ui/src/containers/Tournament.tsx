@@ -320,10 +320,11 @@ const Tournament = () => {
     ) - Number(BigInt(Date.now()) / 1000n);
 
   const status = useMemo(() => {
-    if (isEnded) return "ended";
+    if (isSubmitted) return "finalized";
+    if (isEnded && !isSubmitted) return "in submission";
     if (isStarted) return "live";
     return "upcoming";
-  }, [isStarted, isEnded]);
+  }, [isStarted, isEnded, isSubmitted]);
 
   const hasPrizes = Object.keys(groupedPrizes).length > 0;
 
