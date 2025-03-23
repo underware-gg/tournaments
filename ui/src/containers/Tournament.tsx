@@ -82,7 +82,7 @@ const Tournament = () => {
   const navigate = useNavigate();
   const { nameSpace, selectedChainConfig } = useDojo();
   const state = useDojoStore((state) => state);
-  const { gameData } = useUIStore();
+  const { gameData, getGameImage } = useUIStore();
   const [enterDialogOpen, setEnterDialogOpen] = useState(false);
   const [claimDialogOpen, setClaimDialogOpen] = useState(false);
   const [submitScoresDialogOpen, setSubmitScoresDialogOpen] = useState(false);
@@ -430,7 +430,7 @@ const Tournament = () => {
           <Tooltip delayDuration={50}>
             <TooltipTrigger asChild>
               <div className="flex items-center justify-center cursor-pointer">
-                <TokenGameIcon game={gameAddress} size={"md"} />
+                <TokenGameIcon image={getGameImage(gameAddress)} size={"md"} />
               </div>
             </TooltipTrigger>
             <TooltipContent

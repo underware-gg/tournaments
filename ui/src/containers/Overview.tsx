@@ -58,8 +58,14 @@ const Overview = () => {
   const { nameSpace } = useDojo();
   const { address } = useAccount();
   const { chain } = useNetwork();
-  const { selectedTab, setSelectedTab } = useUIStore();
-  const { gameFilters, setGameFilters, gameData } = useUIStore();
+  const {
+    selectedTab,
+    setSelectedTab,
+    gameFilters,
+    setGameFilters,
+    gameData,
+    getGameImage,
+  } = useUIStore();
 
   // Use the tournament store with tab-specific data
   const {
@@ -483,7 +489,7 @@ const Overview = () => {
                     key={filter}
                     className="flex flex-row items-center gap-2 sm:gap-4 bg-black border-2 border-brand-muted py-2 px-4 shrink-0"
                   >
-                    <GameIcon game={filter} />
+                    <GameIcon image={getGameImage(filter)} />
                     <span className="text-lg 2xl:text-2xl font-brand">
                       {feltToString(
                         gameData.find(

@@ -13,12 +13,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useGetTokensQuery } from "@/dojo/hooks/useSdkQueries";
-import {
-  useGetGameNamespaces,
-  useGetGamesMetadata,
-} from "@/dojo/hooks/useSqlQueries";
 import { Toaster } from "@/components/ui/toaster";
-import useUIStore from "@/hooks/useUIStore";
 import { useEffect, useRef } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -28,29 +23,12 @@ import { useDojo } from "@/context/dojo";
 
 function App() {
   const { nameSpace } = useDojo();
-  const { setGameData } = useUIStore();
   const { chain } = useNetwork();
   const navigate = useNavigate();
   const location = useLocation();
   const previousChainRef = useRef<string | undefined>(chain?.id.toString());
 
   useGetTokensQuery(nameSpace);
-
-  const { data: gameNamespaces } = useGetGameNamespaces();
-
-  const formattedGameNamespaces = gameNamespaces?.map(
-    (namespace) => namespace.namespace
-  );
-
-  const { data: gamesMetadata } = useGetGamesMetadata({
-    gameNamespaces: formattedGameNamespaces || [],
-  });
-
-  useEffect(() => {
-    if (gamesMetadata) {
-      setGameData(gamesMetadata);
-    }
-  }, [gamesMetadata]);
 
   useEffect(() => {
     if (chain) {
