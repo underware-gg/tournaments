@@ -73,17 +73,20 @@ const EntrantsTable = ({
   const [prevEntryCount, setPrevEntryCount] = useState<number | null>(null);
 
   useEffect(() => {
+    // Always update the previous entry count
+    setPrevEntryCount(entryCount);
+
+    // Always update showParticipants based on current entryCount
+    setShowParticipants(entryCount > 0);
+
+    // Only trigger refetch if we have a previous count and it changed
     if (prevEntryCount !== null && prevEntryCount !== entryCount) {
       const timer = setTimeout(() => {
         refetchEntrants();
-        console.log("refetching entrants");
       }, 500);
 
       return () => clearTimeout(timer);
     }
-
-    setPrevEntryCount(entryCount);
-    setShowParticipants(entryCount > 0);
   }, [entryCount, prevEntryCount]);
 
   const { usernames } = useGetUsernames(ownerAddresses ?? []);

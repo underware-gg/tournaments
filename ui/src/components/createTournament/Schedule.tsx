@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Slider } from "@/components/ui/slider";
@@ -35,6 +35,13 @@ import { ChainId } from "@/dojo/setup/networks";
 const Schedule = ({ form }: StepProps) => {
   const { selectedChainConfig } = useDojo();
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
+  const [minStartTime, setMinStartTime] = useState<Date>(() => {
+    // Initialize with current time + 15 minutes
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 15);
+    return now;
+  });
+
   const PREDEFINED_DURATIONS = [
     { value: 86400, label: "1D" },
     { value: 259200, label: "3D" },
@@ -49,16 +56,43 @@ const Schedule = ({ form }: StepProps) => {
     "2W": 172800, // 2 weeks -> 2 days (48 hours)
   } as const;
 
+  // Updated function to disable dates before the minimum start time
   const disablePastDates = (date: Date) => {
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    return date < now;
+    const minDate = new Date(minStartTime);
+    minDate.setHours(0, 0, 0, 0);
+    return date < minDate;
   };
 
   const submissionHours = form.watch("submissionPeriod") / (60 * 60);
   const durationDays = form.watch("duration") / (24 * 60 * 60);
+  const registrationType = form.watch("type");
 
   const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
+
+  // Effect to update start time when registration type changes to "fixed"
+  useEffect(() => {
+    if (registrationType === "fixed") {
+      // Get current time
+      const now = new Date();
+
+      // Calculate minutes to the next 5-minute interval
+      const currentMinutes = now.getMinutes();
+      const remainder = currentMinutes % 5;
+      const minutesToAdd = remainder === 0 ? 15 : 5 - remainder + 15;
+
+      // Create new date with rounded minutes plus 15 minutes
+      const roundedFifteenMinutesFromNow = new Date(now);
+      roundedFifteenMinutesFromNow.setMinutes(now.getMinutes() + minutesToAdd);
+      roundedFifteenMinutesFromNow.setSeconds(0);
+      roundedFifteenMinutesFromNow.setMilliseconds(0);
+
+      // Update the form's start time
+      form.setValue("startTime", roundedFifteenMinutesFromNow);
+
+      // Update the minimum start time
+      setMinStartTime(roundedFifteenMinutesFromNow);
+    }
+  }, [registrationType, form]);
 
   return (
     <>
@@ -122,6 +156,7 @@ const Schedule = ({ form }: StepProps) => {
                             field.onChange(newDate);
                           }}
                           disabled={disablePastDates}
+                          minStartTime={minStartTime}
                           initialFocus
                           className="rounded-md border-4 border-brand-muted w-auto"
                         />
