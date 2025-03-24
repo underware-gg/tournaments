@@ -221,6 +221,12 @@ const Tournament = () => {
   const textRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
+    // Initial check might run too early, so we need to delay it slightly
+    const initialCheckTimeout = setTimeout(() => {
+      checkOverflow();
+    }, 1000);
+
+    // Create a more robust check function
     const checkOverflow = () => {
       if (textRef.current) {
         const isTextOverflowing =
@@ -229,9 +235,45 @@ const Tournament = () => {
       }
     };
 
+    // Run the check whenever the description changes
     checkOverflow();
+
+    // Also set up a resize listener
     window.addEventListener("resize", checkOverflow);
-    return () => window.removeEventListener("resize", checkOverflow);
+
+    // Use a MutationObserver to detect DOM changes
+    const observer = new MutationObserver(checkOverflow);
+    if (textRef.current) {
+      observer.observe(textRef.current, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+    }
+
+    // Clean up
+    return () => {
+      clearTimeout(initialCheckTimeout);
+      window.removeEventListener("resize", checkOverflow);
+      observer.disconnect();
+    };
+  }, [tournamentModel?.metadata.description]);
+
+  // Add a second effect that runs after the component has fully mounted
+  useEffect(() => {
+    // This will run after the component has been painted to the screen
+    const checkAfterRender = requestAnimationFrame(() => {
+      // And then wait one more frame to be extra sure
+      requestAnimationFrame(() => {
+        if (textRef.current) {
+          const isTextOverflowing =
+            textRef.current.scrollWidth > textRef.current.clientWidth;
+          setIsOverflowing(isTextOverflowing);
+        }
+      });
+    });
+
+    return () => cancelAnimationFrame(checkAfterRender);
   }, [tournamentModel?.metadata.description]);
 
   const groupedByTokensPrizes = groupPrizesByTokens(allPrizes, tokens);
@@ -539,7 +581,7 @@ const Tournament = () => {
           />
         </div>
       </div>
-      <div className="flex flex-col overflow-y-auto pb-5 sm:pb-0">
+      <div className="flex flex-col gap-5 overflow-y-auto pb-5 sm:pb-0">
         <div className="flex flex-col gap-1 sm:gap-2">
           <div className="flex flex-row items-center h-8 sm:h-12 justify-between">
             <div className="flex flex-row gap-5">
