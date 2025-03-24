@@ -77,7 +77,7 @@ const Header = () => {
           variant="destructive"
           className="rounded-none border-x-0 border-t-0 py-2"
         >
-          <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-5 justify-center w-full">
             <div className="flex items-center gap-2">
               <span className="w-4 h-4">
                 <ALERT />
