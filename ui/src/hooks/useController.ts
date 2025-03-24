@@ -132,7 +132,7 @@ export const useGetUsernames = (addresses: string[]) => {
   }, [addresses]);
 
   const fetchUsernames = async () => {
-    if (addresses.length) return;
+    if (addresses.length === 0) return;
     const addressMap = await lookupAddresses(addresses);
     setUsernames(addressMap);
   };

@@ -174,7 +174,10 @@ const EntrantsTable = ({
                             align="center"
                             side="top"
                           >
-                            {renderPlayerDetails(registration, index)}
+                            {renderPlayerDetails(
+                              registration,
+                              index + colIndex * 5
+                            )}
                           </HoverCardContent>
                         </HoverCard>
                       </div>
