@@ -279,7 +279,7 @@ export const tokens = [
       "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/516c435e-f89a-4a88-aff0-fdcc6e218900/logo",
   },
   {
-    name: "StarkNet Token",
+    name: "Starknet Token",
     symbol: "STRK",
     decimals: 18,
     l2_token_address:
@@ -434,7 +434,7 @@ export const tokens = [
     symbol: "CASH",
     decimals: 18,
     l2_token_address:
-      "0x498edfaf50ca5855666a700c25dd629d577eb9afccdf3b5977aec79aee55ada",
+      "0x0498edfaf50ca5855666a700c25dd629d577eb9afccdf3b5977aec79aee55ada",
     sort_order: 3,
     total_supply: null,
     hidden: false,
@@ -860,6 +860,18 @@ export const tokens = [
     hidden: true,
     logo_url:
       "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/6deef27f-df40-4248-4e1b-ed1d79a3f000/logo",
+  },
+  {
+    name: "Relend Network USDC - Starknet",
+    symbol: "rUSDC-stark",
+    decimals: 6,
+    l2_token_address:
+      "0x02019e47a0bc54ea6b4853c6123ffc8158ea3ae2af4166928b0de6e89f06de6c",
+    sort_order: 3,
+    total_supply: null,
+    hidden: true,
+    logo_url:
+      "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/7b6dc659-f9c3-4f95-0943-1976a7354a00/logo",
   },
   {
     name: "JOHNNY",
@@ -10909,6 +10921,248 @@ export const tokens = [
       "0x413bb598f22c84ff95ec787dccbcae0562f1f5211860d61199ec57736ade9c1",
     sort_order: 1,
     total_supply: 100000000,
+    hidden: true,
+  },
+  {
+    name: "Test Tokens On Starknet",
+    symbol: "TSTs",
+    decimals: 18,
+    l2_token_address:
+      "0x5216ae8e6e3c36947a7fa4b2f71a2d2216f9605cbb369e3c61d1105d490514e",
+    sort_order: 1,
+    total_supply: 100000000,
+    hidden: true,
+  },
+  {
+    name: "Starknet Test Tokens",
+    symbol: "STT",
+    decimals: 18,
+    l2_token_address:
+      "0x67a108f45dca4b5d54b92941d82e0fdc1d464d5b0bc09b8f6038da934002f8",
+    sort_order: 1,
+    total_supply: 100000000,
+    hidden: true,
+  },
+  {
+    name: "SUNDAY",
+    symbol: "SUNDAY",
+    decimals: 18,
+    l2_token_address:
+      "0x2fa235d7e40a4429c8340d84fe8e11c2610cb501aaa01b078b8ebd3473cb512",
+    sort_order: 1,
+    total_supply: 100000000,
+    hidden: true,
+  },
+  {
+    name: "JAILSTOOL",
+    symbol: "JAILSTOOL",
+    decimals: 18,
+    l2_token_address:
+      "0x618927ce700270dc0d1932e68722bc02806b3efe81a409a3ed7b95f002fc274",
+    sort_order: 1,
+    total_supply: 100000000,
+    hidden: true,
+  },
+  {
+    name: "SHITCOIN on starknet",
+    symbol: "SHITCOIN",
+    decimals: 18,
+    l2_token_address:
+      "0x55bb0ee698f269ae1b932d6c067ec4add338b61b288741a592811d91be9693b",
+    sort_order: 1,
+    total_supply: 100000000,
+    hidden: true,
+  },
+  {
+    name: "Central African Republic Meme",
+    symbol: "CAR",
+    decimals: 18,
+    l2_token_address:
+      "0x1c4e64464af3c3213d87c0efcff5b1becd05ef7c7ae8d17db649255f8a5d1e5",
+    sort_order: 1,
+    total_supply: 1000000000,
+    hidden: true,
+  },
+  {
+    name: "BOOBSCOIN",
+    symbol: "BOOBS",
+    decimals: 18,
+    l2_token_address:
+      "0x1613c0fcb9085d03b0e34eeb02710c058b5be43503a2f89b1d95fa44da453de",
+    sort_order: 1,
+    total_supply: 100000000,
+    hidden: true,
+  },
+  {
+    name: "Baby Sister",
+    symbol: "BSISTER",
+    decimals: 18,
+    l2_token_address:
+      "0x3b0ae3140201f9a3f8f86da02cbc5be4a6ad3b7c9eee4f9d9d10349b16a40f5",
+    sort_order: 1,
+    total_supply: 100000000,
+    hidden: true,
+  },
+  {
+    name: "ArtAI",
+    symbol: "AAI",
+    decimals: 18,
+    l2_token_address:
+      "0x254996d0d82cc02cf983c8a86a1b2a5949919f7861710eb6358126e16fc4ef2",
+    sort_order: 1,
+    total_supply: 100000000,
+    hidden: true,
+  },
+  {
+    name: "CACA",
+    symbol: "CACA",
+    decimals: 18,
+    l2_token_address:
+      "0x7730bd4169a23783ca983ed543f84313d88ad09130e3ea3cbf04e7fdace8334",
+    sort_order: 1,
+    total_supply: 10000000,
+    hidden: true,
+  },
+  {
+    name: "MAKE STARKNET MAINSTREAM",
+    symbol: "MAKESTRK",
+    decimals: 18,
+    l2_token_address:
+      "0xa22fdb251e8e65df4df0888a4508da073da5d742ccca7586686b8e952f2d59",
+    sort_order: 1,
+    total_supply: 10000000,
+    hidden: true,
+  },
+  {
+    name: "HACKED",
+    symbol: "HACKED",
+    decimals: 18,
+    l2_token_address:
+      "0x64e3fa6e8126134773e17b24db0bbe0c3c8a3345ba2d2ec9cfddaeaf071f7ae",
+    sort_order: 1,
+    total_supply: 10000000000,
+    hidden: true,
+  },
+  {
+    name: "YE",
+    symbol: "YE",
+    decimals: 18,
+    l2_token_address:
+      "0x3299b145d74400cbdb5154e02ecedae8d5ac9ed1c550c3171c15c31af5e8390",
+    sort_order: 1,
+    total_supply: 10000000000,
+    hidden: true,
+  },
+  {
+    name: "SAIL",
+    symbol: "SAIL",
+    decimals: 18,
+    l2_token_address:
+      "0x2644af9bfd3e2f956037d7ef952689c6597bf2961ea89f2e52a3ac532a5b821",
+    sort_order: 1,
+    total_supply: 200000000,
+    hidden: true,
+  },
+  {
+    name: "Ramses",
+    symbol: "RAMSES",
+    decimals: 18,
+    l2_token_address:
+      "0x6e955fc56de5e26da63b152880252d2ee07268fe1bb4a0c4ba03e7001b8bd3d",
+    sort_order: 1,
+    total_supply: 1000000000,
+    hidden: true,
+  },
+  {
+    name: "LadyInRed",
+    symbol: "LID",
+    decimals: 18,
+    l2_token_address:
+      "0x29c0bbc7af3d1fbc9feb0b6ef1aa418e965e936596e72222a8c0478bf5f0de8",
+    sort_order: 1,
+    total_supply: 10000000,
+    hidden: true,
+  },
+  {
+    name: "PONZi LAND",
+    symbol: "PONZii",
+    decimals: 18,
+    l2_token_address:
+      "0x6a9ef5823682baf032cf01afeda887a6faa9dcd71e2083d1961279a4ee0c81b",
+    sort_order: 1,
+    total_supply: 1000000000,
+    hidden: true,
+  },
+  {
+    name: "Stwo",
+    symbol: "STW",
+    decimals: 18,
+    l2_token_address:
+      "0x1ee2ec1303e4510ae82e187f90103b4456bca253b3e97b3e7d5b0cbe9032828",
+    sort_order: 1,
+    total_supply: 1000000000,
+    hidden: true,
+  },
+  {
+    name: "Picassos",
+    symbol: "PICASSOS",
+    decimals: 18,
+    l2_token_address:
+      "0x27f7fe616cfeca441f1a658edb5f3164279daffc049f90449312da6f9bf98ac",
+    sort_order: 1,
+    total_supply: 1000000000,
+    hidden: true,
+  },
+  {
+    name: "Nums",
+    symbol: "NUMS",
+    decimals: 18,
+    l2_token_address:
+      "0xe5f10eddc01699dc899a30dbc3c9858148fa4aa0a47c0ffd85f887ffc4653e",
+    sort_order: 1,
+    total_supply: 1,
+    hidden: true,
+    logo_url:
+      "https://imagedelivery.net/0xPAQaDtnQhBs8IzYRIlNg/90868d05-cb75-4c42-278c-5a540db2cf00/logo",
+  },
+  {
+    name: "Starknet CTO",
+    symbol: "SCTO",
+    decimals: 18,
+    l2_token_address:
+      "0x3d8694b417850342a93cc8923fba1fbb19482b642fb6e09e37e8ede4abfd014",
+    sort_order: 1,
+    total_supply: 1000000000,
+    hidden: true,
+  },
+  {
+    name: "AKA",
+    symbol: "ok",
+    decimals: 18,
+    l2_token_address:
+      "0x298070f35713498a19e784d9b5537e11f151f4c961c2269b6d3b843f2defd7c",
+    sort_order: 1,
+    total_supply: 1000000000,
+    hidden: true,
+  },
+  {
+    name: "king",
+    symbol: "KING",
+    decimals: 18,
+    l2_token_address:
+      "0x31980f5ff1ec7dd2ce2205ff0d0daf48e9e5e21aecf45d52d67e0dce2c3409f",
+    sort_order: 1,
+    total_supply: 59742318417706190,
+    hidden: true,
+  },
+  {
+    name: "Soaking",
+    symbol: "WET",
+    decimals: 18,
+    l2_token_address:
+      "0x6197c278ccf4db2501a494288c7c6e5c6864bd8f7e2b54a6c4aae73a112bf76",
+    sort_order: 1,
+    total_supply: 1000000000,
     hidden: true,
   },
 ];

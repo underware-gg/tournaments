@@ -310,20 +310,20 @@ const Schedule = ({ form }: StepProps) => {
                                 <ul className="list-disc pl-4 space-y-2">
                                   <li className="text-muted-foreground text-wrap">
                                     <span className="font-medium text-brand">
-                                      Fixed:
-                                    </span>{" "}
-                                    <span className="text-neutral">
-                                      An event with a registration period for
-                                      capped number of entries.
-                                    </span>
-                                  </li>
-                                  <li className="text-muted-foreground text-wrap">
-                                    <span className="font-medium text-brand">
                                       Open:
                                     </span>{" "}
                                     <span className="text-neutral">
                                       An event where entries can be made
                                       throughout the tournament period.
+                                    </span>
+                                  </li>
+                                  <li className="text-muted-foreground text-wrap">
+                                    <span className="font-medium text-brand">
+                                      Fixed:
+                                    </span>{" "}
+                                    <span className="text-neutral">
+                                      An event with a registration period for
+                                      capped number of entries.
                                     </span>
                                   </li>
                                 </ul>
@@ -344,20 +344,20 @@ const Schedule = ({ form }: StepProps) => {
                         <Button
                           type="button"
                           variant={
-                            field.value === "fixed" ? "default" : "outline"
-                          }
-                          onClick={() => field.onChange("fixed")}
-                        >
-                          Fixed
-                        </Button>
-                        <Button
-                          type="button"
-                          variant={
                             field.value === "open" ? "default" : "outline"
                           }
                           onClick={() => field.onChange("open")}
                         >
                           Open
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={
+                            field.value === "fixed" ? "default" : "outline"
+                          }
+                          onClick={() => field.onChange("fixed")}
+                        >
+                          Fixed
                         </Button>
                       </div>
                     </FormControl>

@@ -222,7 +222,7 @@ export const TournamentCard = ({
                 </div>
               </TooltipTrigger>
               <TooltipContent side="top" align="center">
-                <p>{registrationType} Registration</p>
+                <p>{registrationType} For Registration</p>
               </TooltipContent>
             </Tooltip>
 
@@ -251,15 +251,22 @@ export const TournamentCard = ({
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="top" align="center">
-                  <p>
-                    {requirementVariant === "allowlist"
-                      ? "Allowlist"
-                      : requirementVariant === "token"
-                      ? "Token"
-                      : requirementVariant === "tournament"
-                      ? `Tournament ${tournamentRequirementVariant}`
-                      : "Unknown"}
-                  </p>
+                  <span>
+                    {requirementVariant === "allowlist" ? (
+                      "Allowlist"
+                    ) : requirementVariant === "token" ? (
+                      "Token"
+                    ) : requirementVariant === "tournament" ? (
+                      <span>
+                        Tournament{" "}
+                        <span className="capitalize">
+                          {tournamentRequirementVariant}
+                        </span>
+                      </span>
+                    ) : (
+                      "Unknown"
+                    )}
+                  </span>
                 </TooltipContent>
               </Tooltip>
             )}

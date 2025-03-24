@@ -131,6 +131,7 @@ const Details = ({ form }: StepProps) => {
                       {...fieldProps}
                       value={typeof value === "string" ? value : ""}
                       onChange={(e) => onChange(e.target.value)}
+                      maxLength={31}
                     />
                   </FormControl>
                   <FormMessage />

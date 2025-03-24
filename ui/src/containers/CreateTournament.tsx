@@ -39,7 +39,7 @@ const formSchema = z.object({
   // Schedule step
   startTime: z.date(),
   duration: z.number().min(1).max(7776000), // 90 days
-  type: z.enum(["fixed", "open"]),
+  type: z.enum(["open", "fixed"]),
   submissionPeriod: z.number().min(1).max(324000), // 90 hours
 
   // Details step
@@ -134,7 +134,7 @@ const CreateTournament = () => {
         return now;
       })(),
       duration: 86400,
-      type: "fixed",
+      type: "open",
       submissionPeriod: 3600,
 
       // Other steps
