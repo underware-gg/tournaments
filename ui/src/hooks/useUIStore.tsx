@@ -13,6 +13,8 @@ type State = {
   setGameFilters: (value: string[]) => void;
   gameData: GameData[];
   setGameData: (value: GameData[]) => void;
+  gameDataLoading: boolean;
+  setGameDataLoading: (value: boolean) => void;
   getGameImage: (gameAddress: string) => string;
   getGameName: (gameAddress: string) => string;
   selectedTab: TabType;
@@ -24,6 +26,8 @@ const useUIStore = create<State>((set, get) => ({
   setGameFilters: (value: string[]) => set({ gameFilters: value }),
   gameData: [],
   setGameData: (value: GameData[]) => set({ gameData: value }),
+  gameDataLoading: true,
+  setGameDataLoading: (value: boolean) => set({ gameDataLoading: value }),
   selectedTab: "upcoming",
   setSelectedTab: (value: TabType) => set({ selectedTab: value }),
   getGameImage: (gameAddress: string) => {

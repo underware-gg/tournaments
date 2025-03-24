@@ -33,6 +33,7 @@ import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { ParsedEntity } from "@dojoengine/sdk";
 import { SchemaType } from "@/generated/models.gen";
 import useTournamentStore, { TournamentTab } from "@/hooks/tournamentStore";
+import { STARTING_TOURNAMENT_ID } from "@/lib/constants";
 
 const SORT_OPTIONS = {
   upcoming: [
@@ -108,22 +109,29 @@ const Overview = () => {
     return addAddressPadding(bigintToHex(BigInt(Date.now()) / 1000n));
   }, []);
 
+  const fromTournamentId = useMemo(() => {
+    return addAddressPadding(bigintToHex(BigInt(STARTING_TOURNAMENT_ID)));
+  }, []);
+
   const {
     data: upcomingTournamentsCount,
     refetch: refetchUpcomingTournamentsCount,
   } = useGetUpcomingTournamentsCount({
     namespace: nameSpace,
     currentTime: currentTime,
+    fromTournamentId: fromTournamentId,
   });
 
   const { data: liveTournamentsCount } = useGetLiveTournamentsCount({
     namespace: nameSpace,
     currentTime: currentTime,
+    fromTournamentId: fromTournamentId,
   });
 
   const { data: endedTournamentsCount } = useGetEndedTournamentsCount({
     namespace: nameSpace,
     currentTime: currentTime,
+    fromTournamentId: fromTournamentId,
   });
 
   const queryAddress = useMemo(() => {
@@ -139,6 +147,7 @@ const Overview = () => {
     namespace: nameSpace,
     address: queryAddress ?? "",
     gameAddresses: gameAddresses ?? [],
+    fromTournamentId: fromTournamentId,
   });
 
   const tournamentCounts = useMemo(() => {
@@ -211,6 +220,7 @@ const Overview = () => {
     limit: 12,
     status: selectedTab,
     sortBy: currentSortBy,
+    fromTournamentId: fromTournamentId,
     // Only activate the query for the appropriate tabs and when we need to fetch
     active: ["upcoming", "live", "ended"].includes(selectedTab) && shouldFetch,
   });
@@ -242,6 +252,7 @@ const Overview = () => {
       offset: currentPage * 12,
       active: selectedTab === "my",
       sortBy: currentSortBy,
+      fromTournamentId: fromTournamentId,
     });
 
   // Process and store tournaments when data is loaded
