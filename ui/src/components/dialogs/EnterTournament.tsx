@@ -135,7 +135,9 @@ export function EnterTournamentDialog({
 
   const hasEntryRequirement = tournamentModel?.entry_requirement.isSome();
 
-  const entryLimit = tournamentModel?.entry_requirement.Some?.entry_limit?.Some;
+  // const entryLimit = tournamentModel?.entry_requirement.Some?.entry_limit?.Some;
+  // TEMP
+  const entryLimit = 1;
 
   const requirementVariant =
     tournamentModel?.entry_requirement.Some?.entry_requirement_type?.activeVariant();

@@ -141,7 +141,7 @@ const CreateTournament = () => {
       enableGating: false,
       enableEntryFees: false,
       enableBonusPrizes: false,
-      enableEntryLimit: false,
+      enableEntryLimit: true,
       gatingOptions: {
         entry_limit: 1,
         addresses: [],
