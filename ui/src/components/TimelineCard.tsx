@@ -3,6 +3,11 @@ import { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { formatTime } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface TimelineCardProps {
   icon: ReactNode;
@@ -26,14 +31,38 @@ const TimelineCard = ({
 }: TimelineCardProps) => {
   return (
     <div className="relative flex flex-col gap-2">
-      <Card
-        variant={completed ? "default" : "outline"}
-        className={`p-2 ${
-          completed ? "text-black bg-brand-muted" : "text-brand-muted"
-        } h-10 w-10 sm:h-14 sm:w-14 3xl:h-20 3xl:w-20 flex items-center justify-center z-20`}
-      >
-        {icon}
-      </Card>
+      <Tooltip delayDuration={50}>
+        <TooltipTrigger asChild>
+          <Card
+            variant={completed ? "default" : "outline"}
+            className={`p-2 ${
+              completed ? "text-black bg-brand-muted" : "text-brand-muted"
+            } h-10 w-10 sm:h-14 sm:w-14 3xl:h-20 3xl:w-20 flex items-center justify-center z-20 cursor-pointer`}
+          >
+            {icon}
+          </Card>
+        </TooltipTrigger>
+        {date && (
+          <TooltipContent className="border-brand-muted bg-black text-brand 3xl:text-lg">
+            <span className="text-brand-muted">
+              {label === "Registration"
+                ? "Registration Opened: "
+                : label === "Duration"
+                ? completed
+                  ? "Tournament Started: "
+                  : "Tournament Starts: "
+                : label === "Submission"
+                ? completed
+                  ? "Tournament Ended: "
+                  : "Tournament Ends: "
+                : completed
+                ? "Submission Ended: "
+                : "Submission Ends: "}
+            </span>
+            {format(date, "dd/MM")} - {format(date, "HH:mm")}
+          </TooltipContent>
+        )}
+      </Tooltip>
       {date && (
         <div className="flex flex-col items-center font-brand">
           <span className="text-xs">{format(date, "dd/MM")}</span>
