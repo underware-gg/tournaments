@@ -871,15 +871,63 @@ export function EnterTournamentDialog({
                 </div>
               ) : requirementVariant === "tournament" ? (
                 <div className="flex flex-col gap-2 px-4">
-                  {tournamentsData.map((tournament) => (
-                    <div
-                      key={tournament.id}
-                      className="flex flex-row items-center justify-between border border-brand-muted rounded-md p-2"
-                    >
-                      <span>{feltToString(tournament.metadata.name)}</span>
-                      {address ? (
-                        tournamentRequirementVariant === "winners" ? (
-                          !!hasWonTournamentMap[tournament.id.toString()] ? (
+                  {tournamentsData.map((tournament) => {
+                    const tournamentFinalizedTime =
+                      BigInt(tournament?.schedule.game.end ?? 0n) +
+                      BigInt(tournament?.schedule.submission_duration ?? 0n);
+                    const hasTournamentFinalized =
+                      tournamentFinalizedTime < currentTime;
+                    return (
+                      <div
+                        key={tournament.id}
+                        className="flex flex-row items-center justify-between border border-brand-muted rounded-md p-2"
+                      >
+                        <span>{feltToString(tournament.metadata.name)}</span>
+                        {address ? (
+                          tournamentRequirementVariant === "winners" ? (
+                            !!hasWonTournamentMap[tournament.id.toString()] ? (
+                              <div className="flex flex-row items-center gap-2">
+                                <span className="w-5">
+                                  <CHECK />
+                                </span>
+                                {entriesLeftByTournament.find(
+                                  (entry) =>
+                                    entry.tournamentId ===
+                                    tournament.id.toString()
+                                )?.entriesLeft ?? 0 > 0 ? (
+                                  <span>
+                                    {`${
+                                      entriesLeftByTournament.find(
+                                        (entry) =>
+                                          entry.tournamentId ===
+                                          tournament.id.toString()
+                                      )?.entriesLeft
+                                    } ${
+                                      entriesLeftByTournament.find(
+                                        (entry) =>
+                                          entry.tournamentId ===
+                                          tournament.id.toString()
+                                      )?.entriesLeft === 1
+                                        ? "entry"
+                                        : "entries"
+                                    } left`}
+                                  </span>
+                                ) : (
+                                  <span>No entries left</span>
+                                )}
+                              </div>
+                            ) : !hasTournamentFinalized ? (
+                              <span className="text-warning">
+                                Not Finalized
+                              </span>
+                            ) : (
+                              <span className="w-5">
+                                <X />
+                              </span>
+                            )
+                          ) : !!hasParticipatedInTournamentMap[
+                              tournament.id.toString()
+                            ] ? (
                             <div className="flex flex-row items-center gap-2">
                               <span className="w-5">
                                 <CHECK />
@@ -910,53 +958,19 @@ export function EnterTournamentDialog({
                                 <span>No entries left</span>
                               )}
                             </div>
+                          ) : !hasTournamentFinalized ? (
+                            <span className="text-warning">Not Finalized</span>
                           ) : (
                             <span className="w-5">
                               <X />
                             </span>
                           )
-                        ) : !!hasParticipatedInTournamentMap[
-                            tournament.id.toString()
-                          ] ? (
-                          <div className="flex flex-row items-center gap-2">
-                            <span className="w-5">
-                              <CHECK />
-                            </span>
-                            {entriesLeftByTournament.find(
-                              (entry) =>
-                                entry.tournamentId === tournament.id.toString()
-                            )?.entriesLeft ?? 0 > 0 ? (
-                              <span>
-                                {`${
-                                  entriesLeftByTournament.find(
-                                    (entry) =>
-                                      entry.tournamentId ===
-                                      tournament.id.toString()
-                                  )?.entriesLeft
-                                } ${
-                                  entriesLeftByTournament.find(
-                                    (entry) =>
-                                      entry.tournamentId ===
-                                      tournament.id.toString()
-                                  )?.entriesLeft === 1
-                                    ? "entry"
-                                    : "entries"
-                                } left`}
-                              </span>
-                            ) : (
-                              <span>No entries left</span>
-                            )}
-                          </div>
                         ) : (
-                          <span className="w-5">
-                            <X />
-                          </span>
-                        )
-                      ) : (
-                        <span className="text-neutral">Connect Account</span>
-                      )}
-                    </div>
-                  ))}
+                          <span className="text-neutral">Connect Account</span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               ) : address ? (
                 <div className="flex flex-row items-center gap-2 px-4">
