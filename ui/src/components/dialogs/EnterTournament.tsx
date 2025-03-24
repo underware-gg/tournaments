@@ -1035,7 +1035,11 @@ export function EnterTournamentDialog({
           {address ? (
             <DialogClose asChild>
               <Button
-                disabled={!hasBalance || !meetsEntryRequirements}
+                disabled={
+                  !hasBalance ||
+                  !meetsEntryRequirements ||
+                  playerName.length === 0
+                }
                 onClick={handleEnterTournament}
               >
                 Enter Tournament

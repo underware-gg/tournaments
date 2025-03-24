@@ -127,15 +127,19 @@ export const useGetUsernames = (addresses: string[]) => {
     undefined
   );
 
-  const fetchUsernames = useCallback(async () => {
-    if (!addresses.length) return;
+  const addressesKey = useMemo(() => {
+    return addresses.join(",");
+  }, [addresses]);
+
+  const fetchUsernames = async () => {
+    if (addresses.length) return;
     const addressMap = await lookupAddresses(addresses);
     setUsernames(addressMap);
-  }, [addresses]);
+  };
 
   useEffect(() => {
     fetchUsernames();
-  }, [addresses]);
+  }, [addressesKey]);
 
   return {
     usernames,

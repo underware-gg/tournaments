@@ -74,6 +74,7 @@ import {
 import useUIStore from "@/hooks/useUIStore";
 import { AddPrizesDialog } from "@/components/dialogs/AddPrizes";
 import { ChainId } from "@/dojo/setup/networks";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Tournament = () => {
   const { id } = useParams<{ id: string }>();
@@ -303,7 +304,11 @@ const Tournament = () => {
     (t) => t.address === entryFeeToken
   )?.symbol;
 
-  const { prices, isLoading: pricesLoading } = useEkuboPrices({
+  const {
+    prices,
+    isLoading: pricesLoading,
+    isTokenLoading,
+  } = useEkuboPrices({
     tokens: [
       ...erc20TokenSymbols,
       ...(entryFeeTokenSymbol ? [entryFeeTokenSymbol] : []),
@@ -327,6 +332,7 @@ const Tournament = () => {
   const totalPrizeNFTs = countTotalNFTs(groupedByTokensPrizes);
 
   const entryFeePrice = prices[entryFeeTokenSymbol ?? ""];
+  const entryFeeLoading = isTokenLoading(entryFeeTokenSymbol ?? "");
 
   const entryFee = hasEntryFee
     ? (
@@ -509,7 +515,15 @@ const Tournament = () => {
               <span>Enter</span>
               <span className="hidden sm:block">|</span>
               <span className="hidden sm:block font-bold text-xs sm:text-base 3xl:text-lg">
-                {hasEntryFee ? `$${entryFee}` : "Free"}
+                {hasEntryFee ? (
+                  entryFeeLoading ? (
+                    <Skeleton className="bg-neutral w-10 h-6" />
+                  ) : (
+                    `$${entryFee}`
+                  )
+                ) : (
+                  "Free"
+                )}
               </span>
             </Button>
           ) : isEnded && !isSubmitted ? (
