@@ -697,31 +697,35 @@ export function EnterTournamentDialog({
             <div className="flex flex-col gap-2">
               <span className="text-lg font-brand">Entry Fee</span>
               <div className="flex flex-col items-center">
-                <div className="flex flex-row items-center justify-center gap-2">
-                  <div className="flex flex-row items-center gap-1">
-                    <span>{formatNumber(Number(entryAmount) / 10 ** 18)}</span>
-                    <img
-                      src={getTokenLogoUrl(entryToken ?? "")}
-                      alt={entryToken ?? ""}
-                      className="w-6 h-6"
-                    />
+                <div className="flex flex-row items-center justify-center gap-2 border border-brand-muted rounded-md p-2 px-4">
+                  <div className="flex flex-row items-center gap-2">
+                    <div className="flex flex-row items-center gap-2">
+                      <span>
+                        {formatNumber(Number(entryAmount) / 10 ** 18)}
+                      </span>
+                      <img
+                        src={getTokenLogoUrl(entryToken ?? "")}
+                        alt={entryToken ?? ""}
+                        className="w-6 h-6"
+                      />
 
-                    <span>
-                      {
-                        tokens.find((token) => token.address === entryToken)
-                          ?.symbol
-                      }
+                      <span>
+                        {
+                          tokens.find((token) => token.address === entryToken)
+                            ?.symbol
+                        }
+                      </span>
+                    </div>
+                    <span className="text-neutral">
+                      ~$
+                      {(
+                        Number(
+                          BigInt(tournamentModel?.entry_fee.Some?.amount!) /
+                            10n ** 18n
+                        ) * Number(entryFeePrice)
+                      ).toFixed(2)}
                     </span>
                   </div>
-                  <span className="text-neutral">
-                    ~$
-                    {(
-                      Number(
-                        BigInt(tournamentModel?.entry_fee.Some?.amount!) /
-                          10n ** 18n
-                      ) * Number(entryFeePrice)
-                    ).toFixed(2)}
-                  </span>
                   {address &&
                     (hasBalance ? (
                       <div className="flex flex-row items-center gap-2">
@@ -752,7 +756,7 @@ export function EnterTournamentDialog({
                       {creatorShare}%
                     </span>
                     <span className="text-sm sm:text-base">Creator Fee</span>
-                    <div className="flex flex-row items-center">
+                    <div className="flex flex-row items-center gap-1">
                       <span className="text-xs sm:text-sm">
                         +{formatNumber(creatorAmount)}
                       </span>
@@ -773,7 +777,7 @@ export function EnterTournamentDialog({
                   >
                     <span className="text-sm sm:text-base">{gameShare}%</span>
                     <span className="text-sm sm:text-base">Game Fee</span>
-                    <div className="flex flex-row items-center">
+                    <div className="flex flex-row items-center gap-1">
                       <span className="text-xs sm:text-sm">
                         +{formatNumber(gameAmount)}
                       </span>
@@ -796,7 +800,7 @@ export function EnterTournamentDialog({
                       {prizePoolShare}%
                     </span>
                     <span className="text-sm sm:text-base">Prize Pool</span>
-                    <div className="flex flex-row items-center">
+                    <div className="flex flex-row items-center gap-1">
                       <span className="text-xs sm:text-sm">
                         +{formatNumber(prizePoolAmount)}
                       </span>

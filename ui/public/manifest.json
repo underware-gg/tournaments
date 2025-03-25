@@ -1,0 +1,21 @@
+{
+  "name": "Budokan",
+  "short_name": "Budokan",
+  "description": "A fully onchain tournament platform. Built for developers and players alike, Budokan provides unprecedented flexibility and composability for onchain games",
+  "start_url": "/",
+  "display": "fullscreen",
+  "background_color": "#000000",
+  "theme_color": "#E1F980",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
