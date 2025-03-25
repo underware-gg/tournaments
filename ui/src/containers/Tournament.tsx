@@ -659,7 +659,36 @@ const Tournament = () => {
                     : "overflow-hidden text-ellipsis whitespace-nowrap text-xs sm:text-sm xl:text-base 3xl:text-lg"
                 }`}
               >
-                {tournamentModel?.metadata?.description}
+                {tournamentModel?.metadata?.description
+                  .replace("Opus.Cash", "https://opus.money")
+                  .split(/(https?:\/\/[^\s]+?)([.,;:!?])?(?=\s|$)/g)
+                  .map((part, i, arr) => {
+                    if (part.match(/^https?:\/\//)) {
+                      // This is a URL
+                      return (
+                        <a
+                          key={i}
+                          href={part}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-brand-muted hover:underline"
+                        >
+                          {part}
+                        </a>
+                      );
+                    } else if (
+                      i > 0 &&
+                      arr[i - 1].match(/^https?:\/\//) &&
+                      part &&
+                      /^[.,;:!?]$/.test(part)
+                    ) {
+                      // This is punctuation that followed a URL
+                      return part;
+                    } else {
+                      // This is regular text
+                      return part;
+                    }
+                  })}
               </p>
             </div>
             {isOverflowing && (

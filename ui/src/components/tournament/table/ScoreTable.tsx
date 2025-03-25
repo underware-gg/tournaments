@@ -90,7 +90,6 @@ const ScoreTable = ({
     ) {
       const timer = setTimeout(() => {
         refetchLeaderboard();
-        console.log("refetching leaderboard");
       }, 1000);
 
       return () => clearTimeout(timer);

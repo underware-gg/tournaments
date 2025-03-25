@@ -130,8 +130,6 @@ export function EnterTournamentDialog({
       ) * Number(entryFeePrice)
     : 0;
 
-  console.log(entryFeeUsdCost);
-
   const getBalance = async () => {
     const balance = await getBalanceGeneral(entryToken ?? "");
     setBalance(balance);
