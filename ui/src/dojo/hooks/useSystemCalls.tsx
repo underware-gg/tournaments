@@ -19,8 +19,11 @@ import {
   AccountInterface,
 } from "starknet";
 import { useToast } from "@/hooks/useToast";
-import { feltToString } from "@/lib/utils";
+import { feltToString, formatTime, roundUSDPrice } from "@/lib/utils";
 import { useTournamentContracts } from "@/dojo/hooks/useTournamentContracts";
+import { XShareButton } from "@/components/ui/button";
+import { format } from "date-fns";
+import useUIStore from "@/hooks/useUIStore";
 
 // Type for the transformed tournament
 type ExecutableTournament = Omit<Tournament, "metadata"> & {
@@ -47,6 +50,7 @@ export const useSystemCalls = () => {
   const { account, address } = useAccount();
   const { toast } = useToast();
   const { tournamentAddress } = useTournamentContracts();
+  const { getGameName } = useUIStore();
 
   // Tournament
 
@@ -54,10 +58,17 @@ export const useSystemCalls = () => {
     entryFeeToken: CairoOption<EntryFee>,
     tournamentId: BigNumberish,
     tournamentName: string,
+    tournamentModel: Tournament,
     player_name: BigNumberish,
     player_address: BigNumberish,
-    qualification: CairoOption<QualificationProofEnum>
+    qualification: CairoOption<QualificationProofEnum>,
+    duration: number,
+    entryFeeUsdCost: number
   ) => {
+    const startTime = new Date(
+      Number(tournamentModel.schedule.game.start) * 1000
+    );
+    const game = getGameName(tournamentModel.game_config.address);
     try {
       let calls = [];
       if (entryFeeToken.isSome()) {
@@ -87,7 +98,25 @@ export const useSystemCalls = () => {
       if (tx) {
         toast({
           title: "Entered Tournament!",
-          description: `Entered tournament ${tournamentName}`,
+          description: (
+            <div className="flex flex-col gap-1">
+              <p>Entered tournament {tournamentName}</p>
+              <XShareButton
+                text={`I've just entered ${tournamentName} on Budokan, a fully onchain tournament platform.\n\n\🎮 ${game}\n🎫 ${
+                  entryFeeToken.isSome()
+                    ? `$${roundUSDPrice(entryFeeUsdCost)} entry fee`
+                    : ""
+                }\n⏳ ${formatTime(duration)}\n🏁 ${format(
+                  startTime,
+                  "dd/MM"
+                )} - ${format(
+                  startTime,
+                  "HH:mm"
+                )} UTC\n\nJoin here for a chance win exciting prizes: https://budokan.gg/tournament/${tournamentId} \n\n@provablegames @budokan_gg`}
+                className="w-fit"
+              />
+            </div>
+          ),
         });
       }
     } catch (error) {

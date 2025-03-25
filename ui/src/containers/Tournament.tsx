@@ -566,6 +566,7 @@ const Tournament = () => {
             // gameCount={gameCount}
             tokens={tokens}
             tournamentsData={tournamentsData}
+            duration={durationSeconds}
           />
           <SubmitScoresDialog
             open={submitScoresDialogOpen}

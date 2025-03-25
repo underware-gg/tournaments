@@ -44,6 +44,7 @@ interface EnterTournamentDialogProps {
   // gameCount: BigNumberish;
   tokens: Token[];
   tournamentsData: Tournament[];
+  duration: number;
 }
 
 // Update the proof type to make tournamentId and position optional
@@ -71,6 +72,7 @@ export function EnterTournamentDialog({
   // gameCount,
   tokens,
   tournamentsData,
+  duration,
 }: EnterTournamentDialogProps) {
   const { nameSpace } = useDojo();
   const { address } = useAccount();
@@ -91,11 +93,14 @@ export function EnterTournamentDialog({
       tournamentModel?.entry_fee,
       tournamentModel?.id,
       feltToString(tournamentModel?.metadata.name),
+      tournamentModel,
       // (Number(entryCountModel?.count) ?? 0) + 1,
       stringToFelt(playerName.trim()),
       addAddressPadding(address!),
-      qualificationProof
+      qualificationProof,
       // gameCount
+      duration,
+      entryFeeUsdCost
     );
 
     setPlayerName("");
@@ -119,6 +124,13 @@ export function EnterTournamentDialog({
 
   const entryToken = tournamentModel?.entry_fee?.Some?.token_address;
   const entryAmount = tournamentModel?.entry_fee?.Some?.amount;
+  const entryFeeUsdCost = entryToken
+    ? Number(
+        BigInt(tournamentModel?.entry_fee.Some?.amount ?? 0n) / 10n ** 18n
+      ) * Number(entryFeePrice)
+    : 0;
+
+  console.log(entryFeeUsdCost);
 
   const getBalance = async () => {
     const balance = await getBalanceGeneral(entryToken ?? "");
@@ -717,13 +729,7 @@ export function EnterTournamentDialog({
                       </span>
                     </div>
                     <span className="text-neutral">
-                      ~$
-                      {(
-                        Number(
-                          BigInt(tournamentModel?.entry_fee.Some?.amount!) /
-                            10n ** 18n
-                        ) * Number(entryFeePrice)
-                      ).toFixed(2)}
+                      ~${entryFeeUsdCost.toFixed(2)}
                     </span>
                   </div>
                   {address &&

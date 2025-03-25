@@ -9,6 +9,51 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function displayPrice(num: number): string {
+  if (Math.abs(num) >= 1) {
+    return num.toFixed(0);
+  } else if (Math.abs(num) > 0) {
+    return num.toFixed(2);
+  } else {
+    return "0";
+  }
+}
+
+export function roundUSDPrice(price: number): string {
+  // Handle negative numbers by applying the same logic to the absolute value
+  const isNegative = price < 0;
+  const absPrice = Math.abs(price);
+
+  // Get the integer part
+  const integerPart = Math.floor(absPrice);
+
+  // Get the decimal part
+  const decimalPart = absPrice - integerPart;
+
+  let result: number;
+
+  if (decimalPart <= 0.25) {
+    // Round down to the integer
+    result = integerPart;
+  } else if (decimalPart <= 0.75) {
+    // Round to x.50
+    result = integerPart + 0.5;
+  } else {
+    // Round up to the next integer
+    result = integerPart + 1;
+  }
+
+  // Apply the sign back
+  result = isNegative ? -result : result;
+
+  // Format the result
+  if (result % 1 === 0) {
+    return result.toFixed(0);
+  } else {
+    return result.toFixed(2);
+  }
+}
+
 export function formatNumber(num: number): string {
   if (Math.abs(num) >= 1000000) {
     return parseFloat((num / 1000000).toFixed(2)) + "m";

@@ -3,6 +3,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import PressableBorderImage from "@/components/icons/PressableBorderImage";
 import { cn } from "@/lib/utils";
+import { XIcon } from "@/components/Icons";
 
 const buttonVariants = cva(
   "inline-flex items-center gap-2 whitespace-nowrap rounded-xl text-sm 3xl:text-lg font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 3xl:[&_svg]:size-8 [&_svg]:shrink-0 [border-style:solid] [border-image-slice:4] [border-image-width:4px] relative active:top-[2px] active:left-[2px]",
@@ -66,4 +67,27 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
-export { Button, buttonVariants };
+interface XShareButtonProps {
+  text: string;
+  className?: string;
+}
+
+const XShareButton: React.FC<XShareButtonProps> = ({ text, className }) => {
+  const tweetUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
+    text
+  )}`;
+
+  return (
+    <Button
+      className={`flex flex-row items-center gap-2 ${className}`}
+      onClick={() => {
+        window.open(tweetUrl, "_blank", "noopener noreferrer");
+      }}
+    >
+      <XIcon />
+      <span>Share</span>
+    </Button>
+  );
+};
+
+export { Button, buttonVariants, XShareButton };

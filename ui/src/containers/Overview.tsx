@@ -20,7 +20,12 @@ import {
   useGetMyTournaments,
   useGetMyTournamentsCount,
 } from "@/dojo/hooks/useSqlQueries";
-import { bigintToHex, feltToString, indexAddress } from "@/lib/utils";
+import {
+  bigintToHex,
+  feltToString,
+  indexAddress,
+  stringToFelt,
+} from "@/lib/utils";
 import { addAddressPadding } from "starknet";
 import { useDojo } from "@/context/dojo";
 import EmptyResults from "@/components/overview/tournaments/EmptyResults";
@@ -91,6 +96,10 @@ const Overview = () => {
     }
   }, [chain]);
 
+  const isMainnet = useMemo(() => {
+    return bigintToHex(BigInt(chain?.id)) === stringToFelt("SN_MAIN");
+  }, [chain]);
+
   const subscribedTournaments = useDojoStore((state) =>
     state.getEntitiesByModel(nameSpace, "Tournament")
   );
@@ -110,8 +119,10 @@ const Overview = () => {
   }, []);
 
   const fromTournamentId = useMemo(() => {
-    return addAddressPadding(bigintToHex(BigInt(STARTING_TOURNAMENT_ID)));
-  }, []);
+    return isMainnet
+      ? addAddressPadding(bigintToHex(BigInt(STARTING_TOURNAMENT_ID)))
+      : undefined;
+  }, [isMainnet]);
 
   const {
     data: upcomingTournamentsCount,
