@@ -120,7 +120,7 @@ export function EnterTournamentDialog({
     } else if (accountUsername) {
       setPlayerName(accountUsername);
     }
-  }, [open]);
+  }, [open, accountUsername]);
 
   const entryToken = tournamentModel?.entry_fee?.Some?.token_address;
   const entryAmount = tournamentModel?.entry_fee?.Some?.amount;

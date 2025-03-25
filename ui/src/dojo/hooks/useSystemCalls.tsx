@@ -18,11 +18,10 @@ import {
   Uint256,
   AccountInterface,
 } from "starknet";
-import { useToast } from "@/hooks/useToast";
-import { feltToString, formatTime, roundUSDPrice } from "@/lib/utils";
+import { feltToString } from "@/lib/utils";
 import { useTournamentContracts } from "@/dojo/hooks/useTournamentContracts";
-import { XShareButton } from "@/components/ui/button";
 import useUIStore from "@/hooks/useUIStore";
+import { useToastMessages } from "@/components/toast";
 
 // Type for the transformed tournament
 type ExecutableTournament = Omit<Tournament, "metadata"> & {
@@ -47,9 +46,15 @@ const prepareForExecution = (tournament: Tournament): ExecutableTournament => {
 export const useSystemCalls = () => {
   const { client } = useDojo();
   const { account, address } = useAccount();
-  const { toast } = useToast();
   const { tournamentAddress } = useTournamentContracts();
   const { getGameName } = useUIStore();
+  const {
+    showTournamentEntry,
+    showScoreSubmission,
+    showPrizeAddition,
+    showPrizeDistribution,
+    showTournamentCreation,
+  } = useToastMessages();
 
   // Tournament
 
@@ -94,25 +99,14 @@ export const useSystemCalls = () => {
       const tx = await account?.execute(calls);
 
       if (tx) {
-        toast({
-          title: "Entered Tournament!",
-          description: (
-            <div className="flex flex-col gap-1">
-              <p>Entered tournament {tournamentName}</p>
-              <XShareButton
-                text={`I've just entered ${tournamentName} on @budokan_gg, the onchain gaming arena.\n\n\🎮 ${game}\n🎫 ${
-                  entryFeeToken.isSome()
-                    ? `Entry fee: $${roundUSDPrice(entryFeeUsdCost)}`
-                    : "Free Entry"
-                }\n🏁 Starts in: ${formatTime(
-                  startsIn
-                )}\n⏳ Live for: ${formatTime(
-                  duration
-                )}\n\nJoin here for a chance win exciting prizes: https://budokan.gg/tournament/${tournamentId}`}
-                className="w-fit"
-              />
-            </div>
-          ),
+        showTournamentEntry({
+          tournamentName,
+          tournamentId: Number(tournamentId).toString(),
+          game,
+          entryFeeUsdCost,
+          hasEntryFee: entryFeeToken.isSome(),
+          startsIn,
+          duration,
         });
       }
     } catch (error) {
@@ -146,10 +140,7 @@ export const useSystemCalls = () => {
       const tx = await account?.execute(calls);
 
       if (tx) {
-        toast({
-          title: "Submitted Scores!",
-          description: `Submitted scores for tournament ${tournamentName}`,
-        });
+        showScoreSubmission(tournamentName);
       }
     } catch (error) {
       console.error("Error executing submit scores:", error);
@@ -161,7 +152,8 @@ export const useSystemCalls = () => {
     tournamentId: BigNumberish,
     tournamentName: string,
     prizes: Prize[],
-    showToast: boolean
+    showToast: boolean,
+    prizeTotalUsd: number
   ) => {
     try {
       let calls = [];
@@ -192,9 +184,10 @@ export const useSystemCalls = () => {
       const tx = await account?.execute(calls);
 
       if (showToast && tx) {
-        toast({
-          title: "Added Prize!",
-          description: `Added prize for tournament ${tournamentName}`,
+        showPrizeAddition({
+          tournamentName,
+          tournamentId: Number(tournamentId).toString(),
+          prizeTotalUsd,
         });
       }
     } catch (error) {
@@ -205,10 +198,12 @@ export const useSystemCalls = () => {
 
   const createTournamentAndApproveAndAddPrizes = async (
     tournament: Tournament,
-    prizes: Prize[]
+    prizes: Prize[],
+    entryFeeUsdCost: number,
+    duration: number
   ) => {
     const executableTournament = prepareForExecution(tournament);
-
+    const game = getGameName(tournament.game_config.address);
     try {
       let calls = [];
       const createCall = {
@@ -253,11 +248,14 @@ export const useSystemCalls = () => {
       const tx = await account?.execute(calls);
 
       if (tx) {
-        toast({
-          title: "Created Tournament!",
-          description: `Created tournament ${feltToString(
-            tournament.metadata.name
-          )}`,
+        showTournamentCreation({
+          tournamentName: feltToString(tournament.metadata.name),
+          tournamentId: Number(tournament.id).toString(),
+          game,
+          hasEntryFee: tournament.entry_fee.isSome(),
+          entryFeeUsdCost: entryFeeUsdCost,
+          startsIn: Number(tournament.schedule.game.start) - Date.now() / 1000,
+          duration,
         });
       }
     } catch (error) {
@@ -284,10 +282,7 @@ export const useSystemCalls = () => {
       const tx = await account?.execute(calls);
 
       if (tx) {
-        toast({
-          title: "Distributed Prizes!",
-          description: `Distributed prizes for tournament ${tournamentName}`,
-        });
+        showPrizeDistribution(tournamentName);
       }
     } catch (error) {
       console.error("Error executing distribute prizes:", error);

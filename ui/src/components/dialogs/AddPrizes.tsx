@@ -195,7 +195,8 @@ export function AddPrizesDialog({
         tournamentId,
         tournamentName,
         prizesToAdd,
-        true
+        true,
+        totalValue
       );
 
       setCurrentPrizes([]);

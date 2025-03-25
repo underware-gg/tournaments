@@ -407,7 +407,9 @@ const CreateTournament = () => {
       );
       await createTournamentAndApproveAndAddPrizes(
         processedTournament,
-        processedPrizes
+        processedPrizes,
+        formData.entryFees?.value ?? 0,
+        formData.duration
       );
       form.reset();
       navigate("/");

@@ -146,7 +146,7 @@ export const formatTime = (seconds: number): string => {
   } else if (minutes > 0) {
     return `${minutes} Min${minutes > 1 ? "s" : ""}`;
   } else {
-    return `${seconds} Sec${seconds > 1 ? "s" : ""}`;
+    return `${seconds.toFixed(0)} Sec${seconds > 1 ? "s" : ""}`;
   }
 };
 // Add a utility function to check if a date is before another date
