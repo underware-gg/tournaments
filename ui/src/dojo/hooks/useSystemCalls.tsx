@@ -65,9 +65,8 @@ export const useSystemCalls = () => {
     duration: number,
     entryFeeUsdCost: number
   ) => {
-    const startTime = new Date(
-      Number(tournamentModel.schedule.game.start) * 1000
-    );
+    const startsIn =
+      Number(tournamentModel.schedule.game.start) - Date.now() / 1000;
     const game = getGameName(tournamentModel.game_config.address);
     try {
       let calls = [];
@@ -102,17 +101,15 @@ export const useSystemCalls = () => {
             <div className="flex flex-col gap-1">
               <p>Entered tournament {tournamentName}</p>
               <XShareButton
-                text={`I've just entered ${tournamentName} on Budokan, a fully onchain tournament platform.\n\n\🎮 ${game}\n🎫 ${
+                text={`I've just entered ${tournamentName} on @budokan_gg, the onchain gaming arena.\n\n\🎮 ${game}\n🎫 ${
                   entryFeeToken.isSome()
-                    ? `$${roundUSDPrice(entryFeeUsdCost)} entry fee`
-                    : ""
-                }\n⏳ ${formatTime(duration)}\n🏁 ${format(
-                  startTime,
-                  "dd/MM"
-                )} - ${format(
-                  startTime,
-                  "HH:mm"
-                )} UTC\n\nJoin here for a chance win exciting prizes: https://budokan.gg/tournament/${tournamentId} \n\n@provablegames @budokan_gg`}
+                    ? `Entry fee: $${roundUSDPrice(entryFeeUsdCost)}`
+                    : "Free Entry"
+                }\n🏁 Starts in: ${formatTime(
+                  startsIn
+                )}\n⏳ Live for: ${formatTime(
+                  duration
+                )}\n\nJoin here for a chance win exciting prizes: https://budokan.gg/tournament/${tournamentId}`}
                 className="w-fit"
               />
             </div>
