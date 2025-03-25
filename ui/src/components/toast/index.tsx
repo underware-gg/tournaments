@@ -88,7 +88,7 @@ export const useToastMessages = (): ToastMessages => {
       title: "Created Tournament!",
       description: (
         <div className="flex flex-col gap-1">
-          <p>Entered tournament {tournamentName}</p>
+          <p>Created tournament {tournamentName}</p>
           <XShareButton
             text={[
               `I just created tournament "${tournamentName}" on @budokan_gg, the onchain gaming arena.`,
@@ -128,14 +128,17 @@ export const useToastMessages = (): ToastMessages => {
     toast({
       title: "Added Prize!",
       description: (
-        <XShareButton
-          text={[
-            `I just added $${prizeTotalUsd} to the prize pool for "${tournamentName}" on @budokan_gg, the onchain gaming arena.`,
-            "",
-            `Enter now: https://budokan.gg/tournament/${tournamentId}`,
-          ].join("\n")}
-          className="w-fit"
-        />
+        <div className="flex flex-col gap-1">
+          <p>Added prize to {tournamentName}</p>
+          <XShareButton
+            text={[
+              `I just added $${prizeTotalUsd} to the prize pool for "${tournamentName}" on @budokan_gg, the onchain gaming arena.`,
+              "",
+              `Enter now: https://budokan.gg/tournament/${tournamentId}`,
+            ].join("\n")}
+            className="w-fit"
+          />
+        </div>
       ),
     });
   };
