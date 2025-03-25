@@ -22,7 +22,6 @@ import { useToast } from "@/hooks/useToast";
 import { feltToString, formatTime, roundUSDPrice } from "@/lib/utils";
 import { useTournamentContracts } from "@/dojo/hooks/useTournamentContracts";
 import { XShareButton } from "@/components/ui/button";
-import { format } from "date-fns";
 import useUIStore from "@/hooks/useUIStore";
 
 // Type for the transformed tournament
