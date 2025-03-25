@@ -105,10 +105,22 @@ export function EnterTournamentDialog({
     setPlayerName("");
 
     //TEMP
-    localStorage.setItem(
-      "entryInfo",
-      qualificationProof?.Some?.variant?.Tournament?.token_id
-    );
+    // Get the token ID to store
+    const tokenIdToStore =
+      qualificationProof?.Some?.variant?.Tournament?.token_id;
+
+    if (tokenIdToStore) {
+      // Get existing entries or initialize empty array
+      const entries = JSON.parse(localStorage.getItem("entryInfo") || "[]");
+
+      // Add new token ID if it doesn't exist already
+      if (!entries.includes(tokenIdToStore)) {
+        entries.push(tokenIdToStore);
+      }
+
+      // Save back to localStorage
+      localStorage.setItem("entryInfo", JSON.stringify(entries));
+    }
   };
 
   const ownerAddresses = useMemo(() => {
@@ -311,8 +323,10 @@ export function EnterTournamentDialog({
         for (let i = 0; i < leaderboardTokenIds.length; i++) {
           const leaderboardTokenId = leaderboardTokenIds[i];
           //TEMP
-          const tokenIdStored =
-            localStorage.getItem("entryInfo") === leaderboardTokenId;
+          const storedEntries = JSON.parse(
+            localStorage.getItem("entryInfo") || "[]"
+          );
+          const tokenIdStored = storedEntries.includes(leaderboardTokenId);
           if (ownedGameIds.includes(leaderboardTokenId) && !tokenIdStored) {
             acc[leaderboard.tournament_id].push({
               tokenId: leaderboardTokenId,
