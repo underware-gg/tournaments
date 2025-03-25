@@ -80,7 +80,6 @@ export function EnterTournamentDialog({
   const { approveAndEnterTournament, getBalanceGeneral } = useSystemCalls();
   const [playerName, setPlayerName] = useState("");
   const [balance, setBalance] = useState<BigNumberish>(0);
-
   const handleEnterTournament = () => {
     if (!playerName.trim()) return;
 
@@ -104,6 +103,12 @@ export function EnterTournamentDialog({
     );
 
     setPlayerName("");
+
+    //TEMP
+    localStorage.setItem(
+      "entryInfo",
+      qualificationProof?.Some?.variant?.Tournament?.token_id
+    );
   };
 
   const ownerAddresses = useMemo(() => {
@@ -145,9 +150,7 @@ export function EnterTournamentDialog({
 
   const hasEntryRequirement = tournamentModel?.entry_requirement.isSome();
 
-  // const entryLimit = tournamentModel?.entry_requirement.Some?.entry_limit?.Some;
-  // TEMP
-  const entryLimit = 1;
+  const entryLimit = tournamentModel?.entry_requirement.Some?.entry_limit?.Some;
 
   const requirementVariant =
     tournamentModel?.entry_requirement.Some?.entry_requirement_type?.activeVariant();
@@ -307,7 +310,10 @@ export function EnterTournamentDialog({
         // Find all owned token IDs that appear in the leaderboard and their positions
         for (let i = 0; i < leaderboardTokenIds.length; i++) {
           const leaderboardTokenId = leaderboardTokenIds[i];
-          if (ownedGameIds.includes(leaderboardTokenId)) {
+          //TEMP
+          const tokenIdStored =
+            localStorage.getItem("entryInfo") === leaderboardTokenId;
+          if (ownedGameIds.includes(leaderboardTokenId) && !tokenIdStored) {
             acc[leaderboard.tournament_id].push({
               tokenId: leaderboardTokenId,
               position: i + 1, // Convert to 1-based position for display
@@ -444,7 +450,9 @@ export function EnterTournamentDialog({
           )?.entry_count ?? 0;
 
         // Calculate remaining entries
-        const remaining = (Number(entryLimit) ?? 0) - currentEntryCount;
+        const remaining = entryLimit
+          ? Number(entryLimit) - currentEntryCount
+          : Infinity;
 
         // If this token has entries left
         if (remaining > 0) {
@@ -522,7 +530,9 @@ export function EnterTournamentDialog({
                   entry["qualification.tournament.token_id"] === wonInfo.tokenId
               )?.entry_count ?? 0;
 
-            const remaining = (Number(entryLimit) ?? 0) - currentEntryCount;
+            const remaining = entryLimit
+              ? Number(entryLimit) - currentEntryCount
+              : Infinity;
 
             // If this token has entries left
             if (remaining > 0) {
@@ -558,11 +568,15 @@ export function EnterTournamentDialog({
                   entry["qualification.tournament.token_id"] === gameId
               )?.entry_count ?? 0;
 
-            const remaining = (Number(entryLimit) ?? 0) - currentEntryCount;
+            const remaining = entryLimit
+              ? Number(entryLimit) - currentEntryCount
+              : Infinity;
 
             // If this token has entries left
             if (remaining > 0) {
-              tournamentCanEnter = true;
+              //TEMP
+              tournamentCanEnter =
+                entryCountModel?.count <= leaderboards[0].token_ids.length;
               // Add to total entries left for this tournament
               tournamentTotalEntriesLeft += remaining;
 
@@ -670,6 +684,7 @@ export function EnterTournamentDialog({
     requirementVariant,
     address,
     allowlistAddresses,
+    entryCountModel?.count,
   ]);
 
   // display the entry fee distribution
@@ -900,11 +915,13 @@ export function EnterTournamentDialog({
                                 <span className="w-5">
                                   <CHECK />
                                 </span>
-                                {entriesLeftByTournament.find(
+                                {(entriesLeftByTournament.find(
                                   (entry) =>
                                     entry.tournamentId ===
                                     tournament.id.toString()
-                                )?.entriesLeft ?? 0 > 0 ? (
+                                )?.entriesLeft ??
+                                  0 > 0) &&
+                                meetsEntryRequirements ? (
                                   <span>
                                     {`${
                                       entriesLeftByTournament.find(
