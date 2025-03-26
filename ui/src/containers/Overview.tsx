@@ -416,10 +416,11 @@ const Overview = () => {
   useEffect(() => {
     // Only set the default tab on first render
     if (isFirstRender.current) {
-      if (upcomingTournamentsCount > 0) {
-        setSelectedTab("upcoming");
-      } else if (liveTournamentsCount > 0) {
+      //TEMPORARY
+      if (liveTournamentsCount > 0) {
         setSelectedTab("live");
+      } else if (upcomingTournamentsCount > 0) {
+        setSelectedTab("upcoming");
       } else if (myTournamentsCount > 0) {
         setSelectedTab("my");
       } else if (endedTournamentsCount > 0) {
