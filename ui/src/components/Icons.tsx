@@ -709,3 +709,14 @@ export const XIcon: React.FC = () => (
     />
   </svg>
 );
+
+export const DISCORD: React.FC = () => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M16 5V6H18V7H19V10H20V13H21V16H20V17H18V18H16V16H15V17H9V16H8V18H6V17H4V16H3V13H4V10H5V7H6V6H8V5H10V6H14V5H16ZM11 12V13H10V14H8V13H7V12H8V11H10V12H11ZM14 14V13H13V12H14V11H16V12H17V13H16V14H14Z"
+      fill="currentColor"
+    />
+  </svg>
+);

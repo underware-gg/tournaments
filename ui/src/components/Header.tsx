@@ -9,6 +9,7 @@ import {
   COIN,
   SLOT,
   STARKNET,
+  DISCORD,
 } from "@/components/Icons";
 import { displayAddress } from "@/lib/utils";
 import {
@@ -167,6 +168,17 @@ const Header = () => {
         <div className="flex flex-row items-center gap-2">
           {/* Navigation buttons - only visible on larger screens */}
           <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                window.open("https://discord.gg/wVXCrzMk", "_blank");
+              }}
+            >
+              <span className="flex flex-row items-center gap-2">
+                <DISCORD />
+                Support
+              </span>
+            </Button>
             {!isLocal && account && (
               <DropdownMenu>
                 <DropdownMenuTrigger>
