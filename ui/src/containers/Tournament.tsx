@@ -52,7 +52,6 @@ import useModel from "@/dojo/hooks/useModel";
 import { useGameEndpoints } from "@/dojo/hooks/useGameEndpoints";
 import { EnterTournamentDialog } from "@/components/dialogs/EnterTournament";
 import ScoreTable from "@/components/tournament/table/ScoreTable";
-import { ADMIN_ADDRESS } from "@/lib/constants";
 import { useEkuboPrices } from "@/hooks/useEkuboPrices";
 import MyEntries from "@/components/tournament/MyEntries";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
@@ -73,7 +72,6 @@ import {
 } from "@/components/ui/tooltip";
 import useUIStore from "@/hooks/useUIStore";
 import { AddPrizesDialog } from "@/components/dialogs/AddPrizes";
-import { ChainId } from "@/dojo/setup/networks";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Tournament = () => {
@@ -81,7 +79,7 @@ const Tournament = () => {
   const { address } = useAccount();
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
-  const { nameSpace, selectedChainConfig } = useDojo();
+  const { nameSpace } = useDojo();
   const state = useDojoStore((state) => state);
   const { gameData, getGameImage } = useUIStore();
   const [enterDialogOpen, setEnterDialogOpen] = useState(false);
@@ -91,8 +89,6 @@ const Tournament = () => {
   const [loading, setLoading] = useState(true);
   const [tournamentExists, setTournamentExists] = useState(false);
   const [allPricesFound, setAllPricesFound] = useState(true);
-  const isAdmin = address === ADMIN_ADDRESS;
-  const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
   const [prevEntryCount, setPrevEntryCount] = useState<number | null>(null);
   const { data: tournamentsCount } = useGetTournamentsCount({
     namespace: nameSpace,
@@ -495,7 +491,7 @@ const Tournament = () => {
             tournamentsData={tournamentsData}
             tokens={tokens}
           />
-          {!isEnded && (isMainnet ? isAdmin : true) && (
+          {!isEnded && (
             <Button
               variant="outline"
               onClick={() => setAddPrizesDialogOpen(true)}
