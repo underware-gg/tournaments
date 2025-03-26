@@ -758,6 +758,7 @@ const Tournament = () => {
               gameScoreModel={gameScoreModel ?? ""}
               gameScoreAttribute={gameScoreAttribute ?? ""}
               ownedTokens={ownedTokens}
+              tournamentModel={tournamentModel}
             />
           </div>
         </div>

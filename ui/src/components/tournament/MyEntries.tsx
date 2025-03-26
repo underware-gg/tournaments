@@ -9,7 +9,7 @@ import { useAccount } from "@starknet-react/core";
 import { BigNumberish, addAddressPadding } from "starknet";
 import { bigintToHex } from "@/lib/utils";
 import EntryCard from "@/components/tournament/myEntries/EntryCard";
-import { TokenMetadata } from "@/generated/models.gen";
+import { TokenMetadata, Tournament } from "@/generated/models.gen";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { useDojo } from "@/context/dojo";
 import {
@@ -28,6 +28,7 @@ interface MyEntriesProps {
   gameScoreModel: string;
   gameScoreAttribute: string;
   ownedTokens: any[];
+  tournamentModel: Tournament;
 }
 
 const MyEntries = ({
@@ -37,6 +38,7 @@ const MyEntries = ({
   gameScoreModel,
   gameScoreAttribute,
   ownedTokens,
+  tournamentModel,
 }: MyEntriesProps) => {
   const { address } = useAccount();
   const state = useDojoStore((state) => state);
@@ -170,6 +172,7 @@ const MyEntries = ({
                 key={index}
                 gameAddress={gameAddress}
                 mergedEntry={mergedEntry}
+                tournamentModel={tournamentModel}
               />
             ))}
           </div>

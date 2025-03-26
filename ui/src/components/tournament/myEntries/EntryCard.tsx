@@ -5,7 +5,7 @@ import { HoverCard } from "@/components/ui/hover-card";
 import { INFO } from "@/components/Icons";
 import EntryInfo from "@/components/tournament/myEntries/EntryInfo";
 import { feltToString, formatScore } from "@/lib/utils";
-import { TokenMetadata } from "@/generated/models.gen";
+import { TokenMetadata, Tournament } from "@/generated/models.gen";
 import { BigNumberish } from "starknet";
 import { Button } from "@/components/ui/button";
 import { getGameUrl } from "@/assets/games";
@@ -13,6 +13,7 @@ import { TooltipContent } from "@/components/ui/tooltip";
 import { TooltipTrigger } from "@/components/ui/tooltip";
 import { Tooltip } from "@/components/ui/tooltip";
 import useUIStore from "@/hooks/useUIStore";
+
 interface EntryCardProps {
   gameAddress: string;
   mergedEntry: {
@@ -25,9 +26,14 @@ interface EntryCardProps {
     score?: string | undefined;
     tokenMetadata?: string | null;
   };
+  tournamentModel: Tournament;
 }
 
-const EntryCard = ({ gameAddress, mergedEntry }: EntryCardProps) => {
+const EntryCard = ({
+  gameAddress,
+  mergedEntry,
+  tournamentModel,
+}: EntryCardProps) => {
   const { getGameImage, getGameName } = useUIStore();
   const currentDate = BigInt(new Date().getTime()) / 1000n;
   const hasStarted =
@@ -54,7 +60,20 @@ const EntryCard = ({ gameAddress, mergedEntry }: EntryCardProps) => {
       className="flex-none flex flex-col items-center justify-between h-full w-[100px] 3xl:w-[120px] p-1 relative group"
     >
       <div className="flex flex-col items-center justify-between w-full h-full pt-2">
-        <TokenGameIcon image={gameImage} size={"sm"} />
+        <Tooltip delayDuration={50}>
+          <TooltipTrigger asChild>
+            <span className="hover:cursor-pointer">
+              <TokenGameIcon image={gameImage} size={"sm"} />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent
+            side="top"
+            align="center"
+            className="max-w-[300px] break-words"
+          >
+            <p className="text-sm font-medium">{gameName}</p>
+          </TooltipContent>
+        </Tooltip>
         <div className="absolute top-1 left-1 text-xs 3xl:text-sm">
           #{mergedEntry.entry_number?.toString()}
         </div>
@@ -67,6 +86,7 @@ const EntryCard = ({ gameAddress, mergedEntry }: EntryCardProps) => {
           <EntryInfo
             entryNumber={mergedEntry.entry_number?.toString() ?? ""}
             tokenMetadata={mergedEntry.tokenMetadata ?? ""}
+            tournamentModel={tournamentModel}
           />
         </HoverCard>
         <Tooltip delayDuration={50}>
@@ -113,7 +133,7 @@ const EntryCard = ({ gameAddress, mergedEntry }: EntryCardProps) => {
         <div className="flex flex-row items-center justify-center w-full px-2">
           {isActive ? (
             <>
-              <p className="text-xs 3xl:text-sm text-neutral">Active</p>
+              <p className="text-xs 3xl:text-sm text-success">Active</p>
             </>
           ) : hasEnded ? (
             <p className="text-xs 3xl:text-sm text-warning">Ended</p>

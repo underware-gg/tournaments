@@ -1,11 +1,19 @@
 import { HoverCardContent } from "@/components/ui/hover-card";
+import { Tournament } from "@/generated/models.gen";
 
 interface EntryInfoProps {
   entryNumber: string;
   tokenMetadata: string;
+  tournamentModel: Tournament;
 }
 
-const EntryInfo = ({ entryNumber, tokenMetadata }: EntryInfoProps) => {
+const EntryInfo = ({
+  entryNumber,
+  tokenMetadata,
+  tournamentModel,
+}: EntryInfoProps) => {
+  const settings =
+    tournamentModel?.game_config?.settings_id === 0 ? "Default" : "Custom";
   return (
     <HoverCardContent
       className="w-80 py-4 px-0 text-sm z-50"
@@ -17,7 +25,10 @@ const EntryInfo = ({ entryNumber, tokenMetadata }: EntryInfoProps) => {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2 px-4">
           <h4 className="font-medium">Entry #{entryNumber}</h4>
-          <p className="text-muted-foreground">Game Settings</p>
+          <div className="flex flex-row gap-2">
+            <p>Game Settings</p>
+            <span className="text-brand-muted">{settings}</span>
+          </div>
         </div>
         <div className="w-full h-0.5 bg-brand/50" />
         {tokenMetadata !== "" ? (
