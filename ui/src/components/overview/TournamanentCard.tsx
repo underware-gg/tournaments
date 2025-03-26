@@ -192,20 +192,34 @@ export const TournamentCard = ({
               {feltToString(tournament?.metadata?.name!)}
             </p>
             <div className="flex flex-row gap-2 w-1/3 justify-end">
-              <div className="flex flex-row items-center">
-                <span className="w-6">
-                  <SOLID_CLOCK />
-                </span>
-                <span className="text-sm tracking-tight">
-                  {renderDuration(duration)}
-                </span>
-              </div>
-              <div className="flex flex-row items-center">
-                <span className="w-7">
-                  <USER />
-                </span>
-                <span>{entryCount}</span>
-              </div>
+              <Tooltip delayDuration={50}>
+                <TooltipTrigger asChild>
+                  <div className="flex flex-row items-center">
+                    <span className="w-6">
+                      <SOLID_CLOCK />
+                    </span>
+                    <span className="text-sm tracking-tight">
+                      {renderDuration(duration)}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" align="center">
+                  <p>Duration</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip delayDuration={50}>
+                <TooltipTrigger asChild>
+                  <div className="flex flex-row items-center">
+                    <span className="w-7">
+                      <USER />
+                    </span>
+                    <span>{entryCount}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" align="center">
+                  <p>Entries</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
           <div className="hidden sm:block w-full h-0.5 bg-brand/25" />
