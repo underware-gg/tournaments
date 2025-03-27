@@ -546,9 +546,10 @@ export function EnterTournamentDialog({
                   entry["qualification.tournament.token_id"] === wonInfo.tokenId
               )?.entry_count ?? 0;
 
+            // TEMP
             const remaining = entryLimit
               ? Number(entryLimit) - currentEntryCount
-              : Infinity;
+              : 1;
 
             // If this token has entries left
             if (remaining > 0) {
