@@ -552,7 +552,8 @@ export function EnterTournamentDialog({
             if (remaining > 0) {
               //TEMP
               tournamentCanEnter =
-                entryCountModel?.count < leaderboards[0].token_ids.length;
+                (entryCountModel?.count ?? 0) <
+                leaderboards[0].token_ids.length;
               // Add to total entries left for this tournament
               tournamentTotalEntriesLeft += remaining;
 
