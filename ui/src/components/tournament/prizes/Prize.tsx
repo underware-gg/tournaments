@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { getOrdinalSuffix } from "@/lib/utils";
+import { formatNumber, getOrdinalSuffix } from "@/lib/utils";
 import {
   calculatePrizeValue,
   calculateTotalValue,
@@ -35,35 +35,45 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
         <sup>{getOrdinalSuffix(position)}</sup> Prize
       </h4>
       <div className="space-y-3">
-        {Object.entries(prizes).map(([symbol, prize]) => {
-          const hasPrice = prices[symbol];
-          const USDValue = calculatePrizeValue(prize, symbol, prices);
-          return (
-            <div
-              key={symbol}
-              className="flex justify-between items-center px-4"
-            >
-              {prize.type === "erc20" ? (
-                <div className="flex flex-row gap-1 items-center">
-                  <span>{`${(Number(prize.value) / 10 ** 18).toFixed(
-                    2
-                  )}`}</span>
-                  <img
-                    src={getTokenLogoUrl(prize.address)}
-                    className="w-6 h-6"
-                  />
-                </div>
-              ) : (
-                `${(prize.value as bigint[]).length} NFT${
-                  (prize.value as bigint[]).length === 1 ? "" : "s"
-                }`
-              )}
-              {prize.type === "erc20" && hasPrice && (
-                <span className="text-neutral">~${USDValue.toFixed(2)}</span>
-              )}
-            </div>
-          );
-        })}
+        {Object.entries(prizes)
+          .map(([symbol, prize]) => {
+            const hasPrice = prices[symbol];
+            const USDValue = calculatePrizeValue(prize, symbol, prices);
+            return {
+              symbol,
+              prize,
+              hasPrice,
+              USDValue,
+            };
+          })
+          .sort((a, b) => b.USDValue - a.USDValue) // Sort by USDValue in descending order
+          .map(({ symbol, prize, hasPrice, USDValue }) => {
+            return (
+              <div
+                key={symbol}
+                className="flex justify-between items-center px-4"
+              >
+                {prize.type === "erc20" ? (
+                  <div className="flex flex-row gap-1 items-center">
+                    <span>{`${formatNumber(
+                      Number(prize.value) / 10 ** 18
+                    )}`}</span>
+                    <img
+                      src={getTokenLogoUrl(prize.address)}
+                      className="w-6 h-6"
+                    />
+                  </div>
+                ) : (
+                  `${(prize.value as bigint[]).length} NFT${
+                    (prize.value as bigint[]).length === 1 ? "" : "s"
+                  }`
+                )}
+                {prize.type === "erc20" && hasPrice && (
+                  <span className="text-neutral">~${USDValue.toFixed(2)}</span>
+                )}
+              </div>
+            );
+          })}
         {totalPrizesValueUSD > 0 && (
           <div className="pt-2 border-t border-brand/50">
             <div className="flex justify-between items-center px-4 pb-4">
@@ -107,6 +117,27 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
                       {totalPrizeNFTs} NFT{totalPrizeNFTs === 1 ? "" : "s"}
                     </span>
                   )}
+                </div>
+              ) : Object.entries(prizes).length > 0 ? (
+                <div className="flex flex-row items-center gap-2 font-brand xl:text-lg 3xl:text-2xl">
+                  {Object.entries(prizes).map(([symbol, prize]) => {
+                    return (
+                      <div
+                        className="flex flex-row items-center gap-2"
+                        key={symbol}
+                      >
+                        <span className="whitespace-nowrap">{`${formatNumber(
+                          Number(prize.value) / 10 ** 18
+                        )}`}</span>
+                        <div className="w-6 h-6">
+                          <img
+                            src={getTokenLogoUrl(prize.address)}
+                            alt={`${symbol} token`}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <span>No Prizes</span>

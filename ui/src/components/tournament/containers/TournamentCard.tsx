@@ -109,17 +109,19 @@ export const TournamentCardMetric = ({
 interface TournamentCardContentProps {
   children: React.ReactNode;
   showContent: boolean;
+  className?: string;
 }
 
 export const TournamentCardContent = ({
   children,
   showContent,
+  className,
 }: TournamentCardContentProps) => {
   return (
     <div
       className={`transition-all duration-300 delay-50 ease-in-out ${
         showContent ? "h-[150px] 3xl:h-[200px] opacity-100" : "h-0 opacity-0"
-      }`}
+      } ${className}`}
     >
       <div className="w-full h-0.5 bg-brand/25 mt-2" />
       {children}

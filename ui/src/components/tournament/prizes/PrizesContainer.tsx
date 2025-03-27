@@ -82,10 +82,10 @@ const PrizesContainer = ({
           />
         </div>
       </TournamentCardHeader>
-      <TournamentCardContent showContent={showPrizes}>
+      <TournamentCardContent showContent={showPrizes} className="!h-[100px]">
         <div className="p-2 sm:p-4">
           {prizesExist && (
-            <div className="flex flex-row gap-3 overflow-x-auto pb-2">
+            <div className="flex flex-row gap-3 overflow-x-auto pb-2 w-full">
               {pricesLoading ? (
                 Array.from({ length: 5 }).map((_, index) => (
                   <div
