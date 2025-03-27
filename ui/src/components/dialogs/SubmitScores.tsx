@@ -9,10 +9,16 @@ import {
 import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
 import { useAccount } from "@starknet-react/core";
 import { Leaderboard, Tournament } from "@/generated/models.gen";
-import { feltToString, getOrdinalSuffix, indexAddress } from "@/lib/utils";
+import {
+  feltToString,
+  getOrdinalSuffix,
+  indexAddress,
+  bigintToHex,
+} from "@/lib/utils";
 import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
 import { useGetTournamentLeaderboard } from "@/dojo/hooks/useSqlQueries";
 import { getSubmittableScores } from "@/lib/utils/formatting";
+import { addAddressPadding } from "starknet";
 
 interface SubmitScoresDialogProps {
   open: boolean;
@@ -45,7 +51,7 @@ export function SubmitScoresDialog({
 
   const { data: currentLeaderboard, loading } = useGetTournamentLeaderboard({
     namespace: nameSpace,
-    tournamentId: tournamentModel?.id,
+    tournamentId: addAddressPadding(bigintToHex(tournamentModel?.id)),
     gameNamespace: gameNamespace,
     gameScoreModel: gameScoreModel,
     gameScoreAttribute: gameScoreAttribute,
