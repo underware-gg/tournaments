@@ -1,4 +1,4 @@
-import { QUESTION, TROPHY } from "@/components/Icons";
+import { TROPHY } from "@/components/Icons";
 import PrizeDisplay from "@/components/tournament/prizes/Prize";
 import { useState, useEffect } from "react";
 import { TokenPrices } from "@/hooks/useEkuboPrices";
@@ -21,7 +21,6 @@ interface PrizesContainerProps {
   totalPrizeNFTs: number;
   prices: TokenPrices;
   pricesLoading: boolean;
-  allPricesFound: boolean;
 }
 
 const PrizesContainer = ({
@@ -32,7 +31,6 @@ const PrizesContainer = ({
   totalPrizeNFTs,
   prices,
   pricesLoading,
-  allPricesFound,
 }: PrizesContainerProps) => {
   const [showPrizes, setShowPrizes] = useState(false);
 
@@ -55,15 +53,9 @@ const PrizesContainer = ({
               <Skeleton className="h-6 w-24 bg-brand/10" />
             ) : (
               <>
-                {allPricesFound ? (
-                  totalPrizesValueUSD > 0 && (
-                    <span className="font-brand text-md xl:text-lg 2xl:text-xl 3xl:text-2xl text-brand-muted">
-                      ${totalPrizesValueUSD.toFixed(2)}
-                    </span>
-                  )
-                ) : (
-                  <span className="w-8">
-                    <QUESTION />
+                {totalPrizesValueUSD > 0 && (
+                  <span className="font-brand text-md xl:text-lg 2xl:text-xl 3xl:text-2xl text-brand-muted">
+                    ${totalPrizesValueUSD.toFixed(2)}
                   </span>
                 )}
                 {totalPrizeNFTs > 0 && (

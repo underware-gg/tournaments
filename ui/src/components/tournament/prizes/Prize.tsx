@@ -13,7 +13,7 @@ import {
 import { TokenPrices } from "@/hooks/useEkuboPrices";
 import { TokenPrizes } from "@/lib/types";
 import { getTokenLogoUrl } from "@/lib/tokensMeta";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface PrizeProps {
@@ -25,20 +25,7 @@ interface PrizeProps {
 const Prize = ({ position, prizes, prices }: PrizeProps) => {
   const totalPrizeNFTs = countTotalNFTs(prizes);
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
-  const [allPricesFound, setAllPricesFound] = useState(false);
-  const totalPrizesValueUSD = calculateTotalValue(
-    prizes,
-    prices,
-    allPricesFound
-  );
-
-  useEffect(() => {
-    const allPricesExist = Object.keys(prizes).every(
-      (symbol) => prices[symbol] !== undefined
-    );
-
-    setAllPricesFound(allPricesExist);
-  }, [prices, prizes]);
+  const totalPrizesValueUSD = calculateTotalValue(prizes, prices);
 
   // Function to render prize details content
   const renderPrizeDetails = () => (
@@ -110,9 +97,7 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
               {totalPrizesValueUSD > 0 || totalPrizeNFTs > 0 ? (
                 <div className="flex flex-row items-center gap-2 font-brand xl:text-lg 3xl:text-2xl">
                   {totalPrizesValueUSD > 0 && (
-                    <span>{`${
-                      allPricesFound ? "$" : ""
-                    }${totalPrizesValueUSD.toFixed(2)}`}</span>
+                    <span>{`$${totalPrizesValueUSD.toFixed(2)}`}</span>
                   )}
                   {totalPrizesValueUSD > 0 && totalPrizeNFTs > 0 && (
                     <span className="text-brand/25">|</span>

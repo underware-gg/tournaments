@@ -88,7 +88,6 @@ const Tournament = () => {
   const [addPrizesDialogOpen, setAddPrizesDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [tournamentExists, setTournamentExists] = useState(false);
-  const [allPricesFound, setAllPricesFound] = useState(true);
   const [prevEntryCount, setPrevEntryCount] = useState<number | null>(null);
   const { data: tournamentsCount } = useGetTournamentsCount({
     namespace: nameSpace,
@@ -311,18 +310,9 @@ const Tournament = () => {
     ],
   });
 
-  useEffect(() => {
-    const allPricesExist = Object.keys(groupedByTokensPrizes).every(
-      (symbol) => prices[symbol] !== undefined
-    );
-
-    setAllPricesFound(allPricesExist);
-  }, [prices, groupedByTokensPrizes]);
-
   const totalPrizesValueUSD = calculateTotalValue(
     groupedByTokensPrizes,
-    prices,
-    allPricesFound
+    prices
   );
 
   const totalPrizeNFTs = countTotalNFTs(groupedByTokensPrizes);
@@ -722,7 +712,6 @@ const Tournament = () => {
               totalPrizeNFTs={totalPrizeNFTs}
               prices={prices}
               pricesLoading={pricesLoading}
-              allPricesFound={allPricesFound}
             />
           </div>
           <div className="flex flex-col sm:flex-row gap-5">

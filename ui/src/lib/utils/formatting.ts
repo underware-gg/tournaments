@@ -509,13 +509,8 @@ export const calculatePrizeValue = (
 
 export const calculateTotalValue = (
   groupedPrizes: TokenPrizes,
-  prices: TokenPrices,
-  allPricesFound: boolean
+  prices: TokenPrices
 ) => {
-  if (!allPricesFound) {
-    return 0;
-  }
-
   return Object.entries(groupedPrizes)
     .filter(([_, prize]) => prize.type === "erc20")
     .reduce((total, [symbol, prize]) => {

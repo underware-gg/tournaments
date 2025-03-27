@@ -22,7 +22,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import useUIStore from "@/hooks/useUIStore";
-import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 
 interface TournamentCardProps {
@@ -44,7 +43,6 @@ export const TournamentCard = ({
   const navigate = useNavigate();
   const state = useDojoStore((state) => state);
   const { gameData, getGameImage } = useUIStore();
-  const [allPricesFound, setAllPricesFound] = useState(false);
 
   // token entities
   const tokenModels = state.getEntitiesByModel(nameSpace, "Token");
@@ -75,20 +73,7 @@ export const TournamentCard = ({
     ],
   });
 
-  const totalPrizesValueUSD = calculateTotalValue(
-    groupedPrizes,
-    prices,
-    allPricesFound
-  );
-
-  useEffect(() => {
-    const allPricesExist = Object.keys(groupedPrizes ?? []).every(
-      (symbol) => prices[symbol] !== undefined
-    );
-
-    setAllPricesFound(allPricesExist);
-  }, [prices, prizes]);
-
+  const totalPrizesValueUSD = calculateTotalValue(groupedPrizes, prices);
   const totalPrizeNFTs = countTotalNFTs(groupedPrizes);
 
   const startDate = new Date(Number(tournament.schedule.game.start) * 1000);
