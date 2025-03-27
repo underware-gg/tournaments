@@ -226,7 +226,9 @@ export function EnterTournamentDialog({
 
   const { data: leaderboards } = useGetTournamentLeaderboards({
     namespace: nameSpace ?? "",
-    tournamentIds: tournamentsData.map((tournament) => tournament.id),
+    tournamentIds: tournamentsData.map((tournament) =>
+      addAddressPadding(bigintToHex(tournament.id))
+    ),
     active: requirementVariant === "tournament",
   });
 
