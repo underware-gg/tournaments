@@ -927,7 +927,9 @@ export function EnterTournamentDialog({
                         <span>{feltToString(tournament.metadata.name)}</span>
                         {address ? (
                           tournamentRequirementVariant === "winners" ? (
-                            !!hasWonTournamentMap[tournament.id.toString()] ? (
+                            !!hasWonTournamentMap[tournament.id.toString()] &&
+                            hasWonTournamentMap[tournament.id.toString()]
+                              .length > 0 ? (
                               <div className="flex flex-row items-center gap-2">
                                 <span className="w-5">
                                   <CHECK />
@@ -965,9 +967,12 @@ export function EnterTournamentDialog({
                                 Not Finalized
                               </span>
                             ) : (
-                              <span className="w-5">
-                                <X />
-                              </span>
+                              <div className="flex flex-row items-center gap-2">
+                                <span className="w-5">
+                                  <X />
+                                </span>
+                                <span>No qualified entries</span>
+                              </div>
                             )
                           ) : !!hasParticipatedInTournamentMap[
                               tournament.id.toString()
