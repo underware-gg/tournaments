@@ -68,6 +68,15 @@ const MyEntries = ({
       (entity) =>
         entity.models[nameSpace ?? ""].Registration?.tournament_id ===
         tournamentId
+    )
+    .filter((entity) =>
+      ownedTokenIds?.includes(
+        addAddressPadding(
+          bigintToHex(
+            entity.models[nameSpace ?? ""].Registration?.game_token_id ?? 0n
+          )
+        )
+      )
     );
 
   const myEntriesCount = useMemo(() => {
