@@ -15,14 +15,16 @@ import { TokenPrizes } from "@/lib/types";
 import { getTokenLogoUrl } from "@/lib/tokensMeta";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Token } from "@/generated/models.gen";
 
 interface PrizeProps {
   position: number;
   prizes: TokenPrizes;
   prices: TokenPrices;
+  tokens: Token[];
 }
 
-const Prize = ({ position, prizes, prices }: PrizeProps) => {
+const Prize = ({ position, prizes, prices, tokens }: PrizeProps) => {
   const totalPrizeNFTs = countTotalNFTs(prizes);
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
   const totalPrizesValueUSD = calculateTotalValue(prizes, prices);
@@ -48,6 +50,9 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
           })
           .sort((a, b) => b.USDValue - a.USDValue) // Sort by USDValue in descending order
           .map(({ symbol, prize, hasPrice, USDValue }) => {
+            const token = tokens.find(
+              (token) => token.address === prize.address
+            );
             return (
               <div
                 key={symbol}
@@ -58,10 +63,16 @@ const Prize = ({ position, prizes, prices }: PrizeProps) => {
                     <span>{`${formatNumber(
                       Number(prize.value) / 10 ** 18
                     )}`}</span>
-                    <img
-                      src={getTokenLogoUrl(prize.address)}
-                      className="w-6 h-6"
-                    />
+                    {getTokenLogoUrl(prize.address) ? (
+                      <img
+                        src={getTokenLogoUrl(prize.address)}
+                        className="w-6 h-6"
+                      />
+                    ) : (
+                      <span className="text-brand-muted text-xs">
+                        {token?.symbol}
+                      </span>
+                    )}
                   </div>
                 ) : (
                   `${(prize.value as bigint[]).length} NFT${

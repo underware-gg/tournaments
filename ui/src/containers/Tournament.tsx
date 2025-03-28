@@ -712,6 +712,7 @@ const Tournament = () => {
               totalPrizeNFTs={totalPrizeNFTs}
               prices={prices}
               pricesLoading={pricesLoading}
+              tokens={tokens}
             />
           </div>
           <div className="flex flex-col sm:flex-row gap-5">

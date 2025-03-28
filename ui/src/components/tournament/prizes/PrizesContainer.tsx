@@ -12,6 +12,7 @@ import {
   TournamentCardSwitch,
   TournamentCardTitle,
 } from "@/components/tournament/containers/TournamentCard";
+import { Token } from "@/generated/models.gen";
 
 interface PrizesContainerProps {
   prizesExist: boolean;
@@ -21,6 +22,7 @@ interface PrizesContainerProps {
   totalPrizeNFTs: number;
   prices: TokenPrices;
   pricesLoading: boolean;
+  tokens: Token[];
 }
 
 const PrizesContainer = ({
@@ -31,6 +33,7 @@ const PrizesContainer = ({
   totalPrizeNFTs,
   prices,
   pricesLoading,
+  tokens,
 }: PrizesContainerProps) => {
   const [showPrizes, setShowPrizes] = useState(false);
 
@@ -110,6 +113,7 @@ const PrizesContainer = ({
                         position={Number(position)}
                         prizes={prizes}
                         prices={prices}
+                        tokens={tokens}
                       />
                     ))}
                 </>
