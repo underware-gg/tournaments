@@ -1,7 +1,10 @@
+import { indexAddress } from "./utils";
+
 export function getTokenLogoUrl(l2TokenAddress: string): string | undefined {
   const token = tokens.find(
     (token) =>
-      token.l2_token_address.toLowerCase() === l2TokenAddress.toLowerCase()
+      indexAddress(token.l2_token_address).toLowerCase() ===
+      indexAddress(l2TokenAddress).toLowerCase()
   );
   return token?.logo_url;
 }
@@ -9,7 +12,8 @@ export function getTokenLogoUrl(l2TokenAddress: string): string | undefined {
 export const getTokenSymbol = (l2TokenAddress: string): string | undefined => {
   const token = tokens.find(
     (token) =>
-      token.l2_token_address.toLowerCase() === l2TokenAddress.toLowerCase()
+      indexAddress(token.l2_token_address).toLowerCase() ===
+      indexAddress(l2TokenAddress).toLowerCase()
   );
   return token?.symbol;
 };

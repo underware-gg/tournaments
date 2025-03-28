@@ -16,6 +16,12 @@ import { getTokenLogoUrl } from "@/lib/tokensMeta";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Token } from "@/generated/models.gen";
+import { QUESTION } from "@/components/Icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface PrizeProps {
   position: number;
@@ -31,12 +37,15 @@ const Prize = ({ position, prizes, prices, tokens }: PrizeProps) => {
 
   // Function to render prize details content
   const renderPrizeDetails = () => (
-    <div className="space-y-2">
-      <h4 className="font-medium font-brand pt-4 px-4">
-        {position}
-        <sup>{getOrdinalSuffix(position)}</sup> Prize
-      </h4>
-      <div className="space-y-3">
+    <div className="flex flex-col gap-2">
+      <div className="pt-4 px-4">
+        <h4 className="font-brand">
+          {position}
+          <sup>{getOrdinalSuffix(position)}</sup> Prize
+        </h4>
+      </div>
+      <div className="w-full bg-brand/50 h-0.5" />
+      <div className="flex flex-col gap-2">
         {Object.entries(prizes)
           .map(([symbol, prize]) => {
             const hasPrice = prices[symbol];
@@ -79,21 +88,35 @@ const Prize = ({ position, prizes, prices, tokens }: PrizeProps) => {
                     (prize.value as bigint[]).length === 1 ? "" : "s"
                   }`
                 )}
-                {prize.type === "erc20" && hasPrice && (
+                {prize.type === "erc20" && hasPrice ? (
                   <span className="text-neutral">~${USDValue.toFixed(2)}</span>
+                ) : (
+                  <Tooltip delayDuration={50}>
+                    <TooltipTrigger asChild>
+                      <span className="w-6 h-6 text-neutral cursor-pointer">
+                        <QUESTION />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-black text-brand 3xl:text-lg">
+                      <span className="text-neutral">
+                        No Price Data Available
+                      </span>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
               </div>
             );
           })}
-        {totalPrizesValueUSD > 0 && (
-          <div className="pt-2 border-t border-brand/50">
-            <div className="flex justify-between items-center px-4 pb-4">
-              <span className="font-brand">Total</span>
-              <span>${totalPrizesValueUSD.toFixed(2)}</span>
-            </div>
-          </div>
-        )}
       </div>
+      {totalPrizesValueUSD > 0 && (
+        <div className="flex flex-col gap-2">
+          <div className="w-full bg-brand/50 h-0.5" />
+          <div className="flex justify-between items-center px-4 pb-2">
+            <span className="font-brand">Total</span>
+            <span>${totalPrizesValueUSD.toFixed(2)}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 

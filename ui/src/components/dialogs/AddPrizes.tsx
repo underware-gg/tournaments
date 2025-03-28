@@ -368,7 +368,7 @@ export function AddPrizesDialog({
               {isLoadingBalances ? (
                 <div className="mt-2 text-sm">Checking balances...</div>
               ) : hasInsufficientBalance ? (
-                <div className="mt-2 font-medium flex flex-row items-center gap-2">
+                <div className="mt-2 font-medium flex flex-row items-center gap-2 text-destructive">
                   <span className="w-6">
                     <ALERT />
                   </span>
@@ -409,7 +409,7 @@ export function AddPrizesDialog({
                         </span>
                         <img
                           src={getTokenLogoUrl(prize.tokenAddress)}
-                          className="w-6 h-6"
+                          className="w-6 h-6 rounded-full"
                           alt="Token logo"
                         />
                         <span className="text-sm text-neutral">
@@ -494,7 +494,7 @@ export function AddPrizesDialog({
                       <p>~{formatNumber(newPrize.amount ?? 0)}</p>
                       <img
                         src={getTokenLogoUrl(newPrize.tokenAddress)}
-                        className="w-6"
+                        className="w-6 h-6 rounded-full"
                       />
                     </div>
                   ) : (
@@ -643,7 +643,7 @@ export function AddPrizesDialog({
                               </span>
                               <img
                                 src={getTokenLogoUrl(newPrize.tokenAddress)}
-                                className="w-4"
+                                className="w-4 h-4 rounded-full"
                               />
                             </div>
                             {prices?.[
@@ -690,7 +690,7 @@ export function AddPrizesDialog({
                           <span>{formatNumber(prize.amount ?? 0)}</span>
                           <img
                             src={getTokenLogoUrl(prize.tokenAddress)}
-                            className="w-6 h-6 flex-shrink-0"
+                            className="w-6 h-6 rounded-full flex-shrink-0"
                             alt="Token logo"
                           />
                         </div>

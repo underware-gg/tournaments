@@ -68,7 +68,7 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
             <div className="flex items-center gap-2">
               <img
                 src={getTokenLogoUrl(selectedToken.address)}
-                className="w-6 h-6"
+                className="w-6 h-6 rounded-full"
                 alt="Token logo"
               />
               <span className="text-sm text-neutral uppercase">
@@ -110,9 +110,9 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
                 >
                   <div className="flex flex-row gap-5 items-center">
                     {tokenLogo ? (
-                      <img src={tokenLogo} className="w-8 h-8" />
+                      <img src={tokenLogo} className="w-8 h-8 rounded-full" />
                     ) : (
-                      <div className="w-10 h-10 ">
+                      <div className="w-8 h-8 ">
                         <QUESTION />
                       </div>
                     )}
