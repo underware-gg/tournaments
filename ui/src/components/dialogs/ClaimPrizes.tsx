@@ -43,6 +43,10 @@ export function ClaimPrizesDialog({
     );
   };
 
+  const sortedClaimablePrizes = claimablePrizes.sort((a, b) => {
+    return Number(a.payout_position) - Number(b.payout_position);
+  });
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -50,7 +54,7 @@ export function ClaimPrizesDialog({
           <DialogTitle>Distribute Prizes</DialogTitle>
         </DialogHeader>
         <div className="space-y-2 px-5 py-2 max-h-[300px] overflow-y-auto">
-          {claimablePrizes.map((prize, index) => {
+          {sortedClaimablePrizes.map((prize, index) => {
             const prizeAmount =
               Number(prize.token_type.variant.erc20.amount) / 10 ** 18;
             const tokenPrice =
