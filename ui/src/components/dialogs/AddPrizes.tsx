@@ -25,11 +25,16 @@ import { TOURNAMENT_VERSION_KEY } from "@/lib/constants";
 import { CairoCustomEnum } from "starknet";
 import { useGetMetricsQuery } from "@/dojo/hooks/useSdkQueries";
 import { getTokenLogoUrl, getTokenSymbol } from "@/lib/tokensMeta";
-import { ALERT, CHECK, X } from "@/components/Icons";
+import { ALERT, CHECK, QUESTION, X } from "@/components/Icons";
 import { useAccount } from "@starknet-react/core";
 import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
 import { useEkuboPrices } from "@/hooks/useEkuboPrices";
 import { useDojo } from "@/context/dojo";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function AddPrizesDialog({
   open,
@@ -52,6 +57,7 @@ export function AddPrizesDialog({
   const [newPrize, setNewPrize] = useState<NewPrize>({
     tokenAddress: "",
     tokenType: "",
+    hasPrice: false,
   });
   const [currentPrizes, setCurrentPrizes] = useState<NewPrize[]>([]);
   const [distributionWeight, setDistributionWeight] = useState(1);
@@ -141,6 +147,7 @@ export function AddPrizesDialog({
           amount: ((newPrize.amount ?? 0) * prize.percentage) / 100,
           position: prize.position,
           value: ((newPrize.value ?? 0) * prize.percentage) / 100,
+          hasPrice: newPrize.hasPrice,
         })),
       ]);
     } else if (
@@ -238,6 +245,7 @@ export function AddPrizesDialog({
   // Calculate total value in USD for ERC20 tokens
   const totalValue = aggregatedPrizesArray.reduce((sum, prize: any) => {
     if (prize.tokenType === "ERC20" && prize.value) {
+      if (!prize.hasPrice) return sum;
       return sum + prize.value;
     }
     return sum;
@@ -279,6 +287,7 @@ export function AddPrizesDialog({
       amount:
         (prev.value ?? 0) /
         (prices?.[getTokenSymbol(prev.tokenAddress) ?? ""] ?? 1),
+      hasPrice: !!prices?.[getTokenSymbol(prev.tokenAddress) ?? ""],
     }));
   }, [prices, newPrize.value]);
 
@@ -342,7 +351,7 @@ export function AddPrizesDialog({
   if (onConfirmation) {
     return (
       <Dialog open={open} onOpenChange={handleDialogClose}>
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden">
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
           <DialogHeader>
             <DialogTitle>Confirm Prizes</DialogTitle>
           </DialogHeader>
@@ -412,9 +421,22 @@ export function AddPrizesDialog({
                           className="w-6 h-6 rounded-full"
                           alt="Token logo"
                         />
-                        <span className="text-sm text-neutral">
-                          ~${prize.value.toFixed(2)}
-                        </span>
+                        {prize.hasPrice ? (
+                          <span className="text-sm text-neutral">
+                            ~${prize.value.toFixed(2)}
+                          </span>
+                        ) : (
+                          <Tooltip delayDuration={50}>
+                            <TooltipTrigger asChild>
+                              <span className="w-6 h-6 text-neutral cursor-pointer">
+                                <QUESTION />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent className="bg-black text-brand text-neutral">
+                              <span>No price data available</span>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
                       </div>
                     ) : (
                       <div className="flex flex-col items-end">

@@ -41,4 +41,5 @@ export interface NewPrize {
   value?: number;
   tokenId?: number;
   position?: number;
+  hasPrice?: boolean;
 }

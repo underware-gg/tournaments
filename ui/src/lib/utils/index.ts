@@ -67,10 +67,10 @@ export function formatNumber(num: number): string {
     return num.toFixed(2);
   } else if (Math.abs(num) >= 0.001) {
     return num.toFixed(3);
-  } else if (Math.abs(num) < 0.001) {
-    return num.toFixed(4);
-  } else {
+  } else if (num === 0) {
     return "0";
+  } else {
+    return num.toFixed(4);
   }
 }
 
