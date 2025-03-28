@@ -157,28 +157,52 @@ export const useSystemCalls = () => {
   ) => {
     try {
       let calls = [];
+      const summedCalls = Object.values(
+        prizes.reduce((acc: { [key: string]: any }, prize) => {
+          const tokenAddress = prize.token_address;
+          if (!acc[tokenAddress]) {
+            acc[tokenAddress] = {
+              contractAddress: tokenAddress,
+              entrypoint: "approve",
+              calldata: CallData.compile([
+                tournamentAddress,
+                prize.token_type.variant.erc20?.amount!,
+                "0",
+              ]),
+              totalAmount: BigInt(prize.token_type.variant.erc20?.amount! || 0),
+            };
+          } else {
+            // Sum the amounts for the same token
+            acc[tokenAddress].totalAmount += BigInt(
+              prize.token_type.variant.erc20?.amount! || 0
+            );
+            // Update calldata with new total
+            acc[tokenAddress].calldata = CallData.compile([
+              tournamentAddress,
+              acc[tokenAddress].totalAmount.toString(),
+              "0",
+            ]);
+          }
+          return acc;
+        }, {})
+      ).map(({ contractAddress, entrypoint, calldata }) => ({
+        contractAddress,
+        entrypoint,
+        calldata,
+      }));
+      calls.push(...summedCalls);
       for (const prize of prizes) {
-        calls.push({
-          contractAddress: prize.token_address,
-          entrypoint: "approve",
-          calldata: CallData.compile([
-            tournamentAddress,
-            prize.token_type.activeVariant() === "erc20"
-              ? prize.token_type.variant.erc20?.amount!
-              : prize.token_type.variant.erc721?.token_id!,
-            "0",
-          ]),
-        });
-        calls.push({
+        const addPrizesCall = {
           contractAddress: tournamentAddress,
           entrypoint: "add_prize",
           calldata: CallData.compile([
-            tournamentId,
+            prize.tournament_id,
             prize.token_address,
             prize.token_type,
             prize.payout_position,
           ]),
-        });
+        };
+        calls.push(addPrizesCall);
       }
 
       const tx = await account?.execute(calls);
@@ -219,19 +243,43 @@ export const useSystemCalls = () => {
         ]),
       };
       calls.push(createCall);
+      const summedCalls = Object.values(
+        prizes.reduce((acc: { [key: string]: any }, prize) => {
+          const tokenAddress = prize.token_address;
+          if (!acc[tokenAddress]) {
+            acc[tokenAddress] = {
+              contractAddress: tokenAddress,
+              entrypoint: "approve",
+              calldata: CallData.compile([
+                tournamentAddress,
+                prize.token_type.variant.erc20?.token_amount!,
+                "0",
+              ]),
+              totalAmount: BigInt(
+                prize.token_type.variant.erc20?.token_amount! || 0
+              ),
+            };
+          } else {
+            // Sum the amounts for the same token
+            acc[tokenAddress].totalAmount += BigInt(
+              prize.token_type.variant.erc20?.token_amount! || 0
+            );
+            // Update calldata with new total
+            acc[tokenAddress].calldata = CallData.compile([
+              tournamentAddress,
+              acc[tokenAddress].totalAmount.toString(),
+              "0",
+            ]);
+          }
+          return acc;
+        }, {})
+      ).map(({ contractAddress, entrypoint, calldata }) => ({
+        contractAddress,
+        entrypoint,
+        calldata,
+      }));
+      calls.push(...summedCalls);
       for (const prize of prizes) {
-        const approvePrizeCall = {
-          contractAddress: prize.token_address,
-          entrypoint: "approve",
-          calldata: CallData.compile([
-            tournamentAddress,
-            prize.token_type.activeVariant() === "erc20"
-              ? prize.token_type.variant.erc20?.amount!
-              : prize.token_type.variant.erc721?.token_id!,
-            "0",
-          ]),
-        };
-        calls.push(approvePrizeCall);
         const addPrizesCall = {
           contractAddress: tournamentAddress,
           entrypoint: "add_prize",
