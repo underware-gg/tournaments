@@ -66,7 +66,7 @@ const Prize = ({ position, prizes, prices, tokens }: PrizeProps) => {
                     {getTokenLogoUrl(prize.address) ? (
                       <img
                         src={getTokenLogoUrl(prize.address)}
-                        className="w-6 h-6"
+                        className="w-6 h-6 rounded-full"
                       />
                     ) : (
                       <span className="text-brand-muted text-xs">

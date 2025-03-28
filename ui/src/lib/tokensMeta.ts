@@ -5864,7 +5864,7 @@ export const tokens = [
     symbol: "BROTHER",
     decimals: 18,
     l2_token_address:
-      "0x3b405a98c9e795d427fe82cdeeeed803f221b52471e3a757574a2b4180793ee",
+      "0x03b405a98c9e795d427fe82cdeeeed803f221b52471e3a757574a2b4180793ee",
     sort_order: 1,
     total_supply: 1000000000000000,
     hidden: true,
