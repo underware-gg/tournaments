@@ -30,16 +30,16 @@ pub mod game_component {
         settings_model: ByteArray,
     }
 
-    #[derive(Drop, starknet::Event)]
-    pub struct MetadataUpdateEvent {
-        #[key]
-        token_id: u256,
-    }
+    // #[derive(Drop, starknet::Event)]
+    // pub struct MetadataUpdateEvent {
+    //     #[key]
+    //     token_id: u256,
+    // }
 
     #[event]
     #[derive(Drop, starknet::Event)]
     pub enum Event {
-        MetadataUpdate: MetadataUpdateEvent,
+        // MetadataUpdate: MetadataUpdateEvent,
     }
 
     pub const VERSION: felt252 = '0.0.1';
@@ -117,7 +117,7 @@ pub mod game_component {
         }
 
         fn emit_metadata_update(ref self: ComponentState<TContractState>, game_id: u64) {
-            self.emit(MetadataUpdateEvent { token_id: game_id.into() });
+            // self.emit(MetadataUpdateEvent { token_id: game_id.into() });
         }
 
         fn score_model(self: @ComponentState<TContractState>) -> ByteArray {
