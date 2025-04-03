@@ -4,16 +4,15 @@ import { QueryType, ParsedEntity } from "@dojoengine/sdk";
 import { useDojo } from "@/context/dojo";
 import { SchemaType } from "@/generated/models.gen";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
-import { NAMESPACE } from "@/lib/constants";
 
 export type TournamentGetQuery = QueryType<SchemaType>;
 
-export type EntityResult = {
+export type EntityResult<N extends string = string> = {
   entityId: BigNumberish;
-} & Partial<SchemaType[typeof NAMESPACE]>;
+} & Partial<SchemaType[N]>;
 
-export type UseSdkGetEntitiesResult = {
-  entities: EntityResult[] | null;
+export type UseSdkGetEntitiesResult<N extends string = string> = {
+  entities: EntityResult<N>[] | null;
   isLoading: boolean;
   refetch: () => void;
 };
@@ -24,19 +23,21 @@ export type UseSdkGetEntityResult = {
 
 export type UseSdkGetEntitiesProps = {
   query: any;
-  nameSpace: string;
+  namespace: string;
   enabled?: boolean;
 };
 
 export const useSdkGetEntities = ({
   query,
-  nameSpace,
+  namespace,
   enabled = true,
 }: UseSdkGetEntitiesProps): UseSdkGetEntitiesResult => {
   const { sdk } = useDojo();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [entities, setEntities] = useState<EntityResult[] | null>(null);
+  const [entities, setEntities] = useState<
+    EntityResult<typeof namespace>[] | null
+  >(null);
   const state = useDojoStore((state) => state);
 
   const memoizedQuery = useMemo(() => query, [JSON.stringify(query)]);
@@ -56,8 +57,8 @@ export const useSdkGetEntities = ({
           (e: any) =>
             ({
               entityId: e.entityId,
-              ...e.models[nameSpace],
-            } as any)
+              ...e.models[namespace],
+            } as EntityResult<typeof namespace>)
         )
       );
     } catch (error) {
@@ -71,7 +72,7 @@ export const useSdkGetEntities = ({
     if (enabled) {
       fetchEntities();
     }
-  }, [fetchEntities, enabled, nameSpace]);
+  }, [fetchEntities, enabled, namespace]);
 
   return {
     entities,

@@ -42,7 +42,7 @@ const EntrantsTable = ({
   const [showParticipants, setShowParticipants] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
-  const { nameSpace } = useDojo();
+  const { namespace } = useDojo();
 
   const offset = (currentPage - 1) * 10;
 
@@ -57,7 +57,7 @@ const EntrantsTable = ({
     refetch: refetchEntrants,
     loading,
   } = useGetTournamentEntrants({
-    namespace: nameSpace,
+    namespace: namespace,
     tournamentId: addAddressPadding(bigintToHex(tournamentId)),
     gameNamespace: gameNamespace,
     gameAddress: indexAddress(gameAddress?.toString() ?? "0x0"),

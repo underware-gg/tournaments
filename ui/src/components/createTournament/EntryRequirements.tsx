@@ -55,7 +55,7 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 
 const EntryRequirements = ({ form }: StepProps) => {
-  const { nameSpace } = useDojo();
+  const { namespace } = useDojo();
   const [newAddress, setNewAddress] = React.useState("");
   const [tournamentSearchQuery, setTournamentSearchQuery] = useState("");
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
@@ -73,7 +73,7 @@ const EntryRequirements = ({ form }: StepProps) => {
   ];
 
   const { data: tournaments } = useGetTournaments({
-    namespace: nameSpace,
+    namespace: namespace,
     gameFilters: gameFilters,
     limit: 10,
     offset: (currentPage - 1) * 10,
@@ -82,7 +82,7 @@ const EntryRequirements = ({ form }: StepProps) => {
   });
 
   const { data: tournamentsCount } = useGetTournamentsCount({
-    namespace: nameSpace,
+    namespace: namespace,
   });
 
   const tournamentsData = tournaments.map((tournament) => {

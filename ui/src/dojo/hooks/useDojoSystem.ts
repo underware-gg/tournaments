@@ -6,18 +6,18 @@ import { Manifest } from "@dojoengine/core";
 export type DojoManifest = Manifest & any;
 
 export const useDojoSystem = (systemName: string) => {
-  const { manifest, nameSpace } = useDojo();
-  return useSystem(nameSpace, systemName, manifest);
+  const { manifest, namespace } = useDojo();
+  return useSystem(namespace, systemName, manifest);
 };
 
 const useSystem = (
-  nameSpace: string,
+  namespace: string,
   systemName: string,
   manifest: DojoManifest
 ) => {
   const { contractAddress, abi } = useMemo(() => {
     const contract = manifest
-      ? getContractByName(manifest, nameSpace, systemName)
+      ? getContractByName(manifest, namespace, systemName)
       : null;
     return {
       contractAddress: contract?.address ?? null,

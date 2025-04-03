@@ -15,7 +15,7 @@ interface TournamentGamesProps {
 
 const TournamentGames = ({ tournament }: TournamentGamesProps) => {
   const { address } = useAccount();
-  const { nameSpace } = useDojo();
+  const { namespace } = useDojo();
   const [currentPage, _setCurrentPage] = useState(1);
   const [scores, setScores] = useState<Record<string, number>>({});
   const { endGame } = useSystemCalls();
@@ -25,7 +25,7 @@ const TournamentGames = ({ tournament }: TournamentGamesProps) => {
     useGameEndpoints(tournament.game_config.address);
 
   const { data: leaderboard } = useGetTournamentLeaderboard({
-    namespace: nameSpace,
+    namespace: namespace,
     tournamentId: tournamentId,
     gameNamespace: gameNamespace ?? "",
     gameScoreModel: gameScoreModel ?? "",

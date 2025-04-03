@@ -1,7 +1,5 @@
 import { ETH, LORDS } from "@/components/Icons";
 
-export const NAMESPACE = "budokan_v_1_0_4";
-
 export const TOURNAMENT_VERSION_KEY: string = "0x302e302e31";
 
 export const SECONDS_IN_DAY = 86400;

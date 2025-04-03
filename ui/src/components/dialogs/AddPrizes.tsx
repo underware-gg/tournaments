@@ -50,7 +50,7 @@ export function AddPrizesDialog({
   leaderboardSize: number;
 }) {
   const { address } = useAccount();
-  const { nameSpace } = useDojo();
+  const { namespace } = useDojo();
   const { connect } = useConnectToSelectedChain();
   const { approveAndAddPrizes, getBalanceGeneral } = useSystemCalls();
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
@@ -74,7 +74,7 @@ export function AddPrizesDialog({
 
   const { entity: metricsEntity } = useGetMetricsQuery(
     addAddressPadding(TOURNAMENT_VERSION_KEY),
-    nameSpace
+    namespace
   );
 
   const totalDistributionPercentage = useMemo(() => {

@@ -46,7 +46,7 @@ const TournamentConfirmation = ({
 }: TournamentConfirmationProps) => {
   const { address } = useAccount();
   const { connect } = useConnectToSelectedChain();
-  const { nameSpace, selectedChainConfig } = useDojo();
+  const { namespace, selectedChainConfig } = useDojo();
   const { gameData, getGameImage } = useUIStore();
   const { gameNamespace, gameSettingsModel } = useGameEndpoints(formData.game);
   useGetGameSettingsQuery(gameNamespace ?? "", gameSettingsModel ?? "");
@@ -57,8 +57,8 @@ const TournamentConfirmation = ({
     state.getEntitiesByModel(gameNamespace ?? "", "Settings")
   );
   const tokens = useDojoStore((state) =>
-    state.getEntitiesByModel(nameSpace, "Token")
-  ).map((token) => token.models[nameSpace].Token as Token);
+    state.getEntitiesByModel(namespace, "Token")
+  ).map((token) => token.models[namespace].Token as Token);
 
   const token = tokens.find(
     (token) => token.address === formData?.gatingOptions?.token

@@ -61,7 +61,7 @@ const SORT_OPTIONS = {
 } as const;
 
 const Overview = () => {
-  const { nameSpace } = useDojo();
+  const { namespace } = useDojo();
   const { address } = useAccount();
   const { chain } = useNetwork();
   const {
@@ -101,7 +101,7 @@ const Overview = () => {
   }, [chain]);
 
   const subscribedTournaments = useDojoStore((state) =>
-    state.getEntitiesByModel(nameSpace, "Tournament")
+    state.getEntitiesByModel(namespace, "Tournament")
   );
   const subscribedTournamentsKey = useMemo(
     () => JSON.stringify(subscribedTournaments),
@@ -128,19 +128,19 @@ const Overview = () => {
     data: upcomingTournamentsCount,
     refetch: refetchUpcomingTournamentsCount,
   } = useGetUpcomingTournamentsCount({
-    namespace: nameSpace,
+    namespace: namespace,
     currentTime: currentTime,
     fromTournamentId: fromTournamentId,
   });
 
   const { data: liveTournamentsCount } = useGetLiveTournamentsCount({
-    namespace: nameSpace,
+    namespace: namespace,
     currentTime: currentTime,
     fromTournamentId: fromTournamentId,
   });
 
   const { data: endedTournamentsCount } = useGetEndedTournamentsCount({
-    namespace: nameSpace,
+    namespace: namespace,
     currentTime: currentTime,
     fromTournamentId: fromTournamentId,
   });
@@ -155,7 +155,7 @@ const Overview = () => {
   }, [gameData]);
 
   const { data: myTournamentsCount } = useGetMyTournamentsCount({
-    namespace: nameSpace,
+    namespace: namespace,
     address: queryAddress ?? "",
     gameAddresses: gameAddresses ?? [],
     fromTournamentId: fromTournamentId,
@@ -224,7 +224,7 @@ const Overview = () => {
     loading: tournamentsLoading,
     // refetch: refetchTournaments,
   } = useGetTournaments({
-    namespace: nameSpace,
+    namespace: namespace,
     currentTime: hexTimestamp,
     gameFilters: gameFilters,
     offset: currentPage * 12,
@@ -236,7 +236,7 @@ const Overview = () => {
     active: ["upcoming", "live", "ended"].includes(selectedTab) && shouldFetch,
   });
 
-  useSubscribeTournamentsQuery();
+  useSubscribeTournamentsQuery(namespace);
 
   useEffect(() => {
     if (
@@ -255,7 +255,7 @@ const Overview = () => {
 
   const { data: myTournaments, loading: myTournamentsLoading } =
     useGetMyTournaments({
-      namespace: nameSpace,
+      namespace: namespace,
       address: queryAddress,
       gameAddresses: gameAddresses ?? [],
       gameFilters: gameFilters,

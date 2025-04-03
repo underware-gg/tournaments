@@ -22,7 +22,7 @@ interface DojoContextType {
   sdk: SDK<SchemaType>;
   manifest: DojoManifest;
   selectedChainConfig: DojoChainConfig;
-  nameSpace: string;
+  namespace: string;
   client: ReturnType<typeof setupWorld>;
 }
 
@@ -30,7 +30,7 @@ export const DojoContext = createContext<DojoContextType | null>(null);
 
 export interface DojoAppConfig {
   selectedChainId: ChainId;
-  nameSpace: string;
+  namespace: string;
   starknetDomain: StarknetDomain;
   manifest: DojoManifest;
 }
@@ -109,8 +109,8 @@ export const DojoContextProvider = ({ children }: { children: ReactNode }) => {
         sdk,
         manifest,
         selectedChainConfig,
-        nameSpace: appConfig.nameSpace,
-        client: setupWorld(dojoProvider),
+        namespace: appConfig.namespace,
+        client: setupWorld(dojoProvider, appConfig.namespace),
       }}
     >
       {children}

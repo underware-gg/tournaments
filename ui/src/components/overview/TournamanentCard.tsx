@@ -39,15 +39,15 @@ export const TournamentCard = ({
   prizes,
   entryCount,
 }: TournamentCardProps) => {
-  const { nameSpace } = useDojo();
+  const { namespace } = useDojo();
   const navigate = useNavigate();
   const state = useDojoStore((state) => state);
   const { gameData, getGameImage } = useUIStore();
 
   // token entities
-  const tokenModels = state.getEntitiesByModel(nameSpace, "Token");
+  const tokenModels = state.getEntitiesByModel(namespace, "Token");
   const tokens = tokenModels.map(
-    (model) => model.models[nameSpace].Token
+    (model) => model.models[namespace].Token
   ) as Token[];
 
   const entryFeeToken = tournament?.entry_fee.Some?.token_address;

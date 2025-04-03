@@ -109,11 +109,11 @@ const CreateTournament = () => {
   const navigate = useNavigate();
   const { address } = useAccount();
   const { createTournamentAndApproveAndAddPrizes } = useSystemCalls();
-  const { nameSpace } = useDojo();
-  useSubscribeTournamentsQuery();
+  const { namespace } = useDojo();
+  useSubscribeTournamentsQuery(namespace);
   const { entity: metricsEntity } = useGetMetricsQuery(
     addAddressPadding(TOURNAMENT_VERSION_KEY),
-    nameSpace
+    namespace
   );
 
   const form = useForm<z.infer<typeof formSchema>>({

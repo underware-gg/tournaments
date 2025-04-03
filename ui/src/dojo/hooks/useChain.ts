@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { Connector, useAccount, useConnect } from "@starknet-react/core";
+import {
+  Connector,
+  useAccount,
+  useConnect,
+  useSwitchChain,
+} from "@starknet-react/core";
 import { useDojo } from "@/context/dojo";
+import { ChainId } from "@/dojo/setup/networks";
+import { stringToFelt } from "@/lib/utils";
 
 export const useConnectToSelectedChain = (onConnect?: () => void) => {
   const { connect, connectors } = useConnect();
@@ -40,5 +47,37 @@ export const useConnectToSelectedChain = (onConnect?: () => void) => {
     connect: _connect,
     isConnected,
     isConnecting,
+  };
+};
+
+export const useSwitchNetwork = () => {
+  const { switchChainAsync } = useSwitchChain({
+    params: {
+      chainId: ChainId.SN_MAIN,
+    },
+  });
+
+  const switchToMainnet = async () => {
+    await switchChainAsync({
+      chainId: stringToFelt(ChainId.SN_MAIN).toString(),
+    });
+  };
+
+  const switchToSepolia = async () => {
+    await switchChainAsync({
+      chainId: stringToFelt(ChainId.SN_SEPOLIA).toString(),
+    });
+  };
+
+  const switchToSlot = async () => {
+    await switchChainAsync({
+      chainId: stringToFelt(ChainId.WP_BUDOKAN).toString(),
+    });
+  };
+
+  return {
+    switchToMainnet,
+    switchToSepolia,
+    switchToSlot,
   };
 };

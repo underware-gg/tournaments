@@ -8,37 +8,40 @@ import {
   MemberClause,
   AndComposeClause,
 } from "@dojoengine/sdk";
-import { ModelsMapping } from "@/generated/models.gen";
+import { getModelsMapping } from "@/generated/models.gen";
 import { addAddressPadding, BigNumberish } from "starknet";
 
-export const useGetTokensQuery = (nameSpace: string) => {
+export const useGetTokensQuery = (namespace: string) => {
   const query = useMemo(
     () =>
       new ToriiQueryBuilder()
-        .withClause(KeysClause([ModelsMapping.Token], []).build())
-        .withEntityModels([ModelsMapping.Token])
+        .withClause(KeysClause([getModelsMapping(namespace).Token], []).build())
+        .withEntityModels([getModelsMapping(namespace).Token])
         .includeHashedKeys(),
     []
   );
 
   const { entities, isLoading, refetch } = useSdkGetEntities({
     query,
-    nameSpace,
+    namespace: namespace,
   });
   return { entities, isLoading, refetch };
 };
 
-export const useGetMetricsQuery = (key: string, nameSpace: string) => {
+export const useGetMetricsQuery = (key: string, namespace: string) => {
   const query = useMemo(
     () =>
       new ToriiQueryBuilder()
         .withClause(
           KeysClause(
-            [ModelsMapping.PlatformMetrics, ModelsMapping.PrizeMetrics],
+            [
+              getModelsMapping(namespace).PlatformMetrics,
+              getModelsMapping(namespace).PrizeMetrics,
+            ],
             []
           )
             .where(
-              ModelsMapping.PlatformMetrics,
+              getModelsMapping(namespace).PlatformMetrics,
               "key",
               "Eq",
               addAddressPadding(key)
@@ -46,15 +49,15 @@ export const useGetMetricsQuery = (key: string, nameSpace: string) => {
             .build()
         )
         .withEntityModels([
-          ModelsMapping.PlatformMetrics,
-          ModelsMapping.PrizeMetrics,
+          getModelsMapping(namespace).PlatformMetrics,
+          getModelsMapping(namespace).PrizeMetrics,
         ])
         .includeHashedKeys(),
     [key]
   );
   const { entities, isLoading, refetch } = useSdkGetEntities({
     query,
-    nameSpace,
+    namespace,
   });
   const entity = useMemo(
     () => (Array.isArray(entities) ? entities[0] : entities),
@@ -65,7 +68,7 @@ export const useGetMetricsQuery = (key: string, nameSpace: string) => {
 
 export const useGetTournamentQuery = (
   tournamentId: BigNumberish,
-  nameSpace: string
+  namespace: string
 ) => {
   const query = useMemo(
     () =>
@@ -74,40 +77,40 @@ export const useGetTournamentQuery = (
           AndComposeClause([
             KeysClause(
               [
-                ModelsMapping.Tournament,
-                ModelsMapping.EntryCount,
-                ModelsMapping.Prize,
-                ModelsMapping.PrizeClaim,
-                ModelsMapping.Leaderboard,
+                getModelsMapping(namespace).Tournament,
+                getModelsMapping(namespace).EntryCount,
+                getModelsMapping(namespace).Prize,
+                getModelsMapping(namespace).PrizeClaim,
+                getModelsMapping(namespace).Leaderboard,
               ],
               []
             ),
             MemberClause(
-              ModelsMapping.Tournament,
+              getModelsMapping(namespace).Tournament,
               "id",
               "Eq",
               addAddressPadding(tournamentId)
             ),
             MemberClause(
-              ModelsMapping.EntryCount,
+              getModelsMapping(namespace).EntryCount,
               "tournament_id",
               "Eq",
               addAddressPadding(tournamentId)
             ),
             MemberClause(
-              ModelsMapping.Prize,
+              getModelsMapping(namespace).Prize,
               "tournament_id",
               "Eq",
               addAddressPadding(tournamentId)
             ),
             MemberClause(
-              ModelsMapping.PrizeClaim,
+              getModelsMapping(namespace).PrizeClaim,
               "tournament_id",
               "Eq",
               addAddressPadding(tournamentId)
             ),
             MemberClause(
-              ModelsMapping.Leaderboard,
+              getModelsMapping(namespace).Leaderboard,
               "tournament_id",
               "Eq",
               addAddressPadding(tournamentId)
@@ -115,11 +118,11 @@ export const useGetTournamentQuery = (
           ]).build()
         )
         .withEntityModels([
-          ModelsMapping.Tournament,
-          ModelsMapping.EntryCount,
-          ModelsMapping.Prize,
-          ModelsMapping.PrizeClaim,
-          ModelsMapping.Leaderboard,
+          getModelsMapping(namespace).Tournament,
+          getModelsMapping(namespace).EntryCount,
+          getModelsMapping(namespace).Prize,
+          getModelsMapping(namespace).PrizeClaim,
+          getModelsMapping(namespace).Leaderboard,
         ])
         .includeHashedKeys()
         .withLimit(10000),
@@ -128,7 +131,7 @@ export const useGetTournamentQuery = (
 
   const { entities, isLoading, refetch } = useSdkGetEntities({
     query,
-    nameSpace,
+    namespace,
   });
   return { entities, isLoading, refetch };
 };
@@ -138,13 +141,13 @@ export const useGetRegistrationsForTournamentInTokenListQuery = ({
   tokenIds,
   limit,
   offset,
-  nameSpace,
+  namespace,
 }: {
   tournamentId: BigNumberish;
   tokenIds: BigNumberish[];
   limit: number;
   offset: number;
-  nameSpace: string;
+  namespace: string;
 }) => {
   const query = useMemo(
     () =>
@@ -154,19 +157,19 @@ export const useGetRegistrationsForTournamentInTokenListQuery = ({
             .compose()
             .and([
               new ClauseBuilder().where(
-                ModelsMapping.Registration,
+                getModelsMapping(namespace).Registration,
                 "tournament_id",
                 "Eq",
                 addAddressPadding(tournamentId)
               ),
               new ClauseBuilder().where(
-                ModelsMapping.Registration,
+                getModelsMapping(namespace).Registration,
                 "game_token_id",
                 "In",
                 tokenIds
               ),
               new ClauseBuilder().where(
-                ModelsMapping.Registration,
+                getModelsMapping(namespace).Registration,
                 "entry_number",
                 "Gt",
                 0
@@ -176,15 +179,19 @@ export const useGetRegistrationsForTournamentInTokenListQuery = ({
         )
         .withLimit(limit)
         .withOffset(offset)
-        .addOrderBy(ModelsMapping.Registration, "entry_number", "Asc")
-        .withEntityModels([ModelsMapping.Registration])
+        .addOrderBy(
+          getModelsMapping(namespace).Registration,
+          "entry_number",
+          "Asc"
+        )
+        .withEntityModels([getModelsMapping(namespace).Registration])
         .includeHashedKeys(),
     [tournamentId, tokenIds, limit, offset]
   );
 
   const { entities, isLoading, refetch } = useSdkGetEntities({
     query,
-    nameSpace,
+    namespace,
   });
   return { entities, isLoading, refetch };
 };
@@ -210,39 +217,39 @@ export const useGetGameMetadataInListQuery = ({
   );
   const { entities, isLoading, refetch } = useSdkGetEntities({
     query,
-    nameSpace: gameNamespace,
+    namespace: gameNamespace,
   });
   return { entities, isLoading, refetch };
 };
 
 export const useGetGameCounterQuery = ({
   key,
-  nameSpace,
+  namespace,
 }: {
   key: string;
-  nameSpace: string;
+  namespace: string;
 }) => {
   const query = useMemo(
     () =>
       new ToriiQueryBuilder()
         .withClause(
-          KeysClause([`${nameSpace}-GameCounter`], [])
+          KeysClause([`${namespace}-GameCounter`], [])
             .where(
-              `${nameSpace}-GameCounter`,
+              `${namespace}-GameCounter`,
               "key",
               "Eq",
               addAddressPadding(key)
             )
             .build()
         )
-        .withEntityModels([`${nameSpace}-GameCounter`])
+        .withEntityModels([`${namespace}-GameCounter`])
         .includeHashedKeys(),
-    [nameSpace, key]
+    [namespace, key]
   );
 
   const { entities, isLoading, refetch } = useSdkGetEntities({
     query,
-    nameSpace,
+    namespace,
   });
   const entity = useMemo(
     () => (Array.isArray(entities) ? entities[0] : entities),
@@ -274,7 +281,7 @@ export const useGetGameSettingsQuery = (
 
   const { entities, isLoading, refetch } = useSdkGetEntities({
     query,
-    nameSpace: namespace,
+    namespace: namespace,
   });
   return { entities, isLoading, refetch };
 };
@@ -296,12 +303,15 @@ export const useGetScoresQuery = (namespace: string, model: string) => {
   const { entities, isLoading, refetch } = useSdkGetEntities({
     query,
     enabled: isValidInput,
-    nameSpace: namespace,
+    namespace: namespace,
   });
   return { entities, isLoading, refetch };
 };
 
-export const useSubscribeTournamentQuery = (tournamentId: BigNumberish) => {
+export const useSubscribeTournamentQuery = (
+  tournamentId: BigNumberish,
+  namespace: string
+) => {
   const query = useMemo(
     () =>
       new ToriiQueryBuilder()
@@ -309,32 +319,32 @@ export const useSubscribeTournamentQuery = (tournamentId: BigNumberish) => {
           AndComposeClause([
             KeysClause(
               [
-                ModelsMapping.Tournament,
-                ModelsMapping.EntryCount,
-                ModelsMapping.Registration,
+                getModelsMapping(namespace).Tournament,
+                getModelsMapping(namespace).EntryCount,
+                getModelsMapping(namespace).Registration,
               ],
               []
             ),
             MemberClause(
-              ModelsMapping.Tournament,
+              getModelsMapping(namespace).Tournament,
               "id",
               "Eq",
               addAddressPadding(tournamentId)
             ),
             MemberClause(
-              ModelsMapping.EntryCount,
+              getModelsMapping(namespace).EntryCount,
               "tournament_id",
               "Eq",
               addAddressPadding(tournamentId)
             ),
             MemberClause(
-              ModelsMapping.Registration,
+              getModelsMapping(namespace).Registration,
               "tournament_id",
               "Eq",
               addAddressPadding(tournamentId)
             ),
             MemberClause(
-              ModelsMapping.Prize,
+              getModelsMapping(namespace).Prize,
               "tournament_id",
               "Eq",
               addAddressPadding(tournamentId)
@@ -342,10 +352,10 @@ export const useSubscribeTournamentQuery = (tournamentId: BigNumberish) => {
           ]).build()
         )
         .withEntityModels([
-          ModelsMapping.Tournament,
-          ModelsMapping.EntryCount,
-          ModelsMapping.Registration,
-          ModelsMapping.Prize,
+          getModelsMapping(namespace).Tournament,
+          getModelsMapping(namespace).EntryCount,
+          getModelsMapping(namespace).Registration,
+          getModelsMapping(namespace).Prize,
         ])
         .includeHashedKeys(),
     [tournamentId]
@@ -357,12 +367,12 @@ export const useSubscribeTournamentQuery = (tournamentId: BigNumberish) => {
   return { entities, isSubscribed };
 };
 
-export const useSubscribePrizesQuery = () => {
+export const useSubscribePrizesQuery = (namespace: string) => {
   const query = useMemo(
     () =>
       new ToriiQueryBuilder()
-        .withClause(KeysClause([ModelsMapping.Prize], []).build())
-        .withEntityModels([ModelsMapping.Prize])
+        .withClause(KeysClause([getModelsMapping(namespace).Prize], []).build())
+        .withEntityModels([getModelsMapping(namespace).Prize])
         .includeHashedKeys(),
     []
   );
@@ -373,12 +383,17 @@ export const useSubscribePrizesQuery = () => {
   return { entities, isSubscribed };
 };
 
-export const useSubscribeTournamentsQuery = () => {
+export const useSubscribeTournamentsQuery = (namespace: string) => {
   const query = useMemo(
     () =>
       new ToriiQueryBuilder()
-        .withClause(KeysClause([ModelsMapping.Tournament], [undefined]).build())
-        .withEntityModels([ModelsMapping.Tournament])
+        .withClause(
+          KeysClause(
+            [getModelsMapping(namespace).Tournament],
+            [undefined]
+          ).build()
+        )
+        .withEntityModels([getModelsMapping(namespace).Tournament])
         .includeHashedKeys(),
     []
   );
@@ -389,12 +404,14 @@ export const useSubscribeTournamentsQuery = () => {
   return { entities, isSubscribed };
 };
 
-export const useSubscribeTokensQuery = () => {
+export const useSubscribeTokensQuery = (namespace: string) => {
   const query = useMemo(
     () =>
       new ToriiQueryBuilder()
-        .withClause(KeysClause([ModelsMapping.Token], [undefined]).build())
-        .withEntityModels([ModelsMapping.Token])
+        .withClause(
+          KeysClause([getModelsMapping(namespace).Token], [undefined]).build()
+        )
+        .withEntityModels([getModelsMapping(namespace).Token])
         .includeHashedKeys(),
     []
   );

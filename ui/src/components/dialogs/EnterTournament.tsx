@@ -74,7 +74,7 @@ export function EnterTournamentDialog({
   tournamentsData,
   duration,
 }: EnterTournamentDialogProps) {
-  const { nameSpace } = useDojo();
+  const { namespace } = useDojo();
   const { address } = useAccount();
   const { connect } = useConnectToSelectedChain();
   const { approveAndEnterTournament, getBalanceGeneral } = useSystemCalls();
@@ -201,13 +201,13 @@ export function EnterTournamentDialog({
   }, [ownedGames]);
 
   const { data: registrations } = useGetTournamentRegistrants({
-    namespace: nameSpace ?? "",
+    namespace: namespace ?? "",
     gameIds: ownedGameIds ?? [],
     active: requirementVariant === "tournament",
   });
 
   const { data: leaderboards } = useGetTournamentLeaderboards({
-    namespace: nameSpace ?? "",
+    namespace: namespace ?? "",
     tournamentIds: tournamentsData.map((tournament) =>
       addAddressPadding(bigintToHex(tournament.id))
     ),
@@ -394,7 +394,7 @@ export function EnterTournamentDialog({
   ]);
 
   const { data: qualificationEntries } = useGetTournamentQualificationEntries({
-    namespace: nameSpace ?? "",
+    namespace: namespace ?? "",
     tournamentId: addAddressPadding(bigintToHex(tournamentModel?.id ?? 0n)),
     qualifications: qualificationMethods,
     active: qualificationMethods.length > 0,

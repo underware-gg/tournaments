@@ -1,7 +1,5 @@
 import { ChainId } from "@/dojo/setup/networks";
 import { useDojo } from "@/context/dojo";
-// import { useDojoSystem } from "@/dojo/hooks/useDojoSystem";
-// import { addAddressPadding } from "starknet";
 
 export interface Game {
   contract_address: string;
@@ -27,7 +25,6 @@ export const getGames = (): Game[] => {
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
   const isLocalKatana = selectedChainConfig.chainId === ChainId.KATANA_LOCAL;
   const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
-  // const gameMockAddress = useDojoSystem("game_mock").contractAddress;
   if (isLocalKatana) {
     return [
       {
@@ -42,10 +39,10 @@ export const getGames = (): Game[] => {
     return [
       {
         contract_address:
-          "0x0711a2ed50ba5442259950cf741b81f66f17b9b751e44d0368a87926a3233e3e",
+          "0x04359aee29873cd9603207d29b4140468bac3e042aa10daab2e1a8b2dd60ef7b",
         name: "0x4461726b2053687566666c65",
-        image: "https://darkshuffle.io/favicon.svg",
-        url: "https://darkshuffle.io",
+        image: "https://darkshuffle.dev/favicon.svg",
+        url: "https://darkshuffle.dev",
       },
     ];
   } else if (isMainnet) {
@@ -70,6 +67,12 @@ export const getGames = (): Game[] => {
         name: "0x4a6f6b657273204f66204e656f6e",
         image: "https://jokersofneon.com/icon.png",
         url: "https://jokersofneon.com",
+      },
+      {
+        contract_address: "0x1234",
+        name: "0x7a4b756265",
+        image: "https://zkube.vercel.app/assets/pwa-512x512.png",
+        url: "https://zkube.vercel.app",
       },
     ];
   } else {

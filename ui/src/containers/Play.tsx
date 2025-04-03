@@ -13,11 +13,11 @@ import { Card } from "@/components/ui/card";
 
 const Play = () => {
   const navigate = useNavigate();
-  const { nameSpace } = useDojo();
+  const { namespace } = useDojo();
   const [selectedTournament, setSelectedTournament] = useState<Tournament>();
 
   const { data: tournaments } = useGetTournaments({
-    namespace: nameSpace,
+    namespace: namespace,
     gameFilters: [],
     limit: 100,
     offset: 0,

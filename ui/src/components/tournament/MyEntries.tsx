@@ -42,7 +42,7 @@ const MyEntries = ({
 }: MyEntriesProps) => {
   const { address } = useAccount();
   const state = useDojoStore((state) => state);
-  const { nameSpace } = useDojo();
+  const { namespace } = useDojo();
   const [showMyEntries, setShowMyEntries] = useState(false);
 
   const ownedTokenIds = useMemo(() => {
@@ -59,21 +59,21 @@ const MyEntries = ({
     tokenIds: ownedTokenIds ?? [],
     limit: 1000,
     offset: 0,
-    nameSpace,
+    namespace,
   });
 
   const myRegistrations = state
-    .getEntitiesByModel(nameSpace ?? "", "Registration")
+    .getEntitiesByModel(namespace ?? "", "Registration")
     .filter(
       (entity) =>
-        entity.models[nameSpace ?? ""].Registration?.tournament_id ===
+        entity.models[namespace ?? ""].Registration?.tournament_id ===
         tournamentId
     )
     .filter((entity) =>
       ownedTokenIds?.includes(
         addAddressPadding(
           bigintToHex(
-            entity.models[nameSpace ?? ""].Registration?.game_token_id ?? 0n
+            entity.models[namespace ?? ""].Registration?.game_token_id ?? 0n
           )
         )
       )
@@ -88,7 +88,7 @@ const MyEntries = ({
       myRegistrations?.map((registration) =>
         addAddressPadding(
           bigintToHex(
-            registration?.models[nameSpace ?? ""].Registration?.game_token_id ??
+            registration?.models[namespace ?? ""].Registration?.game_token_id ??
               0n
           )
         )
@@ -112,7 +112,7 @@ const MyEntries = ({
 
     return myRegistrations.map((registration) => {
       const gameTokenId =
-        registration?.models[nameSpace ?? ""].Registration?.game_token_id ?? 0n;
+        registration?.models[namespace ?? ""].Registration?.game_token_id ?? 0n;
 
       // Find matching metadata for this token
       const gameMetadata = metadata.find(
@@ -136,7 +136,7 @@ const MyEntries = ({
       )?.metadata;
 
       return {
-        ...registration.models[nameSpace ?? ""].Registration,
+        ...registration.models[namespace ?? ""].Registration,
         gameMetadata: gameMetadata?.TokenMetadata as TokenMetadata | null,
         tokenMetadata: tokenMetadata as string | null,
         score:

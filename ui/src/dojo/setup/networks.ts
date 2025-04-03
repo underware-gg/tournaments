@@ -120,11 +120,11 @@ const slotKatanaConfig: DojoChainConfig = {
 };
 
 const snSepoliaConfig: DojoChainConfig = {
-  chain: undefined, // derive from this
+  chain: { ...sepolia },
   chainId: ChainId.SN_SEPOLIA,
   name: "Starknet Sepolia",
   rpcUrl: "https://api.cartridge.gg/x/starknet/sepolia",
-  toriiUrl: "https://api.cartridge.gg/x/darkshuffle-sepolia/torii",
+  toriiUrl: "https://api.cartridge.gg/x/budokan-sepolia/torii",
   toriiTokensUrl: "",
   relayUrl: undefined,
   blastRpc: undefined,

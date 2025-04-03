@@ -49,7 +49,7 @@ const ScoreTable = ({
   const [showScores, setShowScores] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
-  const { nameSpace } = useDojo();
+  const { namespace } = useDojo();
   const [prevEntryCount, setPrevEntryCount] = useState<number | null>(null);
   const [prevSubmissionsKey, setPrevSubmissionsKey] = useState<string | null>(
     null
@@ -61,7 +61,7 @@ const ScoreTable = ({
     refetch: refetchLeaderboard,
     loading,
   } = useGetTournamentLeaderboard({
-    namespace: nameSpace,
+    namespace: namespace,
     tournamentId: addAddressPadding(bigintToHex(tournamentId)),
     gameNamespace: gameNamespace,
     gameAddress: indexAddress(gameAddress?.toString() ?? "0x0"),

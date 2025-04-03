@@ -32,7 +32,7 @@ import {
   Prize,
   Token,
   EntryCount,
-  ModelsMapping,
+  getModelsMapping,
   PrizeClaim,
   Leaderboard,
 } from "@/generated/models.gen";
@@ -79,7 +79,7 @@ const Tournament = () => {
   const { address } = useAccount();
   const [isExpanded, setIsExpanded] = useState(false);
   const navigate = useNavigate();
-  const { nameSpace } = useDojo();
+  const { namespace } = useDojo();
   const state = useDojoStore((state) => state);
   const { gameData, getGameImage } = useUIStore();
   const [enterDialogOpen, setEnterDialogOpen] = useState(false);
@@ -90,7 +90,7 @@ const Tournament = () => {
   const [tournamentExists, setTournamentExists] = useState(false);
   const [prevEntryCount, setPrevEntryCount] = useState<number | null>(null);
   const { data: tournamentsCount } = useGetTournamentsCount({
-    namespace: nameSpace,
+    namespace: namespace,
   });
 
   useEffect(() => {
@@ -120,25 +120,25 @@ const Tournament = () => {
     };
   }, [id, tournamentsCount]);
 
-  useGetTournamentQuery(addAddressPadding(bigintToHex(id!)), nameSpace);
-  useSubscribeTournamentQuery(addAddressPadding(bigintToHex(id!)));
+  useGetTournamentQuery(addAddressPadding(bigintToHex(id!)), namespace);
+  useSubscribeTournamentQuery(addAddressPadding(bigintToHex(id!)), namespace);
 
   const tournamentEntityId = useMemo(
     () => getEntityIdFromKeys([BigInt(id!)]),
     [id]
   );
 
-  const tournamentModel = state.getEntity(tournamentEntityId)?.models[nameSpace]
+  const tournamentModel = state.getEntity(tournamentEntityId)?.models[namespace]
     ?.Tournament as TournamentModel;
 
   const entryCountModel = useModel(
     tournamentEntityId,
-    ModelsMapping.EntryCount
+    getModelsMapping(namespace).EntryCount
   ) as unknown as EntryCount;
 
   const leaderboardModel = useModel(
     tournamentEntityId,
-    ModelsMapping.Leaderboard
+    getModelsMapping(namespace).Leaderboard
   ) as unknown as Leaderboard;
 
   const leaderboardSize = Number(tournamentModel?.game_config.prize_spots);
@@ -149,14 +149,14 @@ const Tournament = () => {
     totalSubmissions ===
     Math.min(Number(entryCountModel?.count), leaderboardSize);
 
-  const tournamentPrizes = state.getEntitiesByModel(nameSpace, "Prize");
+  const tournamentPrizes = state.getEntitiesByModel(namespace, "Prize");
 
   const prizes: Prize[] = (tournamentPrizes
     ?.filter(
       (detail) =>
-        detail.models?.[nameSpace]?.Prize?.tournament_id === Number(id)
+        detail.models?.[namespace]?.Prize?.tournament_id === Number(id)
     )
-    .map((detail) => detail.models[nameSpace].Prize) ??
+    .map((detail) => detail.models[namespace].Prize) ??
     []) as unknown as Prize[];
 
   const { tournamentCreatorShare, gameCreatorShare, distributionPrizes } =
@@ -169,16 +169,16 @@ const Tournament = () => {
   const allPrizes = [...distributionPrizes, ...prizes];
 
   const tournamentClaimedPrizes = state.getEntitiesByModel(
-    nameSpace,
+    namespace,
     "PrizeClaim"
   );
 
   const claimedPrizes: PrizeClaim[] = (tournamentClaimedPrizes
     ?.filter(
       (detail) =>
-        detail.models?.[nameSpace]?.PrizeClaim?.tournament_id === Number(id)
+        detail.models?.[namespace]?.PrizeClaim?.tournament_id === Number(id)
     )
-    .map((detail) => detail.models[nameSpace].PrizeClaim) ??
+    .map((detail) => detail.models[namespace].PrizeClaim) ??
     []) as unknown as PrizeClaim[];
 
   const { claimablePrizes, claimablePrizeTypes } = getClaimablePrizes(
@@ -189,9 +189,9 @@ const Tournament = () => {
 
   const allClaimed = claimablePrizes.length === 0;
 
-  const tokenModels = state.getEntitiesByModel(nameSpace, "Token");
+  const tokenModels = state.getEntitiesByModel(namespace, "Token");
   const tokens = tokenModels.map(
-    (model) => model.models[nameSpace].Token
+    (model) => model.models[namespace].Token
   ) as Token[];
 
   const { gameNamespace, gameScoreModel, gameScoreAttribute } =
@@ -384,7 +384,7 @@ const Tournament = () => {
   }, [tournamentModel]);
 
   const { data: tournaments } = useGetTournaments({
-    namespace: nameSpace,
+    namespace: namespace,
     gameFilters: [],
     limit: 100,
     status: "tournaments",
@@ -558,7 +558,7 @@ const Tournament = () => {
             open={submitScoresDialogOpen}
             onOpenChange={setSubmitScoresDialogOpen}
             tournamentModel={tournamentModel}
-            nameSpace={nameSpace}
+            namespace={namespace}
             gameNamespace={gameNamespace ?? ""}
             gameScoreModel={gameScoreModel ?? ""}
             gameScoreAttribute={gameScoreAttribute ?? ""}

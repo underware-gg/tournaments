@@ -9,12 +9,11 @@ import {
   Uint256,
 } from "starknet";
 import * as models from "./models.gen";
-import { NAMESPACE } from "@/lib/constants";
 
-export function setupWorld(provider: DojoProvider) {
+export function setupWorld(provider: DojoProvider, namespace: string) {
   const game_mock_getScore = async (gameId: BigNumberish) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "game_mock",
         entrypoint: "score",
         calldata: [gameId],
@@ -36,7 +35,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "start_game",
           calldata: [gameId],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -56,7 +55,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "end_game",
           calldata: [gameId, score],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -78,7 +77,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "set_settings",
           calldata: [settingsId, name, description, exists],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -96,7 +95,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "initializer",
           calldata: [],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -119,7 +118,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "mint",
           calldata: [playerName, settingsId, availableAt, expiresAt, to],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -128,7 +127,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const game_mock_getSettingsId = async (tokenId: BigNumberish) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "game_mock",
         entrypoint: "get_settings_id",
         calldata: [tokenId],
@@ -140,7 +139,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const game_mock_getSettingsDetails = async (settingsId: BigNumberish) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "game_mock",
         entrypoint: "get_settings_details",
         calldata: [settingsId],
@@ -152,7 +151,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const game_mock_settingsExists = async (settingsId: BigNumberish) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "game_mock",
         entrypoint: "settings_exists",
         calldata: [settingsId],
@@ -164,7 +163,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const game_mock_tokenMetadata = async (tokenId: BigNumberish) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "game_mock",
         entrypoint: "token_metadata",
         calldata: [tokenId],
@@ -176,7 +175,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const game_mock_balanceOf = async (account: string) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "game_mock",
         entrypoint: "balance_of",
         calldata: [account],
@@ -188,7 +187,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const game_mock_ownerOf = async (tokenId: Uint256) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "game_mock",
         entrypoint: "owner_of",
         calldata: [tokenId],
@@ -213,7 +212,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "safe_transfer_from",
           calldata: [from, to, tokenId, data],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -234,7 +233,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "transfer_from",
           calldata: [from, to, tokenId],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -254,7 +253,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "approve",
           calldata: [to, tokenId],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -274,7 +273,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "set_approval_for_all",
           calldata: [operator, approved],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -283,7 +282,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const game_mock_getApproved = async (tokenId: Uint256) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "game_mock",
         entrypoint: "get_approved",
         calldata: [tokenId],
@@ -298,7 +297,7 @@ export function setupWorld(provider: DojoProvider) {
     operator: string
   ) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "game_mock",
         entrypoint: "is_approved_for_all",
         calldata: [owner, operator],
@@ -310,7 +309,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const game_mock_supportsInterface = async (interfaceId: BigNumberish) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "game_mock",
         entrypoint: "supports_interface",
         calldata: [interfaceId],
@@ -322,7 +321,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const game_mock_name = async () => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "game_mock",
         entrypoint: "name",
         calldata: [],
@@ -334,7 +333,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const game_mock_symbol = async () => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "game_mock",
         entrypoint: "symbol",
         calldata: [],
@@ -346,7 +345,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const game_mock_tokenUri = async (tokenId: Uint256) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "game_mock",
         entrypoint: "token_uri",
         calldata: [tokenId],
@@ -358,7 +357,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const erc721_mock_balanceOf = async (account: string) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "erc721_mock",
         entrypoint: "balance_of",
         calldata: [account],
@@ -370,7 +369,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const erc721_mock_ownerOf = async (tokenId: Uint256) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "erc721_mock",
         entrypoint: "owner_of",
         calldata: [tokenId],
@@ -395,7 +394,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "safe_transfer_from",
           calldata: [from, to, tokenId, data],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -416,7 +415,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "transfer_from",
           calldata: [from, to, tokenId],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -436,7 +435,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "approve",
           calldata: [to, tokenId],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -456,7 +455,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "set_approval_for_all",
           calldata: [operator, approved],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -465,7 +464,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const erc721_mock_getApproved = async (tokenId: Uint256) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "erc721_mock",
         entrypoint: "get_approved",
         calldata: [tokenId],
@@ -480,7 +479,7 @@ export function setupWorld(provider: DojoProvider) {
     operator: string
   ) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "erc721_mock",
         entrypoint: "is_approved_for_all",
         calldata: [owner, operator],
@@ -492,7 +491,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const erc721_mock_supportsInterface = async (interfaceId: BigNumberish) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "erc721_mock",
         entrypoint: "supports_interface",
         calldata: [interfaceId],
@@ -504,7 +503,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const erc721_mock_name = async () => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "erc721_mock",
         entrypoint: "name",
         calldata: [],
@@ -516,7 +515,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const erc721_mock_symbol = async () => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "erc721_mock",
         entrypoint: "symbol",
         calldata: [],
@@ -528,7 +527,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const erc721_mock_tokenUri = async (tokenId: Uint256) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "erc721_mock",
         entrypoint: "token_uri",
         calldata: [tokenId],
@@ -551,7 +550,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "mint",
           calldata: [recipient, tokenId],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -571,7 +570,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "mint",
           calldata: [recipient, amount],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -580,7 +579,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const erc20_mock_totalSupply = async () => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "erc20_mock",
         entrypoint: "total_supply",
         calldata: [],
@@ -592,7 +591,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const erc20_mock_balanceOf = async (account: string) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "erc20_mock",
         entrypoint: "balance_of",
         calldata: [account],
@@ -604,7 +603,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const erc20_mock_allowance = async (owner: string, spender: string) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "erc20_mock",
         entrypoint: "allowance",
         calldata: [owner, spender],
@@ -627,7 +626,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "transfer",
           calldata: [recipient, amount],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -648,7 +647,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "transfer_from",
           calldata: [sender, recipient, amount],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -668,7 +667,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "approve",
           calldata: [spender, amount],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -677,7 +676,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const erc20_mock_name = async () => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "erc20_mock",
         entrypoint: "name",
         calldata: [],
@@ -689,7 +688,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const erc20_mock_symbol = async () => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "erc20_mock",
         entrypoint: "symbol",
         calldata: [],
@@ -701,7 +700,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const erc20_mock_decimals = async () => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "erc20_mock",
         entrypoint: "decimals",
         calldata: [],
@@ -733,7 +732,7 @@ export function setupWorld(provider: DojoProvider) {
             entryRequirement,
           ],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -755,7 +754,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "enter_tournament",
           calldata: [tournamentId, playerName, playerAddress, qualification],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -776,7 +775,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "submit_score",
           calldata: [tournamentId, tokenId, position],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -796,7 +795,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "claim_prize",
           calldata: [tournamentId, prizeType],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -818,7 +817,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "add_prize",
           calldata: [tournamentId, tokenAddress, tokenType, position],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -827,7 +826,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const tournament_mock_totalTournaments = async () => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "tournament_mock",
         entrypoint: "total_tournaments",
         calldata: [],
@@ -839,7 +838,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const tournament_mock_tournament = async (tournamentId: BigNumberish) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "tournament_mock",
         entrypoint: "tournament",
         calldata: [tournamentId],
@@ -854,7 +853,7 @@ export function setupWorld(provider: DojoProvider) {
     tokenId: BigNumberish
   ) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "tournament_mock",
         entrypoint: "get_registration",
         calldata: [tournamentId, tokenId],
@@ -868,7 +867,7 @@ export function setupWorld(provider: DojoProvider) {
     tournamentId: BigNumberish
   ) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "tournament_mock",
         entrypoint: "tournament_entries",
         calldata: [tournamentId],
@@ -880,7 +879,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const tournament_mock_isTokenRegistered = async (address: string) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "tournament_mock",
         entrypoint: "is_token_registered",
         calldata: [address],
@@ -903,7 +902,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "register_token",
           calldata: [address, tokenType],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -912,7 +911,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const tournament_mock_getLeaderboard = async (tournamentId: BigNumberish) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "tournament_mock",
         entrypoint: "get_leaderboard",
         calldata: [tournamentId],
@@ -924,7 +923,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const tournament_mock_getState = async (tournamentId: BigNumberish) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "tournament_mock",
         entrypoint: "current_phase",
         calldata: [tournamentId],
@@ -936,7 +935,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const tournament_mock_balanceOf = async (account: string) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "tournament_mock",
         entrypoint: "balance_of",
         calldata: [account],
@@ -948,7 +947,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const tournament_mock_ownerOf = async (tokenId: Uint256) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "tournament_mock",
         entrypoint: "owner_of",
         calldata: [tokenId],
@@ -973,7 +972,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "safe_transfer_from",
           calldata: [from, to, tokenId, data],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -994,7 +993,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "transfer_from",
           calldata: [from, to, tokenId],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -1014,7 +1013,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "approve",
           calldata: [to, tokenId],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -1034,7 +1033,7 @@ export function setupWorld(provider: DojoProvider) {
           entrypoint: "set_approval_for_all",
           calldata: [operator, approved],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);
@@ -1043,7 +1042,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const tournament_mock_getApproved = async (tokenId: Uint256) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "tournament_mock",
         entrypoint: "get_approved",
         calldata: [tokenId],
@@ -1058,7 +1057,7 @@ export function setupWorld(provider: DojoProvider) {
     operator: string
   ) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "tournament_mock",
         entrypoint: "is_approved_for_all",
         calldata: [owner, operator],
@@ -1072,7 +1071,7 @@ export function setupWorld(provider: DojoProvider) {
     interfaceId: BigNumberish
   ) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "tournament_mock",
         entrypoint: "supports_interface",
         calldata: [interfaceId],
@@ -1084,7 +1083,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const tournament_mock_name = async () => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "tournament_mock",
         entrypoint: "name",
         calldata: [],
@@ -1096,7 +1095,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const tournament_mock_symbol = async () => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "tournament_mock",
         entrypoint: "symbol",
         calldata: [],
@@ -1108,7 +1107,7 @@ export function setupWorld(provider: DojoProvider) {
 
   const tournament_mock_tokenUri = async (tokenId: Uint256) => {
     try {
-      return await provider.call(NAMESPACE, {
+      return await provider.call(namespace, {
         contractName: "tournament_mock",
         entrypoint: "token_uri",
         calldata: [tokenId],
@@ -1144,7 +1143,7 @@ export function setupWorld(provider: DojoProvider) {
             testErc721,
           ],
         },
-        NAMESPACE
+        namespace
       );
     } catch (error) {
       console.error(error);

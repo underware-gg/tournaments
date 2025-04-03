@@ -15,12 +15,14 @@ import { displayAddress } from "@/lib/utils";
 import {
   useControllerUsername,
   useControllerProfile,
-  useControllerSwitchChain,
 } from "@/hooks/useController";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDojo } from "@/context/dojo";
 import { ChainId, NetworkId } from "@/dojo/setup/networks";
-import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
+import {
+  useConnectToSelectedChain,
+  useSwitchNetwork,
+} from "@/dojo/hooks/useChain";
 import {
   Sheet,
   SheetContent,
@@ -46,11 +48,12 @@ const Header = () => {
   const { disconnect } = useDisconnect();
   const { openProfile } = useControllerProfile();
   const { username } = useControllerUsername();
-  const { switchToMainnet, switchToSlot } = useControllerSwitchChain();
+  const { switchToMainnet, switchToSepolia, switchToSlot } = useSwitchNetwork();
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedChainConfig } = useDojo();
   const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
+  const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
   const isHomeScreen = location.pathname === "/";
   const isLocal = selectedChainConfig.chainId === ChainId.KATANA_LOCAL;
 
@@ -183,7 +186,8 @@ const Header = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <Button variant="outline">
-                    {selectedChainConfig.chainId === ChainId.SN_MAIN ? (
+                    {selectedChainConfig.chainId === ChainId.SN_MAIN ||
+                    selectedChainConfig.chainId === ChainId.SN_SEPOLIA ? (
                       <STARKNET />
                     ) : (
                       <SLOT />
@@ -203,6 +207,16 @@ const Header = () => {
                     {NetworkId[ChainId.SN_MAIN]}
                   </DropdownMenuItem>
                   <DropdownMenuItem
+                    key="sepolia"
+                    active={selectedChainConfig.chainId === ChainId.SN_SEPOLIA}
+                    onClick={() => switchToSepolia()}
+                  >
+                    <span className="[&_svg]:w-8 [&_svg]:h-8">
+                      <STARKNET />
+                    </span>
+                    {NetworkId[ChainId.SN_SEPOLIA]}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
                     key="slot"
                     active={selectedChainConfig.chainId === ChainId.WP_BUDOKAN}
                     onClick={() => switchToSlot()}
@@ -215,7 +229,7 @@ const Header = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
-            {!isMainnet && location.pathname !== "/play" && (
+            {!isMainnet && !isSepolia && location.pathname !== "/play" && (
               <Button
                 onClick={() => {
                   navigate("/play");
@@ -227,18 +241,20 @@ const Header = () => {
                 </span>
               </Button>
             )}
-            {!isMainnet && location.pathname !== "/register-token" && (
-              <Button
-                onClick={() => {
-                  navigate("/register-token");
-                }}
-              >
-                <span className="flex flex-row items-center gap-2">
-                  <COIN />
-                  Register Token
-                </span>
-              </Button>
-            )}
+            {!isMainnet &&
+              !isSepolia &&
+              location.pathname !== "/register-token" && (
+                <Button
+                  onClick={() => {
+                    navigate("/register-token");
+                  }}
+                >
+                  <span className="flex flex-row items-center gap-2">
+                    <COIN />
+                    Register Token
+                  </span>
+                </Button>
+              )}
             {location.pathname !== "/create-tournament" && (
               // && isAdmin
               <Button

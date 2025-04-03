@@ -4,7 +4,6 @@ import tournament_manifest_dev from "../../../../contracts/manifest_dev.json";
 import tournament_manifest_slot from "../../../../contracts/manifest_slot.json";
 import tournament_manifest_mainnet from "../../../../contracts/manifest_mainnet.json";
 import tournament_manifest_sepolia from "../../../../contracts/manifest_sepolia.json";
-import { NAMESPACE } from "@/lib/constants";
 import { ChainId, CHAINS } from "@/dojo/setup/networks";
 import { DojoAppConfig } from "@/context/dojo";
 
@@ -13,6 +12,13 @@ export const manifests: Record<ChainId, DojoManifest> = {
   [ChainId.WP_BUDOKAN]: tournament_manifest_slot as DojoManifest,
   [ChainId.SN_MAIN]: tournament_manifest_mainnet as DojoManifest,
   [ChainId.SN_SEPOLIA]: tournament_manifest_sepolia as DojoManifest,
+};
+
+export const namespace: Record<ChainId, string> = {
+  [ChainId.KATANA_LOCAL]: "budokan_v_1_0_4",
+  [ChainId.WP_BUDOKAN]: "budokan_v_1_0_4",
+  [ChainId.SN_MAIN]: "budokan_v_1_0_4",
+  [ChainId.SN_SEPOLIA]: "budokan_v_1_0_6",
 };
 
 export const isChainIdSupported = (chainId: ChainId): boolean => {
@@ -33,7 +39,7 @@ export const makeDojoAppConfig = (chainId: ChainId): DojoAppConfig => {
   return {
     selectedChainId: chainId,
     manifest: manifests[chainId],
-    nameSpace: NAMESPACE,
+    namespace: namespace[chainId],
     starknetDomain: makeStarknetDomain(chainId),
   };
 };

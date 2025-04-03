@@ -4,7 +4,7 @@ import { ByteArray, byteArray } from "starknet";
 
 export const useGameEndpoints = (gameAddress: string) => {
   const { provider } = useProvider();
-  const [gameNamespace, setGameNamespace] = useState<string | null>(null);
+  const [gameNamespace, setgameNamespace] = useState<string | null>(null);
   const [gameScoreModel, setGameScoreModel] = useState<string | null>(null);
   const [gameScoreAttribute, setGameScoreAttribute] = useState<string | null>(
     null
@@ -13,7 +13,7 @@ export const useGameEndpoints = (gameAddress: string) => {
     null
   );
 
-  const getGameNamespace = async () => {
+  const getgameNamespace = async () => {
     const gameNamespace = await provider.callContract({
       contractAddress: gameAddress,
       entrypoint: "namespace",
@@ -24,7 +24,7 @@ export const useGameEndpoints = (gameAddress: string) => {
       pending_word: gameNamespace[gameNamespace.length - 2],
       pending_word_len: gameNamespace[gameNamespace.length - 1],
     };
-    setGameNamespace(byteArray.stringFromByteArray(gameNamespaceByteArray));
+    setgameNamespace(byteArray.stringFromByteArray(gameNamespaceByteArray));
   };
 
   const getGameScoreData = async () => {
@@ -76,7 +76,7 @@ export const useGameEndpoints = (gameAddress: string) => {
 
   useEffect(() => {
     if (gameAddress) {
-      getGameNamespace();
+      getgameNamespace();
       getGameScoreData();
       getGameSettings();
     }

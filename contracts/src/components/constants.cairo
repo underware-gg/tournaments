@@ -11,10 +11,11 @@ pub const MAX_TOURNAMENT_LENGTH: u32 = 31104000; // 1 year
 pub const MIN_SUBMISSION_PERIOD: u32 = 900; // 15 minutes
 pub const MAX_SUBMISSION_PERIOD: u32 = 604800; // 1 week
 
+pub const MAINNET_CHAIN_ID: felt252 = 0x534e5f4d41494e;
 pub const SEPOLIA_CHAIN_ID: felt252 = 0x534e5f5345504f4c4941;
 
 pub const GAME_CREATOR_TOKEN_ID: u64 = 0;
 
 pub fn DEFAULT_NS() -> ByteArray {
-    "budokan_v_1_0_4"
+    "budokan_v_1_0_6"
 }

@@ -8,7 +8,7 @@ import { Tournament, Prize, PrizeType } from "@/generated/models.gen";
 const applyModelUpdate = <T extends { [key: string]: any }>(
   draft: any,
   entityId: string,
-  nameSpace: string,
+  namespace: string,
   modelName: string,
   data: T
 ) => {
@@ -17,21 +17,21 @@ const applyModelUpdate = <T extends { [key: string]: any }>(
     draft.entities[entityId] = {
       entityId,
       models: {
-        [nameSpace]: {
+        [namespace]: {
           [modelName]: data,
         },
       },
     };
-  } else if (!draft.entities[entityId]?.models?.[nameSpace]?.[modelName]) {
+  } else if (!draft.entities[entityId]?.models?.[namespace]?.[modelName]) {
     // Case 2: Model doesn't exist in entity
-    draft.entities[entityId].models[nameSpace] = {
-      ...draft.entities[entityId].models[nameSpace],
+    draft.entities[entityId].models[namespace] = {
+      ...draft.entities[entityId].models[namespace],
       [modelName]: data,
     };
   } else {
     // Case 3: Model exists, update it
-    draft.entities[entityId].models[nameSpace][modelName] = {
-      ...draft.entities[entityId].models[nameSpace][modelName],
+    draft.entities[entityId].models[namespace][modelName] = {
+      ...draft.entities[entityId].models[namespace][modelName],
       ...data,
     };
   }
@@ -39,7 +39,7 @@ const applyModelUpdate = <T extends { [key: string]: any }>(
 
 export const useOptimisticUpdates = () => {
   const state = useDojoStore((state) => state);
-  const { nameSpace } = useDojo();
+  const { namespace } = useDojo();
 
   const applyTournamentEntryUpdate = (
     tournamentId: BigNumberish,
@@ -55,14 +55,14 @@ export const useOptimisticUpdates = () => {
     const transactionId = uuidv4();
 
     state.applyOptimisticUpdate(transactionId, (draft) => {
-      applyModelUpdate(draft, entriesEntityId, nameSpace, "EntryCount", {
+      applyModelUpdate(draft, entriesEntityId, namespace, "EntryCount", {
         tournament_id: tournamentId,
         count: newEntryCount,
       });
       applyModelUpdate(
         draft,
         entriesGameTokenEntityId,
-        nameSpace,
+        namespace,
         "Registration",
         {
           tournament_id: tournamentId,
@@ -78,7 +78,7 @@ export const useOptimisticUpdates = () => {
         entriesEntityId,
         (entity) => {
           return (
-            entity?.models?.[nameSpace]?.EntryCount?.count == newEntryCount
+            entity?.models?.[namespace]?.EntryCount?.count == newEntryCount
           );
         }
       );
@@ -88,7 +88,7 @@ export const useOptimisticUpdates = () => {
       //   entriesGameTokenEntityId,
       //   (entity) => {
       //     return (
-      //       entity?.models?.[nameSpace]?.Registration?.entry_number ==
+      //       entity?.models?.[namespace]?.Registration?.entry_number ==
       //       newEntryAddressCount
       //     );
       //   }
@@ -111,7 +111,7 @@ export const useOptimisticUpdates = () => {
     state.applyOptimisticUpdate(transactionId, (draft) => {
       for (const prize of prizes) {
         const entityId = getEntityIdFromKeys([BigInt(prize.id)]);
-        applyModelUpdate(draft, entityId, nameSpace, "Prize", prize);
+        applyModelUpdate(draft, entityId, namespace, "Prize", prize);
       }
     });
 
@@ -119,7 +119,7 @@ export const useOptimisticUpdates = () => {
       const prizePromises = prizes.map((prize) => {
         const entityId = getEntityIdFromKeys([BigInt(prize.id)]);
         return state.waitForEntityChange(entityId, (entity) => {
-          return (entity?.models?.[nameSpace]?.Prize as Prize)?.id == prize.id;
+          return (entity?.models?.[namespace]?.Prize as Prize)?.id == prize.id;
         });
       });
 
@@ -142,13 +142,13 @@ export const useOptimisticUpdates = () => {
     const transactionId = uuidv4();
 
     state.applyOptimisticUpdate(transactionId, (draft) => {
-      applyModelUpdate(draft, entityId, nameSpace, "Tournament", tournament);
+      applyModelUpdate(draft, entityId, namespace, "Tournament", tournament);
       for (const prize of prizes) {
         const entityPrizeId = getEntityIdFromKeys([
           BigInt(tournament.id),
           BigInt(prize.id),
         ]);
-        applyModelUpdate(draft, entityPrizeId, nameSpace, "Prize", prize);
+        applyModelUpdate(draft, entityPrizeId, namespace, "Prize", prize);
       }
     });
 
@@ -157,7 +157,7 @@ export const useOptimisticUpdates = () => {
         entityId,
         (entity) => {
           return (
-            (entity?.models?.[nameSpace]?.Tournament as Tournament)?.id ===
+            (entity?.models?.[namespace]?.Tournament as Tournament)?.id ===
             tournament.id
           );
         }
@@ -169,7 +169,7 @@ export const useOptimisticUpdates = () => {
           BigInt(prize.id),
         ]);
         return state.waitForEntityChange(prizesEntityId, (entity) => {
-          return (entity?.models?.[nameSpace]?.Prize as Prize)?.id == prize.id;
+          return (entity?.models?.[namespace]?.Prize as Prize)?.id == prize.id;
         });
       });
 
@@ -193,7 +193,7 @@ export const useOptimisticUpdates = () => {
 
     state.applyOptimisticUpdate(transactionId, (draft) => {
       for (const prize of prizes) {
-        applyModelUpdate(draft, entityId, nameSpace, "PrizeClaim", {
+        applyModelUpdate(draft, entityId, namespace, "PrizeClaim", {
           tournament_id: tournamentId,
           prize_type: prize,
           claimed: true,

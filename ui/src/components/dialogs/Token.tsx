@@ -27,7 +27,7 @@ interface TokenDialogProps {
 
 const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
   const [tokenSearchQuery, setTokenSearchQuery] = useState("");
-  const { selectedChainConfig, nameSpace } = useDojo();
+  const { selectedChainConfig, namespace } = useDojo();
 
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
 
@@ -48,8 +48,8 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
 
   const tokens = isSepolia
     ? sepoliaTokens
-    : useDojoStore((state) => state.getEntitiesByModel(nameSpace, "Token")).map(
-        (token) => token.models[nameSpace].Token as Token
+    : useDojoStore((state) => state.getEntitiesByModel(namespace, "Token")).map(
+        (token) => token.models[namespace].Token as Token
       );
 
   const typeFilteredTokens = type

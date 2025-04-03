@@ -2,7 +2,7 @@ import { useSqlExecute } from "@/lib/dojo/hooks/useSqlExecute";
 import { useMemo } from "react";
 import { addAddressPadding, BigNumberish } from "starknet";
 
-export const useGetGameNamespaces = () => {
+export const useGetgameNamespaces = () => {
   const query = useMemo(
     () => `
     SELECT namespace 

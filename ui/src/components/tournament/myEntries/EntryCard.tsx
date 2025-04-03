@@ -112,9 +112,7 @@ const EntryCard = ({
               onClick={() => {
                 window.open(
                   gameName === "Dark Shuffle"
-                    ? `https://darkshuffle.io/play/${Number(
-                        mergedEntry.game_token_id
-                      )}`
+                    ? `${gameUrl}/play/${Number(mergedEntry.game_token_id)}`
                     : gameUrl,
                   "_blank"
                 );

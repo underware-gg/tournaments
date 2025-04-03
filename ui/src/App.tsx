@@ -22,21 +22,21 @@ import { useNetwork } from "@starknet-react/core";
 import { useDojo } from "@/context/dojo";
 import useUIStore from "./hooks/useUIStore";
 import {
-  useGetGameNamespaces,
+  useGetgameNamespaces,
   useGetGamesMetadata,
 } from "./dojo/hooks/useSqlQueries";
 import { processGameMetadataFromSql } from "./lib/utils/formatting";
 import { getGames } from "./assets/games";
 
 function App() {
-  const { nameSpace } = useDojo();
+  const { namespace } = useDojo();
   const { chain } = useNetwork();
   const navigate = useNavigate();
   const location = useLocation();
   const previousChainRef = useRef<string | undefined>(chain?.id.toString());
   const { setGameData, setGameDataLoading } = useUIStore();
 
-  useGetTokensQuery(nameSpace);
+  useGetTokensQuery(namespace);
 
   useEffect(() => {
     if (chain) {
@@ -58,15 +58,15 @@ function App() {
     }
   }, [chain, navigate, location.pathname]);
 
-  const { data: gameNamespaces } = useGetGameNamespaces();
+  const { data: gameNamespaces } = useGetgameNamespaces();
 
-  const formattedGameNamespaces = gameNamespaces?.map(
+  const formattedgameNamespaces = gameNamespaces?.map(
     (namespace) => namespace.namespace
   );
 
   const { data: gamesMetadata, loading: isGamesMetadataLoading } =
     useGetGamesMetadata({
-      gameNamespaces: formattedGameNamespaces || [],
+      gameNamespaces: formattedgameNamespaces || [],
     });
 
   const formattedGamesMetadata = useMemo(
@@ -108,7 +108,9 @@ function App() {
         // TODO: Remove this once we have a proper image for the dark shuffle game
         image: metadata?.image
           ? metadata?.contract_address ===
-            "0x0320f977f47f0885e376b781d9e244d9f59f10154ce844ae1815c919f0374726"
+              "0x0320f977f47f0885e376b781d9e244d9f59f10154ce844ae1815c919f0374726" ||
+            metadata?.contract_address ===
+              "0x04359aee29873cd9603207d29b4140468bac3e042aa10daab2e1a8b2dd60ef7b"
             ? "https://darkshuffle.io/favicon.svg"
             : metadata?.image
           : whitelisted?.image,

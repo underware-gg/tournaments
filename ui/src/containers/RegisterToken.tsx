@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 
 const RegisterToken = () => {
   const { address } = useAccount();
-  const { nameSpace, selectedChainConfig } = useDojo();
+  const { namespace, selectedChainConfig } = useDojo();
   const navigate = useNavigate();
   const erc20_mock = useDojoSystem("erc20_mock").contractAddress ?? "0x0";
   const erc721_mock = useDojoSystem("erc721_mock").contractAddress ?? "0x0";
@@ -29,9 +29,9 @@ const RegisterToken = () => {
   const isMainnet = selectedChainConfig?.chainId === "SN_MAIN";
 
   const state = useDojoStore((state) => state);
-  const tokens = state.getEntitiesByModel(nameSpace, "Token");
+  const tokens = state.getEntitiesByModel(namespace, "Token");
 
-  useSubscribeTokensQuery();
+  useSubscribeTokensQuery(namespace);
 
   const { mintErc20, mintErc721, getBalanceGeneral } = useSystemCalls();
 
@@ -141,7 +141,7 @@ const RegisterToken = () => {
                 {!!tokens && tokens.length > 0 ? (
                   <div className="flex flex-row gap-2 justify-center">
                     {tokens.map((token) => {
-                      const tokenModel = token.models[nameSpace].Token as Token;
+                      const tokenModel = token.models[namespace].Token as Token;
                       return (
                         <Button
                           key={token.entityId}

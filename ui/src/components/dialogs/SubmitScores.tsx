@@ -24,7 +24,7 @@ interface SubmitScoresDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   tournamentModel: Tournament;
-  nameSpace: string;
+  namespace: string;
   gameNamespace: string;
   gameScoreModel: string;
   gameScoreAttribute: string;
@@ -36,7 +36,7 @@ export function SubmitScoresDialog({
   open,
   onOpenChange,
   tournamentModel,
-  nameSpace,
+  namespace,
   gameNamespace,
   gameScoreModel,
   gameScoreAttribute,
@@ -50,7 +50,7 @@ export function SubmitScoresDialog({
   const leaderboardSize = Number(tournamentModel?.game_config.prize_spots);
 
   const { data: currentLeaderboard, loading } = useGetTournamentLeaderboard({
-    namespace: nameSpace,
+    namespace: namespace,
     tournamentId: addAddressPadding(bigintToHex(tournamentModel?.id)),
     gameNamespace: gameNamespace,
     gameScoreModel: gameScoreModel,
