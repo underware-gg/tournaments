@@ -103,24 +103,6 @@ export function EnterTournamentDialog({
     );
 
     setPlayerName("");
-
-    //TEMP
-    // Get the token ID to store
-    const tokenIdToStore =
-      qualificationProof?.Some?.variant?.Tournament?.token_id;
-
-    if (tokenIdToStore) {
-      // Get existing entries or initialize empty array
-      const entries = JSON.parse(localStorage.getItem("entryInfo") || "[]");
-
-      // Add new token ID if it doesn't exist already
-      if (!entries.includes(tokenIdToStore)) {
-        entries.push(tokenIdToStore);
-      }
-
-      // Save back to localStorage
-      localStorage.setItem("entryInfo", JSON.stringify(entries));
-    }
   };
 
   const ownerAddresses = useMemo(() => {
@@ -324,12 +306,7 @@ export function EnterTournamentDialog({
         // Find all owned token IDs that appear in the leaderboard and their positions
         for (let i = 0; i < leaderboardTokenIds.length; i++) {
           const leaderboardTokenId = leaderboardTokenIds[i];
-          //TEMP
-          const storedEntries = JSON.parse(
-            localStorage.getItem("entryInfo") || "[]"
-          );
-          const tokenIdStored = storedEntries.includes(leaderboardTokenId);
-          if (ownedGameIds.includes(leaderboardTokenId) && !tokenIdStored) {
+          if (ownedGameIds.includes(leaderboardTokenId)) {
             acc[leaderboard.tournament_id].push({
               tokenId: leaderboardTokenId,
               position: i + 1, // Convert to 1-based position for display
@@ -546,17 +523,13 @@ export function EnterTournamentDialog({
                   entry["qualification.tournament.token_id"] === wonInfo.tokenId
               )?.entry_count ?? 0;
 
-            // TEMP
             const remaining = entryLimit
               ? Number(entryLimit) - currentEntryCount
-              : 1;
+              : Infinity;
 
             // If this token has entries left
             if (remaining > 0) {
-              //TEMP
-              tournamentCanEnter =
-                Number(entryCountModel?.count ?? 0) <
-                parseTokenIds(leaderboards[0].token_ids).length;
+              tournamentCanEnter = true;
               // Add to total entries left for this tournament
               tournamentTotalEntriesLeft += remaining;
 
@@ -935,13 +908,11 @@ export function EnterTournamentDialog({
                                 <span className="w-5">
                                   <CHECK />
                                 </span>
-                                {(entriesLeftByTournament.find(
+                                {entriesLeftByTournament.find(
                                   (entry) =>
                                     entry.tournamentId ===
                                     tournament.id.toString()
-                                )?.entriesLeft ??
-                                  0 > 0) &&
-                                meetsEntryRequirements ? (
+                                )?.entriesLeft ?? 0 > 0 ? (
                                   <span>
                                     {`${
                                       entriesLeftByTournament.find(
