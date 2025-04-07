@@ -14,7 +14,7 @@ import {
 export interface CalendarProps extends Omit<DayPickerSingleProps, "mode"> {
   onTimeChange?: (hour: number, minute: number) => void;
   selectedTime?: Date;
-  minStartTime?: Date;
+  minTime?: Date;
 }
 
 function Calendar({
@@ -23,7 +23,7 @@ function Calendar({
   showOutsideDays = true,
   selectedTime = new Date(),
   onTimeChange,
-  minStartTime,
+  minTime,
   ...props
 }: CalendarProps) {
   const today = new Date();
@@ -75,15 +75,10 @@ function Calendar({
         ),
         CaptionLabel: ({ displayMonth }) => {
           const now = new Date();
-          const isToday = selectedTime.toDateString() === now.toDateString();
           const currentHour = now.getHours();
           const currentMinute = now.getMinutes();
-          const minStartHour = minStartTime
-            ? minStartTime.getHours()
-            : currentHour;
-          const minStartMinute = minStartTime
-            ? minStartTime.getMinutes()
-            : currentMinute;
+          const minHour = minTime ? minTime.getHours() : currentHour;
+          const minMinute = minTime ? minTime.getMinutes() : currentMinute;
 
           return (
             <div className="flex flex-row items-center">
@@ -103,7 +98,7 @@ function Calendar({
                         <SelectItem
                           key={i}
                           value={i.toString().padStart(2, "0")}
-                          disabled={isToday && i < minStartHour}
+                          disabled={i < minHour}
                         >
                           {i.toString().padStart(2, "0")}
                         </SelectItem>
@@ -127,9 +122,8 @@ function Calendar({
                             key={minute}
                             value={minute.toString().padStart(2, "0")}
                             disabled={
-                              isToday &&
-                              selectedTime.getHours() === minStartHour &&
-                              minute <= minStartMinute
+                              selectedTime.getHours() === minHour &&
+                              minute <= minMinute
                             }
                           >
                             {minute.toString().padStart(2, "0")}

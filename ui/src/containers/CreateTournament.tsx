@@ -8,7 +8,7 @@ import { useForm, UseFormReturn } from "react-hook-form";
 import * as z from "zod";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { CHECK } from "@/components/Icons";
+import { CHECK, MINUS } from "@/components/Icons";
 import Details from "@/components/createTournament/Details";
 import Schedule from "@/components/createTournament/Schedule";
 import EntryRequirements from "@/components/createTournament/EntryRequirements";
@@ -38,6 +38,8 @@ export interface StepProps {
 const formSchema = z.object({
   // Schedule step
   startTime: z.date(),
+  enableEndTime: z.boolean().default(false),
+  endTime: z.date(),
   duration: z.number().min(1).max(7776000), // 90 days
   type: z.enum(["open", "fixed"]),
   submissionPeriod: z.number().min(1).max(324000), // 90 hours
@@ -133,6 +135,7 @@ const CreateTournament = () => {
         now.setMinutes(Math.ceil(now.getMinutes() / 5) * 5);
         return now;
       })(),
+      enableEndTime: false,
       duration: 86400,
       type: "open",
       submissionPeriod: 3600,
@@ -367,7 +370,7 @@ const CreateTournament = () => {
 
     return (
       <div className="w-5 h-5 text-muted-foreground">
-        {isCompleted ? <CHECK /> : <span className="text-xs italic">-</span>}
+        {isCompleted ? <CHECK /> : <MINUS />}
       </div>
     );
   };
@@ -419,7 +422,7 @@ const CreateTournament = () => {
   };
 
   return (
-    <div className="flex flex-col gap-5 lg:w-[87.5%] xl:w-5/6 2xl:w-3/4 h-full mx-auto">
+    <div className="flex flex-col gap-2 sm:gap-5 lg:w-[87.5%] xl:w-5/6 2xl:w-3/4 h-full mx-auto">
       <div className="flex flex-col gap-2 sm:gap-5">
         <div className="flex flex-row justify-between items-center">
           <Button variant="outline" onClick={() => navigate("/")}>
@@ -457,13 +460,13 @@ const CreateTournament = () => {
             Create Tournament
           </span>
 
-          <div className="flex items-center w-full justify-between sm:w-auto sm:gap-6">
+          <div className="flex items-center w-full justify-between h-10 sm:w-auto sm:gap-6">
             {Object.entries(getSectionStatus(form)).map(
               ([section, _status]) => (
                 <div
                   key={section}
                   className={cn(
-                    "flex items-center sm:gap-2",
+                    "flex items-center sm:gap-2 sm:text-sm capitalize",
                     visitedSections.has(section) || section === currentStep
                       ? "cursor-pointer"
                       : "cursor-not-allowed opacity-50",
@@ -472,9 +475,7 @@ const CreateTournament = () => {
                   onClick={() => handleSectionClick(section)}
                 >
                   <StatusIndicator section={section} />
-                  <span className="text-xs sm:text-sm capitalize">
-                    {section}
-                  </span>
+                  <span>{section}</span>
                 </div>
               )
             )}

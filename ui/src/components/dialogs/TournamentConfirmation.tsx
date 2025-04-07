@@ -22,14 +22,14 @@ import {
 } from "@/lib/utils";
 import { getTokenLogoUrl, getTokenSymbol } from "@/lib/tokensMeta";
 import { useEkuboPrices } from "@/hooks/useEkuboPrices";
-import { Settings, Token } from "@/generated/models.gen";
+import { Token } from "@/generated/models.gen";
 import { useGameEndpoints } from "@/dojo/hooks/useGameEndpoints";
-import { useGetGameSettingsQuery } from "@/dojo/hooks/useSdkQueries";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
-import { SettingsDetails } from "@/generated/models.gen";
 import { useMemo } from "react";
 import { useDojo } from "@/context/dojo";
 // import { calculateTotalValue } from "@/lib/utils/formatting";
+import { useGetGameSettings } from "@/dojo/hooks/useSqlQueries";
+import { mergeGameSettings } from "@/lib/utils/formatting";
 
 interface TournamentConfirmationProps {
   formData: TournamentFormData;
@@ -49,13 +49,17 @@ const TournamentConfirmation = ({
   const { namespace, selectedChainConfig } = useDojo();
   const { gameData, getGameImage } = useUIStore();
   const { gameNamespace, gameSettingsModel } = useGameEndpoints(formData.game);
-  useGetGameSettingsQuery(gameNamespace ?? "", gameSettingsModel ?? "");
-  const settingsDetails = useDojoStore((state) =>
-    state.getEntitiesByModel(gameNamespace ?? "", "SettingsDetails")
-  );
-  const settings = useDojoStore((state) =>
-    state.getEntitiesByModel(gameNamespace ?? "", "Settings")
-  );
+
+  const { data: settings } = useGetGameSettings({
+    namespace: gameNamespace ?? "",
+    settingsModel: gameSettingsModel ?? "",
+  });
+
+  const { data: settingsDetails } = useGetGameSettings({
+    namespace: gameNamespace ?? "",
+    settingsModel: "GameSettingsMetadata",
+  });
+
   const tokens = useDojoStore((state) =>
     state.getEntitiesByModel(namespace, "Token")
   ).map((token) => token.models[namespace].Token as Token);
@@ -64,45 +68,7 @@ const TournamentConfirmation = ({
     (token) => token.address === formData?.gatingOptions?.token
   );
 
-  const settingsEntities = [...settingsDetails, ...settings];
-
-  const mergedGameSettings = useMemo(() => {
-    if (!settingsEntities) return {};
-
-    return settingsEntities.reduce(
-      (acc, entity) => {
-        const details = entity.models[gameNamespace ?? ""]
-          .SettingsDetails as SettingsDetails;
-        const settings = entity.models[gameNamespace ?? ""]
-          .Settings as Settings;
-        const detailsId = details.id.toString();
-
-        // If this details ID doesn't exist yet, create it
-        if (!acc[detailsId]) {
-          acc[detailsId] = {
-            ...details,
-            hasSettings: false,
-            settings: [],
-          };
-        }
-
-        // If we have settings, add them to the array and set hasSettings to true
-        if (settings) {
-          acc[detailsId].settings.push(settings);
-          acc[detailsId].hasSettings = true;
-        }
-
-        return acc;
-      },
-      {} as Record<
-        string,
-        SettingsDetails & {
-          hasSettings: boolean;
-          settings: Settings[];
-        }
-      >
-    );
-  }, [settingsEntities, formData.game]);
+  const mergedGameSettings = mergeGameSettings(settingsDetails, settings);
 
   const hasBonusPrizes =
     formData.bonusPrizes && formData.bonusPrizes.length > 0;
@@ -110,7 +76,11 @@ const TournamentConfirmation = ({
   const { prices, isLoading: _pricesLoading } = useEkuboPrices({
     tokens: [
       ...(formData.bonusPrizes?.map(
-        (prize) => getTokenSymbol(prize.tokenAddress) ?? ""
+        (prize) =>
+          getTokenSymbol(
+            selectedChainConfig.chainId ?? "",
+            prize.tokenAddress
+          ) ?? ""
       ) ?? []),
       ...(formData.entryFees?.tokenAddress
         ? [formData.entryFees.tokenAddress]
@@ -256,7 +226,10 @@ const TournamentConfirmation = ({
                         </span>
                         <div className="flex flex-row gap-2">
                           <img
-                            src={getTokenLogoUrl(token?.address ?? "")}
+                            src={getTokenLogoUrl(
+                              selectedChainConfig.chainId ?? "",
+                              token?.address ?? ""
+                            )}
                             alt={token?.address ?? ""}
                             className="w-4 h-4"
                           />
@@ -411,18 +384,27 @@ const TournamentConfirmation = ({
                           <div className="flex flex-row gap-2 items-center">
                             <span>{formatNumber(prize.amount)}</span>
                             <img
-                              src={getTokenLogoUrl(prize.tokenAddress)}
+                              src={getTokenLogoUrl(
+                                selectedChainConfig.chainId ?? "",
+                                prize.tokenAddress
+                              )}
                               alt={prize.tokenAddress}
                               className="w-4 h-4"
                             />
                             <span className="text-neutral">
                               {prices?.[
-                                getTokenSymbol(prize.tokenAddress) ?? ""
+                                getTokenSymbol(
+                                  selectedChainConfig.chainId ?? "",
+                                  prize.tokenAddress
+                                ) ?? ""
                               ] &&
                                 `~$${(
                                   prize.amount *
                                   (prices?.[
-                                    getTokenSymbol(prize.tokenAddress) ?? ""
+                                    getTokenSymbol(
+                                      selectedChainConfig.chainId ?? "",
+                                      prize.tokenAddress
+                                    ) ?? ""
                                   ] ?? 0)
                                 ).toFixed(2)}`}
                             </span>
@@ -462,18 +444,27 @@ const TournamentConfirmation = ({
                           <div className="flex flex-row gap-2 items-center">
                             <span>{formatNumber(prize.amount)}</span>
                             <img
-                              src={getTokenLogoUrl(prize.tokenAddress)}
+                              src={getTokenLogoUrl(
+                                selectedChainConfig.chainId ?? "",
+                                prize.tokenAddress
+                              )}
                               alt={prize.tokenAddress}
                               className="w-4 h-4"
                             />
                             <span className="text-neutral">
                               {prices?.[
-                                getTokenSymbol(prize.tokenAddress) ?? ""
+                                getTokenSymbol(
+                                  selectedChainConfig.chainId ?? "",
+                                  prize.tokenAddress
+                                ) ?? ""
                               ] &&
                                 `~$${(
                                   prize.amount *
                                   (prices?.[
-                                    getTokenSymbol(prize.tokenAddress) ?? ""
+                                    getTokenSymbol(
+                                      selectedChainConfig.chainId ?? "",
+                                      prize.tokenAddress
+                                    ) ?? ""
                                   ] ?? 0)
                                 ).toFixed(2)}`}
                             </span>

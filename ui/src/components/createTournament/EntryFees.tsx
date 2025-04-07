@@ -24,9 +24,12 @@ import { useEkuboPrices } from "@/hooks/useEkuboPrices";
 import { getTokenLogoUrl } from "@/lib/tokensMeta";
 import { OptionalSection } from "@/components/createTournament/containers/OptionalSection";
 import { TokenValue } from "@/components/createTournament/containers/TokenValue";
-
+import { useDojo } from "@/context/dojo";
 const EntryFees = ({ form }: StepProps) => {
   const [selectedToken, setSelectedToken] = React.useState<Token | null>(null);
+  const { selectedChainConfig } = useDojo();
+
+  const chainId = selectedChainConfig?.chainId ?? "";
 
   const PREDEFINED_PERCENTAGES = [
     { value: 1, label: "1%" },
@@ -434,6 +437,7 @@ const EntryFees = ({ form }: StepProps) => {
                                         </span>
                                         <img
                                           src={getTokenLogoUrl(
+                                            chainId,
                                             form.watch(
                                               "entryFees.tokenAddress"
                                             ) ?? ""
@@ -443,6 +447,7 @@ const EntryFees = ({ form }: StepProps) => {
                                       </div>
                                       {prices?.[
                                         getTokenSymbol(
+                                          chainId,
                                           form.watch(
                                             "entryFees.tokenAddress"
                                           ) ?? ""

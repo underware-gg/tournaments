@@ -17,11 +17,9 @@ import SettingsCarousel from "./SettingsCarousel";
 import SmallSettingsTable from "./SmallSettingsTable";
 import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
 import { useGameEndpoints } from "@/dojo/hooks/useGameEndpoints";
-import { useGetGameSettingsQuery } from "@/dojo/hooks/useSdkQueries";
+import { useGetGameSettings } from "@/dojo/hooks/useSqlQueries";
 import { feltToString } from "@/lib/utils";
-import { Settings, SettingsDetails } from "@/generated/models.gen";
-import { useMemo } from "react";
-import { useDojoStore } from "@/dojo/hooks/useDojoStore";
+import { mergeGameSettings } from "@/lib/utils/formatting";
 
 interface GameSettingsFieldProps {
   form: UseFormReturn<any>;
@@ -32,55 +30,32 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
   const { gameNamespace, gameSettingsModel } = useGameEndpoints(
     form.watch("game")
   );
-  useGetGameSettingsQuery(gameNamespace ?? "", gameSettingsModel ?? "");
-  const settingsDetails = useDojoStore((state) =>
-    state.getEntitiesByModel(gameNamespace ?? "", "SettingsDetails")
+
+  const { data: rawSettings } = useGetGameSettings({
+    namespace: gameNamespace ?? "",
+    settingsModel: gameSettingsModel ?? "",
+    active: true,
+  });
+
+  const { data: settingsDetails } = useGetGameSettings({
+    namespace: gameNamespace ?? "",
+    settingsModel: "GameSettingsMetadata",
+    active: gameNamespace === "ds_v1_2_0",
+  });
+
+  const settings = rawSettings?.map((setting) =>
+    Object.entries(setting).reduce((acc, [key, value]) => {
+      if (!key.includes("internal") && !key.includes("settings_id")) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as Record<string, any>)
   );
-  const settings = useDojoStore((state) =>
-    state.getEntitiesByModel(gameNamespace ?? "", "Settings")
-  );
 
-  const settingsEntities = [...settingsDetails, ...settings];
-
-  const mergedGameSettings = useMemo(() => {
-    if (!settingsEntities) return {};
-
-    return settingsEntities.reduce(
-      (acc, entity) => {
-        const details = entity.models[gameNamespace ?? ""]
-          .SettingsDetails as SettingsDetails;
-        const settings = entity.models[gameNamespace ?? ""]
-          .Settings as Settings;
-        const detailsId = details.id.toString();
-
-        // If this details ID doesn't exist yet, create it
-        if (!acc[detailsId]) {
-          acc[detailsId] = {
-            ...details,
-            hasSettings: false,
-            settings: [],
-          };
-        }
-
-        // If we have settings, add them to the array and set hasSettings to true
-        if (settings) {
-          acc[detailsId].settings.push(settings);
-          acc[detailsId].hasSettings = true;
-        }
-
-        return acc;
-      },
-      {} as Record<
-        string,
-        SettingsDetails & {
-          hasSettings: boolean;
-          settings: Settings[];
-        }
-      >
-    );
-  }, [settingsEntities, form.watch("game")]);
+  const mergedGameSettings = mergeGameSettings(settingsDetails, settings);
 
   const hasSettings = mergedGameSettings[field.value]?.hasSettings ?? false;
+
   return (
     <FormItem>
       <div className="flex flex-row items-center gap-5">

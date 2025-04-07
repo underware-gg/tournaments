@@ -1,9 +1,8 @@
-import { Settings } from "@/generated/models.gen";
-import { feltToString } from "@/lib/utils";
+import { formatGameSettings } from "@/lib/utils/formatting";
 
 interface SettingsTableProps {
   hasSettings: boolean;
-  settings: Settings[];
+  settings: any[];
 }
 
 const SettingsTable = ({ hasSettings, settings }: SettingsTableProps) => {
@@ -19,29 +18,21 @@ const SettingsTable = ({ hasSettings, settings }: SettingsTableProps) => {
     );
   }
 
+  const formattedSettings = formatGameSettings(settings);
+
   return (
-    <div className="border border-brand-muted rounded-lg overflow-hidden w-3/4">
-      <table className="w-full">
-        <tbody className="divide-y divide-brand-muted">
-          {settings.map((setting, index) => (
-            <tr key={index} className="hover:bg-brand/5 transition-colors">
-              {/* <td className="p-2 pl-4">
-                <img
-                  src={`/icons/${game}/${item.icon}`}
-                  alt={item.label}
-                  className="w-6 h-6 text-brand"
-                />
-              </td> */}
-              <td className="p-2 text-sm font-medium">
-                {feltToString(setting.name)}
-              </td>
-              <td className="p-2 pr-4 text-sm text-muted-foreground text-right">
-                {setting.value.toString()}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="overflow-y-auto sm:w-3/4 flex flex-col gap-2 h-[300px] pr-2">
+      {formattedSettings.map((setting, index) => (
+        <div
+          key={index}
+          className="hover:bg-brand/5 transition-colors rounded-lg border border-brand-muted flex flex-row justify-between items-center"
+        >
+          <div className="p-2 text-sm font-medium">{setting.formattedKey}</div>
+          <div className="p-2 pr-4 text-sm text-muted-foreground text-right">
+            {setting.formattedValue}
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

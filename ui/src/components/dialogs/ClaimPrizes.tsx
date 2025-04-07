@@ -13,6 +13,7 @@ import { feltToString, formatNumber, getOrdinalSuffix } from "@/lib/utils";
 import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
 import { TokenPrices } from "@/hooks/useEkuboPrices";
 import { getTokenLogoUrl, getTokenSymbol } from "@/lib/tokensMeta";
+import { useDojo } from "@/context/dojo";
 
 interface ClaimPrizesDialogProps {
   open: boolean;
@@ -34,6 +35,9 @@ export function ClaimPrizesDialog({
   const { address } = useAccount();
   const { connect } = useConnectToSelectedChain();
   const { claimPrizes } = useSystemCalls();
+  const { selectedChainConfig } = useDojo();
+
+  const chainId = selectedChainConfig?.chainId ?? "";
 
   const handleClaimPrizes = () => {
     claimPrizes(
@@ -58,7 +62,7 @@ export function ClaimPrizesDialog({
             const prizeAmount =
               Number(prize.token_type.variant.erc20.amount) / 10 ** 18;
             const tokenPrice =
-              prices[getTokenSymbol(prize.token_address) ?? ""] ?? 0;
+              prices[getTokenSymbol(chainId, prize.token_address) ?? ""] ?? 0;
             return (
               <div
                 className="flex flex-row items-center justify-between"
@@ -76,7 +80,7 @@ export function ClaimPrizesDialog({
                 <div className="flex flex-row items-center gap-2">
                   <span>{formatNumber(prizeAmount)}</span>
                   <img
-                    src={getTokenLogoUrl(prize.token_address)}
+                    src={getTokenLogoUrl(chainId, prize.token_address)}
                     className="w-6 h-6"
                   />
                   <span className="text-neutral">

@@ -1,9 +1,8 @@
-import { Settings } from "@/generated/models.gen";
-import { feltToString } from "@/lib/utils";
+import { formatGameSettings } from "@/lib/utils/formatting";
 
 interface SmallSettingsTableProps {
   hasSettings: boolean;
-  settings: Settings[];
+  settings: any[];
 }
 
 const SmallSettingsTable = ({
@@ -21,25 +20,22 @@ const SmallSettingsTable = ({
     );
   }
 
+  const formattedSettings = formatGameSettings(settings);
+
   return (
-    <div className="flex flex-row gap-2 overflow-x-auto">
-      {settings.map((item, index) => (
+    <div className="flex flex-row gap-2 overflow-x-auto pb-2">
+      {formattedSettings.map((item, index) => (
         <div
           key={index}
           className="border border-brand-muted rounded-lg p-3 bg-background hover:bg-brand/10 transition-colors flex-shrink-0"
         >
           <div className="flex items-center gap-3">
-            {/* <img
-              src={`/icons/${game}/${item.icon}`}
-              alt={item.label}
-              className="w-5 h-5 text-brand"
-            /> */}
             <div className="flex flex-col">
-              <span className="text-sm font-medium">
-                {feltToString(item.name)}
+              <span className="text-sm font-medium text-brand-muted">
+                {item.formattedKey}
               </span>
               <span className="text-xs text-muted-foreground">
-                {item.value.toString()}
+                {item.formattedValue}
               </span>
             </div>
           </div>

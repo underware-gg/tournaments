@@ -1,5 +1,6 @@
 import { getTokenLogoUrl } from "@/lib/tokensMeta";
 import { formatNumber } from "@/lib/utils";
+import { useDojo } from "@/context/dojo";
 
 interface TokenValueProps {
   amount: number;
@@ -16,6 +17,9 @@ export const TokenValue = ({
   isLoading = false,
   className = "",
 }: TokenValueProps) => {
+  const { selectedChainConfig } = useDojo();
+  const chainId = selectedChainConfig?.chainId ?? "";
+
   if (isLoading) {
     return <p>Loading...</p>;
   }
@@ -28,7 +32,7 @@ export const TokenValue = ({
         <div className={`flex flex-row items-center gap-2 ${className}`}>
           <p>~{formatNumber(amount)}</p>
           <img
-            src={getTokenLogoUrl(tokenAddress)}
+            src={getTokenLogoUrl(chainId, tokenAddress)}
             className="w-6"
             alt="Token logo"
           />

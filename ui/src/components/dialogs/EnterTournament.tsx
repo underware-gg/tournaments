@@ -74,12 +74,15 @@ export function EnterTournamentDialog({
   tournamentsData,
   duration,
 }: EnterTournamentDialogProps) {
-  const { namespace } = useDojo();
+  const { namespace, selectedChainConfig } = useDojo();
   const { address } = useAccount();
   const { connect } = useConnectToSelectedChain();
   const { approveAndEnterTournament, getBalanceGeneral } = useSystemCalls();
   const [playerName, setPlayerName] = useState("");
   const [balance, setBalance] = useState<BigNumberish>(0);
+
+  const chainId = selectedChainConfig?.chainId ?? "";
+
   const handleEnterTournament = () => {
     if (!playerName.trim()) return;
 
@@ -720,7 +723,7 @@ export function EnterTournamentDialog({
                         {formatNumber(Number(entryAmount) / 10 ** 18)}
                       </span>
                       <img
-                        src={getTokenLogoUrl(entryToken ?? "")}
+                        src={getTokenLogoUrl(chainId, entryToken ?? "")}
                         alt={entryToken ?? ""}
                         className="w-6 h-6"
                       />
@@ -771,7 +774,7 @@ export function EnterTournamentDialog({
                         +{formatNumber(creatorAmount)}
                       </span>
                       <img
-                        src={getTokenLogoUrl(entryToken ?? "")}
+                        src={getTokenLogoUrl(chainId, entryToken ?? "")}
                         alt={entryToken ?? ""}
                         className="w-5"
                       />
@@ -792,7 +795,7 @@ export function EnterTournamentDialog({
                         +{formatNumber(gameAmount)}
                       </span>
                       <img
-                        src={getTokenLogoUrl(entryToken ?? "")}
+                        src={getTokenLogoUrl(chainId, entryToken ?? "")}
                         alt={entryToken ?? ""}
                         className="w-5"
                       />
@@ -815,7 +818,7 @@ export function EnterTournamentDialog({
                         +{formatNumber(prizePoolAmount)}
                       </span>
                       <img
-                        src={getTokenLogoUrl(entryToken ?? "")}
+                        src={getTokenLogoUrl(chainId, entryToken ?? "")}
                         alt={entryToken ?? ""}
                         className="w-5"
                       />

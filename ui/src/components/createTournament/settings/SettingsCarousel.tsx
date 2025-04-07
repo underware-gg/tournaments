@@ -4,17 +4,11 @@ import { Button } from "@/components/ui/button";
 import { WEDGE_LEFT, WEDGE_RIGHT } from "@/components/Icons";
 import SettingsTable from "@/components/createTournament/settings/SettingsTable";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
-import { Settings, SettingsDetails } from "@/generated/models.gen";
 import useUIStore from "@/hooks/useUIStore";
+
 interface SettingsCarouselProps {
   game: string;
-  settings: Record<
-    string,
-    SettingsDetails & {
-      hasSettings: boolean;
-      settings: Settings[];
-    }
-  >;
+  settings: any[];
   value: string;
   onChange: (value: string) => void;
 }
@@ -33,6 +27,7 @@ const SettingsCarousel = ({
       Object.values(settings).findIndex((s) => s.id === value)
     );
   });
+
   // If no settings available, show fallback UI
   if (!Object.values(settings)?.length) {
     return (
@@ -50,13 +45,15 @@ const SettingsCarousel = ({
 
   return (
     <div className="space-y-4">
-      <div className="relative px-6 min-h-[200px]">
-        <div className="flex flex-col items-center w-full">
+      <div className="relative px-6 min-h-[200px] max-h-[600px]">
+        <div className="flex flex-col gap-2 items-center w-full">
           <TokenGameIcon size="lg" image={getGameImage(game)} />
-          <h3 className="text-2xl font-brand">
-            {feltToString(currentSetting.name)}
-          </h3>
-          <p className="text-muted-foreground">{currentSetting.description}</p>
+          <div className="flex flex-col items-center">
+            <h3 className="text-2xl font-brand">
+              {feltToString(currentSetting.name)}
+            </h3>
+            <p className="text-brand-muted">{currentSetting.description}</p>
+          </div>
 
           {/* Add the settings table */}
           <SettingsTable
@@ -103,10 +100,22 @@ const SettingsCarousel = ({
             />
           ))}
         </div>
+        {game ===
+          "0x0444834e7b71749832f0db8c64f17ed1c3af8462c1682c10dcd6068b1c57494b" && (
+          <div className="flex flex-row gap-2">
+            <span className="text-brand-muted">More info at</span>
+            <a
+              href="https://darkshuffle.io"
+              target="_blank"
+              className="text-brand underline"
+            >
+              Dark Shuffle
+            </a>
+          </div>
+        )}
         <Button
           onClick={() => {
             onChange(currentSetting.id.toString());
-            // Close dialog
             const dialogClose = document.querySelector("[data-dialog-close]");
             if (dialogClose instanceof HTMLElement) {
               dialogClose.click();

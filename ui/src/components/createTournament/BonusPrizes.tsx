@@ -23,7 +23,7 @@ import { useEkuboPrices } from "@/hooks/useEkuboPrices";
 import { OptionalSection } from "@/components/createTournament/containers/OptionalSection";
 import { TokenValue } from "@/components/createTournament/containers/TokenValue";
 import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
-
+import { useDojo } from "@/context/dojo";
 interface NewPrize {
   tokenAddress: string;
   tokenType: "ERC20" | "ERC721" | "";
@@ -44,6 +44,9 @@ const BonusPrizes = ({ form }: StepProps) => {
     { position: number; percentage: number }[]
   >([]);
   const [hasInsufficientBalance, setHasInsufficientBalance] = useState(false);
+  const { selectedChainConfig } = useDojo();
+
+  const chainId = selectedChainConfig?.chainId ?? "";
 
   const { getBalanceGeneral } = useSystemCalls();
 
@@ -52,7 +55,7 @@ const BonusPrizes = ({ form }: StepProps) => {
 
     // First map to get symbols, then filter out undefined values, then create a Set
     const symbols = bonusPrizes
-      .map((prize) => getTokenSymbol(prize.tokenAddress))
+      .map((prize) => getTokenSymbol(chainId, prize.tokenAddress))
       .filter(
         (symbol): symbol is string =>
           typeof symbol === "string" && symbol !== ""
@@ -66,7 +69,7 @@ const BonusPrizes = ({ form }: StepProps) => {
     tokens: [
       ...uniqueTokenSymbols,
       ...(newPrize.tokenAddress
-        ? [getTokenSymbol(newPrize.tokenAddress) ?? ""]
+        ? [getTokenSymbol(chainId, newPrize.tokenAddress) ?? ""]
         : []),
     ],
   });
@@ -112,7 +115,7 @@ const BonusPrizes = ({ form }: StepProps) => {
       ...prev,
       amount:
         (prev.value ?? 0) /
-        (prices?.[getTokenSymbol(prev.tokenAddress) ?? ""] ?? 1),
+        (prices?.[getTokenSymbol(chainId, prev.tokenAddress) ?? ""] ?? 1),
     }));
   }, [prices, newPrize.value]);
 
@@ -439,12 +442,18 @@ const BonusPrizes = ({ form }: StepProps) => {
                                   )}
                                 </span>
                                 <img
-                                  src={getTokenLogoUrl(newPrize.tokenAddress)}
+                                  src={getTokenLogoUrl(
+                                    chainId,
+                                    newPrize.tokenAddress
+                                  )}
                                   className="w-4"
                                 />
                               </div>
                               {prices?.[
-                                getTokenSymbol(newPrize.tokenAddress) ?? ""
+                                getTokenSymbol(
+                                  chainId,
+                                  newPrize.tokenAddress
+                                ) ?? ""
                               ] && (
                                 <span className="text-xs text-neutral">
                                   ~$
@@ -492,6 +501,7 @@ const BonusPrizes = ({ form }: StepProps) => {
                                       </span>
                                       <img
                                         src={getTokenLogoUrl(
+                                          chainId,
                                           prize.tokenAddress
                                         )}
                                         className="w-6 h-6 flex-shrink-0"
@@ -504,6 +514,7 @@ const BonusPrizes = ({ form }: StepProps) => {
                                         ? "Loading..."
                                         : prices?.[
                                             getTokenSymbol(
+                                              chainId,
                                               prize.tokenAddress
                                             ) ?? ""
                                           ] &&
@@ -511,6 +522,7 @@ const BonusPrizes = ({ form }: StepProps) => {
                                             (prize.amount ?? 0) *
                                             (prices?.[
                                               getTokenSymbol(
+                                                chainId,
                                                 prize.tokenAddress
                                               ) ?? ""
                                             ] ?? 0)

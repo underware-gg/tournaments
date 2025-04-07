@@ -32,6 +32,28 @@ export const useGetGamesMetadata = ({
   return { data, loading, error };
 };
 
+export const useGetGameSettings = ({
+  namespace,
+  settingsModel,
+  active = false,
+}: {
+  namespace: string;
+  settingsModel: string;
+  active?: boolean;
+}) => {
+  const query = useMemo(
+    () =>
+      namespace && settingsModel && active
+        ? `
+    SELECT * FROM "${namespace}-${settingsModel}"
+  `
+        : null,
+    [namespace, settingsModel, active]
+  );
+  const { data, loading, error } = useSqlExecute(query);
+  return { data, loading, error };
+};
+
 export const useGetTournamentsCount = ({
   namespace,
   fromTournamentId,
