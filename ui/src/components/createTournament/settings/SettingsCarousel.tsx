@@ -48,10 +48,12 @@ const SettingsCarousel = ({
       <div className="relative px-6 min-h-[200px] max-h-[600px]">
         <div className="flex flex-col gap-2 items-center w-full">
           <TokenGameIcon size="lg" image={getGameImage(game)} />
-          <h3 className="text-2xl font-brand">
-            {feltToString(currentSetting.name)}
-          </h3>
-          <p className="text-muted-foreground">{currentSetting.description}</p>
+          <div className="flex flex-col items-center">
+            <h3 className="text-2xl font-brand">
+              {feltToString(currentSetting.name)}
+            </h3>
+            <p className="text-brand-muted">{currentSetting.description}</p>
+          </div>
 
           {/* Add the settings table */}
           <SettingsTable

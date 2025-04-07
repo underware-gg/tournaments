@@ -794,7 +794,7 @@ export const formatSettingsValue = (value: any, key: string): any => {
   if (
     typeof value === "number" &&
     (value === 0 || value === 1) &&
-    /auto|enabled|active|toggle|flag/.test(key.toLowerCase())
+    /auto|enabled|active|toggle|flag|scaling|persistent/.test(key.toLowerCase())
   ) {
     return value === 1 ? "Enabled" : "Disabled";
   }

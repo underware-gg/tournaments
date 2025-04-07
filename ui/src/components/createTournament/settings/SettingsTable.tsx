@@ -21,19 +21,12 @@ const SettingsTable = ({ hasSettings, settings }: SettingsTableProps) => {
   const formattedSettings = formatGameSettings(settings);
 
   return (
-    <div className="overflow-y-auto w-3/4 flex flex-col gap-2 h-[300px] pr-2">
+    <div className="overflow-y-auto sm:w-3/4 flex flex-col gap-2 h-[300px] pr-2">
       {formattedSettings.map((setting, index) => (
         <div
           key={index}
           className="hover:bg-brand/5 transition-colors rounded-lg border border-brand-muted flex flex-row justify-between items-center"
         >
-          {/* <td className="p-2 pl-4">
-                <img
-                  src={`/icons/${game}/${item.icon}`}
-                  alt={item.label}
-                  className="w-6 h-6 text-brand"
-                />
-              </td> */}
           <div className="p-2 text-sm font-medium">{setting.formattedKey}</div>
           <div className="p-2 pr-4 text-sm text-muted-foreground text-right">
             {setting.formattedValue}
