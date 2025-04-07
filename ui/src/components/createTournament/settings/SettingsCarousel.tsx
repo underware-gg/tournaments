@@ -100,6 +100,19 @@ const SettingsCarousel = ({
             />
           ))}
         </div>
+        {game ===
+          "0x0444834e7b71749832f0db8c64f17ed1c3af8462c1682c10dcd6068b1c57494b" && (
+          <div className="flex flex-row gap-2">
+            <span className="text-brand-muted">More info at</span>
+            <a
+              href="https://darkshuffle.io"
+              target="_blank"
+              className="text-brand underline"
+            >
+              Dark Shuffle
+            </a>
+          </div>
+        )}
         <Button
           onClick={() => {
             onChange(currentSetting.id.toString());
