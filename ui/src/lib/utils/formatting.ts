@@ -741,6 +741,31 @@ export const processGameMetadataFromSql = (gameMetadata: any): GameMetadata => {
   };
 };
 
+export const mergeGameSettings = (settingsDetails: any[], settings: any[]) => {
+  if (!settingsDetails) return {};
+
+  return settingsDetails.reduce((acc, setting) => {
+    const detailsId = setting.settings_id.toString();
+
+    // If this details ID doesn't exist yet, create it
+    if (!acc[detailsId]) {
+      acc[detailsId] = {
+        ...setting,
+        hasSettings: false,
+        settings: [],
+      };
+    }
+
+    // If we have settings, add them to the array and set hasSettings to true
+    if (settings) {
+      acc[detailsId].settings.push(...settings);
+      acc[detailsId].hasSettings = true;
+    }
+
+    return acc;
+  }, {} as Record<string, any>);
+};
+
 /**
  * Formats a settings key into spaced capitalized words
  * Example: "battle.max_hand_size" -> "Battle - Max Hand Size"

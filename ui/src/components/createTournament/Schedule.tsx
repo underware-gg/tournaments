@@ -43,10 +43,9 @@ const Schedule = ({ form }: StepProps) => {
   });
   const [minEndTime, setMinEndTime] = useState<Date>(() => {
     // Initialize with current start time + 15 minutes
-    const now = new Date();
     const startTime = form.watch("startTime");
     startTime.setMinutes(startTime.getMinutes() + 15);
-    return now;
+    return startTime;
   });
 
   const PREDEFINED_DURATIONS = [
@@ -64,8 +63,14 @@ const Schedule = ({ form }: StepProps) => {
   } as const;
 
   // Updated function to disable dates before the minimum start time
-  const disablePastDates = (date: Date) => {
+  const disablePastStartDates = (date: Date) => {
     const minDate = new Date(minStartTime);
+    minDate.setHours(0, 0, 0, 0);
+    return date < minDate;
+  };
+
+  const disablePastEndDates = (date: Date) => {
+    const minDate = new Date(minEndTime);
     minDate.setHours(0, 0, 0, 0);
     return date < minDate;
   };
@@ -236,7 +241,7 @@ const Schedule = ({ form }: StepProps) => {
                             newDate.setMinutes(minute);
                             field.onChange(newDate);
                           }}
-                          disabled={disablePastDates}
+                          disabled={disablePastStartDates}
                           minTime={minStartTime}
                           initialFocus
                           className="rounded-md border-4 border-brand-muted w-auto"
@@ -326,7 +331,7 @@ const Schedule = ({ form }: StepProps) => {
                                     newDate.setMinutes(minute);
                                     field.onChange(newDate);
                                   }}
-                                  disabled={disablePastDates}
+                                  disabled={disablePastEndDates}
                                   minTime={minEndTime}
                                   initialFocus
                                   className="rounded-md border-4 border-brand-muted w-auto"

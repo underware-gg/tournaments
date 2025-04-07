@@ -75,11 +75,10 @@ function Calendar({
         ),
         CaptionLabel: ({ displayMonth }) => {
           const now = new Date();
-          const isToday = selectedTime.toDateString() === now.toDateString();
           const currentHour = now.getHours();
           const currentMinute = now.getMinutes();
-          const minStartHour = minTime ? minTime.getHours() : currentHour;
-          const minStartMinute = minTime ? minTime.getMinutes() : currentMinute;
+          const minHour = minTime ? minTime.getHours() : currentHour;
+          const minMinute = minTime ? minTime.getMinutes() : currentMinute;
 
           return (
             <div className="flex flex-row items-center">
@@ -99,7 +98,7 @@ function Calendar({
                         <SelectItem
                           key={i}
                           value={i.toString().padStart(2, "0")}
-                          disabled={isToday && i < minStartHour}
+                          disabled={i < minHour}
                         >
                           {i.toString().padStart(2, "0")}
                         </SelectItem>
@@ -123,9 +122,8 @@ function Calendar({
                             key={minute}
                             value={minute.toString().padStart(2, "0")}
                             disabled={
-                              isToday &&
-                              selectedTime.getHours() === minStartHour &&
-                              minute <= minStartMinute
+                              selectedTime.getHours() === minHour &&
+                              minute <= minMinute
                             }
                           >
                             {minute.toString().padStart(2, "0")}

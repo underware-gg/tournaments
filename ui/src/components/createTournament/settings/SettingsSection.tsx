@@ -19,8 +19,7 @@ import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
 import { useGameEndpoints } from "@/dojo/hooks/useGameEndpoints";
 import { useGetGameSettings } from "@/dojo/hooks/useSqlQueries";
 import { feltToString } from "@/lib/utils";
-import { Settings, SettingsDetails } from "@/generated/models.gen";
-import { useMemo } from "react";
+import { mergeGameSettings } from "@/lib/utils/formatting";
 
 interface GameSettingsFieldProps {
   form: UseFormReturn<any>;
@@ -53,39 +52,7 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
     }, {} as Record<string, any>)
   );
 
-  const mergedGameSettings = useMemo(() => {
-    if (!settingsDetails) return {};
-
-    return settingsDetails.reduce(
-      (acc, setting) => {
-        const detailsId = setting.settings_id.toString();
-
-        // If this details ID doesn't exist yet, create it
-        if (!acc[detailsId]) {
-          acc[detailsId] = {
-            ...setting,
-            hasSettings: false,
-            settings: [],
-          };
-        }
-
-        // If we have settings, add them to the array and set hasSettings to true
-        if (settings) {
-          acc[detailsId].settings.push(...settings);
-          acc[detailsId].hasSettings = true;
-        }
-
-        return acc;
-      },
-      {} as Record<
-        string,
-        SettingsDetails & {
-          hasSettings: boolean;
-          settings: Settings[];
-        }
-      >
-    );
-  }, [settingsDetails, settings, form.watch("game")]);
+  const mergedGameSettings = mergeGameSettings(settingsDetails, settings);
 
   const hasSettings = mergedGameSettings[field.value]?.hasSettings ?? false;
 
