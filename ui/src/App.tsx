@@ -108,9 +108,7 @@ function App() {
         // TODO: Remove this once we have a proper image for the dark shuffle game
         image: metadata?.image
           ? metadata?.contract_address ===
-              "0x0320f977f47f0885e376b781d9e244d9f59f10154ce844ae1815c919f0374726" ||
-            metadata?.contract_address ===
-              "0x04359aee29873cd9603207d29b4140468bac3e042aa10daab2e1a8b2dd60ef7b"
+            "0x0444834e7b71749832f0db8c64f17ed1c3af8462c1682c10dcd6068b1c57494b"
             ? "https://darkshuffle.io/favicon.svg"
             : metadata?.image
           : whitelisted?.image,

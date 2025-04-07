@@ -49,7 +49,7 @@ export const getGames = (): Game[] => {
     return [
       {
         contract_address:
-          "0x0320f977f47f0885e376b781d9e244d9f59f10154ce844ae1815c919f0374726",
+          "0x0444834e7b71749832f0db8c64f17ed1c3af8462c1682c10dcd6068b1c57494b",
         name: "0x4461726b2053687566666c65",
         image: "https://darkshuffle.io/favicon.svg",
         url: "https://darkshuffle.io",

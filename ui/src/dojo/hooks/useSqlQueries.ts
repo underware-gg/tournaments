@@ -7,7 +7,7 @@ export const useGetgameNamespaces = () => {
     () => `
     SELECT namespace 
     FROM models 
-    WHERE name = 'GameMetadata'
+    WHERE name = 'GameMetadata' AND namespace != 'ds_v1_1_4'
   `,
     []
   );
