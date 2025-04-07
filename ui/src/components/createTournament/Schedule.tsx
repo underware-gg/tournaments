@@ -263,7 +263,7 @@ const Schedule = ({ form }: StepProps) => {
                           </FormLabel>
 
                           <FormDescription className="sm:text-xs xl:text-sm 3xl:text-base hidden sm:block">
-                            Select a custom end time
+                            Custom end time
                           </FormDescription>
                         </div>
                         <FormControl>

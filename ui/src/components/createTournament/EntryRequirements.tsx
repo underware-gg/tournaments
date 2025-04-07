@@ -440,49 +440,51 @@ const EntryRequirements = ({ form }: StepProps) => {
                                             className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                                           />
                                         </div>
-                                        <div className="flex flex-row gap-2">
-                                          {gameData.map((game) => (
-                                            <div
-                                              key={game.contract_address}
-                                              className={`h-8 ${
-                                                gameFilters.includes(
-                                                  game.contract_address
-                                                )
-                                                  ? "bg-brand-muted text-black"
-                                                  : "bg-black"
-                                              } border border-brand-muted px-2 flex items-center gap-2 cursor-pointer`}
-                                              onClick={() => {
-                                                if (
+                                        <div className="w-full overflow-x-auto pb-2">
+                                          <div className="flex flex-row gap-2 min-w-min">
+                                            {gameData.map((game) => (
+                                              <div
+                                                key={game.contract_address}
+                                                className={`h-8 flex-shrink-0 ${
                                                   gameFilters.includes(
                                                     game.contract_address
                                                   )
-                                                ) {
-                                                  setGameFilters(
-                                                    gameFilters.filter(
-                                                      (g) =>
-                                                        g !==
-                                                        game.contract_address
+                                                    ? "bg-brand-muted text-black"
+                                                    : "bg-black"
+                                                } border border-brand-muted px-2 flex items-center gap-2 cursor-pointer`}
+                                                onClick={() => {
+                                                  if (
+                                                    gameFilters.includes(
+                                                      game.contract_address
                                                     )
-                                                  );
-                                                } else {
-                                                  setGameFilters([
-                                                    ...gameFilters,
-                                                    game.contract_address,
-                                                  ]);
-                                                }
-                                              }}
-                                            >
-                                              {feltToString(game.name)}
-                                              <span className="flex items-center justify-center">
-                                                <TokenGameIcon
-                                                  size="xs"
-                                                  image={getGameImage(
-                                                    game.contract_address
-                                                  )}
-                                                />
-                                              </span>
-                                            </div>
-                                          ))}
+                                                  ) {
+                                                    setGameFilters(
+                                                      gameFilters.filter(
+                                                        (g) =>
+                                                          g !==
+                                                          game.contract_address
+                                                      )
+                                                    );
+                                                  } else {
+                                                    setGameFilters([
+                                                      ...gameFilters,
+                                                      game.contract_address,
+                                                    ]);
+                                                  }
+                                                }}
+                                              >
+                                                {feltToString(game.name)}
+                                                <span className="flex items-center justify-center">
+                                                  <TokenGameIcon
+                                                    size="xs"
+                                                    image={getGameImage(
+                                                      game.contract_address
+                                                    )}
+                                                  />
+                                                </span>
+                                              </div>
+                                            ))}
+                                          </div>
                                         </div>
                                       </div>
                                     </DialogHeader>
