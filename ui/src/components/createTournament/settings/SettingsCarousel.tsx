@@ -4,17 +4,11 @@ import { Button } from "@/components/ui/button";
 import { WEDGE_LEFT, WEDGE_RIGHT } from "@/components/Icons";
 import SettingsTable from "@/components/createTournament/settings/SettingsTable";
 import TokenGameIcon from "@/components/icons/TokenGameIcon";
-import { Settings, SettingsDetails } from "@/generated/models.gen";
 import useUIStore from "@/hooks/useUIStore";
+
 interface SettingsCarouselProps {
   game: string;
-  settings: Record<
-    string,
-    SettingsDetails & {
-      hasSettings: boolean;
-      settings: Settings[];
-    }
-  >;
+  settings: any[];
   value: string;
   onChange: (value: string) => void;
 }
@@ -33,6 +27,7 @@ const SettingsCarousel = ({
       Object.values(settings).findIndex((s) => s.id === value)
     );
   });
+
   // If no settings available, show fallback UI
   if (!Object.values(settings)?.length) {
     return (
@@ -50,8 +45,8 @@ const SettingsCarousel = ({
 
   return (
     <div className="space-y-4">
-      <div className="relative px-6 min-h-[200px]">
-        <div className="flex flex-col items-center w-full">
+      <div className="relative px-6 min-h-[200px] max-h-[600px]">
+        <div className="flex flex-col gap-2 items-center w-full">
           <TokenGameIcon size="lg" image={getGameImage(game)} />
           <h3 className="text-2xl font-brand">
             {feltToString(currentSetting.name)}
@@ -106,7 +101,6 @@ const SettingsCarousel = ({
         <Button
           onClick={() => {
             onChange(currentSetting.id.toString());
-            // Close dialog
             const dialogClose = document.querySelector("[data-dialog-close]");
             if (dialogClose instanceof HTMLElement) {
               dialogClose.click();

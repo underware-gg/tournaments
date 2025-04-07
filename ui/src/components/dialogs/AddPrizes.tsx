@@ -50,7 +50,7 @@ export function AddPrizesDialog({
   leaderboardSize: number;
 }) {
   const { address } = useAccount();
-  const { namespace } = useDojo();
+  const { namespace, selectedChainConfig } = useDojo();
   const { connect } = useConnectToSelectedChain();
   const { approveAndAddPrizes, getBalanceGeneral } = useSystemCalls();
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
@@ -71,6 +71,8 @@ export function AddPrizesDialog({
   );
   const [isLoadingBalances, setIsLoadingBalances] = useState(false);
   const [hasInsufficientBalance, setHasInsufficientBalance] = useState(false);
+
+  const chainId = selectedChainConfig?.chainId ?? "";
 
   const { entity: metricsEntity } = useGetMetricsQuery(
     addAddressPadding(TOURNAMENT_VERSION_KEY),
@@ -262,7 +264,7 @@ export function AddPrizesDialog({
   const uniqueTokenSymbols = useMemo(() => {
     // First map to get symbols, then filter out undefined values, then create a Set
     const symbols = currentPrizes
-      .map((prize) => getTokenSymbol(prize.tokenAddress))
+      .map((prize) => getTokenSymbol(chainId, prize.tokenAddress))
       .filter(
         (symbol): symbol is string =>
           typeof symbol === "string" && symbol !== ""
@@ -276,7 +278,7 @@ export function AddPrizesDialog({
     tokens: [
       ...uniqueTokenSymbols,
       ...(newPrize.tokenAddress
-        ? [getTokenSymbol(newPrize.tokenAddress) ?? ""]
+        ? [getTokenSymbol(chainId, newPrize.tokenAddress) ?? ""]
         : []),
     ],
   });
@@ -286,8 +288,8 @@ export function AddPrizesDialog({
       ...prev,
       amount:
         (prev.value ?? 0) /
-        (prices?.[getTokenSymbol(prev.tokenAddress) ?? ""] ?? 1),
-      hasPrice: !!prices?.[getTokenSymbol(prev.tokenAddress) ?? ""],
+        (prices?.[getTokenSymbol(chainId, prev.tokenAddress) ?? ""] ?? 1),
+      hasPrice: !!prices?.[getTokenSymbol(chainId, prev.tokenAddress) ?? ""],
     }));
   }, [prices, newPrize.value]);
 
@@ -417,7 +419,7 @@ export function AddPrizesDialog({
                           {formatNumber(prize.amount)}
                         </span>
                         <img
-                          src={getTokenLogoUrl(prize.tokenAddress)}
+                          src={getTokenLogoUrl(chainId, prize.tokenAddress)}
                           className="w-6 h-6 rounded-full"
                           alt="Token logo"
                         />
@@ -515,7 +517,7 @@ export function AddPrizesDialog({
                     <div className="flex flex-row items-center gap-2">
                       <p>~{formatNumber(newPrize.amount ?? 0)}</p>
                       <img
-                        src={getTokenLogoUrl(newPrize.tokenAddress)}
+                        src={getTokenLogoUrl(chainId, newPrize.tokenAddress)}
                         className="w-6 h-6 rounded-full"
                       />
                     </div>
@@ -664,12 +666,16 @@ export function AddPrizesDialog({
                                 )}
                               </span>
                               <img
-                                src={getTokenLogoUrl(newPrize.tokenAddress)}
+                                src={getTokenLogoUrl(
+                                  chainId,
+                                  newPrize.tokenAddress
+                                )}
                                 className="w-4 h-4 rounded-full"
                               />
                             </div>
                             {prices?.[
-                              getTokenSymbol(newPrize.tokenAddress) ?? ""
+                              getTokenSymbol(chainId, newPrize.tokenAddress) ??
+                                ""
                             ] && (
                               <span className="text-xs text-neutral">
                                 ~$
@@ -711,7 +717,7 @@ export function AddPrizesDialog({
                         <div className="flex flex-row gap-1 items-center">
                           <span>{formatNumber(prize.amount ?? 0)}</span>
                           <img
-                            src={getTokenLogoUrl(prize.tokenAddress)}
+                            src={getTokenLogoUrl(chainId, prize.tokenAddress)}
                             className="w-6 h-6 rounded-full flex-shrink-0"
                             alt="Token logo"
                           />
@@ -721,12 +727,14 @@ export function AddPrizesDialog({
                           {pricesLoading
                             ? "Loading..."
                             : prices?.[
-                                getTokenSymbol(prize.tokenAddress) ?? ""
+                                getTokenSymbol(chainId, prize.tokenAddress) ??
+                                  ""
                               ] &&
                               `~$${(
                                 (prize.amount ?? 0) *
                                 (prices?.[
-                                  getTokenSymbol(prize.tokenAddress) ?? ""
+                                  getTokenSymbol(chainId, prize.tokenAddress) ??
+                                    ""
                                 ] ?? 0)
                               ).toFixed(2)}`}
                         </span>

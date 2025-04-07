@@ -32,36 +32,38 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
     form.watch("game")
   );
 
-  const { data: settings } = useGetGameSettings({
+  const { data: rawSettings } = useGetGameSettings({
     namespace: gameNamespace ?? "",
     settingsModel: gameSettingsModel ?? "",
+    active: true,
   });
 
   const { data: settingsDetails } = useGetGameSettings({
     namespace: gameNamespace ?? "",
     settingsModel: "GameSettingsMetadata",
-    active: gameNamespace === "ds_v1_1_4",
+    active: gameNamespace === "ds_v1_2_0",
   });
 
-  const settingsEntities = [...settingsDetails, ...settings];
-
-  console.log(settingsEntities);
+  const settings = rawSettings?.map((setting) =>
+    Object.entries(setting).reduce((acc, [key, value]) => {
+      if (!key.includes("internal") && !key.includes("settings_id")) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as Record<string, any>)
+  );
 
   const mergedGameSettings = useMemo(() => {
-    if (!settingsEntities) return {};
+    if (!settingsDetails) return {};
 
-    return settingsEntities.reduce(
-      (acc, entity) => {
-        const details = entity.models[gameNamespace ?? ""]
-          .SettingsDetails as SettingsDetails;
-        const settings = entity.models[gameNamespace ?? ""]
-          .Settings as Settings;
-        const detailsId = details.id.toString();
+    return settingsDetails.reduce(
+      (acc, setting) => {
+        const detailsId = setting.settings_id.toString();
 
         // If this details ID doesn't exist yet, create it
         if (!acc[detailsId]) {
           acc[detailsId] = {
-            ...details,
+            ...setting,
             hasSettings: false,
             settings: [],
           };
@@ -69,7 +71,7 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
 
         // If we have settings, add them to the array and set hasSettings to true
         if (settings) {
-          acc[detailsId].settings.push(settings);
+          acc[detailsId].settings.push(...settings);
           acc[detailsId].hasSettings = true;
         }
 
@@ -83,9 +85,9 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
         }
       >
     );
-  }, [settingsEntities, form.watch("game")]);
+  }, [settingsDetails, settings, form.watch("game")]);
 
-  const hasSettings = false;
+  const hasSettings = mergedGameSettings[field.value]?.hasSettings ?? false;
 
   return (
     <FormItem>

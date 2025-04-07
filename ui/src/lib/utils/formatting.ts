@@ -740,3 +740,96 @@ export const processGameMetadataFromSql = (gameMetadata: any): GameMetadata => {
     image: gameMetadata.image,
   };
 };
+
+/**
+ * Formats a settings key into spaced capitalized words
+ * Example: "battle.max_hand_size" -> "Battle - Max Hand Size"
+ */
+export const formatSettingsKey = (key: string): string => {
+  // First split by dots to get the main sections
+  const sections = key.split(".");
+
+  // Format each section (capitalize words and replace underscores with spaces)
+  const formattedSections = sections.map(
+    (section) =>
+      section
+        .split("_") // Split by underscores
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize first letter
+        .join(" ") // Join with spaces
+  );
+
+  // Join the sections with " - "
+  return formattedSections.join(" - ");
+};
+
+/**
+ * Formats a settings value based on its type and key name
+ */
+export const formatSettingsValue = (value: any, key: string): any => {
+  // Handle string that might be JSON
+  if (
+    typeof value === "string" &&
+    (value.startsWith("[") || value.startsWith("{"))
+  ) {
+    try {
+      const parsed = JSON.parse(value);
+
+      // If it's an array of IDs, return the count
+      if (
+        Array.isArray(parsed) &&
+        parsed.every((item) => typeof item === "string")
+      ) {
+        return `${parsed.length} items`;
+      }
+
+      // Otherwise return the formatted JSON
+      return JSON.stringify(parsed, null, 2);
+    } catch {
+      // If parsing fails, return the original string
+      return value;
+    }
+  }
+
+  // Handle booleans represented as 0/1
+  if (
+    typeof value === "number" &&
+    (value === 0 || value === 1) &&
+    /auto|enabled|active|toggle|flag/.test(key.toLowerCase())
+  ) {
+    return value === 1 ? "Enabled" : "Disabled";
+  }
+
+  // Return other values as is
+  return value;
+};
+
+/**
+ * Formats game settings into a more readable structure
+ */
+export const formatGameSettings = (settings: any[]) => {
+  if (!settings || !settings.length) return [];
+
+  // Process all settings into a single flat array
+  const formattedSettings: any[] = [];
+
+  // Process each setting object
+  settings.forEach((setting) => {
+    // Process each field in the setting
+    Object.entries(setting).forEach(([key, value]) => {
+      // Skip internal fields if needed
+      if (key.includes("internal")) return;
+
+      formattedSettings.push({
+        key,
+        formattedKey: formatSettingsKey(key),
+        value,
+        formattedValue: formatSettingsValue(value, key),
+      });
+    });
+  });
+
+  // Sort settings by category (battle, draft, map, etc.)
+  formattedSettings.sort((a, b) => a.key.localeCompare(b.key));
+
+  return formattedSettings;
+};

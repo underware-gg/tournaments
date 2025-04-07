@@ -22,6 +22,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useDojo } from "@/context/dojo";
 
 interface PrizeProps {
   position: number;
@@ -31,9 +32,12 @@ interface PrizeProps {
 }
 
 const Prize = ({ position, prizes, prices, tokens }: PrizeProps) => {
+  const { selectedChainConfig } = useDojo();
   const totalPrizeNFTs = countTotalNFTs(prizes);
   const [isMobileDialogOpen, setIsMobileDialogOpen] = useState(false);
   const totalPrizesValueUSD = calculateTotalValue(prizes, prices);
+
+  const chainId = selectedChainConfig?.chainId ?? "";
 
   // Function to render prize details content
   const renderPrizeDetails = () => (
@@ -72,9 +76,9 @@ const Prize = ({ position, prizes, prices, tokens }: PrizeProps) => {
                     <span>{`${formatNumber(
                       Number(prize.value) / 10 ** 18
                     )}`}</span>
-                    {getTokenLogoUrl(prize.address) ? (
+                    {getTokenLogoUrl(chainId, prize.address) ? (
                       <img
-                        src={getTokenLogoUrl(prize.address)}
+                        src={getTokenLogoUrl(chainId, prize.address)}
                         className="w-6 h-6 rounded-full"
                       />
                     ) : (
@@ -165,7 +169,7 @@ const Prize = ({ position, prizes, prices, tokens }: PrizeProps) => {
                         )}`}</span>
                         <div className="w-6 h-6">
                           <img
-                            src={getTokenLogoUrl(prize.address)}
+                            src={getTokenLogoUrl(chainId, prize.address)}
                             alt={`${symbol} token`}
                           />
                         </div>
