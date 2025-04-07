@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,14 +10,15 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { getTokenLogoUrl } from "@/lib/tokensMeta";
+import { getTokenLogoUrl, getTokenHidden } from "@/lib/tokensMeta";
 import { useDojo } from "@/context/dojo";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { Token } from "@/generated/models.gen";
 import { ChainId } from "@/dojo/setup/networks";
+import { QUESTION } from "@/components/Icons";
+import { sepoliaTokens } from "@/lib/sepoliaTokens";
 import { addAddressPadding, CairoCustomEnum } from "starknet";
 import { bigintToHex } from "@/lib/utils";
-import { QUESTION } from "@/components/Icons";
 
 interface TokenDialogProps {
   selectedToken: Token | null;
@@ -29,28 +30,32 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
   const [tokenSearchQuery, setTokenSearchQuery] = useState("");
   const { selectedChainConfig, namespace } = useDojo();
 
+  const isMainnet = selectedChainConfig.chainId === ChainId.SN_MAIN;
   const isSepolia = selectedChainConfig.chainId === ChainId.SN_SEPOLIA;
 
-  const sepoliaTokens = [
-    {
-      address:
-        "0x064fd80fcb41d00214430574a0aa19d21cc5d6452aeb4996f31b6e9ba4f466a0",
-      is_registered: true,
-      name: "Lords",
-      symbol: "LORDS",
-      token_type: new CairoCustomEnum({
-        erc20: {
-          amount: addAddressPadding(bigintToHex(BigInt(1))),
-        },
-      }),
-    },
-  ];
+  const mainnetTokens = useDojoStore((state) =>
+    state
+      .getEntitiesByModel(namespace, "Token")
+      .map((token) => token.models[namespace].Token as Token)
+  );
 
-  const tokens = isSepolia
-    ? sepoliaTokens
-    : useDojoStore((state) => state.getEntitiesByModel(namespace, "Token")).map(
-        (token) => token.models[namespace].Token as Token
-      );
+  const tokens: Token[] = useMemo(() => {
+    return isMainnet
+      ? mainnetTokens
+      : isSepolia
+      ? sepoliaTokens.map((token) => ({
+          address: token.l2_token_address,
+          name: token.name,
+          symbol: token.symbol,
+          is_registered: true,
+          token_type: new CairoCustomEnum({
+            erc20: {
+              amount: addAddressPadding(bigintToHex(BigInt(1))),
+            },
+          }),
+        }))
+      : [];
+  }, [isMainnet, isSepolia, namespace]);
 
   const typeFilteredTokens = type
     ? tokens.filter((token) => token.token_type.activeVariant() === type)
@@ -67,7 +72,10 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
           {selectedToken ? (
             <div className="flex items-center gap-2">
               <img
-                src={getTokenLogoUrl(selectedToken.address)}
+                src={getTokenLogoUrl(
+                  selectedChainConfig?.chainId ?? "",
+                  selectedToken.address
+                )}
                 className="w-6 h-6 rounded-full"
                 alt="Token logo"
               />
@@ -81,9 +89,9 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
         </Button>
       </DialogTrigger>
       <DialogContent className="h-[600px] flex flex-col p-0">
-        <DialogHeader className="flex-shrink-0 pb-4">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="p-4">Select Token</DialogTitle>
-          <div className="px-4 pb-4">
+          <div className="px-4">
             <div className="flex items-center border rounded border-brand-muted bg-background">
               <Search className="w-4 h-4 ml-3 text-muted-foreground" />
               <Input
@@ -95,42 +103,60 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
             </div>
           </div>
         </DialogHeader>
-        <div className="flex-1 overflow-y-auto">
-          {searchFilteredTokens.map((token, index) => {
-            const tokenLogo = getTokenLogoUrl(token.address);
-            return (
-              <DialogClose asChild key={index}>
-                <div
-                  className={`w-full flex flex-row items-center justify-between hover:bg-brand/20 hover:cursor-pointer px-5 py-2 ${
-                    selectedToken?.address === token.address
-                      ? "bg-terminal-green/75 text-terminal-black"
-                      : ""
-                  }`}
-                  onClick={() => onSelect(token)}
-                >
-                  <div className="flex flex-row gap-5 items-center">
-                    {tokenLogo ? (
-                      <img src={tokenLogo} className="w-8 h-8 rounded-full" />
-                    ) : (
-                      <div className="w-8 h-8 ">
-                        <QUESTION />
+        {searchFilteredTokens.length > 0 ? (
+          <div className="flex-1 overflow-y-auto">
+            {searchFilteredTokens.map((token, index) => {
+              const tokenLogo = getTokenLogoUrl(
+                selectedChainConfig?.chainId ?? "",
+                token.address
+              );
+              const isHidden = getTokenHidden(
+                selectedChainConfig?.chainId ?? "",
+                token.address
+              );
+              return (
+                <DialogClose asChild key={index}>
+                  <div
+                    className={`w-full flex flex-row items-center justify-between hover:bg-brand/20 hover:cursor-pointer px-5 py-2 ${
+                      selectedToken?.address === token.address
+                        ? "bg-terminal-green/75 text-terminal-black"
+                        : ""
+                    } ${isHidden ? "hidden" : ""}`}
+                    onClick={() => onSelect(token)}
+                  >
+                    <div className="flex flex-row gap-5 items-center">
+                      {tokenLogo ? (
+                        <img src={tokenLogo} className="w-8 h-8 rounded-full" />
+                      ) : (
+                        <div className="w-8 h-8 ">
+                          <QUESTION />
+                        </div>
+                      )}
+                      <div className="flex flex-col">
+                        <span className="font-bold">{token.name}</span>
+                        <span className="uppercase text-neutral">
+                          {token.symbol}
+                        </span>
                       </div>
-                    )}
-                    <div className="flex flex-col">
-                      <span className="font-bold">{token.name}</span>
-                      <span className="uppercase text-neutral">
-                        {token.symbol}
-                      </span>
                     </div>
+                    <span className="uppercase text-neutral">
+                      {token.token_type.activeVariant()}
+                    </span>
                   </div>
-                  <span className="uppercase text-neutral">
-                    {token.token_type.activeVariant()}
-                  </span>
-                </div>
-              </DialogClose>
-            );
-          })}
-        </div>
+                </DialogClose>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto">
+            <div className="flex flex-col items-center h-full">
+              <span className="text-neutral">
+                No <span className="uppercase">{type && type}</span> tokens
+                found
+              </span>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

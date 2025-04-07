@@ -258,34 +258,6 @@ export const useGetGameCounterQuery = ({
   return { entity, isLoading, refetch };
 };
 
-export const useGetGameSettingsQuery = (
-  namespace: string,
-  settingsModel: string
-) => {
-  const query = useMemo(
-    () =>
-      new ToriiQueryBuilder()
-        .withClause(
-          KeysClause(
-            [`${namespace}-SettingsDetails`, `${namespace}-${settingsModel}`],
-            []
-          ).build()
-        )
-        .withEntityModels([
-          `${namespace}-SettingsDetails`,
-          `${namespace}-${settingsModel}`,
-        ])
-        .includeHashedKeys(),
-    [namespace, settingsModel]
-  );
-
-  const { entities, isLoading, refetch } = useSdkGetEntities({
-    query,
-    namespace: namespace,
-  });
-  return { entities, isLoading, refetch };
-};
-
 export const useGetScoresQuery = (namespace: string, model: string) => {
   const isValidInput = useMemo(() => {
     return Boolean(namespace && model);

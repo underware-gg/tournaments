@@ -24,12 +24,12 @@ import { getTokenLogoUrl, getTokenSymbol } from "@/lib/tokensMeta";
 import { useEkuboPrices } from "@/hooks/useEkuboPrices";
 import { Settings, Token } from "@/generated/models.gen";
 import { useGameEndpoints } from "@/dojo/hooks/useGameEndpoints";
-import { useGetGameSettingsQuery } from "@/dojo/hooks/useSdkQueries";
 import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 import { SettingsDetails } from "@/generated/models.gen";
 import { useMemo } from "react";
 import { useDojo } from "@/context/dojo";
 // import { calculateTotalValue } from "@/lib/utils/formatting";
+import { useGetGameSettings } from "@/dojo/hooks/useSqlQueries";
 
 interface TournamentConfirmationProps {
   formData: TournamentFormData;
@@ -49,13 +49,17 @@ const TournamentConfirmation = ({
   const { namespace, selectedChainConfig } = useDojo();
   const { gameData, getGameImage } = useUIStore();
   const { gameNamespace, gameSettingsModel } = useGameEndpoints(formData.game);
-  useGetGameSettingsQuery(gameNamespace ?? "", gameSettingsModel ?? "");
-  const settingsDetails = useDojoStore((state) =>
-    state.getEntitiesByModel(gameNamespace ?? "", "SettingsDetails")
-  );
-  const settings = useDojoStore((state) =>
-    state.getEntitiesByModel(gameNamespace ?? "", "Settings")
-  );
+
+  const { data: settings } = useGetGameSettings({
+    namespace: gameNamespace ?? "",
+    settingsModel: gameSettingsModel ?? "",
+  });
+
+  const { data: settingsDetails } = useGetGameSettings({
+    namespace: gameNamespace ?? "",
+    settingsModel: "GameSettingsMetadata",
+  });
+
   const tokens = useDojoStore((state) =>
     state.getEntitiesByModel(namespace, "Token")
   ).map((token) => token.models[namespace].Token as Token);
@@ -65,6 +69,8 @@ const TournamentConfirmation = ({
   );
 
   const settingsEntities = [...settingsDetails, ...settings];
+
+  console.log(settingsEntities);
 
   const mergedGameSettings = useMemo(() => {
     if (!settingsEntities) return {};
@@ -110,7 +116,11 @@ const TournamentConfirmation = ({
   const { prices, isLoading: _pricesLoading } = useEkuboPrices({
     tokens: [
       ...(formData.bonusPrizes?.map(
-        (prize) => getTokenSymbol(prize.tokenAddress) ?? ""
+        (prize) =>
+          getTokenSymbol(
+            selectedChainConfig.chainId ?? "",
+            prize.tokenAddress
+          ) ?? ""
       ) ?? []),
       ...(formData.entryFees?.tokenAddress
         ? [formData.entryFees.tokenAddress]
@@ -256,7 +266,10 @@ const TournamentConfirmation = ({
                         </span>
                         <div className="flex flex-row gap-2">
                           <img
-                            src={getTokenLogoUrl(token?.address ?? "")}
+                            src={getTokenLogoUrl(
+                              selectedChainConfig.chainId ?? "",
+                              token?.address ?? ""
+                            )}
                             alt={token?.address ?? ""}
                             className="w-4 h-4"
                           />
@@ -411,18 +424,27 @@ const TournamentConfirmation = ({
                           <div className="flex flex-row gap-2 items-center">
                             <span>{formatNumber(prize.amount)}</span>
                             <img
-                              src={getTokenLogoUrl(prize.tokenAddress)}
+                              src={getTokenLogoUrl(
+                                selectedChainConfig.chainId ?? "",
+                                prize.tokenAddress
+                              )}
                               alt={prize.tokenAddress}
                               className="w-4 h-4"
                             />
                             <span className="text-neutral">
                               {prices?.[
-                                getTokenSymbol(prize.tokenAddress) ?? ""
+                                getTokenSymbol(
+                                  selectedChainConfig.chainId ?? "",
+                                  prize.tokenAddress
+                                ) ?? ""
                               ] &&
                                 `~$${(
                                   prize.amount *
                                   (prices?.[
-                                    getTokenSymbol(prize.tokenAddress) ?? ""
+                                    getTokenSymbol(
+                                      selectedChainConfig.chainId ?? "",
+                                      prize.tokenAddress
+                                    ) ?? ""
                                   ] ?? 0)
                                 ).toFixed(2)}`}
                             </span>
@@ -462,18 +484,27 @@ const TournamentConfirmation = ({
                           <div className="flex flex-row gap-2 items-center">
                             <span>{formatNumber(prize.amount)}</span>
                             <img
-                              src={getTokenLogoUrl(prize.tokenAddress)}
+                              src={getTokenLogoUrl(
+                                selectedChainConfig.chainId ?? "",
+                                prize.tokenAddress
+                              )}
                               alt={prize.tokenAddress}
                               className="w-4 h-4"
                             />
                             <span className="text-neutral">
                               {prices?.[
-                                getTokenSymbol(prize.tokenAddress) ?? ""
+                                getTokenSymbol(
+                                  selectedChainConfig.chainId ?? "",
+                                  prize.tokenAddress
+                                ) ?? ""
                               ] &&
                                 `~$${(
                                   prize.amount *
                                   (prices?.[
-                                    getTokenSymbol(prize.tokenAddress) ?? ""
+                                    getTokenSymbol(
+                                      selectedChainConfig.chainId ?? "",
+                                      prize.tokenAddress
+                                    ) ?? ""
                                   ] ?? 0)
                                 ).toFixed(2)}`}
                             </span>

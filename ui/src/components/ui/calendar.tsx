@@ -14,7 +14,7 @@ import {
 export interface CalendarProps extends Omit<DayPickerSingleProps, "mode"> {
   onTimeChange?: (hour: number, minute: number) => void;
   selectedTime?: Date;
-  minStartTime?: Date;
+  minTime?: Date;
 }
 
 function Calendar({
@@ -23,7 +23,7 @@ function Calendar({
   showOutsideDays = true,
   selectedTime = new Date(),
   onTimeChange,
-  minStartTime,
+  minTime,
   ...props
 }: CalendarProps) {
   const today = new Date();
@@ -78,12 +78,8 @@ function Calendar({
           const isToday = selectedTime.toDateString() === now.toDateString();
           const currentHour = now.getHours();
           const currentMinute = now.getMinutes();
-          const minStartHour = minStartTime
-            ? minStartTime.getHours()
-            : currentHour;
-          const minStartMinute = minStartTime
-            ? minStartTime.getMinutes()
-            : currentMinute;
+          const minStartHour = minTime ? minTime.getHours() : currentHour;
+          const minStartMinute = minTime ? minTime.getMinutes() : currentMinute;
 
           return (
             <div className="flex flex-row items-center">

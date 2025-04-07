@@ -28,9 +28,9 @@ import { format } from "date-fns";
 import { CALENDAR } from "@/components/Icons";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { SECONDS_IN_DAY, SECONDS_IN_HOUR } from "@/lib/constants";
-import { Input } from "../ui/input";
 import { useDojo } from "@/context/dojo";
 import { ChainId } from "@/dojo/setup/networks";
+import { Switch } from "@/components/ui/switch";
 
 const Schedule = ({ form }: StepProps) => {
   const { selectedChainConfig } = useDojo();
@@ -39,6 +39,13 @@ const Schedule = ({ form }: StepProps) => {
     // Initialize with current time + 15 minutes
     const now = new Date();
     now.setMinutes(now.getMinutes() + 15);
+    return now;
+  });
+  const [minEndTime, setMinEndTime] = useState<Date>(() => {
+    // Initialize with current start time + 15 minutes
+    const now = new Date();
+    const startTime = form.watch("startTime");
+    startTime.setMinutes(startTime.getMinutes() + 15);
     return now;
   });
 
@@ -94,6 +101,81 @@ const Schedule = ({ form }: StepProps) => {
     }
   }, [registrationType, form]);
 
+  const startTime = form.watch("startTime");
+
+  useEffect(() => {
+    // Get current end time from form
+    const currentEndTime = form.watch("endTime");
+
+    // Calculate minimum required end time (start time + 15 minutes)
+    const minRequiredEndTime = new Date(startTime);
+    minRequiredEndTime.setMinutes(startTime.getMinutes() + 15);
+    minRequiredEndTime.setSeconds(0);
+    minRequiredEndTime.setMilliseconds(0);
+
+    // Update minEndTime for the calendar validation
+    setMinEndTime(minRequiredEndTime);
+
+    // Only update the end time if it's before the minimum required time
+    if (!currentEndTime || currentEndTime < minRequiredEndTime) {
+      // Calculate minutes to the next 5-minute interval
+      const currentMinutes = startTime.getMinutes();
+      const remainder = currentMinutes % 5;
+      const minutesToAdd = remainder === 0 ? 15 : 5 - remainder + 15;
+
+      // Create new date with rounded minutes plus 15 minutes
+      const roundedFifteenMinutesFromStartTime = new Date(startTime);
+      roundedFifteenMinutesFromStartTime.setMinutes(
+        startTime.getMinutes() + minutesToAdd
+      );
+      roundedFifteenMinutesFromStartTime.setSeconds(0);
+      roundedFifteenMinutesFromStartTime.setMilliseconds(0);
+
+      // Update the form's end time
+      form.setValue("endTime", roundedFifteenMinutesFromStartTime);
+    }
+  }, [startTime]);
+
+  // New useEffect to update duration based on start and end times
+  useEffect(() => {
+    const startTime = form.watch("startTime");
+    const endTime = form.watch("endTime");
+
+    if (startTime && endTime && endTime > startTime) {
+      // Calculate duration in seconds
+      const durationInSeconds = Math.floor(
+        (endTime.getTime() - startTime.getTime()) / 1000
+      );
+
+      // Only update if it's a valid duration (at least 15 minutes)
+      if (durationInSeconds >= 900) {
+        form.setValue("duration", durationInSeconds);
+
+        // If submission period is longer than the new duration, adjust it
+        const currentSubmissionPeriod = form.watch("submissionPeriod");
+        if (currentSubmissionPeriod > durationInSeconds) {
+          form.setValue(
+            "submissionPeriod",
+            Math.min(durationInSeconds, SECONDS_IN_HOUR)
+          );
+        }
+      }
+    }
+  }, [form.watch("endTime")]);
+
+  useEffect(() => {
+    const startTime = form.watch("startTime");
+    const duration = form.watch("duration");
+
+    if (startTime && duration) {
+      // Calculate new end time based on start time + duration
+      const newEndTime = new Date(startTime.getTime() + duration * 1000);
+
+      // Update the form's end time
+      form.setValue("endTime", newEndTime);
+    }
+  }, [form.watch("duration")]);
+
   return (
     <>
       <div className="flex flex-col gap-5 lg:p-2 2xl:p-4">
@@ -103,20 +185,20 @@ const Schedule = ({ form }: StepProps) => {
           </span>
           <div className="w-full h-0.5 bg-brand/25" />
         </div>
-        <div className="flex flex-col sm:flex-row sm:justify-between gap-4 sm:gap-0 sm:px-4">
-          <div className="w-full sm:w-2/5">
+        <div className="flex flex-col sm:flex-row sm:gap-5 gap-4 sm:gap-0 sm:px-4">
+          <div className="w-full sm:w-2/5 flex flex-col gap-4">
             <FormField
               control={form.control}
               name="startTime"
               render={({ field }) => (
-                <FormItem className="flex flex-col justify-center h-full gap-2 sm:gap-4">
+                <FormItem className="flex flex-col gap-2 sm:gap-4 space-y-0">
                   <div className="flex flex-row items-center gap-4">
                     <FormLabel className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
                       Start Time
                     </FormLabel>
 
                     <FormDescription className="sm:text-xs xl:text-sm 3xl:text-base">
-                      Select a future time
+                      Select a start time
                     </FormDescription>
                   </div>
 
@@ -125,7 +207,6 @@ const Schedule = ({ form }: StepProps) => {
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          size="xl"
                           className="justify-start text-left font-normal"
                         >
                           <CALENDAR />
@@ -156,7 +237,7 @@ const Schedule = ({ form }: StepProps) => {
                             field.onChange(newDate);
                           }}
                           disabled={disablePastDates}
-                          minStartTime={minStartTime}
+                          minTime={minStartTime}
                           initialFocus
                           className="rounded-md border-4 border-brand-muted w-auto"
                         />
@@ -167,8 +248,102 @@ const Schedule = ({ form }: StepProps) => {
                 </FormItem>
               )}
             />
+            <div className="w-full h-0.5 bg-brand/25" />
+            <FormField
+              control={form.control}
+              name="enableEndTime"
+              render={({ field }) => (
+                <>
+                  <FormItem className="space-y-0 flex flex-col gap-4">
+                    <div className="flex flex-col w-full">
+                      <div className="flex flex-row w-full justify-between">
+                        <div className="flex flex-row items-center gap-4">
+                          <FormLabel className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
+                            End Time
+                          </FormLabel>
+
+                          <FormDescription className="sm:text-xs xl:text-sm 3xl:text-base hidden sm:block">
+                            Select a custom end time
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <div className="flex flex-row items-center gap-2">
+                            <span className="uppercase text-neutral text-xs font-bold">
+                              Optional
+                            </span>
+                            <Switch
+                              size="sm"
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </div>
+                        </FormControl>
+                      </div>
+                    </div>
+                  </FormItem>
+                  {field.value && (
+                    <FormField
+                      control={form.control}
+                      name="endTime"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col gap-2 sm:gap-4 space-y-0">
+                          <div className="flex flex-row justify-center">
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="justify-start text-left font-normal"
+                                >
+                                  <CALENDAR />
+                                  {field.value ? (
+                                    format(field.value, "PPP HH:mm")
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-auto p-0"
+                                align="start"
+                              >
+                                <Calendar
+                                  selected={field.value}
+                                  onSelect={(date) => {
+                                    if (date) {
+                                      const newDate = new Date(date);
+                                      const currentValue = field.value;
+                                      newDate.setHours(currentValue.getHours());
+                                      newDate.setMinutes(
+                                        currentValue.getMinutes()
+                                      );
+                                      field.onChange(newDate);
+                                    }
+                                  }}
+                                  selectedTime={field.value}
+                                  onTimeChange={(hour, minute) => {
+                                    const newDate = new Date(field.value);
+                                    newDate.setHours(hour);
+                                    newDate.setMinutes(minute);
+                                    field.onChange(newDate);
+                                  }}
+                                  disabled={disablePastDates}
+                                  minTime={minEndTime}
+                                  initialFocus
+                                  className="rounded-md border-4 border-brand-muted w-auto"
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </>
+              )}
+            />
+            <div className="w-full h-0.5 bg-brand/25" />
           </div>
-          <div className="w-full h-0.5 bg-brand/25 sm:hidden" />
           <div className="flex flex-col gap-4 w-full sm:w-3/5">
             <FormField
               control={form.control}
@@ -180,7 +355,7 @@ const Schedule = ({ form }: StepProps) => {
                       <FormLabel className="font-brand text-lg xl:text-xl 2xl:text-2xl 3xl:text-3xl">
                         Duration
                       </FormLabel>
-                      <FormDescription className="sm:text-xs xl:text-sm 3xl:text-base">
+                      <FormDescription className="sm:text-xs xl:text-sm 3xl:text-base hidden sm:block">
                         Select the tournament duration and submission period
                       </FormDescription>
                     </div>
@@ -234,26 +409,6 @@ const Schedule = ({ form }: StepProps) => {
                               {label}
                             </Button>
                           ))}
-                          {/* {!isMainnet && ( */}
-                          <div className="flex flex-col gap-1">
-                            <Label className="text-xs font-medium">
-                              Custom (seconds)
-                            </Label>
-                            <Input
-                              className="w-24 px-1"
-                              type="number"
-                              value={field.value}
-                              onChange={(e) => {
-                                field.onChange(Number(e.target.value));
-                                form.setValue(
-                                  "submissionPeriod",
-                                  Number(e.target.value)
-                                );
-                              }}
-                              min={900}
-                            />
-                          </div>
-                          {/* )} */}
                         </div>
                         <div
                           className={`flex flex-row gap-2 w-full ${
@@ -401,15 +556,15 @@ const Schedule = ({ form }: StepProps) => {
               )}
             />
             <div className="w-full h-0.5 bg-brand/25 mb-4 sm:mb-0" />
-            <TournamentTimeline
-              type={form.watch("type")}
-              createdTime={Math.floor(new Date().getTime() / 1000)} // Convert to Unix timestamp
-              startTime={Math.floor(form.watch("startTime").getTime() / 1000)} // Convert to Unix timestamp
-              duration={form.watch("duration")}
-              submissionPeriod={form.watch("submissionPeriod")}
-            />
           </div>
         </div>
+        <TournamentTimeline
+          type={form.watch("type")}
+          createdTime={Math.floor(new Date().getTime() / 1000)} // Convert to Unix timestamp
+          startTime={Math.floor(form.watch("startTime").getTime() / 1000)} // Convert to Unix timestamp
+          duration={form.watch("duration")}
+          submissionPeriod={form.watch("submissionPeriod")}
+        />
       </div>
       <Dialog open={isMobileDialogOpen} onOpenChange={setIsMobileDialogOpen}>
         <DialogContent className="sm:hidden bg-black border border-brand p-4 rounded-lg max-w-[90vw] mx-auto">

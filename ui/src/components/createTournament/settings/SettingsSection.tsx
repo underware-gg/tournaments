@@ -17,11 +17,10 @@ import SettingsCarousel from "./SettingsCarousel";
 import SmallSettingsTable from "./SmallSettingsTable";
 import { UseFormReturn, ControllerRenderProps } from "react-hook-form";
 import { useGameEndpoints } from "@/dojo/hooks/useGameEndpoints";
-import { useGetGameSettingsQuery } from "@/dojo/hooks/useSdkQueries";
+import { useGetGameSettings } from "@/dojo/hooks/useSqlQueries";
 import { feltToString } from "@/lib/utils";
 import { Settings, SettingsDetails } from "@/generated/models.gen";
 import { useMemo } from "react";
-import { useDojoStore } from "@/dojo/hooks/useDojoStore";
 
 interface GameSettingsFieldProps {
   form: UseFormReturn<any>;
@@ -32,15 +31,21 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
   const { gameNamespace, gameSettingsModel } = useGameEndpoints(
     form.watch("game")
   );
-  useGetGameSettingsQuery(gameNamespace ?? "", gameSettingsModel ?? "");
-  const settingsDetails = useDojoStore((state) =>
-    state.getEntitiesByModel(gameNamespace ?? "", "SettingsDetails")
-  );
-  const settings = useDojoStore((state) =>
-    state.getEntitiesByModel(gameNamespace ?? "", "Settings")
-  );
+
+  const { data: settings } = useGetGameSettings({
+    namespace: gameNamespace ?? "",
+    settingsModel: gameSettingsModel ?? "",
+  });
+
+  const { data: settingsDetails } = useGetGameSettings({
+    namespace: gameNamespace ?? "",
+    settingsModel: "GameSettingsMetadata",
+    active: gameNamespace === "ds_v1_1_4",
+  });
 
   const settingsEntities = [...settingsDetails, ...settings];
+
+  console.log(settingsEntities);
 
   const mergedGameSettings = useMemo(() => {
     if (!settingsEntities) return {};
@@ -80,7 +85,8 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
     );
   }, [settingsEntities, form.watch("game")]);
 
-  const hasSettings = mergedGameSettings[field.value]?.hasSettings ?? false;
+  const hasSettings = false;
+
   return (
     <FormItem>
       <div className="flex flex-row items-center gap-5">
