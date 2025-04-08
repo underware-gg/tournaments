@@ -12,7 +12,7 @@ use tournaments::components::models::schedule::{Schedule, Phase};
 ///
 
 #[starknet::interface]
-trait ITournament<TState> {
+pub trait ITournament<TState> {
     fn create_tournament(
         ref self: TState,
         creator_rewards_address: ContractAddress,
