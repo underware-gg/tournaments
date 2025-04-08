@@ -62,11 +62,14 @@ export const useGetTournamentsCount = ({
   fromTournamentId?: string;
 }) => {
   const query = useMemo(
-    () => `
+    () =>
+      namespace
+        ? `
     SELECT COUNT(*) as count 
     FROM '${namespace}-Tournament' m
     ${fromTournamentId ? `WHERE m.id > '${fromTournamentId}'` : ""}
-  `,
+  `
+        : null,
     [namespace, fromTournamentId]
   );
   const { data, loading, error } = useSqlExecute(query);
@@ -741,11 +744,11 @@ const getTournamentQualificationWhereClause = (
 
       switch (type) {
         case "token":
-          return `(qe.'qualification.token.token_id' = '${tokenId}')`;
+          return `(qe.'qualification_proof.token.token_id' = '${tokenId}')`;
         case "tournament":
-          return `(qe.'qualification.tournament.tournament_id' = '${tournamentId}' AND qe.'qualification.tournament.token_id' = '${gameId}' AND qe.'qualification.tournament.position' = ${position})`;
+          return `(qe.'qualification_proof.tournament.tournament_id' = '${tournamentId}' AND qe.'qualification_proof.tournament.token_id' = '${gameId}' AND qe.'qualification_proof.tournament.position' = ${position})`;
         case "allowlist":
-          return `(qe.'qualification.allowlist' = '${address}')`;
+          return `(qe.'qualification_proof.allowlist' = '${address}')`;
         default:
           return null;
       }
@@ -784,7 +787,7 @@ export const useGetTournamentQualificationEntries = ({
 
   const query = useMemo(
     () =>
-      active
+      active && namespace && tournamentId
         ? `
     SELECT * FROM '${namespace}-QualificationEntries' qe
     WHERE qe.tournament_id = '${addAddressPadding(tournamentId)}'

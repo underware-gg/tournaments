@@ -51,7 +51,8 @@ const EntryRequirements = ({
     () => tournamentModel.entry_requirement.Some,
     [tournamentModel]
   );
-  const entryLimit = entryRequirement?.entry_limit.Some;
+  const entryLimit = entryRequirement?.entry_limit;
+  const hasEntryLimit = Number(entryLimit) > 0;
   const activeVariant = useMemo(
     () => entryRequirement?.entry_requirement_type.activeVariant(),
     [entryRequirement]
@@ -150,7 +151,7 @@ const EntryRequirements = ({
               {displayAddress(token?.address ?? "0x0")}
             </span>
           </div>
-          {!!entryLimit && (
+          {!!hasEntryLimit && (
             <div className="flex flex-row items-center gap-2">
               <span>Entry Limit:</span>
               <span>{Number(entryLimit)}</span>
@@ -194,7 +195,7 @@ const EntryRequirements = ({
               );
             })}
           </div>
-          {!!entryLimit && (
+          {!!hasEntryLimit && (
             <div className="flex flex-row items-center gap-2">
               <span>Entry Limit:</span>
               <span>{Number(entryLimit)}</span>
@@ -217,7 +218,7 @@ const EntryRequirements = ({
           >
             <span>See Allowlist</span>
           </Button>
-          {!!entryLimit && (
+          {!!hasEntryLimit && (
             <div className="flex flex-row items-center gap-2">
               <span>Entry Limit:</span>
               <span>{Number(entryLimit)}</span>

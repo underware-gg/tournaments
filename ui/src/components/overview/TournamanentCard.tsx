@@ -146,8 +146,8 @@ export const TournamentCard = ({
 
   const isRestricted = tournament?.entry_requirement.isSome();
   const hasEntryLimit =
-    tournament?.entry_requirement?.Some?.entry_limit.isSome();
-  const entryLimit = tournament?.entry_requirement?.Some?.entry_limit?.Some;
+    Number(tournament?.entry_requirement?.Some?.entry_limit) > 0;
+  const entryLimit = tournament?.entry_requirement?.Some?.entry_limit;
   const requirementVariant =
     tournament?.entry_requirement.Some?.entry_requirement_type?.activeVariant();
   const tournamentRequirementVariant =

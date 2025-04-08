@@ -29,7 +29,7 @@ export const getGames = (): Game[] => {
     return [
       {
         contract_address:
-          "0x0035389eec883a077ca4cc036cbe17fc802d297a08e8d7e930781de9ed492d05",
+          "0x0165a0bd8cf98edcb6fd900cf10484cb73e7569676d3d13ddb28281709cfbb43",
         name: "0x4c6f6f74205375727669766f72",
         image: "https://lootsurvivor.io/favicon-32x32.png",
         url: "https://lootsurvivor.io",
