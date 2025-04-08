@@ -47,7 +47,7 @@ echo "Waiting 10 seconds before execution..."
 sleep 10
 
 sozo execute tournament_mock initializer 0 1 $TEST_ERC20 $TEST_ERC721
-sozo execute game_mock initializer
+sozo execute game_mock initializer 0 511226091358943037906894383349784373 15
 
 #------------------
 echo "--- DONE! 👍"

@@ -82,11 +82,8 @@ export const processTournamentData = (
   if (formData.enableGating && entryRequirementType) {
     entryRequirement = {
       entry_limit: formData.enableEntryLimit
-        ? new CairoOption<BigNumberish>(
-            CairoOptionVariant.Some,
-            formData.gatingOptions?.entry_limit
-          )
-        : new CairoOption<BigNumberish>(CairoOptionVariant.None),
+        ? formData.gatingOptions?.entry_limit ?? 0
+        : 0,
       entry_requirement_type: entryRequirementType,
     };
   }
@@ -588,13 +585,7 @@ export const processTournamentFromSql = (tournament: any): Tournament => {
     }
 
     entryRequirement = {
-      entry_limit:
-        tournament["entry_requirement.Some.entry_limit"] === "Some"
-          ? new CairoOption(
-              CairoOptionVariant.Some,
-              tournament["entry_requirement.Some.entry_limit.Some"]
-            )
-          : new CairoOption(CairoOptionVariant.None),
+      entry_limit: tournament["entry_requirement.Some.entry_limit"],
       entry_requirement_type: entryRequirementType,
     };
   }

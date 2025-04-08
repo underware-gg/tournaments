@@ -304,7 +304,7 @@ export interface TournamentValue {
 }
 
 export type EntryRequirement = {
-  entry_limit: CairoOption<BigNumberish>;
+  entry_limit: BigNumberish;
   entry_requirement_type: EntryRequirementTypeEnum;
 };
 
