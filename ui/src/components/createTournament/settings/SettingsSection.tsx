@@ -45,7 +45,7 @@ const GameSettingsField = ({ form, field }: GameSettingsFieldProps) => {
 
   const settings = rawSettings?.map((setting) =>
     Object.entries(setting).reduce((acc, [key, value]) => {
-      if (!key.includes("internal") && !key.includes("settings_id")) {
+      if (!key.includes("internal")) {
         acc[key] = value;
       }
       return acc;

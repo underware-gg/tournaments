@@ -746,6 +746,9 @@ export const mergeGameSettings = (settingsDetails: any[], settings: any[]) => {
 
   return settingsDetails.reduce((acc, setting) => {
     const detailsId = setting.settings_id.toString();
+    const detailsSettings = settings.find(
+      (s: any) => s.settings_id === setting.settings_id
+    );
 
     // If this details ID doesn't exist yet, create it
     if (!acc[detailsId]) {
@@ -757,8 +760,9 @@ export const mergeGameSettings = (settingsDetails: any[], settings: any[]) => {
     }
 
     // If we have settings, add them to the array and set hasSettings to true
-    if (settings) {
-      acc[detailsId].settings.push(...settings);
+    if (settings && detailsSettings) {
+      const { settings_id, ...settingsWithoutId } = detailsSettings;
+      acc[detailsId].settings.push(settingsWithoutId);
       acc[detailsId].hasSettings = true;
     }
 
