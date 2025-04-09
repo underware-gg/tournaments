@@ -147,7 +147,9 @@ export function EnterTournamentDialog({
 
   const hasEntryRequirement = tournamentModel?.entry_requirement.isSome();
 
-  const entryLimit = tournamentModel?.entry_requirement.Some?.entry_limit?.Some;
+  const hasEntryLimit =
+    Number(tournamentModel?.entry_requirement.Some?.entry_limit) > 0;
+  const entryLimit = tournamentModel?.entry_requirement.Some?.entry_limit;
 
   const requirementVariant =
     tournamentModel?.entry_requirement.Some?.entry_requirement_type?.activeVariant();
@@ -442,11 +444,11 @@ export function EnterTournamentDialog({
         // Get current entry count for this token
         const currentEntryCount =
           qualificationEntries?.find(
-            (entry) => entry["qualification.token.token_id"] === tokenId
+            (entry) => entry["qualification_proof.NFT.token_id"] === tokenId
           )?.entry_count ?? 0;
 
         // Calculate remaining entries
-        const remaining = entryLimit
+        const remaining = hasEntryLimit
           ? Number(entryLimit) - currentEntryCount
           : Infinity;
 
@@ -519,14 +521,15 @@ export function EnterTournamentDialog({
             const currentEntryCount =
               qualificationEntries?.find(
                 (entry) =>
-                  entry["qualification.tournament.tournament_id"] ===
+                  entry["qualification_proof.Tournament.tournament_id"] ===
                     tournamentId &&
-                  entry["qualification.tournament.position"] ===
+                  entry["qualification_proof.Tournament.position"] ===
                     wonInfo.position &&
-                  entry["qualification.tournament.token_id"] === wonInfo.tokenId
+                  entry["qualification_proof.Tournament.token_id"] ===
+                    wonInfo.tokenId
               )?.entry_count ?? 0;
 
-            const remaining = entryLimit
+            const remaining = hasEntryLimit
               ? Number(entryLimit) - currentEntryCount
               : Infinity;
 
@@ -558,13 +561,13 @@ export function EnterTournamentDialog({
             const currentEntryCount =
               qualificationEntries?.find(
                 (entry) =>
-                  entry["qualification.tournament.tournament_id"] ===
+                  entry["qualification_proof.Tournament.tournament_id"] ===
                     tournamentId &&
-                  entry["qualification.tournament.position"] === 1 &&
-                  entry["qualification.tournament.token_id"] === gameId
+                  entry["qualification_proof.Tournament.position"] === 1 &&
+                  entry["qualification_proof.Tournament.token_id"] === gameId
               )?.entry_count ?? 0;
 
-            const remaining = entryLimit
+            const remaining = hasEntryLimit
               ? Number(entryLimit) - currentEntryCount
               : Infinity;
 
