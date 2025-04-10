@@ -21,6 +21,7 @@ import {
 import { processGameMetadataFromSql } from "./lib/utils/formatting";
 import { getGames } from "./assets/games";
 import Header from "@/components/Header";
+import LoadingPage from "@/containers/LoadingPage";
 
 // Use lazy loading with different priority for routes
 const NotFound = React.lazy(() => import("@/containers/NotFound"));
@@ -169,7 +170,9 @@ function App() {
             <Route
               path="/"
               element={
-                <React.Suspense fallback={<div>Loading...</div>}>
+                <React.Suspense
+                  fallback={<LoadingPage message={`Loading overview...`} />}
+                >
                   <Overview />
                 </React.Suspense>
               }
@@ -193,7 +196,11 @@ function App() {
             <Route
               path="/create-tournament"
               element={
-                <React.Suspense fallback={<div>Loading...</div>}>
+                <React.Suspense
+                  fallback={
+                    <LoadingPage message={`Loading create tournament...`} />
+                  }
+                >
                   <CreateTournament />
                 </React.Suspense>
               }
@@ -247,14 +254,18 @@ function TournamentWrapper() {
 
   if (hasError) {
     return (
-      <React.Suspense fallback={<div>Loading error page...</div>}>
+      <React.Suspense
+        fallback={<LoadingPage message={`Loading error page...`} />}
+      >
         <NotFound message={errorMessage} />
       </React.Suspense>
     );
   }
 
   return (
-    <React.Suspense fallback={<div>Loading tournament...</div>}>
+    <React.Suspense
+      fallback={<LoadingPage message={`Loading tournament...`} />}
+    >
       <Tournament />
     </React.Suspense>
   );

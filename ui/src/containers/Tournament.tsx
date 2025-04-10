@@ -73,6 +73,7 @@ import {
 import useUIStore from "@/hooks/useUIStore";
 import { AddPrizesDialog } from "@/components/dialogs/AddPrizes";
 import { Skeleton } from "@/components/ui/skeleton";
+import LoadingPage from "@/containers/LoadingPage";
 
 const Tournament = () => {
   const { id } = useParams<{ id: string }>();
@@ -406,17 +407,7 @@ const Tournament = () => {
   }, [entryCount, prevEntryCount]);
 
   if (loading) {
-    return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 bg-black/20 backdrop-blur-sm z-50">
-        <div className="relative w-16 h-16">
-          <div className="absolute w-full h-full border-4 border-brand rounded-full animate-ping opacity-75"></div>
-          <div className="absolute w-full h-full border-4 border-brand-muted rounded-full animate-pulse"></div>
-        </div>
-        <span className="font-brand text-2xl text-brand-muted animate-pulse">
-          Loading tournament...
-        </span>
-      </div>
-    );
+    return <LoadingPage message={`Loading tournament...`} />;
   }
 
   if (!tournamentExists) {
