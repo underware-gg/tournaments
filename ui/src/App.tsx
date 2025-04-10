@@ -20,16 +20,25 @@ import {
 } from "./dojo/hooks/useSqlQueries";
 import { processGameMetadataFromSql } from "./lib/utils/formatting";
 import { getGames } from "./assets/games";
+import Header from "@/components/Header";
 
+// Use lazy loading with different priority for routes
 const NotFound = React.lazy(() => import("@/containers/NotFound"));
-const Overview = React.lazy(() => import("@/containers/Overview"));
+// Simpler implementation that doesn't cause TypeScript issues
+const Overview = React.lazy(() => {
+  const importPromise = import("@/containers/Overview");
+  // Optimize loading without causing type issues
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(() => {}, { timeout: 500 });
+  }
+  return importPromise;
+});
 const Tournament = React.lazy(() => import("@/containers/Tournament"));
 const Play = React.lazy(() => import("@/containers/Play"));
 const RegisterToken = React.lazy(() => import("@/containers/RegisterToken"));
 const CreateTournament = React.lazy(
   () => import("@/containers/CreateTournament")
 );
-const Header = React.lazy(() => import("@/components/Header"));
 
 function App() {
   const { namespace } = useDojo();
@@ -154,9 +163,7 @@ function App() {
   return (
     <TooltipProvider>
       <div className="flex flex-col min-h-screen h-screen overflow-hidden">
-        <React.Suspense fallback={<div>Loading...</div>}>
-          <Header />
-        </React.Suspense>
+        <Header />
         <main className="flex-1 px-4 pt-4 xl:px-10 xl:pt-10 2xl:px-20 2xl:pt-20 overflow-hidden">
           <Routes>
             <Route

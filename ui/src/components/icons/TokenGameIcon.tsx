@@ -1,15 +1,18 @@
 import { TOKEN, QUESTION } from "@/components/Icons";
+import { getOptimizedImageUrl } from "@/lib/utils/imageOptimization";
 
 interface TokenGameIconProps {
   image: string;
   size?: "xs" | "sm" | "md" | "lg";
   tokenColor?: string;
+  alt?: string;
 }
 
 const TokenGameIcon = ({
   image,
   size = "sm",
   tokenColor = "text-brand/25",
+  alt = "Game logo",
 }: TokenGameIconProps) => {
   const tokenSizeClasses = {
     xs: "size-5 3xl:size-6",
@@ -23,6 +26,19 @@ const TokenGameIcon = ({
     md: "size-8 3xl:size-10",
     lg: "size-12 3xl:size-16",
   };
+
+  // Approximate pixel sizes for width/height attributes
+  const gameSizePixels = {
+    xs: 16,
+    sm: 24,
+    md: 32,
+    lg: 48,
+  };
+
+  const optimizedImageUrl = image
+    ? getOptimizedImageUrl(image, gameSizePixels[size])
+    : "";
+
   return (
     <span className="relative inline-flex items-center justify-center">
       <span className={`${tokenColor} ${tokenSizeClasses[size]}`}>
@@ -31,8 +47,11 @@ const TokenGameIcon = ({
       <span className="absolute inset-0 flex items-center justify-center">
         {image ? (
           <img
-            src={image}
-            alt="game-logo"
+            src={optimizedImageUrl}
+            alt={alt}
+            loading="lazy"
+            width={gameSizePixels[size]}
+            height={gameSizePixels[size]}
             className={`${gameSizeClasses[size]}`}
           />
         ) : (

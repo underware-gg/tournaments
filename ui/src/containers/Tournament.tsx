@@ -217,12 +217,9 @@ const Tournament = () => {
   const textRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
-    // Initial check might run too early, so we need to delay it slightly
-    const initialCheckTimeout = setTimeout(() => {
-      checkOverflow();
-    }, 1000);
+    if (!textRef.current) return;
 
-    // Create a more robust check function
+    // Function to check overflow
     const checkOverflow = () => {
       if (textRef.current) {
         const isTextOverflowing =
@@ -231,45 +228,25 @@ const Tournament = () => {
       }
     };
 
-    // Run the check whenever the description changes
+    // Initial check
     checkOverflow();
 
-    // Also set up a resize listener
-    window.addEventListener("resize", checkOverflow);
+    // Use ResizeObserver for more efficient monitoring
+    const resizeObserver = new ResizeObserver(checkOverflow);
+    resizeObserver.observe(textRef.current);
 
-    // Use a MutationObserver to detect DOM changes
-    const observer = new MutationObserver(checkOverflow);
-    if (textRef.current) {
-      observer.observe(textRef.current, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-      });
-    }
-
-    // Clean up
-    return () => {
-      clearTimeout(initialCheckTimeout);
-      window.removeEventListener("resize", checkOverflow);
-      observer.disconnect();
-    };
-  }, [tournamentModel?.metadata.description]);
-
-  // Add a second effect that runs after the component has fully mounted
-  useEffect(() => {
-    // This will run after the component has been painted to the screen
-    const checkAfterRender = requestAnimationFrame(() => {
-      // And then wait one more frame to be extra sure
-      requestAnimationFrame(() => {
-        if (textRef.current) {
-          const isTextOverflowing =
-            textRef.current.scrollWidth > textRef.current.clientWidth;
-          setIsOverflowing(isTextOverflowing);
-        }
-      });
+    // Monitor content changes with MutationObserver
+    const mutationObserver = new MutationObserver(checkOverflow);
+    mutationObserver.observe(textRef.current, {
+      childList: true,
+      subtree: true,
+      characterData: true,
     });
 
-    return () => cancelAnimationFrame(checkAfterRender);
+    return () => {
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+    };
   }, [tournamentModel?.metadata.description]);
 
   const groupedByTokensPrizes = groupPrizesByTokens(allPrizes, tokens);

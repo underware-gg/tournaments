@@ -20,6 +20,35 @@ export default defineConfig({
   },
   build: {
     target: ["esnext"],
+    minify: "esbuild",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "ui-components": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-hover-card",
+            "@radix-ui/react-label",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-radio-group",
+            "@radix-ui/react-select",
+            "@radix-ui/react-slider",
+            "@radix-ui/react-switch",
+            "@radix-ui/react-toast",
+            "@radix-ui/react-tooltip",
+          ],
+        },
+      },
+    },
+    cssMinify: true,
+    assetsInlineLimit: 4096,
+    sourcemap: false,
+  },
+  esbuild: {
+    drop: ["console", "debugger"],
+    pure: ["console.log", "console.debug", "console.error"],
+    legalComments: "none",
   },
   server: {
     proxy: {},
