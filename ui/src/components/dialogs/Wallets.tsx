@@ -12,8 +12,7 @@ interface WalletsDialogProps {
 }
 
 const WalletsDialog = ({ open, onOpenChange }: WalletsDialogProps) => {
-  const { connectors } = useConnect();
-  console.log(connectors);
+  const { connect, connectors } = useConnect();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -24,8 +23,8 @@ const WalletsDialog = ({ open, onOpenChange }: WalletsDialogProps) => {
           {connectors.map((connector) => (
             <div
               key={connector.id}
-              onClick={() => null}
-              className="flex flex-row items-center gap-5 h-16 border border-brand-muted rounded-md p-2 cursor-pointer"
+              onClick={() => connect({ connector })}
+              className="flex flex-row items-center gap-5 h-16 border border-brand-muted rounded-md py-2 px-4 cursor-pointer hover:bg-brand/20 transition-colors"
             >
               <img
                 src={
@@ -33,7 +32,7 @@ const WalletsDialog = ({ open, onOpenChange }: WalletsDialogProps) => {
                     ? connector.icon
                     : connector.icon?.dark
                 }
-                className="h-full"
+                className="w-8 h-8"
               />
 
               <span className="text-brand">{connector.name}</span>
