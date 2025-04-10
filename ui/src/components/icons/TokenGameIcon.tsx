@@ -24,7 +24,7 @@ const TokenGameIcon = ({
       </span>
       <span className="absolute inset-0 flex items-center justify-center">
         {image ? (
-          <img src={image} className={`h-[50%] w-auto`} />
+          <img src={image} alt="game-logo" className={`h-[50%] w-auto`} />
         ) : (
           <span className="w-full h-full">
             <QUESTION />
