@@ -163,7 +163,7 @@ const Header = () => {
         >
           <img
             className="h-8 max-w-32 sm:max-w-none sm:h-10 xl:h-12 hover:opacity-80 transition-opacity duration-200 object-contain"
-            src="/logo.svg"
+            src="/logo.webp"
             alt="logo"
           />
         </div>

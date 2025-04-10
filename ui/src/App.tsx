@@ -14,10 +14,9 @@ import {
 } from "react-router-dom";
 import { useGetTokensQuery } from "@/dojo/hooks/useSdkQueries";
 import { Toaster } from "@/components/ui/toaster";
-import { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import NotFound from "@/containers/NotFound";
 import { useNetwork } from "@starknet-react/core";
 import { useDojo } from "@/context/dojo";
 import useUIStore from "./hooks/useUIStore";
@@ -27,6 +26,8 @@ import {
 } from "./dojo/hooks/useSqlQueries";
 import { processGameMetadataFromSql } from "./lib/utils/formatting";
 import { getGames } from "./assets/games";
+
+const NotFound = React.lazy(() => import("@/containers/NotFound"));
 
 function App() {
   const { namespace } = useDojo();
@@ -161,7 +162,9 @@ function App() {
                 element={
                   <ErrorBoundary
                     fallback={
-                      <NotFound message="Something went wrong rendering the tournament" />
+                      <React.Suspense>
+                        <NotFound message="Something went wrong rendering the tournament" />
+                      </React.Suspense>
                     }
                   >
                     <TournamentWrapper />
@@ -172,7 +175,14 @@ function App() {
             <Route path="/create-tournament" element={<CreateTournament />} />
             <Route path="/register-token" element={<RegisterToken />} />
             <Route path="/play" element={<Play />} />
-            <Route path="*" element={<NotFound />} />
+            <Route
+              path="*"
+              element={
+                <React.Suspense>
+                  <NotFound />
+                </React.Suspense>
+              }
+            />
           </Routes>
         </main>
         <MobileFooter />
@@ -184,14 +194,26 @@ function App() {
 
 function TournamentWrapper() {
   const { id } = useParams();
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  try {
-    if (id) BigInt(id);
-  } catch (error) {
-    return <NotFound message={`Invalid tournament ID format: ${id}`} />;
+  useEffect(() => {
+    try {
+      if (id) BigInt(id);
+    } catch (error) {
+      setHasError(true);
+      setErrorMessage(`Invalid tournament ID format: ${id}`);
+    }
+  }, [id]);
+
+  if (hasError) {
+    return (
+      <React.Suspense fallback={<div>Loading error page...</div>}>
+        <NotFound message={errorMessage} />
+      </React.Suspense>
+    );
   }
 
   return <Tournament />;
 }
-
 export default App;
