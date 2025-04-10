@@ -1,10 +1,5 @@
 import Header from "@/components/Header";
 import MobileFooter from "@/components/MobileFooter";
-import Overview from "@/containers/Overview";
-import Tournament from "@/containers/Tournament";
-import CreateTournament from "@/containers/CreateTournament";
-import RegisterToken from "@/containers/RegisterToken";
-import Play from "@/containers/Play";
 import {
   Routes,
   Route,
@@ -28,6 +23,13 @@ import { processGameMetadataFromSql } from "./lib/utils/formatting";
 import { getGames } from "./assets/games";
 
 const NotFound = React.lazy(() => import("@/containers/NotFound"));
+const Overview = React.lazy(() => import("@/containers/Overview"));
+const Tournament = React.lazy(() => import("@/containers/Tournament"));
+const Play = React.lazy(() => import("@/containers/Play"));
+const RegisterToken = React.lazy(() => import("@/containers/RegisterToken"));
+const CreateTournament = React.lazy(
+  () => import("@/containers/CreateTournament")
+);
 
 function App() {
   const { namespace } = useDojo();
@@ -155,7 +157,14 @@ function App() {
         <Header />
         <main className="flex-1 px-4 pt-4 xl:px-10 xl:pt-10 2xl:px-20 2xl:pt-20 overflow-hidden">
           <Routes>
-            <Route path="/" element={<Overview />} />
+            <Route
+              path="/"
+              element={
+                <React.Suspense fallback={<div>Loading...</div>}>
+                  <Overview />
+                </React.Suspense>
+              }
+            />
             <Route path="/tournament">
               <Route
                 path=":id"
@@ -172,9 +181,30 @@ function App() {
                 }
               />
             </Route>
-            <Route path="/create-tournament" element={<CreateTournament />} />
-            <Route path="/register-token" element={<RegisterToken />} />
-            <Route path="/play" element={<Play />} />
+            <Route
+              path="/create-tournament"
+              element={
+                <React.Suspense fallback={<div>Loading...</div>}>
+                  <CreateTournament />
+                </React.Suspense>
+              }
+            />
+            <Route
+              path="/register-token"
+              element={
+                <React.Suspense fallback={<div>Loading...</div>}>
+                  <RegisterToken />
+                </React.Suspense>
+              }
+            />
+            <Route
+              path="/play"
+              element={
+                <React.Suspense fallback={<div>Loading...</div>}>
+                  <Play />
+                </React.Suspense>
+              }
+            />
             <Route
               path="*"
               element={
@@ -214,6 +244,10 @@ function TournamentWrapper() {
     );
   }
 
-  return <Tournament />;
+  return (
+    <React.Suspense fallback={<div>Loading tournament...</div>}>
+      <Tournament />
+    </React.Suspense>
+  );
 }
 export default App;
