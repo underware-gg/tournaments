@@ -1,4 +1,3 @@
-import Header from "@/components/Header";
 import MobileFooter from "@/components/MobileFooter";
 import {
   Routes,
@@ -30,6 +29,7 @@ const RegisterToken = React.lazy(() => import("@/containers/RegisterToken"));
 const CreateTournament = React.lazy(
   () => import("@/containers/CreateTournament")
 );
+const Header = React.lazy(() => import("@/components/Header"));
 
 function App() {
   const { namespace } = useDojo();
@@ -154,7 +154,9 @@ function App() {
   return (
     <TooltipProvider>
       <div className="flex flex-col min-h-screen h-screen overflow-hidden">
-        <Header />
+        <React.Suspense fallback={<div>Loading...</div>}>
+          <Header />
+        </React.Suspense>
         <main className="flex-1 px-4 pt-4 xl:px-10 xl:pt-10 2xl:px-20 2xl:pt-20 overflow-hidden">
           <Routes>
             <Route
