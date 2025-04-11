@@ -105,7 +105,7 @@ const SettingsCarousel = ({
           <div className="flex flex-row gap-2">
             <span className="text-brand-muted">More info at</span>
             <a
-              href="https://darkshuffle.io"
+              href={`https://darkshuffle.io/settings/${currentIndex}`}
               target="_blank"
               className="text-brand underline"
             >
