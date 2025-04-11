@@ -8,7 +8,13 @@ import topLevelAwait from "vite-plugin-top-level-await";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      babel: {
+        plugins: [
+          ["@babel/plugin-transform-react-jsx", { runtime: "automatic" }],
+        ],
+      },
+    }),
     wasm(),
     process.env.VITE_CHAIN_ID !== "KATANA_LOCAL" && mkcert(),
     topLevelAwait(),

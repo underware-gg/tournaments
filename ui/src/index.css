@@ -119,7 +119,7 @@
   /* Background */
   background-image: radial-gradient(circle,
       rgba(var(--color-brand), 0.05),
-      rgba(var(--color-brand), 0)), url(/background.png);
+      rgba(var(--color-brand), 0)), url(/background.webp);
   background-size      : cover;
   background-position  : center;
   background-repeat    : no-repeat;
