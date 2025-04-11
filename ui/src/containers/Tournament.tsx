@@ -73,6 +73,7 @@ import {
 import useUIStore from "@/hooks/useUIStore";
 import { AddPrizesDialog } from "@/components/dialogs/AddPrizes";
 import { Skeleton } from "@/components/ui/skeleton";
+import LoadingPage from "@/containers/LoadingPage";
 
 const Tournament = () => {
   const { id } = useParams<{ id: string }>();
@@ -217,12 +218,9 @@ const Tournament = () => {
   const textRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
-    // Initial check might run too early, so we need to delay it slightly
-    const initialCheckTimeout = setTimeout(() => {
-      checkOverflow();
-    }, 1000);
+    if (!textRef.current) return;
 
-    // Create a more robust check function
+    // Function to check overflow
     const checkOverflow = () => {
       if (textRef.current) {
         const isTextOverflowing =
@@ -231,45 +229,25 @@ const Tournament = () => {
       }
     };
 
-    // Run the check whenever the description changes
+    // Initial check
     checkOverflow();
 
-    // Also set up a resize listener
-    window.addEventListener("resize", checkOverflow);
+    // Use ResizeObserver for more efficient monitoring
+    const resizeObserver = new ResizeObserver(checkOverflow);
+    resizeObserver.observe(textRef.current);
 
-    // Use a MutationObserver to detect DOM changes
-    const observer = new MutationObserver(checkOverflow);
-    if (textRef.current) {
-      observer.observe(textRef.current, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-      });
-    }
-
-    // Clean up
-    return () => {
-      clearTimeout(initialCheckTimeout);
-      window.removeEventListener("resize", checkOverflow);
-      observer.disconnect();
-    };
-  }, [tournamentModel?.metadata.description]);
-
-  // Add a second effect that runs after the component has fully mounted
-  useEffect(() => {
-    // This will run after the component has been painted to the screen
-    const checkAfterRender = requestAnimationFrame(() => {
-      // And then wait one more frame to be extra sure
-      requestAnimationFrame(() => {
-        if (textRef.current) {
-          const isTextOverflowing =
-            textRef.current.scrollWidth > textRef.current.clientWidth;
-          setIsOverflowing(isTextOverflowing);
-        }
-      });
+    // Monitor content changes with MutationObserver
+    const mutationObserver = new MutationObserver(checkOverflow);
+    mutationObserver.observe(textRef.current, {
+      childList: true,
+      subtree: true,
+      characterData: true,
     });
 
-    return () => cancelAnimationFrame(checkAfterRender);
+    return () => {
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+    };
   }, [tournamentModel?.metadata.description]);
 
   const groupedByTokensPrizes = groupPrizesByTokens(allPrizes, tokens);
@@ -429,17 +407,7 @@ const Tournament = () => {
   }, [entryCount, prevEntryCount]);
 
   if (loading) {
-    return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center gap-6 bg-black/20 backdrop-blur-sm z-50">
-        <div className="relative w-16 h-16">
-          <div className="absolute w-full h-full border-4 border-brand rounded-full animate-ping opacity-75"></div>
-          <div className="absolute w-full h-full border-4 border-brand-muted rounded-full animate-pulse"></div>
-        </div>
-        <span className="font-brand text-2xl text-brand-muted animate-pulse">
-          Loading tournament...
-        </span>
-      </div>
-    );
+    return <LoadingPage message={`Loading tournament...`} />;
   }
 
   if (!tournamentExists) {
