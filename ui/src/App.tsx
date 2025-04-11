@@ -1,10 +1,4 @@
-import Header from "@/components/Header";
 import MobileFooter from "@/components/MobileFooter";
-import Overview from "@/containers/Overview";
-import Tournament from "@/containers/Tournament";
-import CreateTournament from "@/containers/CreateTournament";
-import RegisterToken from "@/containers/RegisterToken";
-import Play from "@/containers/Play";
 import {
   Routes,
   Route,
@@ -14,10 +8,9 @@ import {
 } from "react-router-dom";
 import { useGetTokensQuery } from "@/dojo/hooks/useSdkQueries";
 import { Toaster } from "@/components/ui/toaster";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState, Suspense, lazy } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import NotFound from "@/containers/NotFound";
 import { useNetwork } from "@starknet-react/core";
 import { useDojo } from "@/context/dojo";
 import useUIStore from "./hooks/useUIStore";
@@ -27,6 +20,24 @@ import {
 } from "./dojo/hooks/useSqlQueries";
 import { processGameMetadataFromSql } from "./lib/utils/formatting";
 import { getGames } from "./assets/games";
+import Header from "@/components/Header";
+import LoadingPage from "@/containers/LoadingPage";
+
+// Use lazy loading with different priority for routes
+const NotFound = lazy(() => import("@/containers/NotFound"));
+// Simpler implementation that doesn't cause TypeScript issues
+const Overview = lazy(() => {
+  const importPromise = import("@/containers/Overview");
+  // Optimize loading without causing type issues
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(() => {}, { timeout: 500 });
+  }
+  return importPromise;
+});
+const Tournament = lazy(() => import("@/containers/Tournament"));
+const Play = lazy(() => import("@/containers/Play"));
+const RegisterToken = lazy(() => import("@/containers/RegisterToken"));
+const CreateTournament = lazy(() => import("@/containers/CreateTournament"));
 
 function App() {
   const { namespace } = useDojo();
@@ -154,14 +165,25 @@ function App() {
         <Header />
         <main className="flex-1 px-4 pt-4 xl:px-10 xl:pt-10 2xl:px-20 2xl:pt-20 overflow-hidden">
           <Routes>
-            <Route path="/" element={<Overview />} />
+            <Route
+              path="/"
+              element={
+                <Suspense
+                  fallback={<LoadingPage message={`Loading overview...`} />}
+                >
+                  <Overview />
+                </Suspense>
+              }
+            />
             <Route path="/tournament">
               <Route
                 path=":id"
                 element={
                   <ErrorBoundary
                     fallback={
-                      <NotFound message="Something went wrong rendering the tournament" />
+                      <Suspense>
+                        <NotFound message="Something went wrong rendering the tournament" />
+                      </Suspense>
                     }
                   >
                     <TournamentWrapper />
@@ -169,10 +191,42 @@ function App() {
                 }
               />
             </Route>
-            <Route path="/create-tournament" element={<CreateTournament />} />
-            <Route path="/register-token" element={<RegisterToken />} />
-            <Route path="/play" element={<Play />} />
-            <Route path="*" element={<NotFound />} />
+            <Route
+              path="/create-tournament"
+              element={
+                <Suspense
+                  fallback={
+                    <LoadingPage message={`Loading create tournament...`} />
+                  }
+                >
+                  <CreateTournament />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/register-token"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <RegisterToken />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/play"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <Play />
+                </Suspense>
+              }
+            />
+            <Route
+              path="*"
+              element={
+                <Suspense>
+                  <NotFound />
+                </Suspense>
+              }
+            />
           </Routes>
         </main>
         <MobileFooter />
@@ -184,14 +238,30 @@ function App() {
 
 function TournamentWrapper() {
   const { id } = useParams();
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  try {
-    if (id) BigInt(id);
-  } catch (error) {
-    return <NotFound message={`Invalid tournament ID format: ${id}`} />;
+  useEffect(() => {
+    try {
+      if (id) BigInt(id);
+    } catch (error) {
+      setHasError(true);
+      setErrorMessage(`Invalid tournament ID format: ${id}`);
+    }
+  }, [id]);
+
+  if (hasError) {
+    return (
+      <Suspense fallback={<LoadingPage message={`Loading error page...`} />}>
+        <NotFound message={errorMessage} />
+      </Suspense>
+    );
   }
 
-  return <Tournament />;
+  return (
+    <Suspense fallback={<LoadingPage message={`Loading tournament...`} />}>
+      <Tournament />
+    </Suspense>
+  );
 }
-
 export default App;

@@ -40,6 +40,7 @@ import { GameButton } from "@/components/overview/gameFilters/GameButton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ALERT } from "@/components/Icons";
 import { useState, useEffect } from "react";
+import logoImage from "@/assets/images/logo.svg";
 
 const Header = () => {
   const { account } = useAccount();
@@ -79,7 +80,7 @@ const Header = () => {
       {showWarning && (
         <Alert
           variant="destructive"
-          className="rounded-none border-x-0 border-t-0 py-2"
+          className="rounded-none border-x-0 border-t-0 py-2 hidden sm:block"
         >
           <div className="flex items-center gap-5 justify-center w-full">
             <div className="flex items-center gap-2">
@@ -163,7 +164,7 @@ const Header = () => {
         >
           <img
             className="h-8 max-w-32 sm:max-w-none sm:h-10 xl:h-12 hover:opacity-80 transition-opacity duration-200 object-contain"
-            src="/logo.svg"
+            src={logoImage}
             alt="logo"
           />
         </div>
