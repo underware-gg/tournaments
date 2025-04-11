@@ -51,11 +51,6 @@ export default defineConfig({
     assetsInlineLimit: 4096,
     sourcemap: false,
   },
-  esbuild: {
-    drop: ["console", "debugger"],
-    pure: ["console.log", "console.debug", "console.error"],
-    legalComments: "none",
-  },
   server: {
     proxy: {},
   },
