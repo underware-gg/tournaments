@@ -79,7 +79,7 @@ const Header = () => {
       {showWarning && (
         <Alert
           variant="destructive"
-          className="rounded-none border-x-0 border-t-0 py-2"
+          className="rounded-none border-x-0 border-t-0 py-2 hidden sm:block"
         >
           <div className="flex items-center gap-5 justify-center w-full">
             <div className="flex items-center gap-2">
