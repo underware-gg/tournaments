@@ -1,5 +1,3 @@
-import { getOptimizedImageUrl } from "@/lib/utils/imageOptimization";
-
 interface GameIconProps {
   image: string;
   size?: number;
@@ -8,11 +6,9 @@ interface GameIconProps {
 
 const GameIcon = ({ image, size = 6, alt = "Game icon" }: GameIconProps) => {
   const pixelSize = size * 4;
-  const optimizedImageUrl = getOptimizedImageUrl(image, pixelSize);
-
   return image ? (
     <img
-      src={optimizedImageUrl}
+      src={image}
       alt={alt}
       loading="lazy"
       height={pixelSize}
