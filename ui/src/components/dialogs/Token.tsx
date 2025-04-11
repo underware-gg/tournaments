@@ -65,6 +65,14 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
     token.name.toLowerCase().includes(tokenSearchQuery.toLowerCase())
   );
 
+  const getTokenImage = (token: Token) => {
+    if (token.token_type.activeVariant() === "erc20") {
+      return getTokenLogoUrl(selectedChainConfig?.chainId ?? "", token.address);
+    } else {
+      return null;
+    }
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -106,10 +114,7 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
         {searchFilteredTokens.length > 0 ? (
           <div className="flex-1 overflow-y-auto">
             {searchFilteredTokens.map((token, index) => {
-              const tokenLogo = getTokenLogoUrl(
-                selectedChainConfig?.chainId ?? "",
-                token.address
-              );
+              const tokenLogo = getTokenImage(token);
               const isHidden = getTokenHidden(
                 selectedChainConfig?.chainId ?? "",
                 token.address
