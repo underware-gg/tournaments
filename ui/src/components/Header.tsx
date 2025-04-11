@@ -39,7 +39,7 @@ import useUIStore from "@/hooks/useUIStore";
 import { GameButton } from "@/components/overview/gameFilters/GameButton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ALERT } from "@/components/Icons";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import logoImage from "@/assets/images/logo.svg";
 
 const Header = () => {
@@ -162,17 +162,11 @@ const Header = () => {
             navigate("/");
           }}
         >
-          <Suspense
-            fallback={
-              <div className="h-8 max-w-32 sm:max-w-none sm:h-10 xl:h-12 bg-gray-200 animate-pulse" />
-            }
-          >
-            <img
-              className="h-8 max-w-32 sm:max-w-none sm:h-10 xl:h-12 hover:opacity-80 transition-opacity duration-200 object-contain"
-              src={logoImage}
-              alt="logo"
-            />
-          </Suspense>
+          <img
+            className="h-8 max-w-32 sm:max-w-none sm:h-10 xl:h-12 hover:opacity-80 transition-opacity duration-200 object-contain"
+            src={logoImage}
+            alt="logo"
+          />
         </div>
 
         <div className="flex flex-row items-center gap-2">

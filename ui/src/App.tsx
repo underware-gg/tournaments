@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { useGetTokensQuery } from "@/dojo/hooks/useSdkQueries";
 import { Toaster } from "@/components/ui/toaster";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, Suspense, lazy } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useNetwork } from "@starknet-react/core";
@@ -24,9 +24,9 @@ import Header from "@/components/Header";
 import LoadingPage from "@/containers/LoadingPage";
 
 // Use lazy loading with different priority for routes
-const NotFound = React.lazy(() => import("@/containers/NotFound"));
+const NotFound = lazy(() => import("@/containers/NotFound"));
 // Simpler implementation that doesn't cause TypeScript issues
-const Overview = React.lazy(() => {
+const Overview = lazy(() => {
   const importPromise = import("@/containers/Overview");
   // Optimize loading without causing type issues
   if (typeof requestIdleCallback === "function") {
@@ -34,12 +34,10 @@ const Overview = React.lazy(() => {
   }
   return importPromise;
 });
-const Tournament = React.lazy(() => import("@/containers/Tournament"));
-const Play = React.lazy(() => import("@/containers/Play"));
-const RegisterToken = React.lazy(() => import("@/containers/RegisterToken"));
-const CreateTournament = React.lazy(
-  () => import("@/containers/CreateTournament")
-);
+const Tournament = lazy(() => import("@/containers/Tournament"));
+const Play = lazy(() => import("@/containers/Play"));
+const RegisterToken = lazy(() => import("@/containers/RegisterToken"));
+const CreateTournament = lazy(() => import("@/containers/CreateTournament"));
 
 function App() {
   const { namespace } = useDojo();
@@ -170,11 +168,11 @@ function App() {
             <Route
               path="/"
               element={
-                <React.Suspense
+                <Suspense
                   fallback={<LoadingPage message={`Loading overview...`} />}
                 >
                   <Overview />
-                </React.Suspense>
+                </Suspense>
               }
             />
             <Route path="/tournament">
@@ -183,9 +181,9 @@ function App() {
                 element={
                   <ErrorBoundary
                     fallback={
-                      <React.Suspense>
+                      <Suspense>
                         <NotFound message="Something went wrong rendering the tournament" />
-                      </React.Suspense>
+                      </Suspense>
                     }
                   >
                     <TournamentWrapper />
@@ -196,37 +194,37 @@ function App() {
             <Route
               path="/create-tournament"
               element={
-                <React.Suspense
+                <Suspense
                   fallback={
                     <LoadingPage message={`Loading create tournament...`} />
                   }
                 >
                   <CreateTournament />
-                </React.Suspense>
+                </Suspense>
               }
             />
             <Route
               path="/register-token"
               element={
-                <React.Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<div>Loading...</div>}>
                   <RegisterToken />
-                </React.Suspense>
+                </Suspense>
               }
             />
             <Route
               path="/play"
               element={
-                <React.Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<div>Loading...</div>}>
                   <Play />
-                </React.Suspense>
+                </Suspense>
               }
             />
             <Route
               path="*"
               element={
-                <React.Suspense>
+                <Suspense>
                   <NotFound />
-                </React.Suspense>
+                </Suspense>
               }
             />
           </Routes>
@@ -254,20 +252,16 @@ function TournamentWrapper() {
 
   if (hasError) {
     return (
-      <React.Suspense
-        fallback={<LoadingPage message={`Loading error page...`} />}
-      >
+      <Suspense fallback={<LoadingPage message={`Loading error page...`} />}>
         <NotFound message={errorMessage} />
-      </React.Suspense>
+      </Suspense>
     );
   }
 
   return (
-    <React.Suspense
-      fallback={<LoadingPage message={`Loading tournament...`} />}
-    >
+    <Suspense fallback={<LoadingPage message={`Loading tournament...`} />}>
       <Tournament />
-    </React.Suspense>
+    </Suspense>
   );
 }
 export default App;
