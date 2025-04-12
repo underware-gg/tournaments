@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState, useEffect } from "react";
-import { useAccount, useConnect } from "@starknet-react/core";
+import { Connector, useAccount, useConnect } from "@starknet-react/core";
 import { lookupAddresses } from "@cartridge/controller";
 import { ControllerConnector } from "@cartridge/connector";
 import { supportedConnectorIds } from "@/lib/connectors";
@@ -117,7 +117,6 @@ export const useGetUsernames = (addresses: string[]) => {
   };
 };
 
-export const isControllerAccount = () => {
-  const { connector } = useConnect();
+export const isControllerAccount = (connector: Connector) => {
   return connector?.id == supportedConnectorIds.CONTROLLER;
 };

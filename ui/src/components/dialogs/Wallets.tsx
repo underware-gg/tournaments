@@ -4,7 +4,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useConnect } from "@starknet-react/core";
+import { Connector, useConnect } from "@starknet-react/core";
+import { isControllerAccount } from "@/hooks/useController";
 
 interface WalletsDialogProps {
   open: boolean;
@@ -12,7 +13,15 @@ interface WalletsDialogProps {
 }
 
 const WalletsDialog = ({ open, onOpenChange }: WalletsDialogProps) => {
-  const { connect, connectors } = useConnect();
+  const { connectAsync, connectors } = useConnect();
+
+  const handleConnect = async (connector: Connector) => {
+    await connectAsync({ connector });
+    onOpenChange(false);
+  };
+
+  const isController = (connector: Connector) => isControllerAccount(connector);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -23,7 +32,9 @@ const WalletsDialog = ({ open, onOpenChange }: WalletsDialogProps) => {
           {connectors.map((connector) => (
             <div
               key={connector.id}
-              onClick={() => connect({ connector })}
+              onClick={() => {
+                handleConnect(connector);
+              }}
               className="flex flex-row items-center gap-5 h-16 border border-brand-muted rounded-md py-2 px-4 cursor-pointer hover:bg-brand/20 transition-colors"
             >
               <img
@@ -35,7 +46,10 @@ const WalletsDialog = ({ open, onOpenChange }: WalletsDialogProps) => {
                 className="w-8 h-8"
               />
 
-              <span className="text-brand">{connector.name}</span>
+              <span className="text-brand text-lg">{connector.name}</span>
+              {isController(connector) && (
+                <span className="text-neutral">(Recommended)</span>
+              )}
             </div>
           ))}
         </div>
