@@ -16,8 +16,12 @@ const WalletsDialog = ({ open, onOpenChange }: WalletsDialogProps) => {
   const { connectAsync, connectors } = useConnect();
 
   const handleConnect = async (connector: Connector) => {
-    await connectAsync({ connector });
-    onOpenChange(false);
+    try {
+      await connectAsync({ connector });
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Failed to connect wallet:", error);
+    }
   };
 
   const isController = (connector: Connector) => isControllerAccount(connector);

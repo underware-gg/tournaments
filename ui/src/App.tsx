@@ -120,7 +120,8 @@ function App() {
         image: metadata?.image
           ? metadata?.contract_address ===
               "0x0444834e7b71749832f0db8c64f17ed1c3af8462c1682c10dcd6068b1c57494b" ||
-            "0x04359aee29873cd9603207d29b4140468bac3e042aa10daab2e1a8b2dd60ef7b"
+            metadata?.contract_address ===
+              "0x04359aee29873cd9603207d29b4140468bac3e042aa10daab2e1a8b2dd60ef7b"
             ? "https://darkshuffle.io/favicon.svg"
             : metadata?.image
           : whitelisted?.image,
