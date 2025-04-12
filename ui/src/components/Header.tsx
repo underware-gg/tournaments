@@ -19,10 +19,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDojo } from "@/context/dojo";
 import { ChainId, NetworkId } from "@/dojo/setup/networks";
-import {
-  useConnectToSelectedChain,
-  useSwitchNetwork,
-} from "@/dojo/hooks/useChain";
+import { useSwitchNetwork } from "@/dojo/hooks/useChain";
 import {
   Sheet,
   SheetContent,
@@ -45,7 +42,6 @@ import logoImage from "@/assets/images/logo.svg";
 
 const Header = () => {
   const { account } = useAccount();
-  const { connect } = useConnectToSelectedChain();
   const { gameFilters, setGameFilters, gameData } = useUIStore();
   const { disconnect } = useDisconnect();
   const { openProfile } = useControllerProfile();

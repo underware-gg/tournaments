@@ -6,7 +6,6 @@ import {
   StarknetConfig,
   argent,
   braavos,
-  Connector,
 } from "@starknet-react/core";
 import React from "react";
 import { ChainId, CHAINS, getDefaultChainId } from "@/dojo/setup/networks";
