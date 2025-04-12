@@ -6,6 +6,7 @@ export interface Game {
   name: string;
   image: string;
   url: string;
+  controllerOnly?: boolean;
 }
 
 export const getGameUrl = (gameAddress: string): string => {
@@ -18,6 +19,12 @@ export const getGameName = (gameAddress: string): string => {
   const games = getGames();
   const game = games.find((game) => game.contract_address === gameAddress);
   return game?.name || "";
+};
+
+export const isControllerOnly = (gameAddress: string): boolean => {
+  const games = getGames();
+  const game = games.find((game) => game.contract_address === gameAddress);
+  return game?.controllerOnly || false;
 };
 
 export const getGames = (): Game[] => {
@@ -33,6 +40,7 @@ export const getGames = (): Game[] => {
         name: "0x4c6f6f74205375727669766f72",
         image: "https://lootsurvivor.io/favicon-32x32.png",
         url: "https://lootsurvivor.io",
+        controllerOnly: true,
       },
     ];
   } else if (isSepolia) {
@@ -43,6 +51,7 @@ export const getGames = (): Game[] => {
         name: "0x4461726b2053687566666c65",
         image: "https://darkshuffle.dev/favicon.svg",
         url: "https://darkshuffle.dev",
+        controllerOnly: true,
       },
     ];
   } else if (isMainnet) {
@@ -53,6 +62,7 @@ export const getGames = (): Game[] => {
         name: "0x4461726b2053687566666c65",
         image: "https://darkshuffle.io/favicon.svg",
         url: "https://darkshuffle.io",
+        controllerOnly: true,
       },
       {
         contract_address:
@@ -60,6 +70,7 @@ export const getGames = (): Game[] => {
         name: "0x4c6f6f74205375727669766f72",
         image: "https://lootsurvivor.io/favicon-32x32.png",
         url: "https://lootsurvivor.io",
+        controllerOnly: true,
       },
       {
         contract_address:
@@ -67,12 +78,14 @@ export const getGames = (): Game[] => {
         name: "0x4a6f6b657273204f66204e656f6e",
         image: "https://jokersofneon.com/icon.png",
         url: "https://jokersofneon.com",
+        controllerOnly: true,
       },
       {
         contract_address: "0x1234",
         name: "0x7a4b756265",
         image: "https://zkube.vercel.app/assets/pwa-512x512.png",
         url: "https://zkube.vercel.app",
+        controllerOnly: true,
       },
     ];
   } else {
