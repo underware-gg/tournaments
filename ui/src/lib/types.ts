@@ -43,3 +43,13 @@ export interface NewPrize {
   position?: number;
   hasPrice?: boolean;
 }
+
+export type TokenUri = {
+  name: string;
+  description: string;
+  attributes: {
+    trait_type: string;
+    value: string;
+  }[];
+  image: string;
+};

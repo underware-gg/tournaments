@@ -19,6 +19,7 @@ import { QUESTION } from "@/components/Icons";
 import { sepoliaTokens } from "@/lib/sepoliaTokens";
 import { addAddressPadding, CairoCustomEnum } from "starknet";
 import { bigintToHex } from "@/lib/utils";
+import { useTokenUris } from "@/hooks/useTokenUris";
 
 interface TokenDialogProps {
   selectedToken: Token | null;
@@ -65,11 +66,17 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
     token.name.toLowerCase().includes(tokenSearchQuery.toLowerCase())
   );
 
+  const erc721Tokens = searchFilteredTokens.filter(
+    (token) => token.token_type.activeVariant() === "erc721"
+  );
+
+  const tokenUris = useTokenUris(erc721Tokens.map((token) => token.address));
+
   const getTokenImage = (token: Token) => {
     if (token.token_type.activeVariant() === "erc20") {
       return getTokenLogoUrl(selectedChainConfig?.chainId ?? "", token.address);
     } else {
-      return null;
+      return tokenUris[token.address]?.image ?? null;
     }
   };
 
@@ -115,6 +122,7 @@ const TokenDialog = ({ selectedToken, onSelect, type }: TokenDialogProps) => {
           <div className="flex-1 overflow-y-auto">
             {searchFilteredTokens.map((token, index) => {
               const tokenLogo = getTokenImage(token);
+              console.log(tokenLogo);
               const isHidden = getTokenHidden(
                 selectedChainConfig?.chainId ?? "",
                 token.address
