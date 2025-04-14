@@ -8,7 +8,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { useSystemCalls } from "@/dojo/hooks/useSystemCalls";
-import { useAccount } from "@starknet-react/core";
+import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
 import { Tournament, Token, EntryCount } from "@/generated/models.gen";
 import {
   stringToFelt,
@@ -22,7 +22,11 @@ import { addAddressPadding, BigNumberish } from "starknet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useConnectToSelectedChain } from "@/dojo/hooks/useChain";
-import { useGetUsernames } from "@/hooks/useController";
+import {
+  isControllerAccount,
+  useGetUsernames,
+  useConnectController,
+} from "@/hooks/useController";
 import { CHECK, X, COIN, FAT_ARROW_RIGHT, USER } from "@/components/Icons";
 import {
   useGetAccountTokenIds,
@@ -76,6 +80,9 @@ export function EnterTournamentDialog({
 }: EnterTournamentDialogProps) {
   const { namespace, selectedChainConfig } = useDojo();
   const { address } = useAccount();
+  const { connector } = useConnect();
+  const { connectController } = useConnectController();
+  const { disconnect } = useDisconnect();
   const { connect } = useConnectToSelectedChain();
   const { approveAndEnterTournament, getBalanceGeneral } = useSystemCalls();
   const [playerName, setPlayerName] = useState("");
@@ -106,6 +113,11 @@ export function EnterTournamentDialog({
     );
 
     setPlayerName("");
+  };
+
+  const handleControllerLogin = async () => {
+    disconnect();
+    connectController();
   };
 
   const ownerAddresses = useMemo(() => {
@@ -708,6 +720,8 @@ export function EnterTournamentDialog({
       (prizePoolShare / 100)) /
     10 ** 18;
 
+  const isController = isControllerAccount(connector!);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -1052,24 +1066,31 @@ export function EnterTournamentDialog({
               />
             </div>
           </div>
+          <div className="text-warning">
+            This game requires you to play with a controller wallet.
+          </div>
         </div>
         <div className="flex justify-end gap-2 mt-6">
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
           {address ? (
-            <DialogClose asChild>
-              <Button
-                disabled={
-                  !hasBalance ||
-                  !meetsEntryRequirements ||
-                  playerName.length === 0
-                }
-                onClick={handleEnterTournament}
-              >
-                Enter Tournament
-              </Button>
-            </DialogClose>
+            isController ? (
+              <DialogClose asChild>
+                <Button
+                  disabled={
+                    !hasBalance ||
+                    !meetsEntryRequirements ||
+                    playerName.length === 0
+                  }
+                  onClick={handleEnterTournament}
+                >
+                  Enter Tournament
+                </Button>
+              </DialogClose>
+            ) : (
+              <Button onClick={handleControllerLogin}>Controller Login</Button>
+            )
           ) : (
             <Button onClick={() => connect()}>Connect Wallet</Button>
           )}

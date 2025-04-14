@@ -1,7 +1,12 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
 import { Chain } from "@starknet-react/chains";
-import { jsonRpcProvider, StarknetConfig } from "@starknet-react/core";
+import {
+  jsonRpcProvider,
+  StarknetConfig,
+  argent,
+  braavos,
+} from "@starknet-react/core";
 import React from "react";
 import { ChainId, CHAINS, getDefaultChainId } from "@/dojo/setup/networks";
 import {
@@ -103,8 +108,10 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
   const connectors = useMemo(() => {
     const availableConnectors = [];
 
-    if (controller) {
+    if (getDefaultChainId() !== ChainId.KATANA_LOCAL && controller) {
       availableConnectors.push(controller);
+      availableConnectors.push(argent());
+      availableConnectors.push(braavos());
     }
 
     return [...availableConnectors, ...predeployedConnectors].filter(Boolean);
