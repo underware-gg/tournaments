@@ -1,16 +1,10 @@
+import { Token } from "@/generated/models.gen";
+
 export interface TableData {
   id: number;
   name: string;
   email: string;
 }
-
-export type Token = {
-  address: string;
-  name: string;
-  symbol: string;
-  token_type: string;
-  is_registered: boolean;
-};
 
 export type TokenPrizes = Record<
   string,
@@ -52,4 +46,8 @@ export type TokenUri = {
     value: string;
   }[];
   image: string;
+};
+
+export type FormToken = Token & {
+  image?: string;
 };
