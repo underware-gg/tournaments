@@ -6,6 +6,8 @@ import { TOURNAMENT_VERSION_KEY } from "@/lib/constants";
 import { useMemo } from "react";
 import { getModelsMapping } from "@/generated/models.gen";
 import { PlatformMetrics } from "@/generated/models.gen";
+import { bigintToHex } from "@/lib/utils";
+import { addAddressPadding } from "starknet";
 
 export const useEntityUpdates = () => {
   const { namespace } = useDojo();
@@ -27,7 +29,7 @@ export const useEntityUpdates = () => {
     await state.waitForEntityChange(platformMetricsEntityId, (entity) => {
       return (
         entity?.models?.[namespace]?.PlatformMetrics?.total_tournaments ==
-        Number(totalTournaments) + 1
+        addAddressPadding(bigintToHex(BigInt(Number(totalTournaments) + 1)))
       );
     });
   };

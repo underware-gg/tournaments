@@ -22,6 +22,7 @@ import { feltToString } from "@/lib/utils";
 import { useTournamentContracts } from "@/dojo/hooks/useTournamentContracts";
 import useUIStore from "@/hooks/useUIStore";
 import { useToastMessages } from "@/components/toast";
+import { useEntityUpdates } from "@/dojo/hooks/useEntityUpdates";
 
 // Type for the transformed tournament
 type ExecutableTournament = Omit<Tournament, "metadata"> & {
@@ -48,6 +49,7 @@ export const useSystemCalls = () => {
   const { account, address } = useAccount();
   const { tournamentAddress } = useTournamentContracts();
   const { getGameName } = useUIStore();
+  const { waitForTournamentCreation } = useEntityUpdates();
   const {
     showTournamentEntry,
     showScoreSubmission,
@@ -294,6 +296,10 @@ export const useSystemCalls = () => {
       }
 
       const tx = await account?.execute(calls);
+
+      console.log("tx", tx);
+
+      await waitForTournamentCreation();
 
       if (tx) {
         showTournamentCreation({

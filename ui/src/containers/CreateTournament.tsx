@@ -30,7 +30,6 @@ import { FormToken } from "@/lib/types";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { TOURNAMENT_VERSION_KEY } from "@/lib/constants";
 import useModel from "@/dojo/hooks/useModel";
-import { useEntityUpdates } from "@/dojo/hooks/useEntityUpdates";
 
 export type TournamentFormData = z.infer<typeof formSchema>;
 
@@ -117,7 +116,6 @@ const CreateTournament = () => {
   const { address } = useAccount();
   const { namespace } = useDojo();
   const { createTournamentAndApproveAndAddPrizes } = useSystemCalls();
-  const { waitForTournamentCreation } = useEntityUpdates();
 
   useSubscribeTournamentsQuery(namespace);
 
@@ -432,14 +430,11 @@ const CreateTournament = () => {
         formData.duration
       );
       form.reset();
-      await waitForTournamentCreation();
       navigate(`/tournament/${Number(tournamentCount) + 1}`);
     } catch (error) {
       console.error("Error creating tournament:", error);
     }
   };
-
-  console.log(form.getValues());
 
   return (
     <div className="flex flex-col gap-2 sm:gap-5 lg:w-[87.5%] xl:w-5/6 2xl:w-3/4 h-full mx-auto">

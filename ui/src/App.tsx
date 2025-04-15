@@ -1,11 +1,5 @@
 import MobileFooter from "@/components/MobileFooter";
-import {
-  Routes,
-  Route,
-  useParams,
-  useNavigate,
-  useLocation,
-} from "react-router-dom";
+import { Routes, Route, useParams } from "react-router-dom";
 import {
   useGetTokensQuery,
   useGetMetricsQuery,
@@ -15,7 +9,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { useEffect, useMemo, useRef, useState, Suspense, lazy } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { useNetwork } from "@starknet-react/core";
 import { useDojo } from "@/context/dojo";
 import useUIStore from "./hooks/useUIStore";
 import {
@@ -26,6 +19,7 @@ import { processGameMetadataFromSql } from "./lib/utils/formatting";
 import { getGames } from "./assets/games";
 import Header from "@/components/Header";
 import LoadingPage from "@/containers/LoadingPage";
+import { useResetDojoOnNetworkChange } from "@/hooks/useResetDojoOnNetworkChange";
 
 const NotFound = lazy(() => import("@/containers/NotFound"));
 const Overview = lazy(() => {
@@ -42,35 +36,13 @@ const CreateTournament = lazy(() => import("@/containers/CreateTournament"));
 
 function App() {
   const { namespace } = useDojo();
-  const { chain } = useNetwork();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const previousChainRef = useRef<string | undefined>(chain?.id.toString());
   const { setGameData, setGameDataLoading } = useUIStore();
+
+  useResetDojoOnNetworkChange();
 
   useGetTokensQuery(namespace);
   useGetMetricsQuery(namespace);
   useSubscribeMetricsQuery(namespace);
-
-  useEffect(() => {
-    if (chain) {
-      // Check if chain has changed
-      const currentChainId = chain.id.toString();
-      if (
-        previousChainRef.current &&
-        previousChainRef.current !== currentChainId
-      ) {
-        // Chain has changed, redirect to overview page
-        // Only redirect if not already on the overview page
-        if (location.pathname !== "/") {
-          navigate("/", { replace: true });
-        }
-      }
-
-      // Update the previous chain ref
-      previousChainRef.current = currentChainId;
-    }
-  }, [chain, navigate, location.pathname]);
 
   const { data: gameNamespaces } = useGetgameNamespaces();
 
@@ -147,7 +119,7 @@ function App() {
   // Store the previous stringified version to compare
   const prevAllGamesStringifiedRef = useRef("");
 
-  // // Use a separate effect for loading state
+  // Use a separate effect for loading state
   useEffect(() => {
     setGameDataLoading(isGamesMetadataLoading);
   }, [isGamesMetadataLoading, setGameDataLoading]);
