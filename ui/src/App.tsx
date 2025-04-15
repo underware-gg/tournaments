@@ -6,7 +6,11 @@ import {
   useNavigate,
   useLocation,
 } from "react-router-dom";
-import { useGetTokensQuery } from "@/dojo/hooks/useSdkQueries";
+import {
+  useGetTokensQuery,
+  useGetMetricsQuery,
+  useSubscribeMetricsQuery,
+} from "@/dojo/hooks/useSdkQueries";
 import { Toaster } from "@/components/ui/toaster";
 import { useEffect, useMemo, useRef, useState, Suspense, lazy } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,12 +27,9 @@ import { getGames } from "./assets/games";
 import Header from "@/components/Header";
 import LoadingPage from "@/containers/LoadingPage";
 
-// Use lazy loading with different priority for routes
 const NotFound = lazy(() => import("@/containers/NotFound"));
-// Simpler implementation that doesn't cause TypeScript issues
 const Overview = lazy(() => {
   const importPromise = import("@/containers/Overview");
-  // Optimize loading without causing type issues
   if (typeof requestIdleCallback === "function") {
     requestIdleCallback(() => {}, { timeout: 500 });
   }
@@ -48,6 +49,8 @@ function App() {
   const { setGameData, setGameDataLoading } = useUIStore();
 
   useGetTokensQuery(namespace);
+  useGetMetricsQuery(namespace);
+  useSubscribeMetricsQuery(namespace);
 
   useEffect(() => {
     if (chain) {

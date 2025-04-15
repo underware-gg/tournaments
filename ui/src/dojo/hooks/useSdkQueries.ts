@@ -28,7 +28,7 @@ export const useGetTokensQuery = (namespace: string) => {
   return { entities, isLoading, refetch };
 };
 
-export const useGetMetricsQuery = (key: string, namespace: string) => {
+export const useGetMetricsQuery = (namespace: string) => {
   const query = useMemo(
     () =>
       new ToriiQueryBuilder()
@@ -38,22 +38,15 @@ export const useGetMetricsQuery = (key: string, namespace: string) => {
               getModelsMapping(namespace).PlatformMetrics,
               getModelsMapping(namespace).PrizeMetrics,
             ],
-            []
-          )
-            .where(
-              getModelsMapping(namespace).PlatformMetrics,
-              "key",
-              "Eq",
-              addAddressPadding(key)
-            )
-            .build()
+            [undefined]
+          ).build()
         )
         .withEntityModels([
           getModelsMapping(namespace).PlatformMetrics,
           getModelsMapping(namespace).PrizeMetrics,
         ])
         .includeHashedKeys(),
-    [key]
+    []
   );
   const { entities, isLoading, refetch } = useSdkGetEntities({
     query,
@@ -384,6 +377,33 @@ export const useSubscribeTokensQuery = (namespace: string) => {
           KeysClause([getModelsMapping(namespace).Token], [undefined]).build()
         )
         .withEntityModels([getModelsMapping(namespace).Token])
+        .includeHashedKeys(),
+    []
+  );
+
+  const { entities, isSubscribed } = useSdkSubscribeEntities({
+    query,
+  });
+  return { entities, isSubscribed };
+};
+
+export const useSubscribeMetricsQuery = (namespace: string) => {
+  const query = useMemo(
+    () =>
+      new ToriiQueryBuilder()
+        .withClause(
+          KeysClause(
+            [
+              getModelsMapping(namespace).PlatformMetrics,
+              getModelsMapping(namespace).PrizeMetrics,
+            ],
+            [undefined]
+          ).build()
+        )
+        .withEntityModels([
+          getModelsMapping(namespace).PlatformMetrics,
+          getModelsMapping(namespace).PrizeMetrics,
+        ])
         .includeHashedKeys(),
     []
   );
