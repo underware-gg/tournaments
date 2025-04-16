@@ -49,7 +49,12 @@ export const useSystemCalls = () => {
   const { account, address } = useAccount();
   const { tournamentAddress } = useTournamentContracts();
   const { getGameName } = useUIStore();
-  const { waitForTournamentCreation } = useEntityUpdates();
+  const {
+    waitForTournamentCreation,
+    waitForTournamentEntry,
+    waitForAddPrizes,
+    waitForSubmitScores,
+  } = useEntityUpdates();
   const {
     showTournamentEntry,
     showScoreSubmission,
@@ -69,7 +74,8 @@ export const useSystemCalls = () => {
     player_address: BigNumberish,
     qualification: CairoOption<QualificationProofEnum>,
     duration: number,
-    entryFeeUsdCost: number
+    entryFeeUsdCost: number,
+    entryCount: number
   ) => {
     const startsIn =
       Number(tournamentModel.schedule.game.start) - Date.now() / 1000;
@@ -99,6 +105,8 @@ export const useSystemCalls = () => {
       });
 
       const tx = await account?.execute(calls);
+
+      await waitForTournamentEntry(tournamentId, entryCount);
 
       if (tx) {
         showTournamentEntry({
@@ -141,6 +149,8 @@ export const useSystemCalls = () => {
 
       const tx = await account?.execute(calls);
 
+      await waitForSubmitScores(tournamentId);
+
       if (tx) {
         showScoreSubmission(tournamentName);
       }
@@ -155,7 +165,8 @@ export const useSystemCalls = () => {
     tournamentName: string,
     prizes: Prize[],
     showToast: boolean,
-    prizeTotalUsd: number
+    prizeTotalUsd: number,
+    totalCurrentPrizes: number
   ) => {
     try {
       let calls = [];
@@ -208,6 +219,8 @@ export const useSystemCalls = () => {
       }
 
       const tx = await account?.execute(calls);
+
+      await waitForAddPrizes(totalCurrentPrizes + prizes.length);
 
       if (showToast && tx) {
         showPrizeAddition({
@@ -297,9 +310,7 @@ export const useSystemCalls = () => {
 
       const tx = await account?.execute(calls);
 
-      console.log("tx", tx);
-
-      await waitForTournamentCreation();
+      await waitForTournamentCreation(Number(tournament.id));
 
       if (tx) {
         showTournamentCreation({

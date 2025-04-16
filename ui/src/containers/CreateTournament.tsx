@@ -430,6 +430,7 @@ const CreateTournament = () => {
         formData.duration
       );
       form.reset();
+      setShowConfirmation(false);
       navigate(`/tournament/${Number(tournamentCount) + 1}`);
     } catch (error) {
       console.error("Error creating tournament:", error);
