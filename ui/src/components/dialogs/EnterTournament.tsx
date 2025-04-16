@@ -94,31 +94,36 @@ export function EnterTournamentDialog({
 
   const handleEnterTournament = async () => {
     setIsEntering(true);
-    if (!playerName.trim()) return;
+    try {
+      if (!playerName.trim()) return;
 
-    const qualificationProof = processQualificationProof(
-      requirementVariant ?? "",
-      proof
-    );
+      const qualificationProof = processQualificationProof(
+        requirementVariant ?? "",
+        proof
+      );
 
-    await approveAndEnterTournament(
-      tournamentModel?.entry_fee,
-      tournamentModel?.id,
-      feltToString(tournamentModel?.metadata.name),
-      tournamentModel,
-      // (Number(entryCountModel?.count) ?? 0) + 1,
-      stringToFelt(playerName.trim()),
-      addAddressPadding(address!),
-      qualificationProof,
-      // gameCount
-      duration,
-      entryFeeUsdCost,
-      Number(entryCountModel?.count) ?? 0
-    );
+      await approveAndEnterTournament(
+        tournamentModel?.entry_fee,
+        tournamentModel?.id,
+        feltToString(tournamentModel?.metadata.name),
+        tournamentModel,
+        // (Number(entryCountModel?.count) ?? 0) + 1,
+        stringToFelt(playerName.trim()),
+        addAddressPadding(address!),
+        qualificationProof,
+        // gameCount
+        duration,
+        entryFeeUsdCost,
+        Number(entryCountModel?.count) ?? 0
+      );
 
-    setPlayerName("");
-    onOpenChange(false);
-    setIsEntering(false);
+      setPlayerName("");
+      onOpenChange(false);
+      setIsEntering(false);
+    } catch (error) {
+      console.error("Failed to enter tournament:", error);
+      setIsEntering(false);
+    }
   };
 
   const handleControllerLogin = async () => {

@@ -27,7 +27,7 @@ export const useResetDojoOnNetworkChange = () => {
         );
 
         // Reset the entities store to an empty object
-        state.setEntities([]);
+        state.resetStore();
 
         // Navigate to homepage
         navigate("/", { replace: true });

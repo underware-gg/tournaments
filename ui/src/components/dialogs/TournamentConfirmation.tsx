@@ -111,7 +111,9 @@ const TournamentConfirmation = ({
     setIsCreating(true);
     try {
       await onConfirm();
-    } finally {
+      setIsCreating(false);
+    } catch (error) {
+      console.error("Failed to create tournament:", error);
       setIsCreating(false);
     }
   };
