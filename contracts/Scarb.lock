@@ -3,8 +3,8 @@ version = 1
 
 [[package]]
 name = "dojo"
-version = "1.4.0"
-source = "git+https://github.com/dojoengine/dojo.git?tag=v1.4.0#22ef7101e84429f4f06fa634f927dd6ad2c48752"
+version = "1.4.2"
+source = "git+https://github.com/dojoengine/dojo.git?tag=v1.4.2#b5eabcf9dd0a552b6c871721cd08f8460f08aef1"
 dependencies = [
  "dojo_plugin",
 ]
@@ -12,7 +12,7 @@ dependencies = [
 [[package]]
 name = "dojo_cairo_test"
 version = "1.0.12"
-source = "git+https://github.com/dojoengine/dojo.git?tag=v1.4.0#22ef7101e84429f4f06fa634f927dd6ad2c48752"
+source = "git+https://github.com/dojoengine/dojo.git?tag=v1.4.2#b5eabcf9dd0a552b6c871721cd08f8460f08aef1"
 dependencies = [
  "dojo",
 ]
@@ -20,7 +20,7 @@ dependencies = [
 [[package]]
 name = "dojo_plugin"
 version = "2.9.4"
-source = "git+https://github.com/dojoengine/dojo.git?tag=v1.4.0#22ef7101e84429f4f06fa634f927dd6ad2c48752"
+source = "git+https://github.com/dojoengine/dojo.git?tag=v1.4.2#b5eabcf9dd0a552b6c871721cd08f8460f08aef1"
 
 [[package]]
 name = "openzeppelin_access"
